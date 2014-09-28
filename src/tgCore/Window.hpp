@@ -25,6 +25,8 @@ namespace tgCore
 
                     Event( Type type );
 
+                    virtual ~Event();
+
                     Type getType() const;
 
                 private:
@@ -96,6 +98,9 @@ namespace tgCore
 
     inline Window::Event::Event( Type type )
         : m_type( type )
+    { }
+
+    inline Window::Event::~Event()
     { }
 
     inline Window::Event::Type Window::Event::getType() const

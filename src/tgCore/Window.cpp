@@ -2,15 +2,19 @@
 
 #include <tgCore/Monitor.hpp>
 
+#include <iostream>
+
 namespace
 {
     void callbackWindowClose( GLFWwindow* window )
     {
-        auto manager = reinterpret_cast< tgCore::EventManager< tgCore::Window::Event >* >(
+        std::cout << "Bla" << std::endl;
+        auto wnd = reinterpret_cast< tgCore::Window* >(
             glfwGetWindowUserPointer( window ) );
 
-        manager->pushEvent( std::unique_ptr< tgCore::Window::Event >(
-            new tgCore::Window::Event( tgCore::Window::Event::Type::WINDOW_CLOSE ) ) );
+        if( wnd->getEventManager() )
+            wnd->getEventManager()->pushEvent( std::unique_ptr< tgCore::Window::Event >(
+                new tgCore::Window::Event( tgCore::Window::Event::Type::WINDOW_CLOSE ) ) );
     }
 }
 
@@ -33,6 +37,8 @@ Window::Window( std::string title, std::shared_ptr< Mode > mode )
         nullptr );
 
     glfwSetWindowUserPointer( m_window, this );
+
+    glfwSetWindowCloseCallback( m_window, callbackWindowClose );
 
     glfwMakeContextCurrent( m_window );
 
@@ -57,8 +63,6 @@ Window::~Window()
 void Window::setEventManager( std::shared_ptr< EventManager< Event > > manager )
 {
     m_eventManager = std::move( manager );
-    glfwSetWindowUserPointer( m_window, reinterpret_cast< void* >( m_eventManager.get() ) );
-    glfwSetWindowCloseCallback( m_window, callbackWindowClose );
 }
 
 void Window::update()

@@ -2,6 +2,8 @@
 
 #include <tgCore/EventListener.hpp>
 
+#include <GLFW/glfw3.h>
+
 #include <cstdint>
 #include <list>
 #include <map>
@@ -60,7 +62,11 @@ namespace tgCore
 
         auto iter = m_listener.find( type );
         if( iter == m_listener.end() )
-            m_listener[ type ] = std::set< Slot*, bool (*)( Slot*, Slot* ) >{ slot, Slot::sort };
+        {
+            std::set< Slot*, bool (*)( Slot*, Slot* ) > newSet( Slot::sort );
+            newSet.insert( slot );
+            m_listener[ type ] = std::move( newSet );
+        }
         else
             iter->second.insert( slot );
 
@@ -76,6 +82,8 @@ namespace tgCore
     template< class T >
     void EventManager< T >::process( float timeFactor )
     {
+        glfwPollEvents();
+
         while( !m_events.empty() )
         {
             auto& event = m_events.front();
