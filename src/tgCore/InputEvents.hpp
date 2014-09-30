@@ -14,14 +14,25 @@ namespace tgCore
                 UP
             };
 
-            KeyEvent( uint32_t key, Action action );
+            KeyEvent( uint32_t key, Action action )
+                : Window::Event( Window::Event::Type::KEY )
+                , m_key( key )
+                , m_action( action )
+            { }
 
-            uint32_t getKey() const;
-            Action getAction() const;
+            uint32_t getKey() const
+            {
+                return m_key;
+            }
+
+            Action getAction() const
+            {
+                return m_action;
+            }
 
         private:
             uint32_t m_key;
-            Action m_keyAction;
+            Action m_action;
     };
 
     class MouseButtonEvent
@@ -45,37 +56,65 @@ namespace tgCore
                 Button button,
                 Action action,
                 double x,
-                double y );
+                double y )
+                : Window::Event( Window::Event::Type::MOUSE_BUTTON )
+                , m_button( button )
+                , m_action( action )
+                , m_x( x )
+                , m_y( y )
+            { }
 
-            Button getButton() const;
-            Action getAction() const;
-            double getX() const;
-            double getY() const;
+            Button getButton() const
+            {
+                return m_button;
+            }
+
+            Action getAction() const
+            {
+                return m_action;
+            }
+
+            double getX() const
+            {
+                return m_x;
+            }
+
+            double getY() const
+            {
+                return m_y;
+            }
 
         private:
             Button m_button;
             Action m_action;
             double m_x;
             double m_y;
-
     };
 
-
-
-    inline KeyEvent::KeyEvent( Window::Event::Type type, uint32_t key, KeyAction action )
-        : Window::Event( Window::Event::Type::KEY )
-        , m_type( type )
-        , m_key( key )
-        , m_action( action )
-    { }
-
-    inline uint32_t KeyEvent::getKey() const
+    class MouseMoveEvent
+        : public Window::Event
     {
-        return m_key;
-    }
+        public:
+            MouseMoveEvent(
+                double x,
+                double y )
+                : Window::Event( Window::Event::Type::MOUSE_MOVE )
+                , m_x( x )
+                , m_y( y )
+            { }
 
-    inline uint32_t KeyEvent::getKeyAction() const
-    {
-        return m_keyAction;
-    }
+            double getX() const
+            {
+                return m_x;
+            }
+
+            double getY() const
+            {
+                return m_y;
+            }
+
+        private:
+            double m_x;
+            double m_y;
+    };
 }

@@ -20,7 +20,10 @@ namespace tgCore
                 public:
                     enum class Type
                     {
-                        WINDOW_CLOSE
+                        WINDOW_CLOSE,
+                        KEY,
+                        MOUSE_BUTTON,
+                        MOUSE_MOVE
                     };
 
                     Event( Type type );
