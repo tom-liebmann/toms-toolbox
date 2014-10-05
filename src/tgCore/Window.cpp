@@ -1,3 +1,7 @@
+#ifdef WIN32
+    #include <GL/glew.h>
+#endif
+
 #include "Window.hpp"
 
 #include <tgCore/InputEvents.hpp>
