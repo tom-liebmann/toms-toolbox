@@ -1,6 +1,4 @@
-#ifdef WIN32
-    #include <GL/glew.h>
-#endif
+#include <GL/glew.h>
 
 #include "Shader.hpp"
 
