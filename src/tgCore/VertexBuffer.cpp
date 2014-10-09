@@ -2,9 +2,11 @@
 
 #include "VertexBuffer.hpp"
 
+#include <tgCore/VertexAttribute.hpp>
+
 using tgCore::VertexBuffer;
 
-VertexBuffer::VertexBuffer( std::shared_ptr< VertexAttributeList > attributes )
+VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes )
     : m_editVertices( false )
     , m_vSize( 0 )
     , m_vCapacity( 0 )
@@ -15,6 +17,7 @@ VertexBuffer::VertexBuffer( std::shared_ptr< VertexAttributeList > attributes )
     , m_iCapacity( 0 )
     , m_iBuffer( nullptr )
     , m_iBufferObject( -1 )
+    , m_mode( mode )
     , m_attributes( std::move( attributes ) )
 {
     glGenBuffers( 1, &m_vBufferObject );
@@ -49,6 +52,11 @@ std::shared_ptr< VertexBuffer::VertexAccess > VertexBuffer::accessVertices()
 
 void VertexBuffer::render() const
 {
+    // do not render while buffers get modified
+    if( m_editVertices
+     || m_editIndices )
+        return;
+
     static GLuint usedBuffer = 0;
 
     if( usedBuffer != m_vBufferObject )
@@ -58,39 +66,52 @@ void VertexBuffer::render() const
         glBindBufferARB( GL_ARRAY_BUFFER, m_vBufferObject );
 
         GLuint index = 0;
-        size_t offset = 0;
+        GLsizei offset = 0;
 
-        for( auto& attribute : m_attributes )
+        for( auto& attribute : *m_attributes )
         {
+            GLsizei size = 0;
+            switch( attribute.getType() )
+            {
+                case GL_FLOAT:
+                    size = sizeof( GLfloat );
+                    break;
+                case GL_BYTE:
+                    size = sizeof( GLbyte );
+                    break;
+            }
+
             glVertexAttribPointer(
-                location,
-                attribute->getNum(),
-                attribute->getType(),
+                index,
+                attribute.getSize(),
+                attribute.getType(),
                 GL_FALSE,
-                m_attribSize,
+                m_attributes->getBlockSize(),
                 reinterpret_cast< const GLvoid* >( offset ) );
-            glEnableVertexAttribArray( location++ );
-            offset += attribute->getSize();
+            glEnableVertexAttribArray( index );
+            offset += size * attribute.getSize();
         }
 
         glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
     }
 
-    graphState().applyShaderMatrix();
-    glDrawElements( m_mode, m_size, GL_UNSIGNED_INT, 0 );
+    glDrawElements( m_mode, m_iSize, GL_UNSIGNED_INT, 0 );
+}
 
+//-------------------------------------------------------------------------------------------------
+// IndexAccess
+//-------------------------------------------------------------------------------------------------
+
+VertexBuffer::IndexAccess::IndexAccess( std::shared_ptr< VertexBuffer > vertexBuffer )
+    : m_vertexBuffer( std::move( vertexBuffer ) )
+{
+    m_vertexBuffer->m_editIndices = true;
 }
 
 void VertexBuffer::IndexAccess::end( IndexAccess* access )
 {
     access->m_vertexBuffer->m_editIndices = false;
     delete access;
-}
-
-VertexBuffer::IndexAccess::IndexAccess( std::shared_ptr< VertexBuffer > vertexBuffer )
-    : m_vertexBuffer( std::move( vertexBuffer ) )
-{
-    m_vertexBuffer->m_editIndices = true;
 }
 
 void VertexBuffer::IndexAccess::push( void* data, size_t size )
@@ -114,16 +135,20 @@ void VertexBuffer::IndexAccess::push( void* data, size_t size )
     memcpy( reinterpret_cast< uint8_t* >( m_vertexBuffer->m_iBuffer ) + m_vertexBuffer->m_iSize, data, size );
 }
 
-void VertexBuffer::VertexAccess::end( VertexAccess* access )
-{
-    access->m_vertexBuffer->m_editVertices = false;
-    delete access;
-}
+//-------------------------------------------------------------------------------------------------
+// VertexAccess
+//-------------------------------------------------------------------------------------------------
 
 VertexBuffer::VertexAccess::VertexAccess( std::shared_ptr< VertexBuffer > vertexBuffer )
     : m_vertexBuffer( std::move( vertexBuffer ) )
 {
     m_vertexBuffer->m_editVertices = true;
+}
+
+void VertexBuffer::VertexAccess::end( VertexAccess* access )
+{
+    access->m_vertexBuffer->m_editVertices = false;
+    delete access;
 }
 
 void VertexBuffer::VertexAccess::push( void* data, size_t size )

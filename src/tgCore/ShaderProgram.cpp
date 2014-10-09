@@ -19,7 +19,7 @@ ShaderProgram::ShaderProgram(
     }
 
     GLuint index = 0;
-    for( auto& attribute : *attributes.get() )
+    for( auto& attribute : *attributes )
     {
         // DGL states that name has not to be terminated but c_str is - possible mistake here
         glBindAttribLocation( m_programObject, index, reinterpret_cast< const GLchar* >( attribute.getName().c_str() ) );
