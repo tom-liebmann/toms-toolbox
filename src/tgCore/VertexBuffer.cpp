@@ -90,6 +90,7 @@ void VertexBuffer::render() const
                 reinterpret_cast< const GLvoid* >( offset ) );
             glEnableVertexAttribArray( index );
             offset += size * attribute.getSize();
+            ++index;
         }
 
         glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
@@ -110,6 +111,13 @@ VertexBuffer::IndexAccess::IndexAccess( std::shared_ptr< VertexBuffer > vertexBu
 
 void VertexBuffer::IndexAccess::end( IndexAccess* access )
 {
+    glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, access->m_vertexBuffer->m_iBufferObject );
+    glBufferData(
+        GL_ELEMENT_ARRAY_BUFFER,
+        access->m_vertexBuffer->m_iSize,
+        reinterpret_cast< const GLvoid* >( access->m_vertexBuffer->m_iBuffer ),
+        GL_STATIC_DRAW );
+
     access->m_vertexBuffer->m_editIndices = false;
     delete access;
 }
@@ -133,6 +141,7 @@ void VertexBuffer::IndexAccess::push( void* data, size_t size )
     }
 
     memcpy( reinterpret_cast< uint8_t* >( m_vertexBuffer->m_iBuffer ) + m_vertexBuffer->m_iSize, data, size );
+    m_vertexBuffer->m_iSize += size;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -147,6 +156,13 @@ VertexBuffer::VertexAccess::VertexAccess( std::shared_ptr< VertexBuffer > vertex
 
 void VertexBuffer::VertexAccess::end( VertexAccess* access )
 {
+    glBindBufferARB( GL_ARRAY_BUFFER, access->m_vertexBuffer->m_vBufferObject );
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        access->m_vertexBuffer->m_vSize,
+        reinterpret_cast< const GLvoid* >( access->m_vertexBuffer->m_vBuffer ),
+        GL_STATIC_DRAW );
+
     access->m_vertexBuffer->m_editVertices = false;
     delete access;
 }
@@ -170,4 +186,5 @@ void VertexBuffer::VertexAccess::push( void* data, size_t size )
     }
 
     memcpy( reinterpret_cast< uint8_t* >( m_vertexBuffer->m_vBuffer ) + m_vertexBuffer->m_vSize, data, size );
+    m_vertexBuffer->m_vSize += size;
 }

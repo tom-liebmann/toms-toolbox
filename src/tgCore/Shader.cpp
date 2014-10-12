@@ -3,6 +3,7 @@
 #include "Shader.hpp"
 
 #include <fstream>
+#include <iostream>
 
 using tgCore::Shader;
 
@@ -13,10 +14,14 @@ std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filena
     // determine length of file
     stream.seekg( 0, std::ios::end );
     size_t size = stream.tellg();
+    stream.seekg( 0, std::ios::beg );
 
     char* buffer = new char[ size + 1 ];
     stream.read( buffer, size );
     buffer[ size ] = '\0';
+
+    std::cout << "Read " << size << " bytes into code." << std::endl;
+    std::cout << buffer << std::endl;
 
     auto shader = std::shared_ptr< Shader >( new Shader( type, buffer ) );
     delete[] buffer;
@@ -52,7 +57,7 @@ Shader::Shader( Type type, const char* code )
         GLchar* log = new GLchar[ size + 1 ];
         glGetShaderInfoLog( m_shaderObject, size, NULL, log );
 
-        // TODO: use log
+        std::cout << log << std::endl;
 
         delete[] log;
     }

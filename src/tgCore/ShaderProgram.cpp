@@ -6,16 +6,18 @@
 #include <tgCore/VertexAttribute.hpp>
 #include <tgCore/Shader.hpp>
 
+#include <iostream>
+
 using tgCore::ShaderProgram;
 
 ShaderProgram::ShaderProgram(
-    std::initializer_list< Shader > shaders,
+    std::initializer_list< std::shared_ptr< tgCore::Shader > > shaders,
     std::shared_ptr< VertexAttributeList > attributes )
     : m_programObject( glCreateProgram() )
 {
     for( auto& shader : shaders )
     {
-        glAttachShader( m_programObject, shader.getShaderObject() );
+        glAttachShader( m_programObject, shader->getShaderObject() );
     }
 
     GLuint index = 0;
@@ -38,13 +40,7 @@ ShaderProgram::~ShaderProgram()
 
 void ShaderProgram::use() const
 {
-    static GLuint usedProgram = 0;
-
-    if( usedProgram != m_programObject )
-    {
-        glUseProgram( m_programObject );
-        usedProgram = m_programObject;
-    }
+    glUseProgram( m_programObject );
 }
 
 void ShaderProgram::unuse() const

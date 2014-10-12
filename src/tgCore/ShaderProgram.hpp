@@ -14,7 +14,7 @@ namespace tgCore
     {
         public:
             ShaderProgram(
-                std::initializer_list< Shader > shaders,
+                std::initializer_list< std::shared_ptr< Shader > > shaders,
                 std::shared_ptr< VertexAttributeList > attributes );
 
             ~ShaderProgram();
