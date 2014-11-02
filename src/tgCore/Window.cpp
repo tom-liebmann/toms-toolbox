@@ -106,12 +106,12 @@ Window::Window( std::string title, std::shared_ptr< Mode > mode )
 
     glfwMakeContextCurrent( m_window );
 
-    ++s_windowCount;
-
-    #ifdef WIN32
+    #ifdef GLEW_STATIC
         if( s_windowCount == 0 )
             glewInit();
     #endif
+
+    ++s_windowCount;
 }
 
 Window::~Window()
