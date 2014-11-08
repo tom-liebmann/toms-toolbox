@@ -14,20 +14,20 @@ namespace tgCore
                 public:
                     static void invalidate( Slot* slot );
 
-                    Slot( std::shared_ptr< T > instance );
+                    Slot( T instance );
 
                     bool isValid() const;
-                    const std::shared_ptr< T >& getInstance() const;
+                    const T& getInstance() const;
 
                 private:
                     bool m_valid;
-                    std::shared_ptr< T > m_instance;
+                    T m_instance;
             };
 
             ~SlotList();
 
-            std::shared_ptr< Slot > add( std::shared_ptr< T > instance );
-            void traverse( const std::function< void ( const std::shared_ptr< T > ) >& callback ) const;
+            std::shared_ptr< Slot > add( T instance );
+            void traverse( const std::function< void ( const T& ) >& callback ) const;
 
         private:
             mutable std::list< Slot* > m_slots;
@@ -48,7 +48,7 @@ namespace tgCore
     }
 
     template< class T >
-    std::shared_ptr< typename SlotList< T >::Slot > SlotList< T >::add( std::shared_ptr< T > instance )
+    std::shared_ptr< typename SlotList< T >::Slot > SlotList< T >::add( T instance )
     {
         auto slot = new Slot( std::move( instance ) );
         m_slots.push_back( slot );
@@ -56,7 +56,7 @@ namespace tgCore
     }
 
     template< class T >
-    void SlotList< T >::traverse( const std::function< void ( const std::shared_ptr< T > ) >& callback ) const
+    void SlotList< T >::traverse( const std::function< void ( const T& ) >& callback ) const
     {
         for( auto iter = m_slots.begin(); iter != m_slots.end(); )
         {
@@ -85,7 +85,7 @@ namespace tgCore
     }
 
     template< class T >
-    SlotList< T >::Slot::Slot( std::shared_ptr< T > instance )
+    SlotList< T >::Slot::Slot( T instance )
         : m_valid( true )
         , m_instance( std::move( instance ) )
     { }
@@ -97,7 +97,7 @@ namespace tgCore
     }
 
     template< class T >
-    inline const std::shared_ptr< T >& SlotList< T >::Slot::getInstance() const
+    inline const T& SlotList< T >::Slot::getInstance() const
     {
         return m_instance;
     }
