@@ -1,9 +1,8 @@
-#include <GL/glew.h>
-
 #include "Shader.hpp"
 
 #include <fstream>
 #include <iostream>
+#include <cstring>
 
 using tgCore::Shader;
 
@@ -17,14 +16,17 @@ std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filena
     stream.seekg( 0, std::ios::beg );
 
     char* buffer = new char[ size + 1 ];
-    stream.read( buffer, size );
-    buffer[ size ] = '\0';
 
-    std::cout << "Read " << size << " bytes into code." << std::endl;
-    std::cout << buffer << std::endl;
+    memset( buffer, 0, size + 1 );
+
+    stream.read( buffer, size );
+    stream.close();
+
+    buffer[ size ] = '\0';
 
     auto shader = std::shared_ptr< Shader >( new Shader( type, buffer ) );
     delete[] buffer;
+
 
     return std::move( shader );
 }
@@ -57,6 +59,9 @@ Shader::Shader( Type type, const char* code )
         GLchar* log = new GLchar[ size + 1 ];
         glGetShaderInfoLog( m_shaderObject, size, NULL, log );
 
+        std::cout << "################ ERROR ################" << std::endl;
+        std::cout << code << std::endl;
+        std::cout << "################ CODE #################" << std::endl;
         std::cout << log << std::endl;
 
         delete[] log;

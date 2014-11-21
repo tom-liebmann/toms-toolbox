@@ -1,10 +1,9 @@
-#include <GL/glew.h>
-
 #include "ShaderProgram.hpp"
 
 #include <tgCore/VertexAttributeList.hpp>
 #include <tgCore/VertexAttribute.hpp>
 #include <tgCore/Shader.hpp>
+#include <tgMath/Matrix4f.hpp>
 
 #include <iostream>
 
@@ -51,4 +50,14 @@ void ShaderProgram::unuse() const
 GLint ShaderProgram::getUniformLocation( const std::string& name ) const
 {
     return glGetUniformLocation( m_programObject, reinterpret_cast< const GLchar* >( name.c_str() ) );
+}
+
+void ShaderProgram::setUniformInt( GLint location, GLint value )
+{
+    glUniform1i( location, value );
+}
+
+void ShaderProgram::setUniform( GLint location, const tgMath::Matrix4f& matrix )
+{
+    glUniformMatrix4fv( location, 1, GL_TRUE, matrix.ptr() );
 }

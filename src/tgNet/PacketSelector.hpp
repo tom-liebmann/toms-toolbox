@@ -6,6 +6,9 @@
     #include <sys/epoll.h>
 #endif
 
+#include <tgCore/EventManager.hpp>
+#include <tgNet/IPacket.hpp>
+
 #include <functional>
 #include <vector>
 #include <mutex>
@@ -14,119 +17,153 @@
 
 namespace tgNet
 {
-    class IPacket;
     class SocketContainer;
-    class TCPSocket;
 
     class PacketSelector
     {
         public:
-            class NetEvent;
+            class Event
+            {
+                public:
+                    enum class Type
+                    {
+                        PACKET,
+                        DISCONNECT
+                    };
 
-            template< class T >
-            class NetEvent_Impl;
+                    virtual ~Event();
+
+                    virtual Type getType() const = 0;
+            };
 
             PacketSelector();
 
             ~PacketSelector();
 
-            void wait( std::function< void ( std::unique_ptr< NetEvent > event ) > callback );
-
-            void add( SocketContainer* container );
-
-            void notify();
+            void addSocket( std::shared_ptr< SocketContainer > container );
+            void removeSocket( const std::shared_ptr< SocketContainer >& container );
+            
+            void wait( const std::function< void ( std::unique_ptr< Event > ) >& callback );
+            void interrupt();
 
         private:
             bool m_running;
 
-        #ifdef WIN32
-            std::mutex m_containerMutex;
-            std::vector< std::tuple< HANDLE, SocketContainer* > > m_container;
-            WSAEVENT* m_events;
-            int m_eventSize;
+            std::list< std::tuple< uint8_t, std::shared_ptr< SocketContainer > > > m_changeList;
 
-            HANDLE m_notifyEvent;
+        #ifdef WIN32
+            private:
+                std::mutex m_containerMutex;
+                std::vector< std::tuple< WSAEVENT, std::shared_ptr< SocketContainer > > > m_container;
+                std::set< std::shared_ptr< SocketContainer > > m_eventContainer;
+                WSAEVENT* m_events;
+                DWORD m_eventSize;
+    
+                HANDLE m_notifyEvent;
         #else
-            int m_pipe[ 2 ];
-            int m_epoll;
-            struct epoll_event m_events[ 64 ];
-            std::mutex m_containerMutex;
-            std::list< SocketContainer* > m_newContainer;
+            private:
+                int m_pipe[ 2 ];
+                int m_epoll;
+                struct epoll_event m_events[ 64 ];
+                std::mutex m_containerMutex;
+                std::list< SocketContainer* > m_newContainer;
         #endif
     };
 
 
 
-    class PacketSelector::NetEvent
+    inline PacketSelector::Event::~Event()
+    { }
+
+
+
+    class PacketEvent
+        : public PacketSelector::Event
     {
         public:
-            enum class Type
+            PacketEvent(
+                const std::shared_ptr< SocketContainer >& source,
+                std::unique_ptr< IPacket > packet );
+
+            // PacketSelector::Event
+            virtual Type getType() const override; 
+
+            std::shared_ptr< SocketContainer > getSource() const;
+            const std::unique_ptr< IPacket >& getPacket() const;
+
+        private:
+            std::weak_ptr< SocketContainer > m_source;
+            std::unique_ptr< IPacket > m_packet;
+    };
+
+    class DisconnectEvent
+        : public PacketSelector::Event
+    {
+        public:
+            enum class Reason
             {
-                PACKET,
-                CLOSED,
-                BROKEN,
-                CONNECT
+                NORMAL,
+                BROKEN
             };
 
-            NetEvent( Type type, SocketContainer* source );
+            DisconnectEvent( const std::shared_ptr< SocketContainer >& source, Reason reason );
 
-            virtual ~NetEvent() { }
+            // PacketSelector::Event
+            virtual Type getType() const override;
 
-            Type getType() const;
-
-            SocketContainer* getSource() const;
-
-            template< class T >
-            std::unique_ptr< T > getData();
+            std::shared_ptr< SocketContainer > getSource() const;
+            Reason getReason() const;
 
         private:
-            Type m_type;
-            SocketContainer* m_source;
-    };
-
-    template< class T >
-    class PacketSelector::NetEvent_Impl : public PacketSelector::NetEvent
-    {
-        public:
-            NetEvent_Impl( Type type, SocketContainer* source, std::unique_ptr< T > data );
-
-            std::unique_ptr< T > getData();
-
-        private:
-            std::unique_ptr< T > m_data;
+            std::weak_ptr< SocketContainer > m_source;
+            Reason m_reason;
     };
 
 
 
-    inline PacketSelector::NetEvent::Type PacketSelector::NetEvent::getType() const
+    inline PacketEvent::PacketEvent(
+        const std::shared_ptr< SocketContainer >& source,
+        std::unique_ptr< IPacket > packet )
+        : m_source( source )
+        , m_packet( std::move( packet ) )
+    { }
+
+    inline PacketSelector::Event::Type PacketEvent::getType() const
     {
-        return m_type;
+        return Type::PACKET;
     }
 
-    inline SocketContainer* PacketSelector::NetEvent::getSource() const
+    inline std::shared_ptr< SocketContainer > PacketEvent::getSource() const
     {
-        return m_source;
+        return m_source.lock();
     }
 
-    template< class T >
-    inline std::unique_ptr< T > PacketSelector::NetEvent::getData()
+    inline const std::unique_ptr< IPacket >& PacketEvent::getPacket() const
     {
-        NetEvent_Impl< T >* th = static_cast< NetEvent_Impl< T >* >( this );
-        return th
-            ? th->getData()
-            : std::unique_ptr< T >();
+        return m_packet;
     }
 
-    template< class T >
-    inline PacketSelector::NetEvent_Impl< T >::NetEvent_Impl( Type type, SocketContainer* source, std::unique_ptr< T > data )
-        : NetEvent( type, source )
-        , m_data( std::move( data ) )
+
+
+    inline DisconnectEvent::DisconnectEvent(
+        const std::shared_ptr< SocketContainer >& source,
+        Reason reason )
+        : m_source( source )
+        , m_reason( reason )
+    { }
+
+    inline PacketSelector::Event::Type DisconnectEvent::getType() const
     {
+        return Type::DISCONNECT;
     }
 
-    template< class T >
-    inline std::unique_ptr< T > PacketSelector::NetEvent_Impl< T >::getData()
+    inline std::shared_ptr< SocketContainer > DisconnectEvent::getSource() const
     {
-        return std::move( m_data );
+        return m_source.lock();
+    }
+
+    inline DisconnectEvent::Reason DisconnectEvent::getReason() const
+    {
+        return m_reason;
     }
 }

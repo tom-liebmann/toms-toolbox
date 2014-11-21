@@ -26,7 +26,7 @@ void OPacket::write< std::string >( const std::string& value )
     append( reinterpret_cast< const uint8_t* >( value.c_str() ), len );
 }
 
-void OPacket::send( TCPSocket* socket ) const
+void OPacket::send( const TCPSocket* socket ) const
 {
     { // send packet length
         uint32_t done = 0;

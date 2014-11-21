@@ -2,8 +2,6 @@
 
 #include <tgCore/VertexAttributeList.hpp>
 
-#include <GL/gl.h>
-
 #include <memory>
 
 namespace tgCore
@@ -50,7 +48,9 @@ namespace tgCore
                     std::shared_ptr< VertexBuffer > m_vertexBuffer;
             };
 
-            VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+            // due to std::enable_shared_from_this the VertexBuffer has to be created as shader ptr
+            static std::shared_ptr< VertexBuffer > create( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+
             ~VertexBuffer();
 
             std::shared_ptr< IndexAccess > accessIndices();
@@ -59,6 +59,8 @@ namespace tgCore
             void render() const;
             
         private:
+            VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+
             bool m_editVertices;
             size_t m_vSize;
             size_t m_vCapacity;
@@ -74,6 +76,16 @@ namespace tgCore
             GLenum m_mode;
             std::shared_ptr< VertexAttributeList > m_attributes;
     };
+
+
+
+    inline std::shared_ptr< VertexBuffer > VertexBuffer::create(
+        GLenum mode,
+        std::shared_ptr< VertexAttributeList > attributes )
+    {
+        return std::shared_ptr< VertexBuffer >( new VertexBuffer(
+            mode, std::move( attributes ) ) );
+    }
 
 
 

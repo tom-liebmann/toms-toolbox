@@ -31,8 +31,7 @@ using namespace tgNet;
 
     TCPSocket::TCPSocket( const SOCKET& socket )
         : m_socket( socket )
-    {
-    }
+    { }
 
     TCPSocket::~TCPSocket()
     {

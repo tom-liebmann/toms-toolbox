@@ -1,7 +1,3 @@
-#ifdef WIN32
-    #include <GL/glew.h>
-#endif
-
 #include "Window.hpp"
 
 #include <tgCore/InputEvents.hpp>
@@ -86,6 +82,7 @@ uint8_t Window::s_windowCount = 0;
 Window::Window( std::string title, std::shared_ptr< Mode > mode )
     : m_title( std::move( title ) )
     , m_mode( std::move( mode ) )
+    , m_eventManager( new EventManager() )
 {
     if( s_windowCount == 0 )
         glfwInit();
@@ -106,6 +103,8 @@ Window::Window( std::string title, std::shared_ptr< Mode > mode )
 
     glfwMakeContextCurrent( m_window );
 
+    glViewport( 0, 0, m_mode->getWidth(), m_mode->getHeight() );
+
     #ifdef GLEW_STATIC
         if( s_windowCount == 0 )
             glewInit();
@@ -124,11 +123,6 @@ Window::~Window()
         glfwTerminate();
 }
 
-void Window::setEventManager( std::shared_ptr< EventManager< Event > > manager )
-{
-    m_eventManager = std::move( manager );
-}
-
 void Window::update()
 {
     glfwSwapBuffers( m_window );
@@ -140,3 +134,16 @@ Window::Mode::Mode( uint16_t width, uint16_t height, bool fullscreen )
     , m_fullscreen( fullscreen )
     , m_monitor( Monitor::fromPrimary() )
 { }
+
+
+
+void Window::EventManager::process()
+{
+    glfwPollEvents();
+
+    while( !m_events.empty() )
+    {
+        runEvent( m_events.front() );
+        m_events.pop_front();
+    }
+}

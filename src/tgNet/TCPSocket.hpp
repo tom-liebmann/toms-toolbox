@@ -10,7 +10,8 @@
 
 namespace tgNet
 {
-    class TCPSocket : public SocketContainer
+    class TCPSocket
+        : public SocketContainer
     {
         public:
             enum class Error
@@ -24,7 +25,8 @@ namespace tgNet
             TCPSocket( const std::string& address, int port );
             ~TCPSocket();
 
-            const TCPSocket* getSocket() const override;
+            // SocketContainer
+            virtual const TCPSocket* getSocket() const override;
 
             int32_t send( const uint8_t* data, int32_t size ) const;
             int32_t receive( uint8_t* data, int32_t size ) const;
@@ -32,18 +34,19 @@ namespace tgNet
             friend class Listener;
 
         #ifdef WIN32
-            SOCKET handle() const;
-        #else
-            int handle() const;
-        #endif
+            public:
+                SOCKET getHandle() const;
 
-        private:
-        #ifdef WIN32
-            TCPSocket( const SOCKET& socket );
-            SOCKET m_socket;
+            private:
+               TCPSocket( const SOCKET& socket );
+                SOCKET m_socket;
         #else
-            TCPSocket( int socket );
-            int m_socket;
+            public:
+                int getHandle() const;
+
+            private:
+                TCPSocket( int socket );
+                int m_socket;
         #endif
     };
 
@@ -55,15 +58,14 @@ namespace tgNet
     }
 
     #ifdef WIN32
-    inline SOCKET TCPSocket::handle() const
-    {
-        return m_socket;
-    }
-
+        inline SOCKET TCPSocket::getHandle() const
+        {
+            return m_socket;
+        }
     #else
-    inline int TCPSocket::handle() const
-    {
-        return m_socket;
-    }
+        inline int TCPSocket::getHandle() const
+        {
+            return m_socket;
+        }
     #endif
 }

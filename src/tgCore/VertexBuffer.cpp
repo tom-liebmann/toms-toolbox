@@ -1,8 +1,7 @@
-#include <GL/glew.h>
-
 #include "VertexBuffer.hpp"
 
 #include <tgCore/VertexAttribute.hpp>
+#include <tgCore/State.hpp>
 
 using tgCore::VertexBuffer;
 
@@ -95,6 +94,8 @@ void VertexBuffer::render() const
 
         glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
     }
+
+    State::getInstance().apply();
 
     glDrawElements( m_mode, m_iSize, GL_UNSIGNED_INT, 0 );
 }

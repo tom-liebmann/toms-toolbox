@@ -21,10 +21,10 @@ IPacket* IPacket::fromTCPSocket( const TCPSocket* socket )
         while( done < size )
             done += socket->receive( buffer + done, size - done );
     }
-    catch( int i )
+    catch( TCPSocket::Error& e )
     {
         delete buffer;
-        throw i;
+        throw e;
     }
 
     IPacket* result = new IPacket();
