@@ -1,6 +1,41 @@
 #include "Texture2D.hpp"
 
+#include <tgCore/PNGLoader.hpp>
+
+#include <iostream>
+
 using tgCore::Texture2D;
+
+std::unique_ptr< Texture2D > Texture2D::fromPNG( const std::string& filename )
+{
+    uint8_t* pngData;
+    unsigned int width, height;
+
+    lodepng_decode_file( &pngData, &width, &height, filename.c_str(), LCT_RGBA, 8 );
+
+    std::unique_ptr< Texture2D > texture( new Texture2D() );
+
+    texture->m_width = width;
+    texture->m_height = height;
+
+    glGenTextures( 1, &texture->m_textureObject );
+    glBindTexture( GL_TEXTURE_2D, texture->m_textureObject );
+
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        width,
+        height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        pngData );
+
+    free( pngData );
+
+    return std::move( texture );
+}
 
 Texture2D::Texture2D(
     uint16_t width,
@@ -26,6 +61,9 @@ Texture2D::Texture2D(
         type,
         NULL );
 }
+
+Texture2D::Texture2D()
+{ }
 
 Texture2D::~Texture2D()
 {

@@ -8,7 +8,7 @@ using tgCore::Shader;
 
 std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filename )
 {
-    std::ifstream stream( filename );
+    std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
     // determine length of file
     stream.seekg( 0, std::ios::end );
@@ -20,13 +20,13 @@ std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filena
     memset( buffer, 0, size + 1 );
 
     stream.read( buffer, size );
-    stream.close();
 
     buffer[ size ] = '\0';
 
     auto shader = std::shared_ptr< Shader >( new Shader( type, buffer ) );
-    delete[] buffer;
 
+    stream.close();
+    delete[] buffer;
 
     return std::move( shader );
 }

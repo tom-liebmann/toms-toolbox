@@ -72,6 +72,9 @@ void State::popShader()
     m_shaderStack.back()->unuse();
     m_shaderStack.pop_back();
 
+    if( !m_shaderStack.empty() )
+        m_shaderStack.back()->use();
+
     m_projectionMatrixSet = false;
     m_modelViewMatrixSet = false;
 }

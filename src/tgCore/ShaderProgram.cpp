@@ -61,3 +61,8 @@ void ShaderProgram::setUniform( GLint location, const tgMath::Matrix4f& matrix )
 {
     glUniformMatrix4fv( location, 1, GL_TRUE, matrix.ptr() );
 }
+
+void ShaderProgram::setUniform( GLint location, const tgMath::Vector< float, 3 >& vector )
+{
+    glUniform3f( location, vector.x(), vector.y(), vector.z() );
+}

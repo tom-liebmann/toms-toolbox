@@ -34,11 +34,12 @@ using tgNet::PacketSelector;
         while( true )
         {
             DWORD res = WSAWaitForMultipleEvents( m_eventSize, m_events, FALSE, WSA_INFINITE, FALSE );
-            res -= WSA_WAIT_EVENT_0;
 
             std::unique_lock< std::mutex > lock( m_containerMutex );
 
-            if( res == m_eventSize - 1 )
+            if( res == WSA_WAIT_FAILED )
+            { }
+            else if( res == WSA_WAIT_EVENT_0 + m_eventSize - 1 )
             {
                 WSAResetEvent( m_notifyEvent );
 
@@ -47,7 +48,7 @@ using tgNet::PacketSelector;
             }
             else
             {
-                auto& tup = m_container[ res ];
+                auto& tup = m_container[ res - WSA_WAIT_EVENT_0 ];
 
                 auto& handle = std::get< 0 >( tup );
                 auto& container = std::get< 1 >( tup );
@@ -158,9 +159,9 @@ using tgNet::PacketSelector;
                                 if( !container->m_events.empty() )
                                     m_eventContainer.erase( container );
 
-                                m_container.erase( iter2 );
-
                                 WSACloseEvent( std::get< 0 >( *iter2 ) );
+
+                                m_container.erase( iter2 );
                             }
                         } break;
                     }

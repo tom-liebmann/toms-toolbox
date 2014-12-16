@@ -4,12 +4,15 @@
 #include <GL/gl.h>
 
 #include <cstdint>
+#include <memory>
 
 namespace tgCore
 {
     class Texture2D
     {
         public:
+            static std::unique_ptr< Texture2D > fromPNG( const std::string& filename );
+
             Texture2D(
                 uint16_t width,
                 uint16_t height,
@@ -31,6 +34,8 @@ namespace tgCore
             void bind( GLenum unit ) const;
 
         private:
+            Texture2D();
+
             uint16_t m_width;
             uint16_t m_height;
 

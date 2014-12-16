@@ -87,6 +87,8 @@ Window::Window( std::string title, std::shared_ptr< Mode > mode )
     if( s_windowCount == 0 )
         glfwInit();
 
+//    glfwWindowHint( GLFW_DECORATED, GL_FALSE );
+
     m_window = glfwCreateWindow(
         m_mode->getWidth(),
         m_mode->getHeight(),
