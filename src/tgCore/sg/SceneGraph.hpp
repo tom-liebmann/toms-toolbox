@@ -18,6 +18,7 @@ namespace tgCore
 
                 void addChild( std::shared_ptr< Node > child );
                 void removeChild( const std::shared_ptr< Node >& child );
+                void clearChildren();
 
                 std::unique_ptr< State > traverse();
 
@@ -53,6 +54,11 @@ namespace tgCore
         inline void SceneGraph::removeChild( const std::shared_ptr< Node >& child )
         {
             m_root.removeChild( child );
+        }
+
+        inline void SceneGraph::clearChildren()
+        {
+            m_root.clearChildren();
         }
     }
 }

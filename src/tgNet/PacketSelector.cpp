@@ -6,19 +6,12 @@
 
 #include <iostream>
 
-using namespace tgNet;
+using tgNet::PacketSelector;
 
 #ifdef WIN32
-
-    PacketSelector::NetEvent::NetEvent( Type type, SocketContainer* source )
-        : m_type( type )
-        , m_source( source )
-    {
-    }
-
     PacketSelector::PacketSelector()
     {
-        m_notifyEvent = CreateEvent( NULL, TRUE, FALSE, NULL );
+        m_notifyEvent = WSACreateEvent();
         m_events = new WSAEVENT[ 1 ];
         m_events[ 0 ] = m_notifyEvent;
         m_eventSize = 1;
@@ -28,114 +21,188 @@ using namespace tgNet;
     {
         delete[] m_events;
 
-        for( std::tuple< HANDLE, SocketContainer* >& tuple : m_container )
-            CloseHandle( std::get< 0 >( tuple ) );
+        for( auto& tuple : m_container )
+            WSACloseEvent( std::get< 0 >( tuple ) );
 
-        CloseHandle( m_notifyEvent );
+        WSACloseEvent( m_notifyEvent );
     }
 
-    void PacketSelector::wait( std::function< void ( std::unique_ptr< NetEvent > event ) > callback )
+    void PacketSelector::wait( const std::function< void ( std::unique_ptr< Event > ) >& callback )
     {
-        bool rebuildList = false;
         m_running = true;
+
         while( true )
         {
-            int res = WSAWaitForMultipleEvents( m_eventSize, m_events, FALSE, WSA_INFINITE, FALSE );
-            res -= WAIT_OBJECT_0;
+            DWORD res = WSAWaitForMultipleEvents( m_eventSize, m_events, FALSE, WSA_INFINITE, FALSE );
 
-            if( res == m_eventSize - 1 )
+            std::unique_lock< std::mutex > lock( m_containerMutex );
+
+            if( res == WSA_WAIT_FAILED )
+            { }
+            else if( res == WSA_WAIT_EVENT_0 + m_eventSize - 1 )
             {
-                ResetEvent( m_notifyEvent );
+                WSAResetEvent( m_notifyEvent );
+
                 if( !m_running )
                     break;
-                rebuildList = true;
             }
             else
             {
-                m_containerMutex.lock();
-                std::tuple< HANDLE, SocketContainer* > tup = m_container[ res ];
-                m_containerMutex.unlock();
+                auto& tup = m_container[ res - WSA_WAIT_EVENT_0 ];
 
-                ResetEvent( std::get< 0 >( tup ) );
-                SocketContainer* container = std::get< 1 >( tup );
+                auto& handle = std::get< 0 >( tup );
+                auto& container = std::get< 1 >( tup );
 
                 try
                 {
                     std::unique_ptr< IPacket > packet( IPacket::fromTCPSocket( container->getSocket() ) );
 
-                    callback( std::unique_ptr< NetEvent >( new NetEvent_Impl< IPacket >(
-                        NetEvent::Type::PACKET,
-                        container,
-                        std::move( packet ) ) ) );
+                    WSAResetEvent( handle );
+                    WSAEventSelect( container->getSocket()->getHandle(), handle, FD_READ | FD_CLOSE );
+
+                    std::unique_lock< std::mutex > containerLock( container->m_mutex );
+                    container->m_events.push_back( std::unique_ptr< Event >(
+                        new PacketEvent(
+                            container,
+                            std::move( packet ) ) ) );
+                    m_eventContainer.insert( container );
                 }
                 catch( TCPSocket::Error& e )
                 {
-                    CloseHandle( std::get< 0 >( tup ) );
-                    m_containerMutex.lock();
-                    m_container.erase( m_container.begin() + res );
-                    m_containerMutex.unlock();
-                    rebuildList = true;
+                    m_changeList.push_back( std::make_tuple( 1, container ) );
 
                     switch( e )
                     {
                         case TCPSocket::Error::CLOSED:
-                            callback( std::unique_ptr< NetEvent >( new NetEvent( NetEvent::Type::CLOSED, container ) ) );
-                            break;
+                        {
+                            std::unique_lock< std::mutex > containerLock( container->m_mutex );
+                            container->m_events.push_back( std::unique_ptr< Event >(
+                                new DisconnectEvent(
+                                    container,
+                                    DisconnectEvent::Reason::NORMAL ) ) );
+                            m_eventContainer.insert( container );
+                        } break;
+
                         case TCPSocket::Error::BROKEN:
-                            callback( std::unique_ptr< NetEvent >( new NetEvent( NetEvent::Type::BROKEN, container ) ) );
-                            break;
+                        {
+                            std::unique_lock< std::mutex > containerLock( container->m_mutex );
+                            container->m_events.push_back( std::unique_ptr< Event >(
+                                new DisconnectEvent(
+                                    container,
+                                    DisconnectEvent::Reason::BROKEN ) ) );
+                            m_eventContainer.insert( container );
+                        } break;
+
                         default:
                             break;
                     }
                 }
             }
 
-            if( rebuildList )
+            // process new events
+            if( callback )
             {
-                rebuildList = false;
-
-                delete[] m_events;
-                m_events = new WSAEVENT[ m_container.size() + 1 ];
-
-                m_containerMutex.lock();
+                while( !m_eventContainer.empty() )
                 {
-                    // call connection events for new connections
-                    for( int i = m_eventSize - 1; i < m_container.size(); ++i )
+                    // get first eventContainer
+                    auto& container = *m_eventContainer.begin();
+
+                    // pop first event
+                    std::unique_lock< std::mutex > containerLock( container->m_mutex );
+                    std::unique_ptr< Event > event = std::move( container->m_events.front() );
+                    container->m_events.pop_front();
+
+                    // if container does not have any events left, remove it from eventQueue
+                    if( container->m_events.empty() )
+                        m_eventContainer.erase( m_eventContainer.begin() );
+
+                    containerLock.unlock();
+
+                    lock.unlock();
+
+                    callback( std::move( event ) );
+
+                    lock.lock();
+                }
+            }
+
+            if( !m_changeList.empty() )
+            {
+                while( !m_changeList.empty() )
+                {
+                    auto& change = m_changeList.front();
+
+                    auto& type = std::get< 0 >( change );
+                    auto& container = std::get< 1 >( change );
+
+                    switch( type )
                     {
-                        callback( std::unique_ptr< NetEvent >( new NetEvent(
-                            NetEvent::Type::CONNECT,
-                            std::get< 1 >( m_container[ i ] ) ) ) );
+                        case 0: // INSERTION
+                        {
+                            WSAEVENT event = WSACreateEvent();
+                            WSAEventSelect( container->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
+
+                            if( !container->m_events.empty() )
+                                m_eventContainer.insert( container );
+
+                            m_container.push_back( std::make_tuple( event, std::move( container ) ) );
+                        } break;
+
+                        case 1: // DELETION
+                        {
+                            auto iter2 = m_container.begin();
+                            while( iter2 != m_container.end() && std::get< 1 >( *iter2 ) != container )
+                                ++iter2;
+
+                            if( iter2 != m_container.end() )
+                            {
+                                if( !container->m_events.empty() )
+                                    m_eventContainer.erase( container );
+
+                                WSACloseEvent( std::get< 0 >( *iter2 ) );
+
+                                m_container.erase( iter2 );
+                            }
+                        } break;
                     }
 
-                    m_eventSize = m_container.size() + 1;
-
-                    for( int i = 0; i < m_container.size(); ++i )
-                        m_events[ i ] = std::get< 0 >( m_container[ i ] );
+                    m_changeList.pop_front();
                 }
-                m_containerMutex.unlock();
+
+                delete[] m_events;
+                m_eventSize = m_container.size() + 1;
+                m_events = new WSAEVENT[ m_eventSize ];
+
+                for( int i = 0; i < m_container.size(); ++i )
+                    m_events[ i ] = std::get< 0 >( m_container[ i ] );
 
                 m_events[ m_eventSize - 1 ] = m_notifyEvent;
             }
+
+            lock.unlock();
         }
     }
 
-    void PacketSelector::add( SocketContainer* container )
+    void PacketSelector::addSocket( std::shared_ptr< SocketContainer > container )
     {
-        HANDLE event = CreateEvent( NULL, TRUE, FALSE, NULL );
-        WSAEventSelect( container->getSocket()->handle(), event, FD_READ | FD_CLOSE );
-        {
-            std::unique_lock< std::mutex > lock( m_containerMutex );
-            m_container.push_back( std::make_tuple( event, container ) );
-        }
-        SetEvent( m_notifyEvent );
+        std::unique_lock< std::mutex > lock( m_containerMutex );
+        m_changeList.push_back( std::make_tuple( 0, std::move( container ) ) );
+        WSASetEvent( m_notifyEvent );
     }
 
-    void PacketSelector::notify()
+    void PacketSelector::removeSocket( const std::shared_ptr< SocketContainer >& container )
     {
+        std::unique_lock< std::mutex > lock( m_containerMutex );
+        m_changeList.push_back( std::make_tuple( 1, std::move( container ) ) );
+        WSASetEvent( m_notifyEvent );
+    }
+
+    void PacketSelector::interrupt()
+    {
+        std::unique_lock< std::mutex > lock( m_containerMutex );
         m_running = false;
-        SetEvent( m_notifyEvent );
+        WSASetEvent( m_notifyEvent );
     }
-
 #else
 
     #include <sys/socket.h>

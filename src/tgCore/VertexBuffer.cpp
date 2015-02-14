@@ -1,8 +1,7 @@
-#include <GL/glew.h>
-
 #include "VertexBuffer.hpp"
 
 #include <tgCore/VertexAttribute.hpp>
+#include <tgCore/State.hpp>
 
 using tgCore::VertexBuffer;
 
@@ -76,18 +75,39 @@ void VertexBuffer::render() const
                 case GL_FLOAT:
                     size = sizeof( GLfloat );
                     break;
+
                 case GL_BYTE:
                     size = sizeof( GLbyte );
                     break;
+
+                case GL_UNSIGNED_INT:
+                    size = sizeof( GLuint );
+                    break;
             }
 
-            glVertexAttribPointer(
-                index,
-                attribute.getSize(),
-                attribute.getType(),
-                GL_FALSE,
-                m_attributes->getBlockSize(),
-                reinterpret_cast< const GLvoid* >( offset ) );
+            switch( attribute.getType() )
+            {
+                case GL_FLOAT:
+                    glVertexAttribPointer(
+                        index,
+                        attribute.getSize(),
+                        attribute.getType(),
+                        GL_FALSE,
+                        m_attributes->getBlockSize(),
+                        reinterpret_cast< const GLvoid* >( offset ) );
+                    break;
+
+                case GL_BYTE:
+                case GL_UNSIGNED_INT:
+                    glVertexAttribIPointer(
+                        index,
+                        attribute.getSize(),
+                        attribute.getType(),
+                        m_attributes->getBlockSize(),
+                        reinterpret_cast< const GLvoid* >( offset ) );
+                    break;
+            }
+
             glEnableVertexAttribArray( index );
             offset += size * attribute.getSize();
             ++index;
@@ -95,6 +115,8 @@ void VertexBuffer::render() const
 
         glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
     }
+
+    State::getInstance().apply();
 
     glDrawElements( m_mode, m_iSize, GL_UNSIGNED_INT, 0 );
 }
@@ -144,6 +166,11 @@ void VertexBuffer::IndexAccess::push( void* data, size_t size )
     m_vertexBuffer->m_iSize += size;
 }
 
+void VertexBuffer::IndexAccess::clear()
+{
+    m_vertexBuffer->m_iSize = 0;
+}
+
 //-------------------------------------------------------------------------------------------------
 // VertexAccess
 //-------------------------------------------------------------------------------------------------
@@ -167,7 +194,7 @@ void VertexBuffer::VertexAccess::end( VertexAccess* access )
     delete access;
 }
 
-void VertexBuffer::VertexAccess::push( void* data, size_t size )
+void VertexBuffer::VertexAccess::pushData( void* data, size_t size )
 {
     if( m_vertexBuffer->m_vCapacity - m_vertexBuffer->m_vSize < size )
     {
@@ -187,4 +214,9 @@ void VertexBuffer::VertexAccess::push( void* data, size_t size )
 
     memcpy( reinterpret_cast< uint8_t* >( m_vertexBuffer->m_vBuffer ) + m_vertexBuffer->m_vSize, data, size );
     m_vertexBuffer->m_vSize += size;
+}
+
+void VertexBuffer::VertexAccess::clear()
+{
+    m_vertexBuffer->m_vSize = 0;
 }

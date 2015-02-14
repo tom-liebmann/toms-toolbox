@@ -15,8 +15,13 @@ VertexAttributeList::VertexAttributeList( std::initializer_list< VertexAttribute
             case GL_FLOAT:
                 m_blockSize += attribute.getSize() * sizeof( GLfloat );
                 break;
+
             case GL_BYTE:
                 m_blockSize += attribute.getSize() * sizeof( GLbyte );
+                break;
+
+            case GL_UNSIGNED_INT:
+                m_blockSize += attribute.getSize() * sizeof( GLuint );
                 break;
         }
     }

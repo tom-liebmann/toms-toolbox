@@ -2,9 +2,8 @@
 
 #include <tgCore/VertexAttributeList.hpp>
 
-#include <GL/gl.h>
-
 #include <memory>
+#include <iostream>
 
 namespace tgCore
 {
@@ -22,6 +21,8 @@ namespace tgCore
                     void pushIndex( GLuint i );
                     void pushIndex( GLuint i1, GLuint i2, GLuint i3 );
 
+                    void clear();
+
                 private:
                     IndexAccess( std::shared_ptr< VertexBuffer > vertexBuffer );
 
@@ -37,20 +38,32 @@ namespace tgCore
 
                     static void end( VertexAccess* access );
 
-                    GLuint pushFloat( GLfloat v );
-                    GLuint pushFloat( GLfloat v1, GLfloat v2 );
-                    GLuint pushFloat( GLfloat v1, GLfloat v2, GLfloat v3 );
-                    GLuint pushFloat( GLfloat v1, GLfloat v2, GLfloat v3, GLfloat v4 );
+
+                    template< class T, class... V >
+                    GLuint push( T v, V... rest );
+
+                    void clear();
 
                 private:
                     VertexAccess( std::shared_ptr< VertexBuffer > vertexBuffer );
 
-                    void push( void* data, size_t size );
+                    template< class T >
+                    void pushRest( T v );
+
+                    template< class T, class... V>
+                    void pushRest( T v, V... rest );
+
+                    template< class T >
+                    void pushValue( T value );
+
+                    void pushData( void* data, size_t size );
 
                     std::shared_ptr< VertexBuffer > m_vertexBuffer;
             };
 
-            VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+            // due to std::enable_shared_from_this the VertexBuffer has to be created as shader ptr
+            static std::shared_ptr< VertexBuffer > create( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+
             ~VertexBuffer();
 
             std::shared_ptr< IndexAccess > accessIndices();
@@ -59,6 +72,8 @@ namespace tgCore
             void render() const;
             
         private:
+            VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
+
             bool m_editVertices;
             size_t m_vSize;
             size_t m_vCapacity;
@@ -77,6 +92,16 @@ namespace tgCore
 
 
 
+    inline std::shared_ptr< VertexBuffer > VertexBuffer::create(
+        GLenum mode,
+        std::shared_ptr< VertexAttributeList > attributes )
+    {
+        return std::shared_ptr< VertexBuffer >( new VertexBuffer(
+            mode, std::move( attributes ) ) );
+    }
+
+
+
     inline void VertexBuffer::IndexAccess::pushIndex( GLuint i )
     {
         push( reinterpret_cast< void* >( &i ), sizeof( GLuint ) );
@@ -89,37 +114,31 @@ namespace tgCore
         pushIndex( i3 );
     }
 
-    inline GLuint VertexBuffer::VertexAccess::pushFloat( GLfloat v )
+    template< class T, class... V >
+    inline GLuint VertexBuffer::VertexAccess::push( T v, V... rest )
     {
         GLuint index = m_vertexBuffer->m_vSize / m_vertexBuffer->m_attributes->getBlockSize();
-        push( reinterpret_cast< void* >( &v ), sizeof( GLfloat ) );
+        pushValue< T >( v );
+        pushRest( rest... );
         return index;
     }
 
-    inline GLuint VertexBuffer::VertexAccess::pushFloat( GLfloat v1, GLfloat v2 )
+    template< class T >
+    inline void VertexBuffer::VertexAccess::pushRest( T v )
     {
-        GLuint index = m_vertexBuffer->m_vSize / m_vertexBuffer->m_attributes->getBlockSize();
-        push( reinterpret_cast< void* >( &v1 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v2 ), sizeof( GLfloat ) );
-        return index;
+        pushValue< T >( v );
     }
 
-    inline GLuint VertexBuffer::VertexAccess::pushFloat( GLfloat v1, GLfloat v2, GLfloat v3 )
+    template< class T, class... V >
+    inline void VertexBuffer::VertexAccess::pushRest( T v, V... rest )
     {
-        GLuint index = m_vertexBuffer->m_vSize / m_vertexBuffer->m_attributes->getBlockSize();
-        push( reinterpret_cast< void* >( &v1 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v2 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v3 ), sizeof( GLfloat ) );
-        return index;
+        pushValue< T >( v );
+        pushRest( rest... );
     }
 
-    inline GLuint VertexBuffer::VertexAccess::pushFloat( GLfloat v1, GLfloat v2, GLfloat v3, GLfloat v4 )
+    template< class T >
+    inline void VertexBuffer::VertexAccess::pushValue( T value )
     {
-        GLuint index = m_vertexBuffer->m_vSize / m_vertexBuffer->m_attributes->getBlockSize();
-        push( reinterpret_cast< void* >( &v1 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v2 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v3 ), sizeof( GLfloat ) );
-        push( reinterpret_cast< void* >( &v4 ), sizeof( GLfloat ) );
-        return index;
+        pushData( reinterpret_cast< void* >( &value ), sizeof( T ) );
     }
 }

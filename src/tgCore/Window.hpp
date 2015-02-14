@@ -2,6 +2,7 @@
 
 #include <tgCore/EventManager.hpp>
 
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
 #include <memory>
@@ -36,12 +37,27 @@ namespace tgCore
                     Type m_type;
             };
 
+            class EventManager
+                : public tgCore::EventManager< Event >
+            {
+                public:
+                    friend class Window;
+
+                    void process(); 
+
+                    void pushEvent( std::unique_ptr< Event > event );
+
+                private:
+                    std::list< std::unique_ptr< Event > > m_events;
+            };
+
             Window( std::string title, std::shared_ptr< Mode > mode );
 
             ~Window();
 
-            void setEventManager( std::shared_ptr< EventManager< Event > > manager );
-            const std::shared_ptr< EventManager< Event > >& getEventManager() const;
+            const std::shared_ptr< EventManager >& getEventManager() const;
+
+            const std::shared_ptr< Mode >& getMode() const;
 
             void update();
 
@@ -50,7 +66,7 @@ namespace tgCore
 
             std::string m_title;
             std::shared_ptr< Mode > m_mode;
-            std::shared_ptr< EventManager< Event > > m_eventManager;
+            std::shared_ptr< EventManager > m_eventManager;
 
             GLFWwindow* m_window;
     };
@@ -74,10 +90,17 @@ namespace tgCore
 
 
 
-    inline const std::shared_ptr< EventManager< Window::Event > >& Window::getEventManager() const
+    inline const std::shared_ptr< Window::EventManager >& Window::getEventManager() const
     {
         return m_eventManager;
     }
+
+    inline const std::shared_ptr< Window::Mode >& Window::getMode() const
+    {
+        return m_mode;
+    }
+
+
 
     inline uint16_t Window::Mode::getWidth() const
     {
@@ -99,6 +122,8 @@ namespace tgCore
         return m_monitor;
     }
 
+
+
     inline Window::Event::Event( Type type )
         : m_type( type )
     { }
@@ -109,5 +134,12 @@ namespace tgCore
     inline Window::Event::Type Window::Event::getType() const
     {
         return m_type;
+    }
+
+
+
+    inline void Window::EventManager::pushEvent( std::unique_ptr< Window::Event > event )
+    {
+        m_events.push_back( std::move( event ) );
     }
 }

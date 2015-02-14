@@ -15,7 +15,7 @@ namespace tgNet
             template< typename T >
             void write( const T& value );
 
-            void send( TCPSocket* socket ) const;
+            void send( const TCPSocket* socket ) const;
 
             void append( const uint8_t* data, uint32_t size );
             void ensure( uint32_t size );

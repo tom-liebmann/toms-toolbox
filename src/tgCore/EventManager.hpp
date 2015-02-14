@@ -2,8 +2,6 @@
 
 #include <tgCore/EventListener.hpp>
 
-#include <GLFW/glfw3.h>
-
 #include <cstdint>
 #include <list>
 #include <map>
@@ -36,21 +34,25 @@ namespace tgCore
                     std::shared_ptr< EventListener< T > > m_listener;
             };
 
+            virtual ~EventManager();
+
             std::shared_ptr< Slot > addListener(
                 typename T::Type type,
                 uint32_t priority,
                 std::shared_ptr< EventListener< T > > listener );
 
-            void pushEvent( std::unique_ptr< T > event );
-
-            void process( float timeFactor );
+        protected:
+            void runEvent( const std::unique_ptr< T >& event ); 
 
         private:
-            std::list< std::unique_ptr< T > > m_events;
             std::map< typename T::Type, std::set< Slot*, bool (*)( Slot*, Slot* ) > > m_listener;
     };
 
 
+
+    template< class T >
+    EventManager< T >::~EventManager()
+    { }
 
     template< class T >
     std::shared_ptr< typename EventManager< T >::Slot > EventManager< T >::addListener(
@@ -74,42 +76,29 @@ namespace tgCore
     }
 
     template< class T >
-    void EventManager< T >::pushEvent( std::unique_ptr< T > event )
+    void EventManager< T >::runEvent( const std::unique_ptr< T >& event )
     {
-        m_events.push_back( std::move( event ) );
-    }
-
-    template< class T >
-    void EventManager< T >::process( float timeFactor )
-    {
-        glfwPollEvents();
-
-        while( !m_events.empty() )
+        auto iter = m_listener.find( event->getType() );
+        if( iter != m_listener.end() )
         {
-            auto& event = m_events.front();
-
-            auto iter = m_listener.find( event->getType() );
-            if( iter != m_listener.end() )
+            for( auto i = iter->second.begin(); i != iter->second.end(); )
             {
-                for( auto i = iter->second.begin(); i != iter->second.end(); )
+                if( (*i)->isValid() )
                 {
-                    if( (*i)->isValid() )
-                    {
-                        if( (*i)->getListener()->event( event ) )
-                            break;
-                        ++i;
-                    }
-                    else
-                    {
-                        delete *i;
-                        i = iter->second.erase( i );
-                    }
+                    if( (*i)->getListener()->event( event ) )
+                        break;
+                    ++i;
+                }
+                else
+                {
+                    delete *i;
+                    i = iter->second.erase( i );
                 }
             }
-
-            m_events.pop_front();
         }
     }
+
+
 
     template< class T >
     bool EventManager< T >::Slot::sort( Slot* slot1, Slot* slot2 )

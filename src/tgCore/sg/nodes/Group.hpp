@@ -17,6 +17,7 @@ namespace tgCore
                 public:
                     void addChild( std::shared_ptr< Node > child );
                     void removeChild( const std::shared_ptr< Node >& child );
+                    void clearChildren();
 
                     // InnerNode
                     virtual void traverseChildren(
@@ -36,6 +37,11 @@ namespace tgCore
             inline void Group::removeChild( const std::shared_ptr< Node >& child )
             {
                 m_children.erase( child );
+            }
+
+            inline void Group::clearChildren()
+            {
+                m_children.clear();
             }
         }
     }
