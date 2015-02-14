@@ -14,6 +14,7 @@
 #include <mutex>
 #include <memory>
 #include <list>
+#include <atomic>
 
 namespace tgNet
 {
@@ -43,32 +44,72 @@ namespace tgNet
             void addSocket( std::shared_ptr< SocketContainer > container );
             void removeSocket( const std::shared_ptr< SocketContainer >& container );
             
-            void wait( const std::function< void ( std::unique_ptr< Event > ) >& callback );
+            std::unique_ptr< Event > wait();
             void interrupt();
 
         private:
-            bool m_running;
+            std::atomic< bool > m_interrupted;
 
+            void processChanges();
+            void insertManagedSocket( std::shared_ptr< SocketContainer > container );
+            void removeManagedSocket( const std::shared_ptr< SocketContainer >& container );
+            void pollEvents( bool& interrupted );
+            void handleEvent( size_t index );
+            void wakeUp();
+
+            /**
+             * Set of sockets managed by this selector.
+             */
+            std::vector< std::shared_ptr< SocketContainer > > m_managedSockets;
+
+            /**
+             * List of sockets to be deleted from or inserted into the managed list.
+             */
             std::list< std::tuple< uint8_t, std::shared_ptr< SocketContainer > > > m_changeList;
+
+            /**
+             * Mutex for thread safe handling of socket changes.
+             */
+            std::mutex m_changeMutex;
+
+            /**
+             * List of slots in m_managedSockets not filled with a socket.
+             */
+            std::list< size_t > m_freeSlots;
+
+            /**
+             * Ids of sockets that currently have an event waiting to be processed.
+             */
+            std::list< size_t > m_eventSockets;
 
         #ifdef WIN32
             private:
-                std::mutex m_containerMutex;
-                std::vector< std::tuple< WSAEVENT, std::shared_ptr< SocketContainer > > > m_container;
-                std::set< std::shared_ptr< SocketContainer > > m_eventContainer;
-                WSAEVENT* m_events;
-                DWORD m_eventSize;
+                std::vector< WSAEVENT > m_eventHandles;
+                std::vector< WSAEVENT > m_events;
+                std::vector< size_t > m_eventIds;
     
                 HANDLE m_notifyEvent;
         #else
             private:
-                int m_pipe[ 2 ];
+                /**
+                 * Handle to polling mechanism.
+                 */
                 int m_epoll;
-                struct epoll_event m_events[ 64 ];
-                std::mutex m_containerMutex;
-                std::list< SocketContainer* > m_newContainer;
+
+                /**
+                 * Buffer for incomming events.
+                 */
+                std::array< epoll_event, 64 > m_events;
+
+                /**
+                 * Read/Write pipe to interrupt event polling.
+                 */
+                int m_pipe[ 2 ];
         #endif
     };
+
+
+
 
 
 
