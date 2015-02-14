@@ -3,6 +3,8 @@
 #include <tgCore/VertexAttribute.hpp>
 #include <tgCore/State.hpp>
 
+#include <cstring>
+
 using tgCore::VertexBuffer;
 
 VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes )
