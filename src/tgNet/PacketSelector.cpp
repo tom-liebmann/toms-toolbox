@@ -88,7 +88,7 @@ std::unique_ptr< PacketSelector::Event > PacketSelector::wait()
             if( event->getType() == Event::Type::DISCONNECT )
                 removeManagedSocket( container );
 
-            return std::move( event );
+            return event;
         }
 
         // if no events are present, wait for new ones

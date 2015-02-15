@@ -34,7 +34,7 @@ std::unique_ptr< Texture2D > Texture2D::fromPNG( const std::string& filename )
 
     free( pngData );
 
-    return std::move( texture );
+    return texture;
 }
 
 Texture2D::Texture2D(
