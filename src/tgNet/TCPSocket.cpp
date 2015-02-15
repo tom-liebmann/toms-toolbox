@@ -115,7 +115,7 @@ using namespace tgNet;
 
     int32_t TCPSocket::send( const uint8_t* data, int32_t size ) const
     {
-        int ret = ::send( m_socket, reinterpret_cast< const char* >( data ), size, 0 );
+        int ret = ::send( m_socket, reinterpret_cast< const char* >( data ), size, MSG_NOSIGNAL );
 
         if( ret == -1 )
             throw Error::BROKEN;
