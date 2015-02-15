@@ -31,6 +31,8 @@ IPacket* IPacket::fromTCPSocket( const TCPSocket* socket )
     result->m_buffer = buffer;
     result->m_size = size;
     result->m_cursor = 0;
+
+    return result;
 }
 
 IPacket::~IPacket()
