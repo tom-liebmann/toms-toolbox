@@ -37,7 +37,7 @@ namespace tgNet
     {
         T value;
         read( reinterpret_cast< uint8_t* >( &value ), sizeof( T ) );
-        return std::move( value );
+        return value;
     }
 
     template<>

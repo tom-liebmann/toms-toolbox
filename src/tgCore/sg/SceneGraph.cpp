@@ -61,7 +61,7 @@ std::unique_ptr< SceneGraph::State > SceneGraph::traverse()
         }
     }
 
-    return std::move( state );
+    return state;
 }
 
 SceneGraph::State::~State()

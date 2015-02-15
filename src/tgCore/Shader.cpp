@@ -28,7 +28,7 @@ std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filena
     stream.close();
     delete[] buffer;
 
-    return std::move( shader );
+    return shader;
 }
 
 Shader::Shader( Type type, const char* code )

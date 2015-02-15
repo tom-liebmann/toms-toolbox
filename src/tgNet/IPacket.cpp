@@ -51,7 +51,7 @@ std::string IPacket::read< std::string >()
     std::string value = std::string( reinterpret_cast< char* >( m_buffer + m_cursor ), len );
     m_cursor += len;
 
-    return std::move( value );
+    return value;
 }
 
 void IPacket::read( uint8_t* data, uint32_t size )
