@@ -340,7 +340,7 @@ void PacketSelector::handleEvent( size_t index )
 
     try
     {
-        std::unique_ptr< IPacket > packet( IPacket::fromTCPSocket( container->getSocket() ) );
+        auto packet = IPacket::fromTCPSocket( *container->getSocket() );
 
         if( container->m_events.empty() )
             m_eventSockets.push_back( index );

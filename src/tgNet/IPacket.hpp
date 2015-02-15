@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 
 namespace tgNet
 {
@@ -9,7 +10,7 @@ namespace tgNet
     class IPacket
     {
         public:
-            static IPacket* fromTCPSocket( const TCPSocket* socket );
+            static std::unique_ptr< IPacket > fromTCPSocket( const TCPSocket& socket );
             ~IPacket();
 
             template< typename T >
