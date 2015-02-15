@@ -84,6 +84,10 @@ std::unique_ptr< PacketSelector::Event > PacketSelector::wait()
             if( container->m_events.empty() )
                 m_eventSockets.pop_front();
 
+            // if socket disconnected, remove it from the managed ones
+            if( event->getType() == Event::Type::DISCONNECT )
+                removeManagedSocket( container );
+
             return std::move( event );
         }
 
@@ -348,8 +352,6 @@ void PacketSelector::handleEvent( size_t index )
     }
     catch( TCPSocket::Error& e )
     {
-        m_changeList.push_back( std::make_tuple( 1, container ) );
-
         switch( e )
         {
             case TCPSocket::Error::CLOSED:
