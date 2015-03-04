@@ -12,10 +12,10 @@ namespace tgMath
     {
         public:
             static Matrix4f fromOrtho(
-                float left,
                 float right,
-                float bottom,
                 float top,
+                float left,
+                float bottom,
                 float zNear,
                 float zFar );
 

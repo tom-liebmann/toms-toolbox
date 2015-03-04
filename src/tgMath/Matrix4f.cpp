@@ -4,7 +4,8 @@
 
 using namespace tgMath;
 
-Matrix4f Matrix4f::fromOrtho(float left, float right, float bottom, float top, float zNear, float zFar)
+Matrix4f Matrix4f::fromOrtho(
+    float right, float top, float left, float bottom, float zNear, float zFar )
 {
     return Matrix4f(2.0f / (right - left), 0.0f                 , 0.0f                 , (right + left) / (left - right),
                     0.0f                 , 2.0f / (top - bottom), 0.0f                 , (top + bottom) / (bottom - top),

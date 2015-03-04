@@ -4,141 +4,134 @@
 
 #include <memory>
 #include <iostream>
+#include <vector>
 
 namespace tgCore
 {
     class VertexBuffer
-        : public std::enable_shared_from_this< VertexBuffer >
     {
-        public:
-            class IndexAccess
-            {
-                public:
-                    friend class VertexBuffer;
+    public:
+        class Access;
 
-                    static void end( IndexAccess* access );
+        VertexBuffer(
+            GLenum mode,
+            std::shared_ptr< VertexAttributeList > attributes );
 
-                    void pushIndex( GLuint i );
-                    void pushIndex( GLuint i1, GLuint i2, GLuint i3 );
+        ~VertexBuffer();
 
-                    void clear();
+        std::shared_ptr< Access > access();
 
-                private:
-                    IndexAccess( std::shared_ptr< VertexBuffer > vertexBuffer );
+        void render() const;
+        
+    private:
+        Access* m_access;
 
-                    void push( void* data, size_t size );
+        std::vector< uint8_t > m_vBuffer;
+        GLuint m_vBufferObject;
 
-                    std::shared_ptr< VertexBuffer > m_vertexBuffer;
-            };
+        std::vector< GLuint > m_iBuffer;
+        GLuint m_iBufferObject;
 
-            class VertexAccess
-            {
-                public:
-                    friend class VertexBuffer;
-
-                    static void end( VertexAccess* access );
-
-
-                    template< class T, class... V >
-                    GLuint push( T v, V... rest );
-
-                    void clear();
-
-                private:
-                    VertexAccess( std::shared_ptr< VertexBuffer > vertexBuffer );
-
-                    template< class T >
-                    void pushRest( T v );
-
-                    template< class T, class... V>
-                    void pushRest( T v, V... rest );
-
-                    template< class T >
-                    void pushValue( T value );
-
-                    void pushData( void* data, size_t size );
-
-                    std::shared_ptr< VertexBuffer > m_vertexBuffer;
-            };
-
-            // due to std::enable_shared_from_this the VertexBuffer has to be created as shader ptr
-            static std::shared_ptr< VertexBuffer > create( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
-
-            ~VertexBuffer();
-
-            std::shared_ptr< IndexAccess > accessIndices();
-            std::shared_ptr< VertexAccess > accessVertices();
-
-            void render() const;
-            
-        private:
-            VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes );
-
-            bool m_editVertices;
-            size_t m_vSize;
-            size_t m_vCapacity;
-            void* m_vBuffer;
-            GLuint m_vBufferObject;
-
-            bool m_editIndices;
-            size_t m_iSize;
-            size_t m_iCapacity;
-            void* m_iBuffer;
-            GLuint m_iBufferObject;
-
-            GLenum m_mode;
-            std::shared_ptr< VertexAttributeList > m_attributes;
+        GLenum m_mode;
+        std::shared_ptr< VertexAttributeList > m_attributes;
     };
 
 
 
-    inline std::shared_ptr< VertexBuffer > VertexBuffer::create(
-        GLenum mode,
-        std::shared_ptr< VertexAttributeList > attributes )
+    class VertexBuffer::Access
     {
-        return std::shared_ptr< VertexBuffer >( new VertexBuffer(
-            mode, std::move( attributes ) ) );
+    public:
+        static void end( Access* access );
+
+        template< class... T >
+        void pushI( GLuint index, T... rest );
+
+        template< class... T >
+        GLuint pushV( T... data );
+
+        void clearI();
+        void clearV();
+        void clear();
+
+    private:
+        Access( VertexBuffer* vertexBuffer );
+
+        void pushI( GLuint index );
+
+        template< class T >
+        void pushVRest( T value );
+
+        template< class T, class... U >
+        void pushVRest( T value, U... rest );
+
+        VertexBuffer* m_vertexBuffer;
+        bool m_iChanged;
+        bool m_vChanged;
+
+        friend class VertexBuffer;
+    };
+
+
+
+    //============================================== Template definitions =====
+
+    template< class... T >
+    void VertexBuffer::Access::pushI( GLuint index, T... rest )
+    {
+        pushI( index );
+        pushI( rest... );
     }
 
-
-
-    inline void VertexBuffer::IndexAccess::pushIndex( GLuint i )
+    template< class... T >
+    GLuint VertexBuffer::Access::pushV( T... data )
     {
-        push( reinterpret_cast< void* >( &i ), sizeof( GLuint ) );
-    }
-
-    inline void VertexBuffer::IndexAccess::pushIndex( GLuint i1, GLuint i2, GLuint i3 )
-    {
-        pushIndex( i1 );
-        pushIndex( i2 );
-        pushIndex( i3 );
-    }
-
-    template< class T, class... V >
-    inline GLuint VertexBuffer::VertexAccess::push( T v, V... rest )
-    {
-        GLuint index = m_vertexBuffer->m_vSize / m_vertexBuffer->m_attributes->getBlockSize();
-        pushValue< T >( v );
-        pushRest( rest... );
+        GLuint index = m_vertexBuffer->m_vBuffer.size() / m_vertexBuffer->m_attributes->getBlockSize();
+        pushVRest( data... );
         return index;
     }
 
     template< class T >
-    inline void VertexBuffer::VertexAccess::pushRest( T v )
+    void VertexBuffer::Access::pushVRest( T value )
     {
-        pushValue< T >( v );
+        m_vChanged = true;
+        m_vertexBuffer->m_vBuffer.insert(
+            m_vertexBuffer->m_vBuffer.end(),
+            reinterpret_cast< uint8_t* >( &value ),
+            reinterpret_cast< uint8_t* >( &value ) + sizeof( value ) );
     }
 
-    template< class T, class... V >
-    inline void VertexBuffer::VertexAccess::pushRest( T v, V... rest )
+    template< class T, class... U >
+    void VertexBuffer::Access::pushVRest( T value, U... rest )
     {
-        pushValue< T >( v );
-        pushRest( rest... );
+        pushVRest( value );
+        pushVRest( rest... );
     }
 
-    template< class T >
-    inline void VertexBuffer::VertexAccess::pushValue( T value )
+
+
+    //================================================ Inline definitions =====
+
+    inline void VertexBuffer::Access::pushI( GLuint index )
     {
-        pushData( reinterpret_cast< void* >( &value ), sizeof( T ) );
+        m_iChanged = true;
+        m_vertexBuffer->m_iBuffer.push_back( index );
+    }
+
+    inline void VertexBuffer::Access::clearI()
+    {
+        m_iChanged = true;
+        m_vertexBuffer->m_iBuffer.clear();
+    }
+
+    inline void VertexBuffer::Access::clearV()
+    {
+        m_vChanged = true;
+        m_vertexBuffer->m_vBuffer.clear();
+    }
+
+    inline void VertexBuffer::Access::clear()
+    {
+        clearI();
+        clearV();
     }
 }

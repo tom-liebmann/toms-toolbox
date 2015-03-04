@@ -24,7 +24,8 @@ namespace tgCore
                         WINDOW_CLOSE,
                         KEY,
                         MOUSE_BUTTON,
-                        MOUSE_MOVE
+                        MOUSE_MOVE,
+                        WINDOW_RESIZE
                     };
 
                     Event( Type type );
@@ -142,4 +143,33 @@ namespace tgCore
     {
         m_events.push_back( std::move( event ) );
     }
+
+
+
+    class WindowResizeEvent
+        : public Window::Event
+    {
+        public:
+            WindowResizeEvent(
+                int width,
+                int height )
+                : Window::Event( Window::Event::Type::WINDOW_RESIZE )
+                , m_width( width )
+                , m_height( height )
+            { }
+
+            int getWidth() const
+            {
+                return m_width;
+            }
+
+            int getHeight() const
+            {
+                return m_height;
+            }
+
+        private:
+            int m_width;
+            int m_height;
+    };
 }

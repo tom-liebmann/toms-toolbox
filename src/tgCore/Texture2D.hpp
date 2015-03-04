@@ -12,6 +12,10 @@ namespace tgCore
     {
         public:
             static std::unique_ptr< Texture2D > fromPNG( const std::string& filename );
+            static std::unique_ptr< Texture2D > fromRaw(
+                uint16_t width,
+                uint16_t height,
+                const uint8_t* data );
 
             Texture2D(
                 uint16_t width,

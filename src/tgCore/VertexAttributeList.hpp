@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-#include <list>
+#include <vector>
 
 namespace tgCore
 {
@@ -14,24 +14,28 @@ namespace tgCore
         public:
             VertexAttributeList( std::initializer_list< VertexAttribute > attributes );
 
-            std::list< VertexAttribute >::iterator begin();
-            std::list< VertexAttribute >::iterator end();
+            std::vector< VertexAttribute >::const_iterator begin() const;
+            std::vector< VertexAttribute >::const_iterator end() const;
 
             GLsizei getBlockSize() const;
 
+            const VertexAttribute& operator[]( size_t i ) const;
+
+            size_t size() const;
+
         private:
-            std::list< VertexAttribute > m_attributes;
+            std::vector< VertexAttribute > m_attributes;
             GLsizei m_blockSize;
     };
 
 
 
-    inline std::list< VertexAttribute >::iterator VertexAttributeList::begin()
+    inline std::vector< VertexAttribute >::const_iterator VertexAttributeList::begin() const
     {
         return m_attributes.begin();
     }
 
-    inline std::list< VertexAttribute >::iterator VertexAttributeList::end()
+    inline std::vector< VertexAttribute >::const_iterator VertexAttributeList::end() const
     {
         return m_attributes.end();
     }
@@ -39,5 +43,15 @@ namespace tgCore
     inline GLsizei VertexAttributeList::getBlockSize() const
     {
         return m_blockSize;
+    }
+
+    inline const VertexAttribute& VertexAttributeList::operator[]( size_t i ) const
+    {
+        return m_attributes[ i ];
+    }
+
+    inline size_t VertexAttributeList::size() const
+    {
+        return m_attributes.size();
     }
 }

@@ -73,6 +73,12 @@ namespace
         pushEvent( window, std::unique_ptr< tgCore::Window::Event >(
             new tgCore::MouseMoveEvent( x, y ) ) );
     }
+
+    void callbackWindowSize( GLFWwindow* window, int width, int height )
+    {
+        pushEvent( window, std::unique_ptr< tgCore::Window::Event >(
+            new tgCore::WindowResizeEvent( width, height ) ) );
+    }
 }
 
 using tgCore::Window;
@@ -102,6 +108,7 @@ Window::Window( std::string title, std::shared_ptr< Mode > mode )
     glfwSetKeyCallback( m_window, callbackKey );
     glfwSetMouseButtonCallback( m_window, callbackMouseButton );
     glfwSetCursorPosCallback( m_window, callbackMouseMove );
+    glfwSetWindowSizeCallback( m_window, callbackWindowSize );
 
     glfwMakeContextCurrent( m_window );
 
