@@ -3,13 +3,9 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 PROJECT( tgCore )
 
 # GLFW
-SET( GLFW_PATH "" CACHE PATH "GLFW directory" )
-INCLUDE_DIRECTORIES( "${GLFW_PATH}/include" )
+FIND_LIBRARY( GLFW_STATIC NAMES libglfw3.a )
 
-FIND_LIBRARY(
-    GLFW_STATIC
-    NAMES libglfw3.a
-    PATHS "${GLFW_PATH}/src" NO_DEFAULT_PATH )
+FIND_PATH( GLFW_INCLUDE_DIR NAMES GLFW/glfw3.h )
 
 IF( NOT GLFW_STATIC )
     MESSAGE( FATAL_ERROR "GLFW not found!" )
@@ -23,22 +19,9 @@ IF( NOT OPENGL_FOUND )
 ENDIF()
 
 # glew
-SET( GLEW_PATH "" CACHE PATH "GLEW directory" )
-INCLUDE_DIRECTORIES( "${GLEW_PATH}/include" )
+FIND_LIBRARY( GLEW_STATIC NAMES libglew32.a libGLEW.a )
 
-FIND_LIBRARY(
-    GLEWX_STATIC
-    NAMES libglew32mx.a libGLEW.a
-    PATHS "${GLEW_PATH}/lib/" NO_DEFAULT_PATH)
-
-IF( NOT GLEWX_STATIC )
-    MESSAGE( FATAL_ERROR "glewX not found!" )
-ENDIF()
-
-FIND_LIBRARY(
-    GLEW_STATIC
-    NAMES libglew32.a libGLEWmx.a
-    PATHS "${GLEW_PATH}/lib/" NO_DEFAULT_PATH)
+FIND_PATH( GLEW_INCLUDE_DIR NAMES GL/glew.h )
 
 IF( NOT GLEW_STATIC )
     MESSAGE( FATAL_ERROR "glew not found!" )
@@ -52,7 +35,7 @@ IF( WIN32 )
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32" )
 ENDIF()
 
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y" )
+SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
 SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Bstatic -static-libgcc -static-libstdc++" )
 
 # find source files
@@ -60,11 +43,15 @@ FILE(
     GLOB_RECURSE
     SOURCE_FILES
     ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-    *.cpp )
+    *.cpp
+)
 
-# create executable
-
-INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_SOURCE_DIR}/../" )
+# create library
+INCLUDE_DIRECTORIES(
+    "${CMAKE_CURRENT_SOURCE_DIR}/.."
+    ${GLFW_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIR}
+)
 
 ADD_LIBRARY( tgCore STATIC ${SOURCE_FILES} )
 
@@ -73,10 +60,12 @@ IF( WIN32 )
         tgCore
         ${GLFW_STATIC}
         ${GLEW_STATIC}
-        ${OPENGL_LIBRARIES} )
+        ${OPENGL_LIBRARIES}
+    )
 ELSE()
     TARGET_LINK_LIBRARIES(
         tgCore
         ${GLFW_STATIC}
-        ${OPENGL_LIBRARIES} )
+        ${OPENGL_LIBRARIES}
+    )
 ENDIF()

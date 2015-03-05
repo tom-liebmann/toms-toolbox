@@ -1,0 +1,1 @@
+#define TENGOM_VERSION 0.1
