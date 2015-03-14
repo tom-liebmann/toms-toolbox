@@ -9,20 +9,19 @@ IF( WIN32 )
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32" )
 ENDIF()
 
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++1y" )
+SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
 SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Bstatic -static-libgcc -static-libstdc++" )
 
 # find source files
-
 FILE(
     GLOB_RECURSE
     SOURCE_FILES
     ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-    *.cpp )
+    *.cpp
+)
 
 # create executable
-
-INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_SOURCE_DIR}/../" )
+INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_SOURCE_DIR}/.." )
 
 ADD_LIBRARY( tgNet STATIC ${SOURCE_FILES} )
 

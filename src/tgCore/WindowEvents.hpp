@@ -1,0 +1,261 @@
+#pragma once
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
+    namespace events
+    {
+        constexpr Event::Type KEY           = 0;
+        constexpr Event::Type MOUSE_BUTTON  = 1;
+        constexpr Event::Type MOUSE_MOVE    = 2;
+        constexpr Event::Type WINDOW_CLOSE  = 3;
+        constexpr Event::Type WINDOW_RESIZE = 4;
+
+
+
+        class Key
+            : public Event
+        {
+        public:
+            enum class Action;
+
+            Key( uint32_t key, Action action );
+
+            uint32_t getKey() const;
+            Action getAction() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            uint32_t m_key;
+            Action m_action;
+        };
+
+
+
+        enum class Key::Action
+        {
+            DOWN,
+            UP
+        };
+
+
+
+        class MouseButton
+            : public Event
+        {
+        public:
+            enum class Button;
+            enum class Action;
+
+            MouseButton( Button button, Action action, double x, double y );
+
+            Button getButton() const;
+            Action getAction() const;
+
+            double getX() const;
+            double getY() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            Button m_button;
+            Action m_action;
+            double m_x;
+            double m_y;
+        };
+
+
+
+        enum class MouseButton::Button
+        {
+            LEFT,
+            RIGHT,
+            MIDDLE
+        };
+
+
+
+        enum class MouseButton::Action
+        {
+            UP,
+            DOWN
+        };
+
+
+
+        class MouseMove
+            : public Event
+        {
+        public:
+            MouseMove( double x, double y );
+
+            double getX() const;
+            double getY() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            double m_x;
+            double m_y;
+        };
+
+
+
+        class WindowClose
+            : public Event
+        {
+        public:
+            WindowClose( const Window& window );
+
+            const Window& getWindow() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            const Window& m_window;
+        };
+
+
+
+        class WindowResize
+            : public Event
+        {
+        public:
+            WindowResize( const Window& window );
+
+            const Window& getWindow() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            const Window& m_window;
+        };
+    }
+}
+
+
+
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace events
+    {
+        inline Key::Key( uint32_t key, Action action )
+            : m_key( key )
+            , m_action( action )
+        { }
+
+        inline uint32_t Key::getKey() const
+        {
+            return m_key;
+        }
+
+        inline Key::Action Key::getAction() const
+        {
+            return m_action;
+        }
+
+        inline Event::Type Key::getType() const
+        {
+            return KEY;
+        }
+
+
+
+        inline MouseButton::MouseButton( Button button, Action action, double x, double y )
+            : m_button( button )
+            , m_action( action )
+            , m_x( x )
+            , m_y( y )
+        { }
+
+        inline MouseButton::Button MouseButton::getButton() const
+        {
+            return m_button;
+        }
+
+        inline MouseButton::Action MouseButton::getAction() const
+        {
+            return m_action;
+        }
+
+        inline double MouseButton::getX() const
+        {
+            return m_x;
+        }
+
+        inline double MouseButton::getY() const
+        {
+            return m_y;
+        }
+
+        inline Event::Type MouseButton::getType() const
+        {
+            return MOUSE_BUTTON;
+        }
+
+
+
+        inline MouseMove::MouseMove( double x, double y )
+            : m_x( x )
+            , m_y( y )
+        { }
+
+        inline double MouseMove::getX() const
+        {
+            return m_x;
+        }
+
+        inline double MouseMove::getY() const
+        {
+            return m_y;
+        }
+
+        inline Event::Type MouseMove::getType() const
+        {
+            return MOUSE_MOVE;
+        }
+
+
+
+        inline WindowClose::WindowClose( const Window& window )
+            : m_window( window )
+        { }
+
+        inline const Window& WindowClose::getWindow() const
+        {
+            return m_window;
+        }
+
+        inline Event::Type WindowClose::getType() const
+        {
+            return WINDOW_CLOSE;
+        }
+
+
+
+        inline WindowResize::WindowResize( const Window& window )
+            : m_window( window )
+        { }
+
+        inline const Window& WindowResize::getWindow() const
+        {
+            return m_window;
+        }
+
+        inline Event::Type WindowResize::getType() const
+        {
+            return WINDOW_RESIZE;
+        }
+    }
+}

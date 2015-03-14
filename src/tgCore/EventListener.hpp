@@ -2,19 +2,30 @@
 
 #include <memory>
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
 {
-    template< class T >
+    class Event;
+}
+
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class EventListener
     {
-        public:
-            virtual ~EventListener();
+    public:
+        virtual ~EventListener();
 
-            virtual bool event(
-                const std::unique_ptr< T >& event ) = 0;
+        virtual bool event(
+            const std::unique_ptr< Event >& event ) = 0;
     };
 
-    template< class T >
-    inline EventListener< T >::~EventListener()
+    inline EventListener::~EventListener()
     { }
 }
