@@ -5,7 +5,7 @@
 
 #include <memory>
 
-namespace tgCore
+namespace tg
 {
     class Monitor
     {

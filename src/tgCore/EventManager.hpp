@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tgCore/EventListener.hpp>
+#include <tgCore/Event.hpp>
 
 #include <cstdint>
 #include <list>
@@ -8,133 +9,96 @@
 #include <memory>
 #include <set>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
-    template< class T >
     class EventManager
     {
-        public:
-            class Slot
-            {
-                public:
-                    static bool sort( Slot* slot1, Slot* slot2 );
-                    static void invalidate( Slot* slot );
+    public:
+        class Slot;
 
-                    Slot(
-                        uint32_t priority,
-                        std::shared_ptr< EventListener< T > > listener );
+        ~EventManager();
 
-                    bool isValid() const;
-                    uint32_t getPriority() const;
-                    const std::shared_ptr< EventListener< T > >& getListener() const;
+        std::shared_ptr< Slot > addListener(
+            Event::Type type,
+            uint32_t priority,
+            std::shared_ptr< EventListener > listener );
 
-                private:
-                    bool m_valid;
-                    uint32_t m_priority;
-                    std::shared_ptr< EventListener< T > > m_listener;
-            };
+        void pushEvent( std::unique_ptr< Event > event );
 
-            virtual ~EventManager();
+        void process();
 
-            std::shared_ptr< Slot > addListener(
-                typename T::Type type,
-                uint32_t priority,
-                std::shared_ptr< EventListener< T > > listener );
+    protected:
+        void runEvent( const std::unique_ptr< Event >& event ); 
 
-        protected:
-            void runEvent( const std::unique_ptr< T >& event ); 
-
-        private:
-            std::map< typename T::Type, std::set< Slot*, bool (*)( Slot*, Slot* ) > > m_listener;
+    private:
+        std::map< Event::Type, std::set< Slot*, bool (*)( Slot*, Slot* ) > > m_listener;
+        std::list< std::unique_ptr< Event > > m_events;
     };
 
+    
 
-
-    template< class T >
-    EventManager< T >::~EventManager()
-    { }
-
-    template< class T >
-    std::shared_ptr< typename EventManager< T >::Slot > EventManager< T >::addListener(
-        typename T::Type type,
-        uint32_t priority,
-        std::shared_ptr< EventListener< T > > listener )
+    class EventManager::Slot
     {
-        Slot* slot = new Slot( priority, std::move( listener ) );
+    public:
+        static bool sort( Slot* lhs, Slot* rhs );
+        static void invalidate( Slot* slot );
 
-        auto iter = m_listener.find( type );
-        if( iter == m_listener.end() )
-        {
-            std::set< Slot*, bool (*)( Slot*, Slot* ) > newSet( Slot::sort );
-            newSet.insert( slot );
-            m_listener[ type ] = std::move( newSet );
-        }
-        else
-            iter->second.insert( slot );
+        Slot(
+            uint32_t priority,
+            std::shared_ptr< EventListener > listener );
 
-        return std::shared_ptr< Slot >( slot, Slot::invalidate );
+        bool isValid() const;
+        uint32_t getPriority() const;
+        const std::shared_ptr< EventListener >& getListener() const;
+
+    private:
+        bool m_valid;
+        uint32_t m_priority;
+        std::shared_ptr< EventListener > m_listener;
+
+        friend class EventManager;
+    };
+}
+
+
+
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    inline bool EventManager::Slot::sort( Slot* lhs, Slot* rhs )
+    {
+        return lhs->getPriority() > rhs->getPriority();
     }
 
-    template< class T >
-    void EventManager< T >::runEvent( const std::unique_ptr< T >& event )
-    {
-        auto iter = m_listener.find( event->getType() );
-        if( iter != m_listener.end() )
-        {
-            for( auto i = iter->second.begin(); i != iter->second.end(); )
-            {
-                if( (*i)->isValid() )
-                {
-                    if( (*i)->getListener()->event( event ) )
-                        break;
-                    ++i;
-                }
-                else
-                {
-                    delete *i;
-                    i = iter->second.erase( i );
-                }
-            }
-        }
-    }
-
-
-
-    template< class T >
-    bool EventManager< T >::Slot::sort( Slot* slot1, Slot* slot2 )
-    {
-        return slot1->getPriority() > slot2->getPriority();
-    }
-
-    template< class T >
-    void EventManager< T >::Slot::invalidate( Slot* slot )
+    inline void EventManager::Slot::invalidate( Slot* slot )
     {
         slot->m_valid = false;
     }
 
-    template< class T >
-    inline EventManager< T >::Slot::Slot(
+    inline EventManager::Slot::Slot(
         uint32_t priority,
-        std::shared_ptr< EventListener< T > > listener )
+        std::shared_ptr< EventListener > listener )
         : m_valid( true )
         , m_priority( priority )
         , m_listener( std::move( listener ) )
     { }
 
-    template< class T >
-    inline bool EventManager< T >::Slot::isValid() const
+    inline bool EventManager::Slot::isValid() const
     {
         return m_valid;
     }
     
-    template< class T >
-    inline uint32_t EventManager< T >::Slot::getPriority() const
+    inline uint32_t EventManager::Slot::getPriority() const
     {
         return m_priority;
     }
 
-    template< class T >
-    inline const std::shared_ptr< EventListener< T > >& EventManager< T >::Slot::getListener() const
+    inline const std::shared_ptr< EventListener >& EventManager::Slot::getListener() const
     {
         return m_listener;
     }

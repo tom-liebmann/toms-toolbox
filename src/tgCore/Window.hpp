@@ -7,98 +7,80 @@
 
 #include <memory>
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
 {
     class Monitor;
+}
 
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class Window
     {
-        public:
-            class Mode;
+    public:
+        class Mode
+        {
+            public:
+                Mode( uint16_t width, uint16_t height, bool fullscreen );
 
-            class Event
-            {
-                public:
-                    enum class Type
-                    {
-                        WINDOW_CLOSE,
-                        KEY,
-                        MOUSE_BUTTON,
-                        MOUSE_MOVE,
-                        WINDOW_RESIZE
-                    };
+                uint16_t getWidth() const;
+                uint16_t getHeight() const;
+                bool isFullscreen() const;
+                const std::shared_ptr< Monitor >& getMonitor() const;
 
-                    Event( Type type );
+            private:
+                uint16_t m_width;
+                uint16_t m_height;
+                bool m_fullscreen;
+                std::shared_ptr< Monitor > m_monitor;
+        };
 
-                    virtual ~Event();
 
-                    Type getType() const;
+        Window( std::string title, Mode mode );
 
-                private:
-                    Type m_type;
-            };
+        ~Window();
 
-            class EventManager
-                : public tgCore::EventManager< Event >
-            {
-                public:
-                    friend class Window;
+        void setEventManager( const std::shared_ptr< EventManager >& eventManager );
+        std::shared_ptr< EventManager > getEventManager() const;
 
-                    void process(); 
+        const Mode& getMode() const;
 
-                    void pushEvent( std::unique_ptr< Event > event );
+        void update();
 
-                private:
-                    std::list< std::unique_ptr< Event > > m_events;
-            };
+    private:
+        static uint8_t s_windowCount;
 
-            Window( std::string title, std::shared_ptr< Mode > mode );
+        std::string m_title;
+        Mode m_mode;
 
-            ~Window();
+        std::weak_ptr< EventManager > m_eventManager;
 
-            const std::shared_ptr< EventManager >& getEventManager() const;
-
-            const std::shared_ptr< Mode >& getMode() const;
-
-            void update();
-
-        private:
-            static uint8_t s_windowCount;
-
-            std::string m_title;
-            std::shared_ptr< Mode > m_mode;
-            std::shared_ptr< EventManager > m_eventManager;
-
-            GLFWwindow* m_window;
+        GLFWwindow* m_window;
     };
+}
 
-    class Window::Mode
+
+
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    inline void Window::setEventManager( const std::shared_ptr< EventManager >& eventManager )
     {
-        public:
-            Mode( uint16_t width, uint16_t height, bool fullscreen );
-
-            uint16_t getWidth() const;
-            uint16_t getHeight() const;
-            bool getFullscreen() const;
-            const std::shared_ptr< Monitor >& getMonitor() const;
-
-        private:
-            uint16_t m_width;
-            uint16_t m_height;
-            bool m_fullscreen;
-            std::shared_ptr< Monitor > m_monitor;
-    };
-
-
-
-    inline const std::shared_ptr< Window::EventManager >& Window::getEventManager() const
-    {
-        return m_eventManager;
+        m_eventManager = eventManager;
     }
 
-    inline const std::shared_ptr< Window::Mode >& Window::getMode() const
+    inline std::shared_ptr< EventManager > Window::getEventManager() const
     {
-        return m_mode;
+        return m_eventManager.lock();
     }
 
 
@@ -113,7 +95,7 @@ namespace tgCore
         return m_height;
     }
 
-    inline bool Window::Mode::getFullscreen() const
+    inline bool Window::Mode::isFullscreen() const
     {
         return m_fullscreen;
     }
@@ -122,54 +104,4 @@ namespace tgCore
     {
         return m_monitor;
     }
-
-
-
-    inline Window::Event::Event( Type type )
-        : m_type( type )
-    { }
-
-    inline Window::Event::~Event()
-    { }
-
-    inline Window::Event::Type Window::Event::getType() const
-    {
-        return m_type;
-    }
-
-
-
-    inline void Window::EventManager::pushEvent( std::unique_ptr< Window::Event > event )
-    {
-        m_events.push_back( std::move( event ) );
-    }
-
-
-
-    class WindowResizeEvent
-        : public Window::Event
-    {
-        public:
-            WindowResizeEvent(
-                int width,
-                int height )
-                : Window::Event( Window::Event::Type::WINDOW_RESIZE )
-                , m_width( width )
-                , m_height( height )
-            { }
-
-            int getWidth() const
-            {
-                return m_width;
-            }
-
-            int getHeight() const
-            {
-                return m_height;
-            }
-
-        private:
-            int m_width;
-            int m_height;
-    };
 }

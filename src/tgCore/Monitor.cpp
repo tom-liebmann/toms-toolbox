@@ -1,6 +1,6 @@
 #include "Monitor.hpp"
 
-using tgCore::Monitor;
+using tg::Monitor;
 
 std::shared_ptr< Monitor > Monitor::fromPrimary()
 {
