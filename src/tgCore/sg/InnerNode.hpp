@@ -2,7 +2,10 @@
 
 #include <tgCore/sg/Node.hpp>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
@@ -18,9 +21,18 @@ namespace tgCore
                 virtual void traverseChildren(
                     std::function< void ( const Node* ) > callback ) const = 0;
         };
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
         inline InnerNode::~InnerNode()
         { }
 

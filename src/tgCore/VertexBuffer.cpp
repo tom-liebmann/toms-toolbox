@@ -5,7 +5,7 @@
 
 #include <cstring>
 
-using tgCore::VertexBuffer;
+using namespace tg;
 
 VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes )
     : m_access( nullptr )
@@ -34,11 +34,13 @@ std::shared_ptr< VertexBuffer::Access > VertexBuffer::access()
         : std::shared_ptr< Access >( new Access( this ), Access::end );
 }
 
-void VertexBuffer::render() const
+void VertexBuffer::render( State& state ) const
 {
     // do not render while buffers get modified
     if( m_access )
         return;
+
+    state.apply();
 
     glBindBuffer( GL_ARRAY_BUFFER, m_vBufferObject );
 
@@ -90,7 +92,6 @@ void VertexBuffer::render() const
     }
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
-
     glDrawElements( m_mode, m_iBuffer.size(), GL_UNSIGNED_INT, 0 );
 }
 
@@ -100,7 +101,6 @@ void VertexBuffer::Access::end( Access* access )
 {
     if( access->m_iChanged )
     {
-        std::cout << "Updating index buffer of size" << access->m_vertexBuffer->m_iBuffer.size() << std::endl;
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, access->m_vertexBuffer->m_iBufferObject );
         glBufferData(
             GL_ELEMENT_ARRAY_BUFFER,
@@ -112,7 +112,6 @@ void VertexBuffer::Access::end( Access* access )
 
     if( access->m_vChanged )
     {
-        std::cout << "Updating vertex buffer of size" << access->m_vertexBuffer->m_vBuffer.size() << std::endl;
         glBindBuffer( GL_ARRAY_BUFFER, access->m_vertexBuffer->m_vBufferObject );
         glBufferData(
             GL_ARRAY_BUFFER,

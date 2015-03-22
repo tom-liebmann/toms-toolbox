@@ -1,23 +1,21 @@
 #include "ShaderProgram.hpp"
 
-#include <tgCore/VertexAttributeList.hpp>
+    #include <tgCore/VertexAttributeList.hpp>
 #include <tgCore/VertexAttribute.hpp>
 #include <tgCore/Shader.hpp>
 #include <tgMath/Matrix4f.hpp>
 
 #include <iostream>
 
-using tgCore::ShaderProgram;
+using namespace tg;
 
 ShaderProgram::ShaderProgram(
-    std::initializer_list< std::shared_ptr< tgCore::Shader > > shaders,
+    std::initializer_list< std::shared_ptr< Shader > > shaders,
     std::shared_ptr< VertexAttributeList > attributes )
     : m_programObject( glCreateProgram() )
 {
     for( auto& shader : shaders )
-    {
         glAttachShader( m_programObject, shader->getShaderObject() );
-    }
 
     GLuint index = 0;
     for( auto& attribute : *attributes )

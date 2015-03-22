@@ -7,33 +7,44 @@
 #include <memory>
 #include <vector>
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
 {
     class Texture2D;
+}
 
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class GBuffer
     {
-        public:
-            GBuffer();
+    public:
+        GBuffer();
 
-            ~GBuffer();
+        ~GBuffer();
 
-            uint16_t getWidth() const;
-            uint16_t getHeight() const;
-            const std::shared_ptr< Texture2D >& getDrawBuffer( int8_t unit ) const;
-            const std::shared_ptr< Texture2D >& getDepthBuffer() const;
+        uint16_t getWidth() const;
+        uint16_t getHeight() const;
+        const std::shared_ptr< Texture2D >& getDrawBuffer( int8_t unit ) const;
+        const std::shared_ptr< Texture2D >& getDepthBuffer() const;
 
-            void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
-            void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
+        void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
+        void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
 
-            void begin() const;
-            void end() const;
+        void begin() const;
+        void end() const;
 
-        private:
-            GLuint m_frameBufferObject;            
+    private:
+        GLuint m_frameBufferObject;            
 
-            std::vector< std::shared_ptr< Texture2D > > m_drawBuffers;
-            std::vector< GLenum > m_drawBufferIDs;
-            std::shared_ptr< Texture2D > m_depthBuffer;
+        std::vector< std::shared_ptr< Texture2D > > m_drawBuffers;
+        std::vector< GLenum > m_drawBufferIDs;
+        std::shared_ptr< Texture2D > m_depthBuffer;
     };
 }

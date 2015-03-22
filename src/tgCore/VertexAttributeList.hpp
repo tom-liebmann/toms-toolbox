@@ -3,12 +3,15 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include <tgCore/VertexAttribute.hpp>
+
 #include <vector>
 
-namespace tgCore
-{
-    class VertexAttribute;
+// declarations
+//=============================================================================
 
+namespace tg
+{
     class VertexAttributeList
     {
         public:
@@ -27,9 +30,15 @@ namespace tgCore
             std::vector< VertexAttribute > m_attributes;
             GLsizei m_blockSize;
     };
+}
 
 
 
+// defintions
+//=============================================================================
+
+namespace tg
+{
     inline std::vector< VertexAttribute >::const_iterator VertexAttributeList::begin() const
     {
         return m_attributes.begin();

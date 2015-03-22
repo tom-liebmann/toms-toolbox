@@ -2,25 +2,47 @@
 
 #include <tgCore/sg/Node.hpp>
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
+{
+    class State;
+}
+
+
+
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
         class LeafNode
             : public Node
         {
-            public:
-                virtual ~LeafNode();
+        public:
+            virtual ~LeafNode();
 
-                // Node
-                virtual bool isLeaf() const override;
+            // Node
+            virtual bool isLeaf() const override;
 
-                virtual uint32_t getRenderPass() const = 0;
-                virtual void render() const = 0;
+            virtual uint32_t getRenderPass() const = 0;
+            virtual void render( State& state ) const = 0;
         };
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
         inline LeafNode::~LeafNode()
         { }
 

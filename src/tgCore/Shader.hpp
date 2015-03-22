@@ -5,7 +5,10 @@
 
 #include <memory>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     class Shader
     {
@@ -29,9 +32,15 @@ namespace tgCore
 
             GLuint m_shaderObject;
     };
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
     inline GLuint Shader::getShaderObject() const
     {
         return m_shaderObject;

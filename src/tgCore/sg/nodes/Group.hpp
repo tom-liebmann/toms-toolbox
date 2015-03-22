@@ -5,7 +5,10 @@
 #include <memory>
 #include <set>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
@@ -26,9 +29,21 @@ namespace tgCore
                 private:
                     std::set< std::shared_ptr< Node > > m_children;
             };
+        }
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
+        namespace nodes
+        {
             inline void Group::addChild( std::shared_ptr< Node > child )
             {
                 m_children.insert( std::move( child ) );

@@ -5,6 +5,9 @@
 
 #include <memory>
 
+// declarations
+//=============================================================================
+
 namespace tg
 {
     class Monitor
@@ -17,13 +20,19 @@ namespace tg
         private:
             Monitor( GLFWmonitor* monitor );
 
-            GLFWmonitor* m_monitor;
+            GLFWmonitor* m_handle;
     };
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
     inline GLFWmonitor* Monitor::getHandle() const
     {
-        return m_monitor;
+        return m_handle;
     }
 }

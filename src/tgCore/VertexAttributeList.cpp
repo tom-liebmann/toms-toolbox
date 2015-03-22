@@ -2,7 +2,7 @@
 
 #include <tgCore/VertexAttribute.hpp>
 
-using tgCore::VertexAttributeList;
+using tg::VertexAttributeList;
 
 VertexAttributeList::VertexAttributeList( std::initializer_list< VertexAttribute > attributes )
     : m_attributes( attributes.begin(), attributes.end() )

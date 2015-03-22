@@ -1,6 +1,6 @@
 #include "Group.hpp"
 
-using tgCore::sg::nodes::Group;
+using namespace tg::sg::nodes;
 
 void Group::traverseChildren(
     std::function< void ( const Node* ) > callback ) const

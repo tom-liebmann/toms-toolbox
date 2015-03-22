@@ -2,7 +2,10 @@
 
 #include <list>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
@@ -23,9 +26,18 @@ namespace tgCore
                 std::list< const Modifier* > m_modifiers;
                 const LeafNode* m_leafNode;
         };
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
         inline Instance::Instance(
             std::list< const Modifier* > modifiers,
             const LeafNode* leafNode )

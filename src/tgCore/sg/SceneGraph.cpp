@@ -7,7 +7,7 @@
 #include <list>
 #include <algorithm>
 
-using tgCore::sg::SceneGraph;
+using namespace tg::sg;
 
 std::unique_ptr< SceneGraph::State > SceneGraph::traverse()
 {
@@ -91,8 +91,8 @@ void SceneGraph::State::pushInstance(
 namespace
 {
     bool sortInstances(
-        tgCore::sg::Instance* instance1,
-        tgCore::sg::Instance* instance2 )
+        Instance* instance1,
+        Instance* instance2 )
     {
         return std::lexicographical_compare(
             instance1->getModifiers().begin(), instance1->getModifiers().end(),
@@ -100,7 +100,7 @@ namespace
     }
 }
 
-void SceneGraph::State::render( uint32_t pass )
+void SceneGraph::State::render( tg::State& state, uint32_t pass )
 {
     auto iter = m_passes.find( pass );
     if( iter != m_passes.end() )
@@ -135,18 +135,18 @@ void SceneGraph::State::render( uint32_t pass )
                 while( iter != lIter )
                 {
                     --iter;
-                    ( *iter )->end();
+                    ( *iter )->end( state );
                 }
             }
 
             // add new modifiers
             while( cIter != current->getModifiers().end() )
             {
-                ( *cIter )->begin();
+                ( *cIter )->begin( state );
                 ++cIter;
             }
 
-            current->getLeafNode()->render();
+            current->getLeafNode()->render( state );
 
             last = current;
         }
@@ -154,7 +154,7 @@ void SceneGraph::State::render( uint32_t pass )
         if( last )
         {
             for( auto iter = last->getModifiers().rbegin(); iter != last->getModifiers().rend(); ++iter )
-                ( *iter )->end();
+                ( *iter )->end( state );
         }
     }
 }

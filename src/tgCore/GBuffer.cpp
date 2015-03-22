@@ -2,7 +2,7 @@
 
 #include <tgCore/Texture2D.hpp>
 
-using tgCore::GBuffer;
+using namespace tg;
 
 GBuffer::GBuffer()
 {
@@ -25,12 +25,12 @@ uint16_t GBuffer::getHeight() const
     return m_drawBuffers[ 0 ]->getHeight();
 }
 
-const std::shared_ptr< tgCore::Texture2D >& GBuffer::getDrawBuffer( int8_t unit ) const
+const std::shared_ptr< Texture2D >& GBuffer::getDrawBuffer( int8_t unit ) const
 {
     return m_drawBuffers[ unit ];
 }
 
-const std::shared_ptr< tgCore::Texture2D >& GBuffer::getDepthBuffer() const
+const std::shared_ptr< Texture2D >& GBuffer::getDepthBuffer() const
 {
     return m_depthBuffer;
 }

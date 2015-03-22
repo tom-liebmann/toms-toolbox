@@ -1,9 +1,11 @@
 #pragma once
 
-#include <tgCore/EventManager.hpp>
-
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+#include <tgCore/EventManager.hpp>
+#include <tgCore/State.hpp>
+#include <tgCore/WindowMode.hpp>
 
 #include <memory>
 
@@ -12,7 +14,7 @@
 
 namespace tg
 {
-    class Monitor;
+    class State;
 }
 
 
@@ -25,44 +27,36 @@ namespace tg
     class Window
     {
     public:
-        class Mode
-        {
-            public:
-                Mode( uint16_t width, uint16_t height, bool fullscreen );
-
-                uint16_t getWidth() const;
-                uint16_t getHeight() const;
-                bool isFullscreen() const;
-                const std::shared_ptr< Monitor >& getMonitor() const;
-
-            private:
-                uint16_t m_width;
-                uint16_t m_height;
-                bool m_fullscreen;
-                std::shared_ptr< Monitor > m_monitor;
-        };
-
-
-        Window( std::string title, Mode mode );
+        Window( std::string title, WindowMode mode );
 
         ~Window();
 
         void setEventManager( const std::shared_ptr< EventManager >& eventManager );
         std::shared_ptr< EventManager > getEventManager() const;
 
-        const Mode& getMode() const;
+        const WindowMode& getMode() const;
+        State& getState();
+
+        GLFWwindow* getHandle() const;
 
         void update();
 
     private:
+        static void callbackWindowClose( GLFWwindow* window );
+        static void callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods );
+        static void callbackMouseButton( GLFWwindow* window, int button, int action, int mods );
+        static void callbackMouseMove( GLFWwindow* window, double x, double y );
+        static void callbackWindowSize( GLFWwindow* window, int width, int height );
+
         static uint8_t s_windowCount;
 
         std::string m_title;
-        Mode m_mode;
+        WindowMode m_mode;
+        std::unique_ptr< State > m_state;
 
         std::weak_ptr< EventManager > m_eventManager;
 
-        GLFWwindow* m_window;
+        GLFWwindow* m_handle;
     };
 }
 
@@ -83,25 +77,18 @@ namespace tg
         return m_eventManager.lock();
     }
 
-
-
-    inline uint16_t Window::Mode::getWidth() const
+    inline const WindowMode& Window::getMode() const
     {
-        return m_width;
+        return m_mode;
     }
 
-    inline uint16_t Window::Mode::getHeight() const
+    inline State& Window::getState()
     {
-        return m_height;
+        return *m_state;
     }
 
-    inline bool Window::Mode::isFullscreen() const
+    inline GLFWwindow* Window::getHandle() const
     {
-        return m_fullscreen;
-    }
-
-    inline const std::shared_ptr< Monitor >& Window::Mode::getMonitor() const
-    {
-        return m_monitor;
+        return m_handle;
     }
 }

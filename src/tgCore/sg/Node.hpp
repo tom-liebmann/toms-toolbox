@@ -2,7 +2,10 @@
 
 #include <functional>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
@@ -10,17 +13,26 @@ namespace tgCore
 
         class Node
         {
-            public:
-                virtual ~Node();
+        public:
+            virtual ~Node();
 
-                virtual bool isLeaf() const = 0;
+            virtual bool isLeaf() const = 0;
 
-                virtual void traverseModifier(
-                    std::function< void ( const Modifier* ) > callback ) const;
+            virtual void traverseModifier(
+                std::function< void ( const Modifier* ) > callback ) const;
         };
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
         inline Node::~Node()
         { }
 

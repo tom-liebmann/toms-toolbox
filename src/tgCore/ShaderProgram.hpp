@@ -8,16 +8,27 @@
 #include <initializer_list>
 #include <memory>
 
+// forward declarations
+//=============================================================================
+
 namespace tgMath
 {
     class Matrix4f;
 }
 
-namespace tgCore
+namespace tg
 {
     class Shader;
     class VertexAttributeList;
+}
 
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class ShaderProgram
     {
         public:

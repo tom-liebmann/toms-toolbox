@@ -4,7 +4,7 @@
 
 #include <iostream>
 
-using tgCore::Texture2D;
+using namespace tg;
 
 std::unique_ptr< Texture2D > Texture2D::fromPNG( const std::string& filename )
 {

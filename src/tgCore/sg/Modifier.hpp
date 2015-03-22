@@ -1,6 +1,19 @@
 #pragma once
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
+{
+    class State;
+}
+
+
+
+// declarations
+//=============================================================================
+
+namespace tg
 {
     namespace sg
     {
@@ -11,12 +24,21 @@ namespace tgCore
 
                 virtual uint32_t getPriority() const = 0;
 
-                virtual void begin() const = 0;
-                virtual void end() const = 0;
+                virtual void begin( State& state ) const = 0;
+                virtual void end( State& state ) const = 0;
         };
+    }
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    namespace sg
+    {
         inline Modifier::~Modifier()
         { }
     }

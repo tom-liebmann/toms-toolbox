@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstring>
 
-using tgCore::Shader;
+using namespace tg;
 
 std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filename )
 {

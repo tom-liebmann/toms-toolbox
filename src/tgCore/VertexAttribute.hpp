@@ -2,7 +2,10 @@
 
 #include <string>
 
-namespace tgCore
+// declarations
+//=============================================================================
+
+namespace tg
 {
     class VertexAttribute
     {
@@ -21,9 +24,15 @@ namespace tgCore
             GLenum m_type;
             GLint m_size;
     };
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
     inline VertexAttribute::VertexAttribute(
         std::string name,
         GLenum type,

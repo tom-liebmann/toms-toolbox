@@ -2,26 +2,31 @@
 
 #include <tgMath/Matrix4f.hpp>
 #include <tgCore/ShaderProgram.hpp>
+#include <tgCore/Window.hpp>
 
 #include <iostream>
 
-using tgCore::State;
+using namespace tg;
 
-State::State()
-    : m_projectionMatrixSet( false )
+State::State( Window& window )
+    : m_window( window )
+    , m_projectionMatrixSet( false )
+    , m_projectionMatrix( new tgMath::Matrix4f() )
     , m_modelViewMatrixSet( false )
+    , m_windowViewport( new Viewport( 0, 0, m_window.getMode().getWidth(), m_window.getMode().getHeight() ) )
 {
-    m_projectionMatrix = new tgMath::Matrix4f();
-    m_modelViewMatrixStack.push_back( new tgMath::Matrix4f() );
+    m_modelViewMatrixStack.push_back( std::unique_ptr< tgMath::Matrix4f >( new tgMath::Matrix4f() ) );
+
+    glViewport(
+        m_windowViewport->getX(),
+        m_windowViewport->getY(),
+        m_windowViewport->getWidth(),
+        m_windowViewport->getHeight()
+    );
 }
 
 State::~State()
-{
-    delete m_projectionMatrix;
-
-    for( auto& matrix : m_modelViewMatrixStack )
-        delete matrix;
-}
+{ }
 
 void State::setProjectionMatrix( const tgMath::Matrix4f& matrix )
 {
@@ -32,12 +37,13 @@ void State::setProjectionMatrix( const tgMath::Matrix4f& matrix )
 
 void State::pushMatrix()
 {
-    m_modelViewMatrixStack.push_back( new tgMath::Matrix4f( *m_modelViewMatrixStack.back() ) );
+    m_modelViewMatrixStack.push_back( 
+        std::unique_ptr< tgMath::Matrix4f >(
+            new tgMath::Matrix4f( *m_modelViewMatrixStack.back() ) ) );
 }
 
 void State::popMatrix()
 {
-    delete m_modelViewMatrixStack.back();
     m_modelViewMatrixStack.pop_back();
 
     m_modelViewMatrixSet = false;
@@ -58,7 +64,7 @@ void State::applyMatrix( const tgMath::Matrix4f& matrix )
     m_modelViewMatrixSet = false;
 }
 
-void State::pushShader( std::shared_ptr< tgCore::ShaderProgram > shader )
+void State::pushShader( std::shared_ptr< ShaderProgram > shader )
 {
     shader->use();
     m_shaderStack.push_back( std::move( shader ) );
@@ -77,6 +83,61 @@ void State::popShader()
 
     m_projectionMatrixSet = false;
     m_modelViewMatrixSet = false;
+}
+
+void State::pushViewport( Viewport viewport )
+{
+    m_viewportStack.push_back( viewport );
+
+    glViewport(
+        viewport.getX(),
+        viewport.getY(),
+        viewport.getWidth(),
+        viewport.getHeight()
+    );
+}
+
+void State::popViewport()
+{
+    m_viewportStack.pop_back();
+    if( m_viewportStack.empty() )
+    {
+        const auto& viewport = m_viewportStack.back();
+        glViewport(
+            viewport.getX(),
+            viewport.getY(),
+            viewport.getWidth(),
+            viewport.getHeight()
+        );
+    }
+    else
+    {
+        const auto& viewport = *m_windowViewport;
+        glViewport(
+            viewport.getX(),
+            viewport.getY(),
+            viewport.getWidth(),
+            viewport.getHeight()
+        );
+    }
+}
+
+void State::onWindowResize()
+{
+    *m_windowViewport = Viewport(
+        0,
+        0,
+        m_window.getMode().getWidth(),
+        m_window.getMode().getHeight()
+    );
+
+    if( m_viewportStack.empty() )
+        glViewport(
+            m_windowViewport->getX(),
+            m_windowViewport->getY(),
+            m_windowViewport->getWidth(),
+            m_windowViewport->getHeight()
+        );
 }
 
 void State::apply()

@@ -6,7 +6,20 @@
 #include <iostream>
 #include <vector>
 
-namespace tgCore
+// forward declarations
+//=============================================================================
+
+namespace tg
+{
+    class State;
+}
+
+
+
+// declarations
+//=============================================================================
+
+namespace tg
 {
     class VertexBuffer
     {
@@ -21,7 +34,7 @@ namespace tgCore
 
         std::shared_ptr< Access > access();
 
-        void render() const;
+        void render( State& state ) const;
         
     private:
         Access* m_access;
@@ -46,6 +59,8 @@ namespace tgCore
         template< class... T >
         void pushI( GLuint index, T... rest );
 
+        void pushI( GLuint index );
+
         template< class... T >
         GLuint pushV( T... data );
 
@@ -55,8 +70,6 @@ namespace tgCore
 
     private:
         Access( VertexBuffer* vertexBuffer );
-
-        void pushI( GLuint index );
 
         template< class T >
         void pushVRest( T value );
