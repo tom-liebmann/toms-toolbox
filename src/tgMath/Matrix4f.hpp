@@ -57,7 +57,7 @@ namespace tgMath
             float& operator[](uint8_t i) { return m_v[i]; }
 
             float v(uint8_t i) const { return m_v[i]; }
-            float v(uint8_t i, float value) { m_v[i] = value; }
+            void v(uint8_t i, float value) { m_v[i] = value; }
 
             const float* ptr() const { return m_v; }
 

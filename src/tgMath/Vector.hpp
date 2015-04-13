@@ -85,10 +85,7 @@ namespace tgMath
                 return std::sqrt(lengthSq());
             }
 
-            inline double lengthSq() const
-            {
-                return (*this) * (*this);
-            }
+            inline double lengthSq() const;
 
             inline const Vector<Scalar, Size>& operator=(const Vector<Scalar, Size>& vector)
             {
@@ -219,4 +216,14 @@ std::ostream& operator<<(
         stream << vec[i];
     }
     stream << ")";
+}
+
+
+namespace tgMath
+{
+    template<typename Scalar, size_t Size>
+    inline double Vector< Scalar, Size >::lengthSq() const
+    {
+        return (*this) * (*this);
+    }
 }

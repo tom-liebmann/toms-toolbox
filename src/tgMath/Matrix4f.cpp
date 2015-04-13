@@ -112,6 +112,7 @@ const Matrix4f& Matrix4f::operator=(const Matrix4f& mat)
 {
     for(int i = 0; i < 16; ++i)
         m_v[i] = mat[i];
+    return *this;
 }
 
 void Matrix4f::translate(float x, float y, float z)
@@ -185,7 +186,7 @@ Vector< float, 3 > operator*(const Matrix4f& mat, const Vector< float, 3 >& vec)
 
 std::ostream& operator<<(std::ostream& stream, const Matrix4f& matrix)
 {
-    stream
+    return stream
     << "/"  << matrix[0]  << ", " << matrix[1]  << ", " << matrix[2]  << ", " << matrix[3]  << "\\" << std::endl
     << "|"  << matrix[4]  << ", " << matrix[5]  << ", " << matrix[6]  << ", " << matrix[7]  << "|"  << std::endl
     << "|"  << matrix[8]  << ", " << matrix[9]  << ", " << matrix[10] << ", " << matrix[11] << "|"  << std::endl

@@ -22,9 +22,9 @@ namespace tg
     public:
         constexpr Type( uint32_t value );
 
-        constexpr bool operator<( const Type& type );
-        constexpr bool operator==( const Type& type );
-        constexpr operator uint32_t();
+        constexpr bool operator<( const Type& type ) const;
+        constexpr bool operator==( const Type& type ) const;
+        constexpr operator uint32_t() const;
 
     private:
         uint32_t m_value;
@@ -46,17 +46,17 @@ namespace tg
         : m_value( value )
     { }
 
-    inline constexpr bool Event::Type::operator<( const Type& type )
+    inline constexpr bool Event::Type::operator<( const Type& type ) const
     {
         return m_value < type.m_value;
     }
 
-    inline constexpr bool Event::Type::operator==( const Type& type )
+    inline constexpr bool Event::Type::operator==( const Type& type ) const
     {
         return m_value == type.m_value;
     }
 
-    inline constexpr Event::Type::operator uint32_t()
+    inline constexpr Event::Type::operator uint32_t() const
     {
         return m_value;
     }
