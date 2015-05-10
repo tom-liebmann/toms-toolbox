@@ -29,6 +29,12 @@ namespace tg
 
         ~Texture2D();
 
+        void setData(
+            GLint internalFormat,
+            GLenum format,
+            GLenum type,
+            const uint8_t* data );
+
         void setMinMagFilter( GLint minFilter, GLint magFilter );
         void setDepthTextureMode( GLint mode );
         void setTextureCompareMode( GLint mode );
