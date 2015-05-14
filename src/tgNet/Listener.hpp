@@ -9,29 +9,26 @@
 namespace tgNet
 {
     class TCPSocket;
+}
 
+namespace tgNet
+{
     class Listener
     {
         public:
-            enum class Error
-            {
-                CREATE,
-                BIND,
-                LISTEN,
-                ACCEPT
-            };
+            #ifdef WIN32
+                using Handle = SOCKET;
+            #else
+                using Handle = int;
+            #endif
 
-            Listener( int port );
+            Listener( uint16_t port );
 
             ~Listener();
 
             std::unique_ptr< TCPSocket > accept();
 
         private:
-            #ifdef WIN32
-                SOCKET m_socket;
-            #else
-                int m_socket;
-            #endif
+            Handle m_handle;
     };
 }

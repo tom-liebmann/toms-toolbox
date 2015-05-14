@@ -8,64 +8,63 @@
     #include <winsock2.h>
 #endif
 
+
 namespace tgNet
 {
     class TCPSocket
         : public SocketContainer
     {
         public:
+            #ifdef WIN32
+                using Handle = SOCKET;
+            #else
+                using Handle = int;
+            #endif
+
             enum class Error
             {
                 CREATE,
                 CLOSED,
                 BROKEN,
+                RESOLVE,
                 CONNECT
             };
 
-            TCPSocket( const std::string& address, int port );
+            // Construction
+            TCPSocket( const std::string& address, uint16_t port );
+
+            TCPSocket( Handle handle );
+
             ~TCPSocket();
+
+
+            // Getter
+            Handle getHandle() const;
+
+
+            // Misc
+            int32_t send( const uint8_t* data, int32_t size ) const;
+            int32_t receive( uint8_t* data, int32_t size ) const;
 
             // SocketContainer
             virtual const TCPSocket* getSocket() const override;
 
-            int32_t send( const uint8_t* data, int32_t size ) const;
-            int32_t receive( uint8_t* data, int32_t size ) const;
-
-            friend class Listener;
-
-        #ifdef WIN32
-            public:
-                SOCKET getHandle() const;
-
-            private:
-               TCPSocket( const SOCKET& socket );
-                SOCKET m_socket;
-        #else
-            public:
-                int getHandle() const;
-
-            private:
-                TCPSocket( int socket );
-                int m_socket;
-        #endif
+        private:
+            Handle m_handle;
     };
+}
 
 
 
+namespace tgNet
+{
     inline const TCPSocket* TCPSocket::getSocket() const
     {
         return this;
     }
 
-    #ifdef WIN32
-        inline SOCKET TCPSocket::getHandle() const
-        {
-            return m_socket;
-        }
-    #else
-        inline int TCPSocket::getHandle() const
-        {
-            return m_socket;
-        }
-    #endif
+    inline TCPSocket::Handle TCPSocket::getHandle() const
+    {
+        return m_handle;
+    }
 }

@@ -27,7 +27,7 @@ PacketSelector::PacketSelector()
     #ifdef WIN32
 
         m_notifyEvent = WSACreateEvent();
-        m_events.assing( { m_notifyEvent } );
+        m_events = std::vector< WSAEVENT >( { m_notifyEvent } );
 
     #else
 
@@ -229,7 +229,7 @@ void PacketSelector::insertManagedSocket( std::shared_ptr< SocketContainer > con
             m_eventHandles.resize( index + 1 );
 
         m_eventHandles[ index ] = WSACreateEvent();
-        WSAEventSelect( container->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
+        WSAEventSelect( container->getSocket()->getHandle(), m_eventHandles[ index ], FD_READ | FD_CLOSE );
 
     #else
 
@@ -260,7 +260,7 @@ void PacketSelector::removeManagedSocket( const std::shared_ptr< SocketContainer
 
         #ifdef WIN32
 
-            WSACloseEvent( m_eventHandle[ index ] );
+            WSACloseEvent( m_eventHandles[ index ] );
 
         #else
 
@@ -294,7 +294,7 @@ void PacketSelector::pollEvents( bool& interrupted )
             size_t index = m_eventIds[ res - WSA_WAIT_EVENT_0 ];
 
             WSAResetEvent( event );
-            WSAEventSelect( m_managesSockets[ index ]->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
+            WSAEventSelect( m_managedSockets[ index ]->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
 
             handleEvent( index );
         }
