@@ -3,6 +3,68 @@
 #include <cmath>
 #include <cstdlib>
 #include <ostream>
+#include <array>
+
+//namespace tg
+//{
+//    template< typename T, size_t D >
+//    class Vector
+//    {
+//    public:
+//        // Construction
+//        template< typename... K >
+//        Vector( K&&... values );
+//
+//        Vector( std::initializer_list< T > values );
+//
+//        // Access
+//        T& operator[]( size_t index );
+//        const T& operator[]( size_t index ) const;
+//
+//        T& x();
+//        T& y();
+//        T& z();
+//
+//        const T& x() const;
+//        const T& y() const;
+//        const T& z() const;
+//
+//    private:
+//        std::array< T, D > m_values;
+//    };
+//
+//
+//
+//    // Norm of a vector.
+//    template< typename T, size_t D >
+//    T norm( const Vector< T, D >& vector );
+//
+//    // Squared norm of a vector.
+//    template< typename T, size_t D >
+//    T norm2( const Vector< T, D >& vector );
+//
+//    // Sum of two vectors.
+//    template< typename T1, typename T2, size_t D >
+//    Vector< decltype( T1() + T2() ), D > operator+( const Vector< T1, D >& lhs, const Vector< T2, D >& rhs );
+//
+//    // Subtraction of two vectors.
+//    template< typename T1, typename T2, size_t D >
+//    Vector< decltype( T1() + T2() ), D > operator-( const Vector< T1, D >& lhs, const Vector< T2, D >& rhs );
+//
+//    // Dot product of two vectors.
+//    template< typename T1, typename T2, size_t D >
+//    decltype( T1() * T2() ) operator*( const Vector< T1, D >& lhs, const Vector< T2, D >& rhs );
+//
+//    // Product of vector with scalar.
+//    template< typename T, size_t D, typename S >
+//    Vector< decltype( T() * S() ), D > operator*( const S& lhs, const Vector< T, D >& rhs );
+//
+//    // Product of vector with scalar.
+//    template< typename T, size_t D, typename S >
+//    Vector< decltype( T() * S() ), D > operator*( const Vector< T, D >& lhs, const S& rhs );
+//}
+
+
 
 namespace tgMath
 {
