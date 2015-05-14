@@ -97,6 +97,26 @@ Texture2D::~Texture2D()
     glDeleteTextures( 1, &m_textureObject );
 }
 
+void Texture2D::setData(
+    GLint internalFormat,
+    GLenum format,
+    GLenum type,
+    const uint8_t* data )
+{
+    glBindTexture( GL_TEXTURE_2D, m_textureObject );
+
+    glTexSubImage2D(
+        GL_TEXTURE_2D,
+        0,
+        0,
+        0,
+        m_width,
+        m_height,
+        format,
+        type,
+        data );
+}
+
 void Texture2D::setMinMagFilter( GLint minFilter, GLint magFilter )
 {
     glBindTexture( GL_TEXTURE_2D, m_textureObject ); 
