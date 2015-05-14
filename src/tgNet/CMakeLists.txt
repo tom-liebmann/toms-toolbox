@@ -2,16 +2,6 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
 PROJECT( tgNet )
 
-# platform dependend stuff
-
-IF( WIN32 )
-    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows" )
-    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32" )
-ENDIF()
-
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
-SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Bstatic -static-libgcc -static-libstdc++" )
-
 # find source files
 FILE(
     GLOB_RECURSE
