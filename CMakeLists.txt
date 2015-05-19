@@ -42,7 +42,7 @@ ENDFUNCTION( ADD_SUBLIBRARY )
 SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
 # All sublibraries to build
-SET( SUBLIBRARIES "tgCore" "tgMath" "tgNet" )
+SET( SUBLIBRARIES "tgCore" "tgMath" "tgNet" "tgTools" )
 
 # Copy header files of sublibraries into a single include directory.
 FOREACH( SUBLIBRARY ${SUBLIBRARIES} )

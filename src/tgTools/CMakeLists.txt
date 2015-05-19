@@ -1,0 +1,16 @@
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
+
+PROJECT( tgTools )
+
+# find source files
+FILE(
+    GLOB_RECURSE
+    SOURCE_FILES
+    ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.cpp
+)
+
+# create executable
+INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_SOURCE_DIR}/.." )
+
+ADD_LIBRARY( tgTools STATIC ${SOURCE_FILES} )
