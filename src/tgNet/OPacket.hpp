@@ -2,6 +2,9 @@
 
 #include <string>
 
+// declarations
+//=============================================================================
+
 namespace tgNet
 {
     class TCPSocket;
@@ -28,8 +31,17 @@ namespace tgNet
             uint32_t m_cap;
     };
 
+    template< typename T >
+    OPacket& operator<<( OPacket& packet, const T& value );
+}
 
 
+
+// definitions
+//=============================================================================
+
+namespace tgNet
+{
     template< typename T >
     void OPacket::write( const T& value )
     {
@@ -38,4 +50,10 @@ namespace tgNet
 
     template<>
     void OPacket::write< std::string >( const std::string& value );
+
+    template< typename T >
+    inline OPacket& operator<<( OPacket& packet, const T& value )
+    {
+        packet.write< T >( value );
+    }
 }

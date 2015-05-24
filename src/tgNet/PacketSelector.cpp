@@ -36,9 +36,9 @@ PacketSelector::PacketSelector()
             throw std::runtime_error( "Unable to initialize epoll." );
 
         // init interruption pipe
-        struct epoll_event event;
+        epoll_event event;
         event.events = EPOLLIN;
-        event.data.ptr = NULL;
+        event.data.fd = -1;
         pipe( m_pipe );
         if( epoll_ctl( m_epoll, EPOLL_CTL_ADD, m_pipe[ 0 ], &event ) == -1 )
             throw std::runtime_error( "Unable to initialize interruption pipe." );
@@ -302,6 +302,7 @@ void PacketSelector::pollEvents( bool& interrupted )
     #else
 
         int numEvents = epoll_wait( m_epoll, m_events.data(), 64, -1 );
+
         if( numEvents == -1 )
         {
             if( errno != EINTR )
@@ -313,7 +314,7 @@ void PacketSelector::pollEvents( bool& interrupted )
 
             for( size_t i = 0; i < numEvents; ++i )
             {
-                if( m_events[ i ].data.ptr == NULL ) // event on the pipe happened
+                if( m_events[ i ].data.fd == -1 ) // event on the pipe happened
                 {
                     // empty the pipe
                     // do I really need locking here?

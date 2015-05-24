@@ -9,17 +9,12 @@ using namespace tgNet;
 std::unique_ptr< IPacket > IPacket::fromTCPSocket( const TCPSocket& socket )
 {
     uint32_t size;
-
-    uint32_t done = 0;
-    while( done < sizeof( uint32_t ) )
-        done += socket.receive( reinterpret_cast< uint8_t* >( &size + done ), sizeof( uint32_t ) - done );
+    socket.receive( &size, sizeof( uint32_t ) );
 
     uint8_t* buffer = static_cast< uint8_t* >( operator new( size ) );
-    done = 0;
     try
     {
-        while( done < size )
-            done += socket.receive( buffer + done, size - done );
+        socket.receive( buffer, size );
     }
     catch( TCPSocket::Error& e )
     {

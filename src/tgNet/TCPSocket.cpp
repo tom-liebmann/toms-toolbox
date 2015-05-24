@@ -122,77 +122,85 @@ TCPSocket::~TCPSocket()
     #endif
 }
 
-int32_t TCPSocket::send( const uint8_t* data, int32_t size ) const
+void TCPSocket::send( const void* data, size_t size ) const
 {
-    #ifdef WIN32
+    size_t offset = 0;
+    while( offset < size )
+    {
+        #ifdef WIN32
 
-        int ret = ::send( m_handle, reinterpret_cast< const char* >( data ), size, 0 );
-
-        if( ret == SOCKET_ERROR )
-            throw Error::BROKEN;
-
-        return ret;
-
-    #else
-
-        int ret = ::send( m_handle, reinterpret_cast< const char* >( data ), size, MSG_NOSIGNAL );
-
-        if( ret == -1 )
-            throw Error::BROKEN;
-
-        return ret;
-
-    #endif
-}
-
-int32_t TCPSocket::receive( uint8_t* data, int32_t size ) const
-{
-    #ifdef WIN32
-
-        while( true )
-        {
-            int ret = recv( m_handle, reinterpret_cast< char* >( data ), size, 0 );
+            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, 0 );
 
             if( ret == SOCKET_ERROR )
-            {
-                int errorNum = WSAGetLastError();
-                switch( errorNum )
-                {
-                    case WSAEWOULDBLOCK:
-                        break;
-                    case WSAECONNRESET:
-                        throw Error::CLOSED;
-                    default:
-                        throw Error::BROKEN;
-                }
-            }
-            else if( ret == 0 )
-                throw Error::CLOSED;
-            else
-                return ret;
-        }
+                throw Error::BROKEN;
 
-    #else
+        #else
+
+            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, MSG_NOSIGNAL );
+
+            if( ret == -1 )
+                throw Error::BROKEN;
+
+        #endif
+
+        offset += ret;
+    }
+}
+
+void TCPSocket::receive( void* data, size_t size ) const
+{
+    size_t offset = 0;
+
+    while( offset < size )
+    {
+        int ret;
 
         while( true )
         {
-            int ret = recv( m_handle, reinterpret_cast< char* >( data ), size, 0 );
+            #ifdef WIN32
 
-            if( ret > 0 )
-                return ret;
-            else if( ret == 0 )
-                throw Error::CLOSED;
-            else
-            {
-                switch( errno )
+                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+
+                if( ret == SOCKET_ERROR )
                 {
-                    case EAGAIN:
-                        break;
-                    default:
-                        throw Error::BROKEN;
+                    int errorNum = WSAGetLastError();
+                    switch( errorNum )
+                    {
+                        case WSAEWOULDBLOCK:
+                            break;
+                        case WSAECONNRESET:
+                            throw Error::CLOSED;
+                        default:
+                            throw Error::BROKEN;
+                    }
                 }
-            }
+                else if( ret == 0 )
+                    throw Error::CLOSED;
+                else
+                    break;
+
+            #else
+
+                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+
+                if( ret > 0 )
+                    break;
+                else if( ret == 0 )
+                    throw Error::CLOSED;
+                else
+                {
+                    switch( errno )
+                    {
+                        case EAGAIN:
+                            break;
+                        default:
+                            throw Error::BROKEN;
+                    }
+                }
+
+            #endif
         }
 
-    #endif
+        offset += ret;
+    }
 }

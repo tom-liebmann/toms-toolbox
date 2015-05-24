@@ -28,17 +28,11 @@ void OPacket::write< std::string >( const std::string& value )
 
 void OPacket::send( const TCPSocket* socket ) const
 {
-    { // send packet length
-        uint32_t done = 0;
-        while( done < sizeof( uint32_t ) )
-            done += socket->send( reinterpret_cast< const uint8_t* >( &m_size + done ), sizeof( uint32_t ) - done );
-    }
+    // send packet length
+    socket->send( &m_size, sizeof( uint32_t ) );
 
-    { // send packet data
-        uint32_t done = 0;
-        while( done < m_size )
-            done += socket->send( m_buffer + done, m_size - done );
-    }
+    // send packet data
+    socket->send( m_buffer, m_size );
 }
 
 void OPacket::append( const uint8_t* data, uint32_t size )

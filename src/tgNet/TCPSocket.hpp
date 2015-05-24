@@ -43,8 +43,8 @@ namespace tgNet
 
 
             // Misc
-            int32_t send( const uint8_t* data, int32_t size ) const;
-            int32_t receive( uint8_t* data, int32_t size ) const;
+            void send( const void* data, size_t size ) const;
+            void receive( void* data, size_t size ) const;
 
             // SocketContainer
             virtual const TCPSocket* getSocket() const override;
