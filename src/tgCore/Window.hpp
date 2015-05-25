@@ -67,11 +67,6 @@ namespace tg
 
 namespace tg
 {
-    inline void Window::setEventManager( const std::shared_ptr< EventManager >& eventManager )
-    {
-        m_eventManager = eventManager;
-    }
-
     inline std::shared_ptr< EventManager > Window::getEventManager() const
     {
         return m_eventManager.lock();

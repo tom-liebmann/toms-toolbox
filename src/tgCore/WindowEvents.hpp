@@ -111,15 +111,15 @@ namespace tg
             : public Event
         {
         public:
-            WindowClose( const Window& window );
+            WindowClose( Window& window );
 
-            const Window& getWindow() const;
+            Window& getWindow();
 
             // Event
             virtual Type getType() const override;
 
         private:
-            const Window& m_window;
+            Window& m_window;
         };
 
 
@@ -128,15 +128,15 @@ namespace tg
             : public Event
         {
         public:
-            WindowResize( const Window& window );
+            WindowResize( Window& window );
 
-            const Window& getWindow() const;
+            Window& getWindow();
 
             // Event
             virtual Type getType() const override;
 
         private:
-            const Window& m_window;
+            Window& m_window;
         };
     }
 }
@@ -228,11 +228,11 @@ namespace tg
 
 
 
-        inline WindowClose::WindowClose( const Window& window )
+        inline WindowClose::WindowClose( Window& window )
             : m_window( window )
         { }
 
-        inline const Window& WindowClose::getWindow() const
+        inline Window& WindowClose::getWindow()
         {
             return m_window;
         }
@@ -244,11 +244,11 @@ namespace tg
 
 
 
-        inline WindowResize::WindowResize( const Window& window )
+        inline WindowResize::WindowResize( Window& window )
             : m_window( window )
         { }
 
-        inline const Window& WindowResize::getWindow() const
+        inline Window& WindowResize::getWindow()
         {
             return m_window;
         }

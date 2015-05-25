@@ -157,3 +157,15 @@ void Window::update()
     glfwSwapBuffers( m_handle );
     glfwPollEvents();
 }
+
+void Window::setEventManager( const std::shared_ptr< EventManager >& eventManager )
+{
+    m_eventManager = eventManager;
+
+    if( eventManager )
+        eventManager->pushEvent(
+            std::unique_ptr< tg::Event >(
+                new tg::events::WindowResize( *this )
+            )
+        );
+}
