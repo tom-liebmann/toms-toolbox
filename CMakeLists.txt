@@ -2,6 +2,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
 PROJECT( tengom )
 
+
 FUNCTION( COPY_HEADER SOURCE DESTINATION )
     FILE(
         GLOB
@@ -28,29 +29,9 @@ FUNCTION( COPY_HEADER SOURCE DESTINATION )
     ENDFOREACH()
 ENDFUNCTION( COPY_HEADER )
 
-FUNCTION( ADD_SUBLIBRARY LIB_NAME )
-    # build library
-    ADD_SUBDIRECTORY( ${LIB_NAME} )
 
-    # copy header files
-    COPY_HEADER(
-        ${CMAKE_CURRENT_SOURCE_DIR}/${LIB_NAME}
-        ${CMAKE_CURRENT_BINARY_DIR}/include
-    )
-ENDFUNCTION( ADD_SUBLIBRARY )
 
 SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-
-# All sublibraries to build
-SET( SUBLIBRARIES "tgCore" "tgMath" "tgNet" "tgTools" )
-
-# Copy header files of sublibraries into a single include directory.
-FOREACH( SUBLIBRARY ${SUBLIBRARIES} )
-    COPY_HEADER(
-        "${CMAKE_CURRENT_SOURCE_DIR}/src/${SUBLIBRARY}"
-        "${CMAKE_CURRENT_BINARY_DIR}/include/${SUBLIBRARY}"
-    )
-ENDFOREACH()
 
 # Set compilation flags used by all libraries.
 SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
@@ -59,10 +40,25 @@ IF( WIN32 )
     SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32" )
 ENDIF()
 
-# Add sublibraries.
-FOREACH( SUBLIBRARY ${SUBLIBRARIES} )
-    ADD_SUBDIRECTORY( "src/${SUBLIBRARY}" )
+
+
+FILE(
+    GLOB
+    SUBDIRECTORIES
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*"
+)
+
+FOREACH( SUBDIRECTORY ${SUBDIRECTORIES} )
+    ADD_SUBDIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/src/${SUBDIRECTORY}" )
+
+    COPY_HEADER(
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/${SUBDIRECTORY}"
+        "${CMAKE_CURRENT_BINARY_DIR}/include/tg/${SUBDIRECTORY}"
+    )
 ENDFOREACH()
+
+
 
 # Export build tree to Targets.cmake file.
 SET( CONF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include" )
