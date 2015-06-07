@@ -1,12 +1,10 @@
 #include "Monitor.hpp"
 
-using tg::Monitor;
-
-std::shared_ptr< Monitor > Monitor::fromPrimary()
+std::shared_ptr< tg::Monitor > tg::Monitor::fromPrimary()
 {
     return std::shared_ptr< Monitor >( new Monitor( glfwGetPrimaryMonitor() ) );
 }
 
-Monitor::Monitor( GLFWmonitor* handle )
+tg::Monitor::Monitor( GLFWmonitor* handle )
     : m_handle( handle )
 { }

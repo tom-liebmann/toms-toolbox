@@ -2,38 +2,25 @@
 
 #include <mutex>
 
-using namespace tgNet;
-
-#ifdef WIN32
-
+namespace tg
+{
     void Socket::init()
     {
-        const int vers = 2;
-        WSADATA wsaData;
-        auto succ = WSAStartup( MAKEWORD( vers, 0 ), &wsaData );
-/*
-        if( !succ )
-            logger( tg::Logger::Mode::ERROR ) << "Unable to initialize Winsock." << std::endl;
-*/
+        #ifdef WIN32
+
+            const int vers = 2;
+            WSADATA wsaData;
+            auto succ = WSAStartup( MAKEWORD( vers, 0 ), &wsaData );
+
+        #endif
     }
 
     void Socket::destroy()
     {
-        WSACleanup();
-/*
-        if( WSACleanup() )
-            logger( tg::Logger::Mode::ERROR ) << "Unable to destroy Winsock." << std::endl;
-*/
+        #ifdef WIN32
+
+            WSACleanup();
+
+        #endif
     }
-
-#else
-
-    #include <string.h>
-
-    void Socket::init()
-    { }
-
-    void Socket::destroy()
-    { }
-
-#endif
+}

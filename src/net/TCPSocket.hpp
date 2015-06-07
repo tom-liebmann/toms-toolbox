@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tgNet/SocketContainer.hpp>
+#include <net/SocketContainer.hpp>
 
 #include <string>
 
@@ -9,7 +9,11 @@
 #endif
 
 
-namespace tgNet
+
+// declarations
+//=============================================================================
+
+namespace tg
 {
     class TCPSocket
         : public SocketContainer
@@ -56,7 +60,10 @@ namespace tgNet
 
 
 
-namespace tgNet
+// definitions
+//=============================================================================
+
+namespace tg
 {
     inline const TCPSocket* TCPSocket::getSocket() const
     {

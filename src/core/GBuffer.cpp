@@ -1,41 +1,41 @@
 #include "GBuffer.hpp"
 
-#include <tgCore/Texture2D.hpp>
+#include <core/Texture2D.hpp>
 
 using namespace tg;
 
-GBuffer::GBuffer()
+tg::GBuffer::GBuffer()
 {
     glGenFramebuffers( 1, &m_frameBufferObject );
 }
 
-GBuffer::~GBuffer()
+tg::GBuffer::~GBuffer()
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
     glDeleteFramebuffers( 1, &m_frameBufferObject );
 }
 
-uint16_t GBuffer::getWidth() const
+uint16_t tg::GBuffer::getWidth() const
 {
     return m_drawBuffers[ 0 ]->getWidth();
 }
 
-uint16_t GBuffer::getHeight() const
+uint16_t tg::GBuffer::getHeight() const
 {
     return m_drawBuffers[ 0 ]->getHeight();
 }
 
-const std::shared_ptr< Texture2D >& GBuffer::getDrawBuffer( int8_t unit ) const
+const std::shared_ptr< Texture2D >& tg::GBuffer::getDrawBuffer( int8_t unit ) const
 {
     return m_drawBuffers[ unit ];
 }
 
-const std::shared_ptr< Texture2D >& GBuffer::getDepthBuffer() const
+const std::shared_ptr< Texture2D >& tg::GBuffer::getDepthBuffer() const
 {
     return m_depthBuffer;
 }
 
-void GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer )
+void tg::GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer )
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
 
@@ -58,7 +58,7 @@ void GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer )
     m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
 }
 
-void GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
+void tg::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
 
@@ -74,7 +74,7 @@ void GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
     m_depthBuffer = std::move( buffer );
 }
 
-void GBuffer::begin() const
+void tg::GBuffer::begin() const
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
 
@@ -86,7 +86,7 @@ void GBuffer::begin() const
 //    graphState().pushViewport( 0, 0, m_width, m_height );
 }
 
-void GBuffer::end() const
+void tg::GBuffer::end() const
 {
 //    graphState().popViewport();
 

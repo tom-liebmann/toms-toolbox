@@ -3,7 +3,7 @@
 #include <list>
 #include <memory>
 
-namespace tgCore
+namespace core
 {
     template< class T >
     class SlotList
@@ -32,9 +32,12 @@ namespace tgCore
         private:
             mutable std::list< Slot* > m_slots;
     };
+}
 
 
 
+namespace tg
+{
     template< class T >
     SlotList< T >::~SlotList()
     {

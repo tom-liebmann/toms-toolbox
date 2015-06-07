@@ -1,8 +1,8 @@
 #include "SceneGraph.hpp"
 
-#include <tgCore/sg/Instance.hpp>
-#include <tgCore/sg/LeafNode.hpp>
-#include <tgCore/sg/Modifier.hpp>
+#include <core/sg/Instance.hpp>
+#include <core/sg/LeafNode.hpp>
+#include <core/sg/Modifier.hpp>
 
 #include <list>
 #include <algorithm>

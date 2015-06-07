@@ -1,6 +1,6 @@
 #include "TCPSocket.hpp"
 
-#include <tgNet/Socket.hpp>
+#include <net/Socket.hpp>
 
 #include <iostream>
 
@@ -14,8 +14,6 @@
     #include <unistd.h>
 
 #endif
-
-using namespace tgNet;
 
 namespace
 {
@@ -62,145 +60,148 @@ namespace
 
 
 
-TCPSocket::TCPSocket( const std::string& address, uint16_t port )
+namespace tg
 {
-    #ifdef WIN32
-
-        // Create socket.
-        m_handle = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
-
-        if( m_handle == INVALID_SOCKET )
-        {
-            auto error = WSAGetLastError();
-            throw std::runtime_error( "Unable to create socket. (" + std::to_string( error ) + ")" );
-        }
-
-        // Connect to remote.
-        auto sockAddr = createAddress( address, port );
-
-        if( connect( m_handle, reinterpret_cast< sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
-        {
-            auto error = WSAGetLastError();
-            closesocket( m_handle );
-            throw std::runtime_error( "Unable to connect to remote host. (" + std::to_string( error ) + ")" );
-        }
-
-    #else
-
-        // create socket
-        m_handle = ::socket( AF_INET, SOCK_STREAM, 0 );
-
-        if( m_handle == -1 )
-            throw std::runtime_error( "Unable to create socket." );
-
-        sockaddr_in sockAddr = createAddress( address, port );
-        if( connect( m_handle, reinterpret_cast< struct sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
-        {
-            close( m_handle );
-            throw std::runtime_error( "Unable to connect to remote host." );
-        }
-
-    #endif
-}
-
-TCPSocket::TCPSocket( Handle handle )
-    : m_handle( handle )
-{ }
-
-TCPSocket::~TCPSocket()
-{
-    #ifdef WIN32
-    
-        shutdown( m_handle, SD_SEND );
-        closesocket( m_handle );
-
-    #else
-
-        shutdown( m_handle, 0 );
-        close( m_handle );
-
-    #endif
-}
-
-void TCPSocket::send( const void* data, size_t size ) const
-{
-    size_t offset = 0;
-    while( offset < size )
+    TCPSocket::TCPSocket( const std::string& address, uint16_t port )
     {
         #ifdef WIN32
 
-            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, 0 );
+            // Create socket.
+            m_handle = ::socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
 
-            if( ret == SOCKET_ERROR )
-                throw Error::BROKEN;
+            if( m_handle == INVALID_SOCKET )
+            {
+                auto error = WSAGetLastError();
+                throw std::runtime_error( "Unable to create socket. (" + std::to_string( error ) + ")" );
+            }
+
+            // Connect to remote.
+            auto sockAddr = createAddress( address, port );
+
+            if( connect( m_handle, reinterpret_cast< sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
+            {
+                auto error = WSAGetLastError();
+                closesocket( m_handle );
+                throw std::runtime_error( "Unable to connect to remote host. (" + std::to_string( error ) + ")" );
+            }
 
         #else
 
-            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, MSG_NOSIGNAL );
+            // create socket
+            m_handle = ::socket( AF_INET, SOCK_STREAM, 0 );
 
-            if( ret == -1 )
-                throw Error::BROKEN;
+            if( m_handle == -1 )
+                throw std::runtime_error( "Unable to create socket." );
+
+            sockaddr_in sockAddr = createAddress( address, port );
+            if( connect( m_handle, reinterpret_cast< struct sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
+            {
+                close( m_handle );
+                throw std::runtime_error( "Unable to connect to remote host." );
+            }
 
         #endif
-
-        offset += ret;
     }
-}
 
-void TCPSocket::receive( void* data, size_t size ) const
-{
-    size_t offset = 0;
+    TCPSocket::TCPSocket( Handle handle )
+        : m_handle( handle )
+    { }
 
-    while( offset < size )
+    TCPSocket::~TCPSocket()
     {
-        int ret;
+        #ifdef WIN32
+        
+            shutdown( m_handle, SD_SEND );
+            closesocket( m_handle );
 
-        while( true )
+        #else
+
+            shutdown( m_handle, 0 );
+            close( m_handle );
+
+        #endif
+    }
+
+    void TCPSocket::send( const void* data, size_t size ) const
+    {
+        size_t offset = 0;
+        while( offset < size )
         {
             #ifdef WIN32
 
-                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+                auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, 0 );
 
                 if( ret == SOCKET_ERROR )
-                {
-                    int errorNum = WSAGetLastError();
-                    switch( errorNum )
-                    {
-                        case WSAEWOULDBLOCK:
-                            break;
-                        case WSAECONNRESET:
-                            throw Error::CLOSED;
-                        default:
-                            throw Error::BROKEN;
-                    }
-                }
-                else if( ret == 0 )
-                    throw Error::CLOSED;
-                else
-                    break;
+                    throw Error::BROKEN;
 
             #else
 
-                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+                auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, MSG_NOSIGNAL );
 
-                if( ret > 0 )
-                    break;
-                else if( ret == 0 )
-                    throw Error::CLOSED;
-                else
-                {
-                    switch( errno )
-                    {
-                        case EAGAIN:
-                            break;
-                        default:
-                            throw Error::BROKEN;
-                    }
-                }
+                if( ret == -1 )
+                    throw Error::BROKEN;
 
             #endif
-        }
 
-        offset += ret;
+            offset += ret;
+        }
+    }
+
+    void TCPSocket::receive( void* data, size_t size ) const
+    {
+        size_t offset = 0;
+
+        while( offset < size )
+        {
+            int ret;
+
+            while( true )
+            {
+                #ifdef WIN32
+
+                    ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+
+                    if( ret == SOCKET_ERROR )
+                    {
+                        int errorNum = WSAGetLastError();
+                        switch( errorNum )
+                        {
+                            case WSAEWOULDBLOCK:
+                                break;
+                            case WSAECONNRESET:
+                                throw Error::CLOSED;
+                            default:
+                                throw Error::BROKEN;
+                        }
+                    }
+                    else if( ret == 0 )
+                        throw Error::CLOSED;
+                    else
+                        break;
+
+                #else
+
+                    ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+
+                    if( ret > 0 )
+                        break;
+                    else if( ret == 0 )
+                        throw Error::CLOSED;
+                    else
+                    {
+                        switch( errno )
+                        {
+                            case EAGAIN:
+                                break;
+                            default:
+                                throw Error::BROKEN;
+                        }
+                    }
+
+                #endif
+            }
+
+            offset += ret;
+        }
     }
 }

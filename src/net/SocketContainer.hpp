@@ -1,11 +1,24 @@
 #pragma once
 
-#include <tgNet/PacketSelector.hpp>
+#include <net/PacketSelector.hpp>
 
-namespace tgNet
+
+
+// forward declarations
+//=============================================================================
+
+namespace tg
 {
     class TCPSocket;
+}
 
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class SocketContainer
     {
         public:

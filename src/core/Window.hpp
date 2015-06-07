@@ -3,9 +3,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include <tgCore/EventManager.hpp>
-#include <tgCore/State.hpp>
-#include <tgCore/WindowMode.hpp>
+#include <core/EventManager.hpp>
+#include <core/State.hpp>
+#include <core/WindowMode.hpp>
 
 #include <memory>
 

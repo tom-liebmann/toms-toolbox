@@ -6,8 +6,8 @@
     #include <sys/epoll.h>
 #endif
 
-#include <tgCore/EventManager.hpp>
-#include <tgNet/IPacket.hpp>
+#include <core/EventManager.hpp>
+#include <net/IPacket.hpp>
 
 #include <functional>
 #include <vector>
@@ -16,10 +16,23 @@
 #include <list>
 #include <atomic>
 
-namespace tgNet
+
+
+// forward declarations
+//=============================================================================
+
+namespace tg
 {
     class SocketContainer;
+}
 
+
+
+// declarations
+//=============================================================================
+
+namespace tg
+{
     class PacketSelector
     {
         public:
@@ -110,14 +123,6 @@ namespace tgNet
 
 
 
-
-
-
-    inline PacketSelector::Event::~Event()
-    { }
-
-
-
     class PacketEvent
         : public PacketSelector::Event
     {
@@ -136,6 +141,8 @@ namespace tgNet
             std::weak_ptr< SocketContainer > m_source;
             std::unique_ptr< IPacket > m_packet;
     };
+
+
 
     class DisconnectEvent
         : public PacketSelector::Event
@@ -159,6 +166,17 @@ namespace tgNet
             std::weak_ptr< SocketContainer > m_source;
             Reason m_reason;
     };
+}
+
+
+
+// definitions
+//=============================================================================
+
+namespace tg
+{
+    inline PacketSelector::Event::~Event()
+    { }
 
 
 

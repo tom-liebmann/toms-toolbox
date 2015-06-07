@@ -6,12 +6,12 @@
 
 #include <memory>
 
-namespace tgNet
+namespace tg
 {
     class TCPSocket;
 }
 
-namespace tgNet
+namespace tg
 {
     class Listener
     {

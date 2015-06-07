@@ -1,15 +1,13 @@
 #include "ShaderProgram.hpp"
 
-    #include <tgCore/VertexAttributeList.hpp>
-#include <tgCore/VertexAttribute.hpp>
-#include <tgCore/Shader.hpp>
-#include <tgMath/Matrix4f.hpp>
+#include <core/VertexAttributeList.hpp>
+#include <core/VertexAttribute.hpp>
+#include <core/Shader.hpp>
+#include <math/Matrix4f.hpp>
 
 #include <iostream>
 
-using namespace tg;
-
-ShaderProgram::ShaderProgram(
+tg::ShaderProgram::ShaderProgram(
     std::initializer_list< std::shared_ptr< Shader > > shaders,
     std::shared_ptr< VertexAttributeList > attributes )
     : m_programObject( glCreateProgram() )
@@ -30,37 +28,37 @@ ShaderProgram::ShaderProgram(
     // TODO: check for errors
 }
 
-ShaderProgram::~ShaderProgram()
+tg::ShaderProgram::~ShaderProgram()
 {
     glDeleteProgram( m_programObject );
 }
 
-void ShaderProgram::use() const
+void tg::ShaderProgram::use() const
 {
     glUseProgram( m_programObject );
 }
 
-void ShaderProgram::unuse() const
+void tg::ShaderProgram::unuse() const
 {
     glUseProgram( 0 );
 }
 
-GLint ShaderProgram::getUniformLocation( const std::string& name ) const
+GLint tg::ShaderProgram::getUniformLocation( const std::string& name ) const
 {
     return glGetUniformLocation( m_programObject, reinterpret_cast< const GLchar* >( name.c_str() ) );
 }
 
-void ShaderProgram::setUniformInt( GLint location, GLint value )
+void tg::ShaderProgram::setUniformInt( GLint location, GLint value )
 {
     glUniform1i( location, value );
 }
 
-void ShaderProgram::setUniform( GLint location, const tgMath::Matrix4f& matrix )
+void tg::ShaderProgram::setUniform( GLint location, const tg::Matrix4f& matrix )
 {
     glUniformMatrix4fv( location, 1, GL_TRUE, matrix.ptr() );
 }
 
-void ShaderProgram::setUniform( GLint location, const tgMath::Vector< float, 3 >& vector )
+void tg::ShaderProgram::setUniform( GLint location, const tg::Vector< float, 3 >& vector )
 {
     glUniform3f( location, vector.x(), vector.y(), vector.z() );
 }

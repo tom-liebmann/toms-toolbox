@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-#include <tgCore/VertexAttribute.hpp>
+#include <core/VertexAttribute.hpp>
 
 #include <vector>
 

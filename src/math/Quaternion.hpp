@@ -1,10 +1,14 @@
 #pragma once
 
-#include <tgMath/Vector.hpp>
+#include <math/Vector.hpp>
 
 #include <ostream>
+#include <cmath>
 
-namespace tgMath
+// declarations
+//=============================================================================
+
+namespace tg
 {
     template< class Type >
     class Quaternion
@@ -41,8 +45,15 @@ namespace tgMath
             Type m_y;
             Type m_z;
     };
+}
 
 
+
+// definitions
+//=============================================================================
+
+namespace tg
+{
     template< class Type >
     inline Quaternion< Type >::Quaternion()
         : m_w( 1 )
@@ -136,11 +147,11 @@ namespace tgMath
 }
 
 template< class Type >
-tgMath::Quaternion< Type > operator*(
-    const tgMath::Quaternion< Type >& quat1,
-    const tgMath::Quaternion< Type >& quat2)
+tg::Quaternion< Type > operator*(
+    const tg::Quaternion< Type >& quat1,
+    const tg::Quaternion< Type >& quat2)
 {
-    return tgMath::Quaternion< Type >(
+    return tg::Quaternion< Type >(
         quat1.w() * quat2.w() - quat1.x() * quat2.x() - quat1.y() * quat2.y() - quat1.z() * quat2.z(),
         quat1.w() * quat2.x() + quat1.x() * quat2.w() + quat1.y() * quat2.z() - quat1.z() * quat2.y(),
         quat1.w() * quat2.y() + quat1.y() * quat2.w() + quat1.z() * quat2.x() - quat1.x() * quat2.z(),
@@ -148,11 +159,11 @@ tgMath::Quaternion< Type > operator*(
 }
 
 template< class Type >
-tgMath::Quaternion< Type > operator*(
-    const tgMath::Quaternion< Type >& quat,
+tg::Quaternion< Type > operator*(
+    const tg::Quaternion< Type >& quat,
     Type scalar )
 {
-    return tgMath::Quaternion< Type >(
+    return tg::Quaternion< Type >(
         quat.w() * scalar,
         quat.x() * scalar,
         quat.y() * scalar,
@@ -160,11 +171,11 @@ tgMath::Quaternion< Type > operator*(
 }
 
 template< class Type >
-tgMath::Quaternion< Type > operator+(
-    const tgMath::Quaternion< Type >& quat1,
-    const tgMath::Quaternion< Type >& quat2)
+tg::Quaternion< Type > operator+(
+    const tg::Quaternion< Type >& quat1,
+    const tg::Quaternion< Type >& quat2)
 {
-    return tgMath::Quaternion< Type >(
+    return tg::Quaternion< Type >(
         quat1.w() + quat2.w(),
         quat1.x() + quat2.x(),
         quat1.y() + quat2.y(),
@@ -172,21 +183,21 @@ tgMath::Quaternion< Type > operator+(
 }
 
 template< class Type >
-tgMath::Vector< Type, 3 > operator*(
-    const tgMath::Quaternion< Type >& quat,
-    const tgMath::Vector< Type, 3 >& vec )
+tg::Vector< Type, 3 > operator*(
+    const tg::Quaternion< Type >& quat,
+    const tg::Vector< Type, 3 >& vec )
 {
-    tgMath::Quaternion< Type > inv = quat.invert();
-    tgMath::Quaternion< Type > x( 0, vec.x(), vec.y(), vec.z() );
+    tg::Quaternion< Type > inv = quat.invert();
+    tg::Quaternion< Type > x( 0, vec.x(), vec.y(), vec.z() );
     inv = quat * x * inv;
-    return tgMath::Vector< Type, 3 >( inv.x(), inv.y(), inv.z() );
+    return tg::Vector< Type, 3 >( inv.x(), inv.y(), inv.z() );
 }
 
 
 template< class Type >
 std::ostream& operator <<(
     std::ostream& stream,
-    const tgMath::Quaternion< Type >& quat )
+    const tg::Quaternion< Type >& quat )
 {
     stream << "( " << quat.w()
            << ", " << quat.x()

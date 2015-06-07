@@ -1,6 +1,6 @@
 #include "Texture2D.hpp"
 
-#include <tgCore/PNGLoader.hpp>
+#include <core/PNGLoader.hpp>
 
 #include <iostream>
 

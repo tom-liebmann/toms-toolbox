@@ -11,7 +11,7 @@
     #include <winsock2.h>
 #endif
 
-namespace tgNet
+namespace tg
 {
     class Socket
     {

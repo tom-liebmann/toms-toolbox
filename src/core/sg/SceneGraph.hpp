@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tgCore/sg/nodes/Group.hpp>
+#include <core/sg/nodes/Group.hpp>
 
 #include <map>
 #include <vector>

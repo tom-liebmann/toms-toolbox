@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tgCore/VertexAttributeList.hpp>
+#include <core/VertexAttributeList.hpp>
 
 #include <memory>
 #include <iostream>

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tgCore/EventListener.hpp>
-#include <tgCore/Event.hpp>
+#include <core/EventListener.hpp>
+#include <core/Event.hpp>
 
 #include <cstdint>
 #include <list>

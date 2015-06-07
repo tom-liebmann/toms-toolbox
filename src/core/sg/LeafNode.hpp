@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tgCore/sg/Node.hpp>
+#include <core/sg/Node.hpp>
 
 // forward declarations
 //=============================================================================

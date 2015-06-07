@@ -1,8 +1,6 @@
 #include "EventManager.hpp"
 
-using tg::EventManager;
-
-EventManager::~EventManager()
+tg::EventManager::~EventManager()
 {
     for( auto& listenerSet : m_listener )
     {
@@ -16,7 +14,7 @@ EventManager::~EventManager()
     }
 }
 
-std::shared_ptr< EventManager::Slot > EventManager::addListener(
+std::shared_ptr< tg::EventManager::Slot > tg::EventManager::addListener(
     Event::Type type,
     uint32_t priority,
     std::shared_ptr< EventListener > listener )
@@ -36,7 +34,7 @@ std::shared_ptr< EventManager::Slot > EventManager::addListener(
     return std::shared_ptr< Slot >( slot, Slot::invalidate );
 }
 
-void EventManager::runEvent( const std::unique_ptr< Event >& event )
+void tg::EventManager::runEvent( const std::unique_ptr< Event >& event )
 {
     auto iter = m_listener.find( event->getType() );
     if( iter != m_listener.end() )
@@ -58,12 +56,12 @@ void EventManager::runEvent( const std::unique_ptr< Event >& event )
     }
 }
 
-void EventManager::pushEvent( std::unique_ptr< Event > event )
+void tg::EventManager::pushEvent( std::unique_ptr< Event > event )
 {
     m_events.push_back( std::move( event ) );
 }
 
-void EventManager::process()
+void tg::EventManager::process()
 {
     while( !m_events.empty() )
     {

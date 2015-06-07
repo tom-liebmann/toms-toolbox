@@ -3,7 +3,12 @@
 #include <string>
 #include <memory>
 
-namespace tgNet
+
+
+// declarations
+//=============================================================================
+
+namespace tg
 {
     class TCPSocket;
 
@@ -29,9 +34,15 @@ namespace tgNet
             uint32_t m_size;
             uint32_t m_cursor;
     };
+}
 
 
 
+// definitions
+//=============================================================================
+
+namespace tg
+{
     template< typename T >
     T IPacket::read()
     {

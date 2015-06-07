@@ -2,13 +2,21 @@
 
 #include <string>
 
+// forward declarations
+//=============================================================================
+
+namespace tg
+{
+    class TCPSocket;
+}
+
+
+
 // declarations
 //=============================================================================
 
-namespace tgNet
+namespace tg
 {
-    class TCPSocket;
-
     class OPacket
     {
         public:
@@ -40,7 +48,7 @@ namespace tgNet
 // definitions
 //=============================================================================
 
-namespace tgNet
+namespace tg
 {
     template< typename T >
     void OPacket::write( const T& value )

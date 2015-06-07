@@ -1,12 +1,10 @@
 #include "IPacket.hpp"
 
-#include <tgNet/TCPSocket.hpp>
+#include <net/TCPSocket.hpp>
 
 #include <cstring>
 
-using namespace tgNet;
-
-std::unique_ptr< IPacket > IPacket::fromTCPSocket( const TCPSocket& socket )
+std::unique_ptr< tg::IPacket > tg::IPacket::fromTCPSocket( const TCPSocket& socket )
 {
     uint32_t size;
     socket.receive( &size, sizeof( uint32_t ) );
@@ -30,13 +28,13 @@ std::unique_ptr< IPacket > IPacket::fromTCPSocket( const TCPSocket& socket )
     return result;
 }
 
-IPacket::~IPacket()
+tg::IPacket::~IPacket()
 {
     delete m_buffer;
 }
 
 template<>
-std::string IPacket::read< std::string >()
+std::string tg::IPacket::read< std::string >()
 {
     uint32_t len;
     read( reinterpret_cast< uint8_t* >( &len ), sizeof( uint32_t ) );
@@ -49,7 +47,7 @@ std::string IPacket::read< std::string >()
     return value;
 }
 
-void IPacket::read( uint8_t* data, uint32_t size )
+void tg::IPacket::read( uint8_t* data, uint32_t size )
 {
     if( size > m_size - m_cursor )
         throw 0;

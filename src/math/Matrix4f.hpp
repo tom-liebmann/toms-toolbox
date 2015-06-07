@@ -1,12 +1,12 @@
 #pragma once
 
-#include <tgMath/Quaternion.hpp>
-#include <tgMath/Vector.hpp>
+#include <math/Quaternion.hpp>
+#include <math/Vector.hpp>
 
 #include <cstdint>
 #include <ostream>
 
-namespace tgMath
+namespace tg
 {
     class Matrix4f
     {
@@ -70,8 +70,8 @@ namespace tgMath
     };
 }
 
-tgMath::Matrix4f operator*(const tgMath::Matrix4f& mat1, const tgMath::Matrix4f& mat2);
-tgMath::Vector< float, 3 > operator*(const tgMath::Matrix4f& mat, const tgMath::Vector< float, 3 >& vec);
-tgMath::Vector< float, 3 > operator*(const tgMath::Vector< float, 3 >& vec, const tgMath::Matrix4f& mat);
+tg::Matrix4f operator*(const tg::Matrix4f& mat1, const tg::Matrix4f& mat2);
+tg::Vector< float, 3 > operator*(const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec);
+tg::Vector< float, 3 > operator*(const tg::Vector< float, 3 >& vec, const tg::Matrix4f& mat);
 
-std::ostream& operator<<(std::ostream& stream, const tgMath::Matrix4f& matrix);
+std::ostream& operator<<(std::ostream& stream, const tg::Matrix4f& matrix);

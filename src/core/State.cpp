@@ -1,21 +1,19 @@
 #include "State.hpp"
 
-#include <tgMath/Matrix4f.hpp>
-#include <tgCore/ShaderProgram.hpp>
-#include <tgCore/Window.hpp>
+#include <math/Matrix4f.hpp>
+#include <core/ShaderProgram.hpp>
+#include <core/Window.hpp>
 
 #include <iostream>
 
-using namespace tg;
-
-State::State( Window& window )
+tg::State::State( Window& window )
     : m_window( window )
     , m_projectionMatrixSet( false )
-    , m_projectionMatrix( new tgMath::Matrix4f() )
+    , m_projectionMatrix( new tg::Matrix4f() )
     , m_modelViewMatrixSet( false )
     , m_windowViewport( new Viewport( 0, 0, m_window.getMode().getWidth(), m_window.getMode().getHeight() ) )
 {
-    m_modelViewMatrixStack.push_back( std::unique_ptr< tgMath::Matrix4f >( new tgMath::Matrix4f() ) );
+    m_modelViewMatrixStack.push_back( std::unique_ptr< tg::Matrix4f >( new tg::Matrix4f() ) );
 
     glViewport(
         m_windowViewport->getX(),
@@ -25,38 +23,38 @@ State::State( Window& window )
     );
 }
 
-State::~State()
+tg::State::~State()
 { }
 
-void State::setProjectionMatrix( const tgMath::Matrix4f& matrix )
+void tg::State::setProjectionMatrix( const tg::Matrix4f& matrix )
 {
     m_projectionMatrix->operator=( matrix );
 
     m_projectionMatrixSet = false;
 }
 
-void State::pushMatrix()
+void tg::State::pushMatrix()
 {
     m_modelViewMatrixStack.push_back( 
-        std::unique_ptr< tgMath::Matrix4f >(
-            new tgMath::Matrix4f( *m_modelViewMatrixStack.back() ) ) );
+        std::unique_ptr< tg::Matrix4f >(
+            new tg::Matrix4f( *m_modelViewMatrixStack.back() ) ) );
 }
 
-void State::popMatrix()
+void tg::State::popMatrix()
 {
     m_modelViewMatrixStack.pop_back();
 
     m_modelViewMatrixSet = false;
 }
 
-void State::setMatrix( const tgMath::Matrix4f& matrix )
+void tg::State::setMatrix( const tg::Matrix4f& matrix )
 {
     m_modelViewMatrixStack.back()->operator=( matrix );
 
     m_modelViewMatrixSet = false;
 }
 
-void State::applyMatrix( const tgMath::Matrix4f& matrix )
+void tg::State::applyMatrix( const tg::Matrix4f& matrix )
 {
     m_modelViewMatrixStack.back()->operator=(
         (*m_modelViewMatrixStack.back()) * matrix );
@@ -64,7 +62,7 @@ void State::applyMatrix( const tgMath::Matrix4f& matrix )
     m_modelViewMatrixSet = false;
 }
 
-void State::pushShader( std::shared_ptr< ShaderProgram > shader )
+void tg::State::pushShader( std::shared_ptr< ShaderProgram > shader )
 {
     shader->use();
     m_shaderStack.push_back( std::move( shader ) );
@@ -73,7 +71,7 @@ void State::pushShader( std::shared_ptr< ShaderProgram > shader )
     m_modelViewMatrixSet = false;
 }
 
-void State::popShader()
+void tg::State::popShader()
 {
     m_shaderStack.back()->unuse();
     m_shaderStack.pop_back();
@@ -85,7 +83,7 @@ void State::popShader()
     m_modelViewMatrixSet = false;
 }
 
-void State::pushViewport( Viewport viewport )
+void tg::State::pushViewport( Viewport viewport )
 {
     m_viewportStack.push_back( viewport );
 
@@ -97,7 +95,7 @@ void State::pushViewport( Viewport viewport )
     );
 }
 
-void State::popViewport()
+void tg::State::popViewport()
 {
     m_viewportStack.pop_back();
     if( m_viewportStack.empty() )
@@ -122,7 +120,7 @@ void State::popViewport()
     }
 }
 
-void State::onWindowResize()
+void tg::State::onWindowResize()
 {
     *m_windowViewport = Viewport(
         0,
@@ -140,7 +138,7 @@ void State::onWindowResize()
         );
 }
 
-void State::apply()
+void tg::State::apply()
 {
     if( !m_shaderStack.empty() )
     {

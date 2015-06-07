@@ -6,7 +6,7 @@
 
 using namespace tg;
 
-std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filename )
+std::shared_ptr< tg::Shader > tg::Shader::fromFile( Type type, const std::string& filename )
 {
     std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
@@ -31,7 +31,7 @@ std::shared_ptr< Shader > Shader::fromFile( Type type, const std::string& filena
     return shader;
 }
 
-Shader::Shader( Type type, const char* code )
+tg::Shader::Shader( Type type, const char* code )
 {
     switch( type )
     {
@@ -68,7 +68,7 @@ Shader::Shader( Type type, const char* code )
     }
 }
 
-Shader::~Shader()
+tg::Shader::~Shader()
 {
     glDeleteShader( m_shaderObject );
 }

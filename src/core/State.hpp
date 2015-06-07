@@ -3,7 +3,7 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-#include <tgCore/Viewport.hpp>
+#include <core/Viewport.hpp>
 
 #include <memory>
 #include <list>
@@ -17,7 +17,7 @@ namespace tg
     class ShaderProgram;
 }
 
-namespace tgMath
+namespace tg
 {
     class Matrix4f;
 }
@@ -36,13 +36,13 @@ namespace tg
         ~State();
 
         // projection
-        void setProjectionMatrix( const tgMath::Matrix4f& matrix );
+        void setProjectionMatrix( const tg::Matrix4f& matrix );
 
         // modelview
         void pushMatrix();
         void popMatrix();
-        void setMatrix( const tgMath::Matrix4f& matrix );
-        void applyMatrix( const tgMath::Matrix4f& matrix );
+        void setMatrix( const tg::Matrix4f& matrix );
+        void applyMatrix( const tg::Matrix4f& matrix );
 
         // shader
         void pushShader( std::shared_ptr< ShaderProgram > shader );
@@ -60,11 +60,11 @@ namespace tg
         Window& m_window;
 
         // projection
-        std::unique_ptr< tgMath::Matrix4f > m_projectionMatrix;
+        std::unique_ptr< tg::Matrix4f > m_projectionMatrix;
         bool m_projectionMatrixSet;
 
         // modelview
-        std::list< std::unique_ptr< tgMath::Matrix4f > > m_modelViewMatrixStack;
+        std::list< std::unique_ptr< tg::Matrix4f > > m_modelViewMatrixStack;
         bool m_modelViewMatrixSet;
 
         // shader

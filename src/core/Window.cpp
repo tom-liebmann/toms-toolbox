@@ -1,13 +1,11 @@
 #include "Window.hpp"
 
-#include <tgCore/Monitor.hpp>
-#include <tgCore/WindowEvents.hpp>
+#include <core/Monitor.hpp>
+#include <core/WindowEvents.hpp>
 
 #include <iostream>
 
-using tg::Window;
-
-uint8_t Window::s_windowCount = 0;
+uint8_t tg::Window::s_windowCount = 0;
 
 namespace
 {
@@ -23,7 +21,7 @@ namespace
     }
 }
 
-void Window::callbackWindowClose( GLFWwindow* window )
+void tg::Window::callbackWindowClose( GLFWwindow* window )
 {
     auto wnd = reinterpret_cast< tg::Window* >(
         glfwGetWindowUserPointer( window ) );
@@ -32,7 +30,7 @@ void Window::callbackWindowClose( GLFWwindow* window )
         new tg::events::WindowClose( *wnd ) ) );
 }
 
-void Window::callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
+void tg::Window::callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
     switch( action )
     {
@@ -48,7 +46,7 @@ void Window::callbackKey( GLFWwindow* window, int key, int scancode, int action,
     }
 }
 
-void Window::callbackMouseButton( GLFWwindow* window, int button, int action, int mods )
+void tg::Window::callbackMouseButton( GLFWwindow* window, int button, int action, int mods )
 {
     tg::events::MouseButton::Button mouseButton;
     switch( button )
@@ -82,13 +80,13 @@ void Window::callbackMouseButton( GLFWwindow* window, int button, int action, in
             mouseY ) ) );
 }
 
-void Window::callbackMouseMove( GLFWwindow* window, double x, double y )
+void tg::Window::callbackMouseMove( GLFWwindow* window, double x, double y )
 {
     pushEvent( window, std::unique_ptr< tg::Event >(
         new tg::events::MouseMove( x, y ) ) );
 }
 
-void Window::callbackWindowSize( GLFWwindow* window, int width, int height )
+void tg::Window::callbackWindowSize( GLFWwindow* window, int width, int height )
 {
     auto wnd = reinterpret_cast< tg::Window* >(
         glfwGetWindowUserPointer( window ) );
@@ -105,7 +103,7 @@ void Window::callbackWindowSize( GLFWwindow* window, int width, int height )
         new tg::events::WindowResize( *wnd ) ) );
 }
 
-Window::Window( std::string title, WindowMode mode )
+tg::Window::Window( std::string title, WindowMode mode )
     : m_title( std::move( title ) )
     , m_mode( std::move( mode ) )
 {
@@ -142,7 +140,7 @@ Window::Window( std::string title, WindowMode mode )
     ++s_windowCount;
 }
 
-Window::~Window()
+tg::Window::~Window()
 {
     glfwDestroyWindow( m_handle );
 
@@ -152,13 +150,13 @@ Window::~Window()
         glfwTerminate();
 }
 
-void Window::update()
+void tg::Window::update()
 {
     glfwSwapBuffers( m_handle );
     glfwPollEvents();
 }
 
-void Window::setEventManager( const std::shared_ptr< EventManager >& eventManager )
+void tg::Window::setEventManager( const std::shared_ptr< EventManager >& eventManager )
 {
     m_eventManager = eventManager;
 

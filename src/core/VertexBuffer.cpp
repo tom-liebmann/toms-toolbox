@@ -1,13 +1,11 @@
 #include "VertexBuffer.hpp"
 
-#include <tgCore/VertexAttribute.hpp>
-#include <tgCore/State.hpp>
+#include <core/VertexAttribute.hpp>
+#include <core/State.hpp>
 
 #include <cstring>
 
-using namespace tg;
-
-VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes )
+tg::VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > attributes )
     : m_access( nullptr )
     , m_vBufferObject( -1 )
     , m_iBufferObject( -1 )
@@ -18,7 +16,7 @@ VertexBuffer::VertexBuffer( GLenum mode, std::shared_ptr< VertexAttributeList > 
     glGenBuffers( 1, &m_iBufferObject );
 }
 
-VertexBuffer::~VertexBuffer()
+tg::VertexBuffer::~VertexBuffer()
 {
     glDeleteBuffers( 1, &m_vBufferObject );
     glDeleteBuffers( 1, &m_iBufferObject );
@@ -27,14 +25,14 @@ VertexBuffer::~VertexBuffer()
         m_access->m_vertexBuffer = nullptr;
 }
 
-std::shared_ptr< VertexBuffer::Access > VertexBuffer::access()
+std::shared_ptr< tg::VertexBuffer::Access > tg::VertexBuffer::access()
 {
     return m_access
         ? std::shared_ptr< Access >()
         : std::shared_ptr< Access >( new Access( this ), Access::end );
 }
 
-void VertexBuffer::render( State& state ) const
+void tg::VertexBuffer::render( State& state ) const
 {
     // do not render while buffers get modified
     if( m_access )
@@ -97,7 +95,7 @@ void VertexBuffer::render( State& state ) const
 
 
 
-void VertexBuffer::Access::end( Access* access )
+void tg::VertexBuffer::Access::end( Access* access )
 {
     if( access->m_iChanged )
     {
@@ -125,7 +123,7 @@ void VertexBuffer::Access::end( Access* access )
     delete access;
 }
 
-VertexBuffer::Access::Access( VertexBuffer* vertexBuffer )
+tg::VertexBuffer::Access::Access( tg::VertexBuffer* vertexBuffer )
     : m_vertexBuffer( vertexBuffer )
     , m_iChanged( false )
     , m_vChanged( false )

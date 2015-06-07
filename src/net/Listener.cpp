@@ -1,6 +1,6 @@
 #include "Listener.hpp"
 
-#include <tgNet/TCPSocket.hpp>
+#include <net/TCPSocket.hpp>
 
 #ifdef WIN32
 #else
@@ -13,9 +13,7 @@
 
 #endif
 
-using namespace tgNet;
-
-namespace tgNet
+namespace tg
 {
     Listener::Listener( uint16_t port )
     {

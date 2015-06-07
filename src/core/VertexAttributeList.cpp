@@ -1,6 +1,6 @@
 #include "VertexAttributeList.hpp"
 
-#include <tgCore/VertexAttribute.hpp>
+#include <core/VertexAttribute.hpp>
 
 using tg::VertexAttributeList;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <tgCore/sg/InnerNode.hpp>
+#include <core/sg/InnerNode.hpp>
 
 #include <memory>
 #include <set>
