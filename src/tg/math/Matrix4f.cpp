@@ -148,43 +148,43 @@ namespace tg
                         0.0f,
                         0.0f, 0.0f, 0.0f, 1.0f);
     }
+}
 
-    Matrix4f operator*(const Matrix4f& mat1, const Matrix4f& mat2)
+
+
+tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 )
+{
+    tg::Matrix4f result;
+    for( size_t x = 0; x < 4; x++ )
+    for( size_t y = 0; y < 4; y++ )
     {
-        float v[16];
-        for(int x = 0; x < 4; x++)
-        for(int y = 0; y < 4; y++)
-        {
-            v[x + y * 4] = 0;
-            for(int i = 0; i < 4; i++)
-                v[x + y * 4] += mat1[i + y * 4] * mat2[x + i * 4];
-        }
+        result[ x + y * 4 ] = 0.0f;
 
-        return Matrix4f(v[0], v[1], v[2], v[3],
-                        v[4], v[5], v[6], v[7],
-                        v[8], v[9], v[10], v[11],
-                        v[12], v[13], v[14], v[15]);
+        for( size_t i = 0; i < 4; i++ )
+            result[ x + y * 4 ] += mat1[ i + y * 4 ] * mat2[ x + i * 4 ];
     }
 
-    Vector< float, 3 > operator*(const Matrix4f& mat, const Vector< float, 3 >& vec)
-    {
-        float v[4];
-        for(int y = 0; y < 4; y++)
-        {
-            v[y] = 0;
-            for(int i = 0; i < 4; i++)
-                v[y] += mat[i + y * 4] * (i < 3 ? vec[i] : 1.0f);
-        }
-        
-        if(v[3] < -1e-7 || v[3] > 1e-7)
-        {
-            v[0] /= v[3];
-            v[1] /= v[3];
-            v[2] /= v[3];
-        }
+    return result;
+}
 
-        return Vector< float, 3 >( { v[0], v[1], v[2] } );
+tg::Vector< float, 3 > operator*(const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec)
+{
+    float v[4];
+    for(int y = 0; y < 4; y++)
+    {
+        v[y] = 0;
+        for(int i = 0; i < 4; i++)
+            v[y] += mat[i + y * 4] * (i < 3 ? vec[i] : 1.0f);
     }
+    
+    if(v[3] < -1e-7 || v[3] > 1e-7)
+    {
+        v[0] /= v[3];
+        v[1] /= v[3];
+        v[2] /= v[3];
+    }
+
+    return tg::Vector< float, 3 >( { v[0], v[1], v[2] } );
 }
 
 std::ostream& operator<<(std::ostream& stream, const tg::Matrix4f& matrix)
@@ -195,4 +195,3 @@ std::ostream& operator<<(std::ostream& stream, const tg::Matrix4f& matrix)
     << "|"  << matrix[8]  << ", " << matrix[9]  << ", " << matrix[10] << ", " << matrix[11] << "|"  << std::endl
     << "\\" << matrix[12] << ", " << matrix[13] << ", " << matrix[14] << ", " << matrix[15] << "/";
 }
-

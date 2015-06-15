@@ -70,8 +70,7 @@ namespace tg
     };
 }
 
-tg::Matrix4f operator*(const tg::Matrix4f& mat1, const tg::Matrix4f& mat2);
-tg::Vector< float, 3 > operator*(const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec);
-tg::Vector< float, 3 > operator*(const tg::Vector< float, 3 >& vec, const tg::Matrix4f& mat);
+tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 );
+tg::Vector< float, 3 > operator*( const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec );
 
 std::ostream& operator<<(std::ostream& stream, const tg::Matrix4f& matrix);
