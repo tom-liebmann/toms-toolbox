@@ -35,15 +35,6 @@ SET( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" 
 
 INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_BINARY_DIR}/include" )
 
-# Set compilation flags used by all libraries.
-SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
-IF( WIN32 )
-    SET( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -mwindows" )
-    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DWIN32" )
-ENDIF()
-
-
-
 FILE(
     GLOB
     SUBDIRECTORIES
@@ -65,9 +56,8 @@ ENDFOREACH()
 # Export build tree to Targets.cmake file.
 SET( CONF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include" )
 
-MESSAGE( "${TENGOM_TARGETS}" )
 EXPORT(
-    TARGETS ${TENGOM_TARGETS}
+    TARGETS tgCore tgMath tgNet tgTools
     FILE "${PROJECT_BINARY_DIR}/TengomTargets.cmake"
 )
 

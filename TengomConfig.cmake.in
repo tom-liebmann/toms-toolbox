@@ -9,8 +9,8 @@ INCLUDE( "@CMAKE_CURRENT_BINARY_DIR@/TengomTargets.cmake" )
  
 SET(
     TENGOM_LIBRARIES
-    "@CMAKE_CURRENT_BINARY_DIR@/src/core/libtgCore.a"
-    "@CMAKE_CURRENT_BINARY_DIR@/src/math/libtgMath.a"
-    "@CMAKE_CURRENT_BINARY_DIR@/src/net/libtgNet.a"
-    "@CMAKE_CURRENT_BINARY_DIR@/src/tools/libtgTools.a"
+    tgCore
+    tgMath
+    tgNet
+    tgTools
 )

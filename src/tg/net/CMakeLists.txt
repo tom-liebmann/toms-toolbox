@@ -11,12 +11,26 @@ FILE(
 )
 
 # create executable
-SET( TENGOM_TARGETS ${TENGOM_TARGETS} "tgNet" PARENT_SCOPE )
-ADD_LIBRARY( tgNet STATIC ${SOURCE_FILES} )
+ADD_LIBRARY(
+    tgNet
+    STATIC ${SOURCE_FILES}
+)
+
+TARGET_COMPILE_OPTIONS(
+    tgNet
+    PRIVATE -std=c++11
+)
 
 IF( WIN32 )
     TARGET_LINK_LIBRARIES(
         tgNet
-        wsock32
-        ws2_32 )
+        PUBLIC
+            wsock32
+            ws2_32
+    )
+
+    TARGET_COMPILE_DEFINITIONS(
+        tgNet
+        PRIVATE WIN32
+    )
 ENDIF()

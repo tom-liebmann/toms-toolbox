@@ -20,10 +20,10 @@ namespace tg
     template< typename T, size_t D >
     T norm2( const Vector< T, D >& vec );
 
-    template< typename T1, typename T2, size_t D >
-    Vector< decltype( T1() * T2() ), D > cross(
-        const Vector< T1, D >& lhs,
-        const Vector< T2, D >& rhs );
+    template< typename T1, typename T2 >
+    Vector< decltype( T1() * T2() ), 3 > cross(
+        const Vector< T1, 3 >& lhs,
+        const Vector< T2, 3 >& rhs );
 
     template< typename T1, typename T2, size_t D >
     decltype( T1() * T2() ) dot(
@@ -53,6 +53,18 @@ namespace tg
             result += vec[ i ] * vec[ i ];
 
         return result;
+    }
+
+    template< typename T1, typename T2 >
+    Vector< decltype( T1() * T2() ), 3 > cross(
+        const Vector< T1, 3 >& lhs,
+        const Vector< T2, 3 >& rhs )
+    {
+        return Vector< decltype( T1() * T2() ), 3 >( {
+            lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ],
+            lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
+            lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ]
+        } );
     }
 
     template< typename T1, typename T2, size_t D >
