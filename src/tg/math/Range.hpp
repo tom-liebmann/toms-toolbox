@@ -81,12 +81,12 @@ namespace tg
         using namespace std;
         return Range< T, D >(
             Vector< T, D >( {
-                max( lhs.getMin()[ 0 ], rhs.getMin()[ 0 ] ),
-                max( lhs.getMin()[ 1 ], rhs.getMin()[ 1 ] )
+                max( lhs.getMin( 0 ), rhs.getMin( 0 ) ),
+                max( lhs.getMin( 1 ), rhs.getMin( 1 ) )
             } ),
             Vector< T, D >( {
-                min( lhs.getMax()[ 0 ], rhs.getMax()[ 0 ] ),
-                min( lhs.getMax()[ 1 ], rhs.getMax()[ 1 ] )
+                min( lhs.getMax( 0 ), rhs.getMax( 0 ) ),
+                min( lhs.getMax( 1 ), rhs.getMax( 1 ) )
             } )
         );
     }
