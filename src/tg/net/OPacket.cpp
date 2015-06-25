@@ -4,18 +4,44 @@
 
 #include <cstring>
 #include <sstream>
+#include <iostream>
 
 namespace tg
 {
     OPacket::OPacket( uint32_t size )
-        : m_buffer( static_cast< uint8_t* >( operator new( size ) ) )
+        : m_buffer( reinterpret_cast< uint8_t* >( operator new( size ) ) )
         , m_size( 0 )
         , m_cap( size )
     { }
 
+    OPacket::OPacket( const OPacket& packet )
+        : m_buffer( reinterpret_cast< uint8_t* >( operator new( packet.m_cap ) ) )
+        , m_size( packet.m_size )
+        , m_cap( packet.m_cap )
+    {
+        memcpy(
+            reinterpret_cast< void* >( m_buffer ),
+            reinterpret_cast< const void* >( packet.m_buffer ),
+            m_size
+        );
+    }
+
     OPacket::~OPacket()
     {
         delete m_buffer;
+    }
+
+    OPacket& OPacket::operator=( const OPacket& packet )
+    {
+        delete m_buffer;
+        m_size = packet.m_size;
+        m_cap = packet.m_cap;
+        m_buffer = reinterpret_cast< uint8_t* >( operator new( m_cap ) );
+        memcpy(
+            reinterpret_cast< void* >( m_buffer ),
+            reinterpret_cast< const void* >( packet.m_buffer ),
+            m_size
+        );
     }
 
     template<>
@@ -38,7 +64,11 @@ namespace tg
     void OPacket::append( const uint8_t* data, uint32_t size )
     {
         ensure( size );
-        memcpy( static_cast< void* >( m_buffer + m_size ), static_cast< const void* >( data ), size );
+        memcpy(
+            reinterpret_cast< void* >( m_buffer + m_size ),
+            reinterpret_cast< const void* >( data ),
+            size
+        );
         m_size += size;
     }
 
@@ -46,8 +76,8 @@ namespace tg
     {
         if( m_cap - m_size < size )
         {
-            uint8_t* buf = static_cast< uint8_t* >( operator new( m_size + size ) );
-            memcpy( static_cast< void* >( buf ), static_cast< void* >( m_buffer ), m_size + size );
+            uint8_t* buf = reinterpret_cast< uint8_t* >( operator new( m_size + size ) );
+            memcpy( reinterpret_cast< void* >( buf ), reinterpret_cast< const void* >( m_buffer ), m_size );
             delete m_buffer;
             m_buffer = buf;
             m_cap = m_size + size;

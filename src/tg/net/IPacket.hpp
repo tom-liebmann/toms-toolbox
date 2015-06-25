@@ -27,6 +27,8 @@ namespace tg
 
             uint32_t getRemaining() const;
 
+            std::string getContent() const;
+
         private:
             IPacket() { }
 

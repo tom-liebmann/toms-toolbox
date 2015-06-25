@@ -20,8 +20,11 @@ namespace tg
     class OPacket
     {
         public:
-            OPacket( uint32_t size = 0 );
+            OPacket( uint32_t size = 1 );
+            OPacket( const OPacket& packet );
             ~OPacket();
+
+            OPacket& operator=( const OPacket& packet );
 
             template< typename T >
             void write( const T& value );
@@ -30,6 +33,7 @@ namespace tg
 
             void append( const uint8_t* data, uint32_t size );
             void ensure( uint32_t size );
+
 
             std::string getContent() const;
 

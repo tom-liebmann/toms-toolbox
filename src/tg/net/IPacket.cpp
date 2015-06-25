@@ -3,6 +3,7 @@
 #include <tg/net/TCPSocket.hpp>
 
 #include <cstring>
+#include <sstream>
 
 std::unique_ptr< tg::IPacket > tg::IPacket::fromTCPSocket( const TCPSocket& socket )
 {
@@ -54,4 +55,14 @@ void tg::IPacket::read( uint8_t* data, uint32_t size )
 
     memcpy( static_cast< void* >( data ), static_cast< const void* >( m_buffer + m_cursor ), size );
     m_cursor += size;
+}
+
+std::string tg::IPacket::getContent() const
+{
+    std::ostringstream os;
+
+    for( uint32_t i = 0; i < m_size; ++i )
+        os << static_cast< int >( m_buffer[ i ] ) << " ";
+
+    return os.str();
 }
