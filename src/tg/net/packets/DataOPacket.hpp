@@ -15,6 +15,7 @@ namespace tg
         : public OPacket
     {
     public:
+        DataOPacket() = default;
         DataOPacket( uint32_t size );
 
         template< typename T >
@@ -29,6 +30,7 @@ namespace tg
 
         std::vector< uint8_t > m_data;
     };
+
 
 
     template< typename T >
@@ -58,7 +60,7 @@ namespace tg
 
 
     template< typename T >
-    DataOPacket& operator<<( DataOPacket& packet, const T& value )
+    inline DataOPacket& operator<<( DataOPacket& packet, const T& value )
     {
         packet.write< T >( value );
         return packet;

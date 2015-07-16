@@ -15,7 +15,7 @@ namespace tg
         : public IPacket
     {
     public:
-        DataIPacket( std::shared_ptr< IPacket > frame );
+        DataIPacket( const IPacket& frame );
 
         template< typename T >
         T read();
@@ -25,7 +25,7 @@ namespace tg
         virtual size_t getSize() const override;
 
     private:
-        std::shared_ptr< IPacket > m_frame;
+        const IPacket& m_frame;
 
         size_t m_offset;
     };
@@ -38,15 +38,15 @@ namespace tg
 
 namespace tg
 {
-    inline DataIPacket::DataIPacket( std::shared_ptr< IPacket > frame )
-        : m_frame( std::move( frame ) )
+    inline DataIPacket::DataIPacket( const IPacket& frame )
+        : m_frame( frame )
         , m_offset( 0 )
     { }
 
     template< typename T >
     inline T DataIPacket::read()
     {
-        T result = *reinterpret_cast< const T* >( m_frame->getData() + m_offset );
+        T result = *reinterpret_cast< const T* >( m_frame.getData() + m_offset );
         m_offset += sizeof( T );
         return result;
     }

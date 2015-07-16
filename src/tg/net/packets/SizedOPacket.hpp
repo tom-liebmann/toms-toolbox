@@ -15,14 +15,14 @@ namespace tg
         : public OPacket
     {
     public:
-        SizedOPacket( std::shared_ptr< OPacket > packet );
+        SizedOPacket( const OPacket& packet );
 
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
         virtual size_t getSize() const override;
 
     private:
-        std::shared_ptr< OPacket > m_packet;
+        const OPacket& m_packet;
     };
 }
 
@@ -33,7 +33,7 @@ namespace tg
 
 namespace tg
 {
-    inline SizedOPacket::SizedOPacket( std::shared_ptr< OPacket > packet )
-        : m_packet( std::move( packet ) )
+    inline SizedOPacket::SizedOPacket( const OPacket& packet )
+        : m_packet( packet )
     { }
 }

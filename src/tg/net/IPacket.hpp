@@ -11,7 +11,7 @@ namespace tg
     class IPacket
     {
     public:
-        virtual ~IPacket();
+        virtual ~IPacket() = default;
 
         virtual const uint8_t* getData() const = 0;
 
