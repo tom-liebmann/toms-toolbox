@@ -1,6 +1,6 @@
 #include "PacketSelector.hpp"
 
-#include <tg/net/IPacket.hpp>
+#include <tg/net/packets/SizedIPacket.hpp>
 #include <tg/net/SocketContainer.hpp>
 #include <tg/net/TCPSocket.hpp>
 
@@ -106,9 +106,9 @@ namespace tg
         #ifdef WIN32
         #else
 
-            int flags = fcntl( container->getSocket()->getHandle(), F_GETFL, 0 );
+            int flags = fcntl( container->getSocket().getHandle(), F_GETFL, 0 );
             flags |= O_NONBLOCK;
-            fcntl( container->getSocket()->getHandle(), F_SETFL, flags );
+            fcntl( container->getSocket().getHandle(), F_SETFL, flags );
 
         #endif
 
@@ -236,7 +236,7 @@ namespace tg
             struct epoll_event event;
             event.events = EPOLLIN;
             event.data.fd = index;
-            epoll_ctl( m_epoll, EPOLL_CTL_ADD, container->getSocket()->getHandle(), &event );
+            epoll_ctl( m_epoll, EPOLL_CTL_ADD, container->getSocket().getHandle(), &event );
 
         #endif
 
@@ -264,7 +264,7 @@ namespace tg
 
             #else
 
-                epoll_ctl( m_epoll, EPOLL_CTL_DEL, container->getSocket()->getHandle(), NULL );
+                epoll_ctl( m_epoll, EPOLL_CTL_DEL, container->getSocket().getHandle(), NULL );
 
             #endif
 
@@ -341,7 +341,7 @@ namespace tg
 
         try
         {
-            auto packet = IPacket::fromTCPSocket( *container->getSocket() );
+            std::unique_ptr< IPacket > packet( new SizedIPacket( container->getSocket() ) );
 
             if( container->m_events.empty() )
                 m_eventSockets.push_back( index );

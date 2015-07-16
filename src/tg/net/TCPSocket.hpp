@@ -49,7 +49,8 @@ namespace tg
             void receive( void* data, size_t size ) const;
 
             // SocketContainer
-            virtual const TCPSocket* getSocket() const override;
+            virtual TCPSocket& getSocket() override;
+            virtual const TCPSocket& getSocket() const override;
 
         private:
             Handle m_handle;
@@ -63,9 +64,14 @@ namespace tg
 
 namespace tg
 {
-    inline const TCPSocket* TCPSocket::getSocket() const
+    inline TCPSocket& TCPSocket::getSocket()
     {
-        return this;
+        return *this;
+    }
+
+    inline const TCPSocket& TCPSocket::getSocket() const
+    {
+        return *this;
     }
 
     inline TCPSocket::Handle TCPSocket::getHandle() const

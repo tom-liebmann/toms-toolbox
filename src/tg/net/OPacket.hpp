@@ -19,12 +19,12 @@ namespace tg
 {
     class OPacket
     {
-        public:
-            virtual ~OPacket();
+    public:
+        virtual ~OPacket();
 
-            virtual void send( TCPSocket& socket ) const;
+        virtual void send( TCPSocket& socket ) const = 0;
 
-            virtual size_t getSize() const;
+        virtual size_t getSize() const = 0;
     };
 }
 

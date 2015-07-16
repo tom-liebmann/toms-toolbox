@@ -26,7 +26,8 @@ namespace tg
 
             virtual ~SocketContainer() { }
 
-            virtual const TCPSocket* getSocket() const = 0; 
+            virtual TCPSocket& getSocket() = 0; 
+            virtual const TCPSocket& getSocket() const = 0; 
 
         private:
             std::list< std::unique_ptr< PacketSelector::Event > > m_events;

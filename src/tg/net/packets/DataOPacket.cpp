@@ -1,5 +1,7 @@
 #include "DataOPacket.hpp"
 
+#include <tg/net/TCPSocket.hpp>
+
 #include <cstring>
 
 namespace tg
@@ -17,5 +19,15 @@ namespace tg
         uint32_t len = value.length();
         append( reinterpret_cast< const uint8_t* >( &len ), sizeof( uint32_t ) );
         append( reinterpret_cast< const uint8_t* >( value.c_str() ), len );
+    }
+
+    void DataOPacket::send( TCPSocket& socket ) const
+    {
+        socket.send( reinterpret_cast< const uint8_t* >( m_data.data() ), getSize() );
+    }
+
+    size_t DataOPacket::getSize() const
+    {
+        return m_data.size();
     }
 }
