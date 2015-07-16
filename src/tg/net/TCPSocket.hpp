@@ -41,10 +41,8 @@ namespace tg
 
             ~TCPSocket();
 
-
             // Getter
             Handle getHandle() const;
-
 
             // Misc
             void send( const void* data, size_t size ) const;

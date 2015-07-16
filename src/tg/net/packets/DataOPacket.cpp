@@ -1,0 +1,21 @@
+#include "DataOPacket.hpp"
+
+#include <cstring>
+
+namespace tg
+{
+    void DataOPacket::append( const uint8_t* data, uint32_t size )
+    {
+        size_t oldSize = m_data.size();
+        m_data.resize( m_data.size() + size );
+        memcpy( m_data.data() + oldSize, data, size );
+    }
+
+    template<>
+    void DataOPacket::write< std::string >( const std::string& value )
+    {
+        uint32_t len = value.length();
+        append( reinterpret_cast< const uint8_t* >( &len ), sizeof( uint32_t ) );
+        append( reinterpret_cast< const uint8_t* >( value.c_str() ), len );
+    }
+}
