@@ -23,6 +23,7 @@ namespace tg
         // IPacket
         virtual const uint8_t* getData() const override;
         virtual size_t getSize() const override;
+        virtual std::string getContent( const std::string& inner ) const override;
 
     private:
         const IPacket& m_frame;

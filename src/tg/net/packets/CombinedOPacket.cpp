@@ -12,4 +12,9 @@ namespace tg
     {
         return m_first.getSize() + m_second.getSize();
     }
+
+    std::string CombinedOPacket::getContent() const
+    {
+        return m_first.getContent() + m_second.getContent();
+    }
 }

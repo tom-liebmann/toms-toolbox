@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 // declarations
 //=============================================================================
@@ -16,5 +17,7 @@ namespace tg
         virtual const uint8_t* getData() const = 0;
 
         virtual size_t getSize() const = 0;
+
+        virtual std::string getContent( const std::string& inner ) const = 0;
     };
 }

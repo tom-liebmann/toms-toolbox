@@ -3,6 +3,7 @@
 #include <tg/net/TCPSocket.hpp>
 
 #include <cstring>
+#include <sstream>
 
 namespace tg
 {
@@ -29,5 +30,14 @@ namespace tg
     size_t DataOPacket::getSize() const
     {
         return m_data.size();
+    }
+
+    std::string DataOPacket::getContent() const
+    {
+        std::ostringstream os;
+        for( uint8_t value : m_data )
+            os << static_cast< uint32_t >( value ) << " ";
+
+        return os.str();
     }
 }

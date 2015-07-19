@@ -24,6 +24,7 @@ namespace tg
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
         virtual size_t getSize() const override;
+        virtual std::string getContent() const override;
 
     private:
         void append( const uint8_t* data, uint32_t size );

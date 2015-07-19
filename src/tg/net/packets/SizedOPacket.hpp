@@ -20,6 +20,7 @@ namespace tg
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
         virtual size_t getSize() const override;
+        virtual std::string getContent() const override;
 
     private:
         const OPacket& m_packet;

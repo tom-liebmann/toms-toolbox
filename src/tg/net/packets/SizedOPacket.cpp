@@ -16,4 +16,9 @@ namespace tg
     {
         return sizeof( uint32_t ) + m_packet.getSize();
     }
+
+    std::string SizedOPacket::getContent() const
+    {
+        return m_packet.getContent();
+    }
 }

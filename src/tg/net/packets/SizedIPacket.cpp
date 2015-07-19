@@ -15,11 +15,16 @@ namespace tg
 
     const uint8_t* SizedIPacket::getData() const
     {
-        return m_data.data() + sizeof( uint32_t );
+        return m_data.data();
     }
 
     size_t SizedIPacket::getSize() const
     {
         return m_data.size();
+    }
+
+    std::string SizedIPacket::getContent( const std::string& inner ) const
+    {
+        return inner;
     }
 }
