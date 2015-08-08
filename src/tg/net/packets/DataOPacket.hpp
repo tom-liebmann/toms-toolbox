@@ -31,12 +31,13 @@ namespace tg
 
         std::vector< uint8_t > m_data;
     };
-
-
-
-    template< typename T >
-    DataOPacket& operator<<( DataOPacket& packet, const T& value );
 }
+
+
+
+template< typename T >
+tg::DataOPacket& operator<<( tg::DataOPacket& packet, const T& value );
+
 
 
 
@@ -57,13 +58,13 @@ namespace tg
 
     template<>
     void DataOPacket::write< std::string >( const std::string& value );
+}
 
 
 
-    template< typename T >
-    inline DataOPacket& operator<<( DataOPacket& packet, const T& value )
-    {
-        packet.write< T >( value );
-        return packet;
-    }
+template< typename T >
+inline tg::DataOPacket& operator<<( tg::DataOPacket& packet, const T& value )
+{
+    packet.write< T >( value );
+    return packet;
 }
