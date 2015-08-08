@@ -48,6 +48,7 @@ namespace tg
                     virtual ~Event();
 
                     virtual Type getType() const = 0;
+                    virtual std::shared_ptr< SocketContainer > getSource() const = 0;
             };
 
             PacketSelector();
@@ -131,11 +132,11 @@ namespace tg
                 const std::shared_ptr< SocketContainer >& source,
                 std::unique_ptr< IPacket > packet );
 
+            const std::unique_ptr< IPacket >& getPacket() const;
+
             // PacketSelector::Event
             virtual Type getType() const override; 
-
-            std::shared_ptr< SocketContainer > getSource() const;
-            const std::unique_ptr< IPacket >& getPacket() const;
+            virtual std::shared_ptr< SocketContainer > getSource() const override;
 
         private:
             std::weak_ptr< SocketContainer > m_source;
@@ -156,11 +157,11 @@ namespace tg
 
             DisconnectEvent( const std::shared_ptr< SocketContainer >& source, Reason reason );
 
+            Reason getReason() const;
+
             // PacketSelector::Event
             virtual Type getType() const override;
-
-            std::shared_ptr< SocketContainer > getSource() const;
-            Reason getReason() const;
+            virtual std::shared_ptr< SocketContainer > getSource() const override;
 
         private:
             std::weak_ptr< SocketContainer > m_source;
