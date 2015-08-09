@@ -85,13 +85,6 @@ namespace tg
               0, 0, 0, 1 }
     { }
 
-    Matrix4f::Matrix4f( const Matrix4f& mat ) :
-        m_v { mat[0],  mat[1],  mat[2],  mat[3],
-              mat[4],  mat[5],  mat[6],  mat[7],
-              mat[8],  mat[9],  mat[10], mat[11],
-              mat[12], mat[13], mat[14], mat[15] }
-    { }
-
     Matrix4f::Matrix4f( float v0, float v1, float v2, float v3,
                         float v4, float v5, float v6, float v7,
                         float v8, float v9, float v10, float v11,
