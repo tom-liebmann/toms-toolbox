@@ -9,14 +9,6 @@
 
 #include <memory>
 
-// forward declarations
-//=============================================================================
-
-namespace tg
-{
-    class State;
-}
-
 
 
 // declarations
