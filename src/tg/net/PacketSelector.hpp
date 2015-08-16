@@ -129,7 +129,7 @@ namespace tg
     {
         public:
             PacketEvent(
-                const std::shared_ptr< SocketContainer >& source,
+                std::shared_ptr< SocketContainer > source,
                 std::unique_ptr< IPacket > packet );
 
             const std::unique_ptr< IPacket >& getPacket() const;
@@ -139,7 +139,7 @@ namespace tg
             virtual std::shared_ptr< SocketContainer > getSource() const override;
 
         private:
-            std::weak_ptr< SocketContainer > m_source;
+            std::shared_ptr< SocketContainer > m_source;
             std::unique_ptr< IPacket > m_packet;
     };
 
@@ -155,7 +155,9 @@ namespace tg
                 BROKEN
             };
 
-            DisconnectEvent( const std::shared_ptr< SocketContainer >& source, Reason reason );
+            DisconnectEvent(
+                std::shared_ptr< SocketContainer > source,
+                Reason reason );
 
             Reason getReason() const;
 
@@ -164,7 +166,7 @@ namespace tg
             virtual std::shared_ptr< SocketContainer > getSource() const override;
 
         private:
-            std::weak_ptr< SocketContainer > m_source;
+            std::shared_ptr< SocketContainer > m_source;
             Reason m_reason;
     };
 }
@@ -182,9 +184,9 @@ namespace tg
 
 
     inline PacketEvent::PacketEvent(
-        const std::shared_ptr< SocketContainer >& source,
+        std::shared_ptr< SocketContainer > source,
         std::unique_ptr< IPacket > packet )
-        : m_source( source )
+        : m_source( std::move( source ) )
         , m_packet( std::move( packet ) )
     { }
 
@@ -195,7 +197,7 @@ namespace tg
 
     inline std::shared_ptr< SocketContainer > PacketEvent::getSource() const
     {
-        return m_source.lock();
+        return m_source;
     }
 
     inline const std::unique_ptr< IPacket >& PacketEvent::getPacket() const
@@ -206,9 +208,9 @@ namespace tg
 
 
     inline DisconnectEvent::DisconnectEvent(
-        const std::shared_ptr< SocketContainer >& source,
+        std::shared_ptr< SocketContainer > source,
         Reason reason )
-        : m_source( source )
+        : m_source( std::move( source ) )
         , m_reason( reason )
     { }
 
@@ -219,7 +221,7 @@ namespace tg
 
     inline std::shared_ptr< SocketContainer > DisconnectEvent::getSource() const
     {
-        return m_source.lock();
+        return m_source;
     }
 
     inline DisconnectEvent::Reason DisconnectEvent::getReason() const
