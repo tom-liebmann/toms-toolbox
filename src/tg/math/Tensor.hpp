@@ -3,6 +3,7 @@
 #include <tg/math/TensorHelper.hpp>
 
 #include <array>
+#include <iostream>
 
 
 
@@ -84,6 +85,9 @@ tg::Tensor< T1, D... >& operator*=(
 template< typename T1, typename T2, size_t... D >
 tg::Tensor< T1, D... >& operator/=(
     tg::Tensor< T1, D... >& lhs, const T2& rhs );
+
+template< class T, size_t... D >
+std::ostream& operator <<( std::ostream& stream, const tg::Tensor< T, D... >& tensor );
 
 
 
@@ -271,4 +275,17 @@ tg::Tensor< T1, D... >& operator/=(
         lhs[ i ] /= rhs;
 
     return lhs;
+}
+
+template< class T, size_t... D >
+std::ostream& operator <<( std::ostream& stream, const tg::Tensor< T, D... >& tensor )
+{
+    stream << "(";
+    for( size_t i = 0; i < tensor.size; ++i )
+    {
+        if( i != 0 )
+            stream << ", ";
+        stream << tensor[ i ];
+    }
+    stream << ")";
 }
