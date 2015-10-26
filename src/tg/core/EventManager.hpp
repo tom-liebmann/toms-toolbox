@@ -72,7 +72,8 @@ namespace tg
 {
     inline bool EventManager::Slot::sort( Slot* lhs, Slot* rhs )
     {
-        return lhs->getPriority() > rhs->getPriority();
+        return lhs->getPriority() > rhs->getPriority()
+            || ( lhs->getPriority() == rhs->getPriority() && lhs < rhs );
     }
 
     inline void EventManager::Slot::invalidate( Slot* slot )
