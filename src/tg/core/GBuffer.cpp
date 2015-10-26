@@ -66,10 +66,8 @@ void tg::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
         GL_DRAW_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D,
-        buffer->getTextureObject(),
+        buffer ? buffer->getTextureObject() : 0,
         0); 
-
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 
     m_depthBuffer = std::move( buffer );
 }
