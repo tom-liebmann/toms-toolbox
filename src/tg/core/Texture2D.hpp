@@ -27,7 +27,24 @@ namespace tg
             GLenum format,
             GLenum type );
 
+        Texture2D();
+
         ~Texture2D();
+
+        void setFormat(
+            uint16_t width,
+            uint16_t height,
+            GLint internalFormat,
+            GLenum format,
+            GLenum type );
+
+        void setData(
+            uint16_t width,
+            uint16_t height,
+            GLint internalFormat,
+            GLenum format,
+            GLenum type,
+            const uint8_t* data );
 
         void setData(
             GLint internalFormat,
@@ -47,8 +64,6 @@ namespace tg
         void bind( GLenum unit ) const;
 
     private:
-        Texture2D();
-
         uint16_t m_width;
         uint16_t m_height;
 
