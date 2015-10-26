@@ -77,7 +77,7 @@ namespace tg
     {
         rot /= 114.5915590262;
         double sin = std::sin( rot );
-        Vector< Type, 3 > normAxis = axis.normalize();
+        Vector< Type, 3 > normAxis = axis / norm( axis );
         m_w = std::cos( rot );
         m_x = normAxis.x() * sin;
         m_y = normAxis.y() * sin;
@@ -96,7 +96,8 @@ namespace tg
     template< class Type >
     Quaternion< Type >::Quaternion( const Vector< Type, 3 >& from, const Vector< Type, 3 >& to )
     {
-        Vector< Type, 3 > halfVec = ( from + to ).normalize();
+        Vector< Type, 3 > halfVec = from + to;
+        halfVec = halfVec / norm( halfVec );
         m_w = halfVec * to;
         halfVec = halfVec % to;
         m_x = halfVec.x();
@@ -190,7 +191,7 @@ tg::Vector< Type, 3 > operator*(
     tg::Quaternion< Type > inv = quat.invert();
     tg::Quaternion< Type > x( 0, vec.x(), vec.y(), vec.z() );
     inv = quat * x * inv;
-    return tg::Vector< Type, 3 >( inv.x(), inv.y(), inv.z() );
+    return tg::Vector< Type, 3 >( { inv.x(), inv.y(), inv.z() } );
 }
 
 
