@@ -98,7 +98,7 @@ void tg::State::pushViewport( Viewport viewport )
 void tg::State::popViewport()
 {
     m_viewportStack.pop_back();
-    if( m_viewportStack.empty() )
+    if( !m_viewportStack.empty() )
     {
         const auto& viewport = m_viewportStack.back();
         glViewport(
