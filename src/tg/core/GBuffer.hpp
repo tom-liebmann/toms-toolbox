@@ -13,6 +13,7 @@
 namespace tg
 {
     class Texture2D;
+    class State;
 }
 
 
@@ -37,8 +38,8 @@ namespace tg
         void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
         void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
 
-        void begin() const;
-        void end() const;
+        void begin( State& state ) const;
+        void end( State& state ) const;
 
     private:
         GLuint m_frameBufferObject;            

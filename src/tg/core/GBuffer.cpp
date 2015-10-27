@@ -1,6 +1,7 @@
 #include "GBuffer.hpp"
 
 #include <tg/core/Texture2D.hpp>
+#include <tg/core/State.hpp>
 
 using namespace tg;
 
@@ -52,8 +53,6 @@ void tg::GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buff
         buffer->getTextureObject(),
         0 ); 
 
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-
     m_drawBuffers[ unit ] = std::move( buffer );
     m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
 }
@@ -72,7 +71,7 @@ void tg::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
     m_depthBuffer = std::move( buffer );
 }
 
-void tg::GBuffer::begin() const
+void tg::GBuffer::begin( State& state ) const
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
 
@@ -81,12 +80,12 @@ void tg::GBuffer::begin() const
     else
         glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
 
-//    graphState().pushViewport( 0, 0, m_width, m_height );
+    state.pushViewport( Viewport( 0, 0, getWidth(), getHeight() ) );
 }
 
-void tg::GBuffer::end() const
+void tg::GBuffer::end( State& state ) const
 {
-//    graphState().popViewport();
+    state.popViewport();
 
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 }
