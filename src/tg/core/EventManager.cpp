@@ -1,58 +1,66 @@
 #include "EventManager.hpp"
 
-tg::EventManager::~EventManager()
+#include <algorithm>
+
+namespace tg
 {
-    for( auto& listenerSet : m_listener )
+    struct EventManager::SlotCompare
     {
-        for( auto& listener : listenerSet.second )
+        bool operator()( tg::EventManager::Slot const& lhs, tg::EventManager::Slot const& rhs )
         {
-            if( listener->isValid() )
-                listener->m_valid = false;
-            else
-                delete listener;
+            return lhs.m_priority > rhs.m_priority;
         }
+    };
+}
+
+tg::EventManager::Slot::Slot( bool valid, uint32_t priority,
+                              std::shared_ptr< EventListener > listener )
+    : m_valid( valid ), m_priority( priority ), m_listener( std::move( listener ) )
+{
+}
+
+void tg::EventManager::addListener( Event::Type type, uint32_t priority,
+                                    std::shared_ptr< EventListener > listener )
+{
+    auto& container = m_listener[ type ];
+
+    container.emplace_back( true, priority, std::move( listener ) );
+    std::sort( std::begin( container ), std::end( container ), SlotCompare() );
+}
+
+void tg::EventManager::removeListener( Event::Type type,
+                                       std::shared_ptr< EventListener > const& listener )
+{
+    auto& container = m_listener[ type ];
+
+    auto iter = std::find_if( std::begin( container ), std::end( container ),
+                              [&listener]( Slot const& slot )
+                              {
+                                  return slot.m_listener == listener;
+                              } );
+
+    if( iter != std::end( container ) )
+    {
+        iter->m_valid = false;
+        iter->m_listener.reset();
     }
 }
 
-std::shared_ptr< tg::EventManager::Slot > tg::EventManager::addListener(
-    Event::Type type,
-    uint32_t priority,
-    std::shared_ptr< EventListener > listener )
+void tg::EventManager::runEvent( std::unique_ptr< Event > const& event )
 {
-    Slot* slot = new Slot( priority, std::move( listener ) );
+    auto& container = m_listener[ event->getType() ];
 
-    auto iter = m_listener.find( type );
-    if( iter == m_listener.end() )
+    for( auto iter = std::begin( container ); iter != std::end( container ); )
     {
-        std::set< Slot*, bool (*)( Slot*, Slot* ) > newSet( Slot::sort );
-        newSet.insert( slot );
-        m_listener[ type ] = std::move( newSet );
-    }
-    else
-        iter->second.insert( slot );
-
-    return std::shared_ptr< Slot >( slot, Slot::invalidate );
-}
-
-void tg::EventManager::runEvent( const std::unique_ptr< Event >& event )
-{
-    auto iter = m_listener.find( event->getType() );
-    if( iter != m_listener.end() )
-    {
-        for( auto i = iter->second.begin(); i != iter->second.end(); )
+        if( iter->m_valid )
         {
-            if( (*i)->isValid() )
-            {
-                if( (*i)->getListener()->event( event ) )
-                    break;
-                ++i;
-            }
+            if( iter->m_listener->event( event ) )
+                break;
             else
-            {
-                delete *i;
-                i = iter->second.erase( i );
-            }
+                ++iter;
         }
+        else
+            iter = container.erase( iter );
     }
 }
 
