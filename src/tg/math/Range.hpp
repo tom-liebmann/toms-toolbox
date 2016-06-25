@@ -22,6 +22,9 @@ namespace tg
         const T& getMin( size_t index ) const;
         const T& getMax( size_t index ) const;
 
+        Vector< T, D > const& getMinVector() const;
+        Vector< T, D > const& getMaxVector() const;
+
         bool contains( const Vector< T, D >& position ) const;
 
     private:
@@ -62,6 +65,18 @@ namespace tg
     inline const T& Range< T, D >::getMax( size_t index ) const
     {
         return m_max[ index ];
+    }
+
+    template< typename T, size_t D >
+    inline Vector< T, D > const& Range< T, D >::getMinVector() const
+    {
+        return m_min;
+    }
+
+    template< typename T, size_t D >
+    inline Vector< T, D > const& Range< T, D >::getMaxVector() const
+    {
+        return m_max;
     }
 
     template< typename T, size_t D >
