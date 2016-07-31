@@ -11,8 +11,7 @@ namespace
 {
     void pushEvent( GLFWwindow* window, std::unique_ptr< tg::Event > event )
     {
-        auto wnd = reinterpret_cast< tg::Window* >(
-            glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< tg::Window* >( glfwGetWindowUserPointer( window ) );
 
         auto eventManager = wnd->getEventManager();
 
@@ -23,11 +22,9 @@ namespace
 
 void tg::Window::callbackWindowClose( GLFWwindow* window )
 {
-    auto wnd = reinterpret_cast< tg::Window* >(
-        glfwGetWindowUserPointer( window ) );
+    auto wnd = reinterpret_cast< tg::Window* >( glfwGetWindowUserPointer( window ) );
 
-    pushEvent( window, std::unique_ptr< tg::Event >(
-        new tg::events::WindowClose( *wnd ) ) );
+    pushEvent( window, std::unique_ptr< tg::Event >( new tg::events::WindowClose( *wnd ) ) );
 }
 
 void tg::Window::callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
@@ -36,12 +33,12 @@ void tg::Window::callbackKey( GLFWwindow* window, int key, int scancode, int act
     {
         case GLFW_PRESS:
             pushEvent( window, std::unique_ptr< tg::Event >(
-                new tg::events::Key( key, tg::events::Key::Action::DOWN ) ) );
+                                   new tg::events::Key( key, tg::events::Key::Action::DOWN ) ) );
             break;
 
         case GLFW_RELEASE:
             pushEvent( window, std::unique_ptr< tg::Event >(
-                new tg::events::Key( key, tg::events::Key::Action::UP ) ) );
+                                   new tg::events::Key( key, tg::events::Key::Action::UP ) ) );
             break;
     }
 }
@@ -70,54 +67,45 @@ void tg::Window::callbackMouseButton( GLFWwindow* window, int button, int action
     double mouseX, mouseY;
     glfwGetCursorPos( window, &mouseX, &mouseY );
 
-    pushEvent( window, std::unique_ptr< tg::Event >(
-        new tg::events::MouseButton(
-            mouseButton,
-            action == GLFW_PRESS
-                ? tg::events::MouseButton::Action::DOWN
-                : tg::events::MouseButton::Action::UP,
-            mouseX,
-            mouseY ) ) );
+    pushEvent( window, std::unique_ptr< tg::Event >( new tg::events::MouseButton(
+                           mouseButton, action == GLFW_PRESS ? tg::events::MouseButton::Action::DOWN
+                                                             : tg::events::MouseButton::Action::UP,
+                           mouseX, mouseY ) ) );
 }
 
 void tg::Window::callbackMouseMove( GLFWwindow* window, double x, double y )
 {
-    pushEvent( window, std::unique_ptr< tg::Event >(
-        new tg::events::MouseMove( x, y ) ) );
+    pushEvent( window, std::unique_ptr< tg::Event >( new tg::events::MouseMove( x, y ) ) );
 }
 
 void tg::Window::callbackWindowSize( GLFWwindow* window, int width, int height )
 {
-    auto wnd = reinterpret_cast< tg::Window* >(
-        glfwGetWindowUserPointer( window ) );
+    auto wnd = reinterpret_cast< tg::Window* >( glfwGetWindowUserPointer( window ) );
 
-    wnd->m_mode = WindowMode(
-        width,
-        height,
-        wnd->m_mode.isFullscreen()
-    );
+    wnd->m_mode = WindowMode( width, height, wnd->m_mode.isFullscreen() );
 
     wnd->m_state->onWindowResize();
-        
+
+    pushEvent( window, std::unique_ptr< tg::Event >( new tg::events::WindowResize( *wnd ) ) );
+}
+
+void tg::Window::callbackScroll( GLFWwindow* window, double xoffset, double yoffset )
+{
     pushEvent( window, std::unique_ptr< tg::Event >(
-        new tg::events::WindowResize( *wnd ) ) );
+        new tg::events::Scroll( xoffset, yoffset )
+    ) );
 }
 
 tg::Window::Window( std::string title, WindowMode mode )
-    : m_title( std::move( title ) )
-    , m_mode( std::move( mode ) )
+    : m_title( std::move( title ) ), m_mode( std::move( mode ) )
 {
     if( s_windowCount == 0 )
         glfwInit();
 
-//    glfwWindowHint( GLFW_DECORATED, GL_FALSE );
+    //    glfwWindowHint( GLFW_DECORATED, GL_FALSE );
 
-    m_handle = glfwCreateWindow(
-        m_mode.getWidth(),
-        m_mode.getHeight(),
-        m_title.c_str(),
-        m_mode.getMonitor().getHandle(),
-        nullptr );
+    m_handle = glfwCreateWindow( m_mode.getWidth(), m_mode.getHeight(), m_title.c_str(),
+                                 m_mode.getMonitor().getHandle(), nullptr );
 
     glfwSetWindowUserPointer( m_handle, this );
 
@@ -127,13 +115,14 @@ tg::Window::Window( std::string title, WindowMode mode )
     glfwSetMouseButtonCallback( m_handle, callbackMouseButton );
     glfwSetCursorPosCallback( m_handle, callbackMouseMove );
     glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
+    glfwSetScrollCallback( m_handle, callbackScroll );
 
     glfwMakeContextCurrent( m_handle );
 
-    #ifdef GLEW_STATIC
-        if( s_windowCount == 0 )
-            glewInit();
-    #endif
+#ifdef GLEW_STATIC
+    if( s_windowCount == 0 )
+        glewInit();
+#endif
 
     m_state.reset( new State( *this ) );
 
@@ -146,7 +135,7 @@ tg::Window::~Window()
 
     --s_windowCount;
 
-    if( s_windowCount == 0)
+    if( s_windowCount == 0 )
         glfwTerminate();
 }
 
@@ -162,8 +151,5 @@ void tg::Window::setEventManager( const std::shared_ptr< EventManager >& eventMa
 
     if( eventManager )
         eventManager->pushEvent(
-            std::unique_ptr< tg::Event >(
-                new tg::events::WindowResize( *this )
-            )
-        );
+            std::unique_ptr< tg::Event >( new tg::events::WindowResize( *this ) ) );
 }

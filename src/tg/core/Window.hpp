@@ -39,6 +39,7 @@ namespace tg
         static void callbackMouseButton( GLFWwindow* window, int button, int action, int mods );
         static void callbackMouseMove( GLFWwindow* window, double x, double y );
         static void callbackWindowSize( GLFWwindow* window, int width, int height );
+        static void callbackScroll( GLFWwindow* window, double xoffset, double yoffset );
 
         static uint8_t s_windowCount;
 

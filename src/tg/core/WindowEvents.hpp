@@ -7,16 +7,16 @@ namespace tg
 {
     namespace events
     {
-        constexpr Event::Type KEY           = 0;
-        constexpr Event::Type MOUSE_BUTTON  = 1;
-        constexpr Event::Type MOUSE_MOVE    = 2;
-        constexpr Event::Type WINDOW_CLOSE  = 3;
+        constexpr Event::Type KEY = 0;
+        constexpr Event::Type MOUSE_BUTTON = 1;
+        constexpr Event::Type MOUSE_MOVE = 2;
+        constexpr Event::Type WINDOW_CLOSE = 3;
         constexpr Event::Type WINDOW_RESIZE = 4;
+        constexpr Event::Type SCROLL = 5;
 
 
 
-        class Key
-            : public Event
+        class Key : public Event
         {
         public:
             enum class Action;
@@ -44,8 +44,7 @@ namespace tg
 
 
 
-        class MouseButton
-            : public Event
+        class MouseButton : public Event
         {
         public:
             enum class Button;
@@ -88,8 +87,7 @@ namespace tg
 
 
 
-        class MouseMove
-            : public Event
+        class MouseMove : public Event
         {
         public:
             MouseMove( double x, double y );
@@ -107,8 +105,7 @@ namespace tg
 
 
 
-        class WindowClose
-            : public Event
+        class WindowClose : public Event
         {
         public:
             WindowClose( Window& window );
@@ -124,8 +121,7 @@ namespace tg
 
 
 
-        class WindowResize
-            : public Event
+        class WindowResize : public Event
         {
         public:
             WindowResize( Window& window );
@@ -137,6 +133,24 @@ namespace tg
 
         private:
             Window& m_window;
+        };
+
+
+
+        class Scroll : public Event
+        {
+        public:
+            Scroll( double xoffset, double yoffset );
+
+            double getXOffset() const;
+            double getYOffset() const;
+
+            // Event
+            virtual Type getType() const override;
+
+        private:
+            double m_xoffset;
+            double m_yoffset;
         };
     }
 }
@@ -150,10 +164,9 @@ namespace tg
 {
     namespace events
     {
-        inline Key::Key( uint32_t key, Action action )
-            : m_key( key )
-            , m_action( action )
-        { }
+        inline Key::Key( uint32_t key, Action action ) : m_key( key ), m_action( action )
+        {
+        }
 
         inline uint32_t Key::getKey() const
         {
@@ -173,11 +186,9 @@ namespace tg
 
 
         inline MouseButton::MouseButton( Button button, Action action, double x, double y )
-            : m_button( button )
-            , m_action( action )
-            , m_x( x )
-            , m_y( y )
-        { }
+            : m_button( button ), m_action( action ), m_x( x ), m_y( y )
+        {
+        }
 
         inline MouseButton::Button MouseButton::getButton() const
         {
@@ -206,10 +217,9 @@ namespace tg
 
 
 
-        inline MouseMove::MouseMove( double x, double y )
-            : m_x( x )
-            , m_y( y )
-        { }
+        inline MouseMove::MouseMove( double x, double y ) : m_x( x ), m_y( y )
+        {
+        }
 
         inline double MouseMove::getX() const
         {
@@ -228,9 +238,9 @@ namespace tg
 
 
 
-        inline WindowClose::WindowClose( Window& window )
-            : m_window( window )
-        { }
+        inline WindowClose::WindowClose( Window& window ) : m_window( window )
+        {
+        }
 
         inline Window& WindowClose::getWindow()
         {
@@ -244,9 +254,9 @@ namespace tg
 
 
 
-        inline WindowResize::WindowResize( Window& window )
-            : m_window( window )
-        { }
+        inline WindowResize::WindowResize( Window& window ) : m_window( window )
+        {
+        }
 
         inline Window& WindowResize::getWindow()
         {
@@ -256,6 +266,28 @@ namespace tg
         inline Event::Type WindowResize::getType() const
         {
             return WINDOW_RESIZE;
+        }
+
+
+
+        inline Scroll::Scroll( double xoffset, double yoffset )
+            : m_xoffset( xoffset ), m_yoffset( yoffset )
+        {
+        }
+
+        inline double Scroll::getXOffset() const
+        {
+            return m_xoffset;
+        }
+
+        inline double Scroll::getYOffset() const
+        {
+            return m_yoffset;
+        }
+
+        inline Event::Type Scroll::getType() const
+        {
+            return SCROLL;
         }
     }
 }
