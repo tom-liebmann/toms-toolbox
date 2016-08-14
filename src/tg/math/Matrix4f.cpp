@@ -165,26 +165,6 @@ tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 )
     return result;
 }
 
-tg::Vector< float, 3 > operator*( const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec )
-{
-    float v[ 4 ];
-    for( int y = 0; y < 4; y++ )
-    {
-        v[ y ] = 0;
-        for( int i = 0; i < 4; i++ )
-            v[ y ] += mat[ i + y * 4 ] * ( i < 3 ? vec[ i ] : 1.0f );
-    }
-
-    if( v[ 3 ] < -1e-7 || v[ 3 ] > 1e-7 )
-    {
-        v[ 0 ] /= v[ 3 ];
-        v[ 1 ] /= v[ 3 ];
-        v[ 2 ] /= v[ 3 ];
-    }
-
-    return tg::Vector< float, 3 >( { v[ 0 ], v[ 1 ], v[ 2 ] } );
-}
-
 std::ostream& operator<<( std::ostream& stream, const tg::Matrix4f& matrix )
 {
     return stream << "/" << matrix[ 0 ] << ", " << matrix[ 1 ] << ", " << matrix[ 2 ] << ", "

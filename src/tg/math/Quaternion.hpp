@@ -98,8 +98,8 @@ namespace tg
     {
         Vector< Type, 3 > halfVec = from + to;
         halfVec = halfVec / norm( halfVec );
-        m_w = halfVec * to;
-        halfVec = halfVec % to;
+        m_w = dot( halfVec, to );
+        halfVec = cross( halfVec, to );
         m_x = halfVec.x();
         m_y = halfVec.y();
         m_z = halfVec.z();

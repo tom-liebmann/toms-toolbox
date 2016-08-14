@@ -72,6 +72,38 @@ namespace tg
 }
 
 tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 );
-tg::Vector< float, 3 > operator*( const tg::Matrix4f& mat, const tg::Vector< float, 3 >& vec );
+
+template < typename T >
+tg::Vector< decltype( std::declval< T >() * std::declval< float >() ), 3 > operator*(
+    tg::Matrix4f const& matrix, tg::Vector< T, 3 > const& vector );
 
 std::ostream& operator<<( std::ostream& stream, const tg::Matrix4f& matrix );
+
+
+
+// definition
+//=================================================================================================
+
+template < typename T >
+tg::Vector< decltype( std::declval< T >() * std::declval< float >() ), 3 > operator*(
+    tg::Matrix4f const& matrix, tg::Vector< T, 3 > const& vector )
+{
+    using result_type = decltype( std::declval< T >() * std::declval< float >() );
+
+    result_type v[ 4 ];
+    for( int y = 0; y < 4; y++ )
+    {
+        v[ y ] = 0;
+        for( int i = 0; i < 4; i++ )
+            v[ y ] += matrix[ i + y * 4 ] * ( i < 3 ? vector[ i ] : 1.0f );
+    }
+
+    if( v[ 3 ] < -1e-7 || v[ 3 ] > 1e-7 )
+    {
+        v[ 0 ] /= v[ 3 ];
+        v[ 1 ] /= v[ 3 ];
+        v[ 2 ] /= v[ 3 ];
+    }
+
+    return tg::Vector< result_type, 3 >( { v[ 0 ], v[ 1 ], v[ 2 ] } );
+}
