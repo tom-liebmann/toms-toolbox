@@ -46,6 +46,12 @@ namespace tg
     private:
         std::array< T, size > m_values;
     };
+
+    template < typename T, size_t... D >
+    bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
+
+    template < typename T, size_t... D >
+    bool operator!=( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
 }
 
 
@@ -83,12 +89,6 @@ template < typename T1, typename T2, size_t... D >
 tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs );
 
 template < typename T, size_t... D >
-bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
-
-template < typename T, size_t... D >
-bool operator!=( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
-
-template < class T, size_t... D >
 std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor );
 
 
@@ -175,6 +175,24 @@ namespace tg
     {
         static_assert( size > 2 && order == 1, "Wrong tensor type!" );
         return m_values[ 2 ];
+    }
+
+    template < typename T, size_t... D >
+    bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            if( lhs[ i ] != rhs[ i ] )
+                return false;
+        return true;
+    }
+
+    template < typename T, size_t... D >
+    bool operator!=( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            if( lhs[ i ] != rhs[ i ] )
+                return true;
+        return false;
     }
 }
 
@@ -272,24 +290,6 @@ tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs )
         lhs[ i ] /= rhs;
 
     return lhs;
-}
-
-template < typename T, size_t... D >
-bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        if( lhs[ i ] != rhs[ i ] )
-            return false;
-    return true;
-}
-
-template < typename T, size_t... D >
-bool operator!=( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        if( lhs[ i ] != rhs[ i ] )
-            return true;
-    return false;
 }
 
 template < class T, size_t... D >
