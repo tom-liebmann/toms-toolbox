@@ -3,32 +3,29 @@
 #include <tg/math/Tensor.hpp>
 
 #include <cmath>
-
-
+#include <utility>
 
 // declarations
 //=============================================================================
 
 namespace tg
 {
-    template< typename T, size_t D >
+    template < typename T, size_t D >
     using Vector = Tensor< T, D >;
 
-    template< typename T, size_t D >
-    T norm( const Vector< T, D >& vec );
+    template < typename T, size_t D >
+    T norm( Vector< T, D > const& vec );
 
-    template< typename T, size_t D >
-    T norm2( const Vector< T, D >& vec );
+    template < typename T, size_t D >
+    T norm2( Vector< T, D > const& vec );
 
-    template< typename T1, typename T2 >
-    Vector< decltype( T1() * T2() ), 3 > cross(
-        const Vector< T1, 3 >& lhs,
-        const Vector< T2, 3 >& rhs );
+    template < typename T1, typename T2 >
+    Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 > cross(
+        Vector< T1, 3 > const& lhs, Vector< T2, 3 > const& rhs );
 
-    template< typename T1, typename T2, size_t D >
-    decltype( T1() * T2() ) dot(
-        const Vector< T1, D >& lhs,
-        const Vector< T2, D >& rhs );
+    template < typename T1, typename T2, size_t D >
+    decltype( std::declval< T1 >() * std::declval< T2 >() ) dot( Vector< T1, D > const& lhs,
+                                                                 Vector< T2, D > const& rhs );
 }
 
 
@@ -38,14 +35,15 @@ namespace tg
 
 namespace tg
 {
-    template< typename T, size_t D >
-    T norm( const Vector< T, D >& vec )
+    template < typename T, size_t D >
+    T norm( Vector< T, D > const& vec )
     {
-        return std::sqrt( norm2( vec ) );
+        using std::sqrt;
+        return sqrt( norm2( vec ) );
     }
 
-    template< typename T, size_t D >
-    T norm2( const Vector< T, D >& vec )
+    template < typename T, size_t D >
+    T norm2( Vector< T, D > const& vec )
     {
         T result = 0;
 
@@ -55,24 +53,20 @@ namespace tg
         return result;
     }
 
-    template< typename T1, typename T2 >
-    Vector< decltype( T1() * T2() ), 3 > cross(
-        const Vector< T1, 3 >& lhs,
-        const Vector< T2, 3 >& rhs )
+    template < typename T1, typename T2 >
+    Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 > cross(
+        Vector< T1, 3 > const& lhs, Vector< T2, 3 > const& rhs )
     {
-        return Vector< decltype( T1() * T2() ), 3 >( {
-            lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ],
-            lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
-            lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ]
-        } );
+        return Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 >(
+            { lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ], lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
+              lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ] } );
     }
 
-    template< typename T1, typename T2, size_t D >
-    decltype( T1() * T2() ) dot(
-        const Vector< T1, D >& lhs,
-        const Vector< T2, D >& rhs )
+    template < typename T1, typename T2, size_t D >
+    decltype( std::declval< T1 >() * std::declval< T2 >() ) dot( Vector< T1, D > const& lhs,
+                                                                 Vector< T2, D > const& rhs )
     {
-        decltype( T1() * T2() ) result = 0;
+        decltype( std::declval< T1 >() * std::declval< T2 >() ) result = 0;
 
         for( size_t i = 0; i < D; ++i )
             result += lhs[ i ] * rhs[ i ];

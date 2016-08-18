@@ -146,33 +146,33 @@ namespace tg
                          ( m_v[ 0 ] * m_v[ 5 ] - m_v[ 1 ] * m_v[ 4 ] ) / det, 0.0f, 0.0f, 0.0f,
                          0.0f, 1.0f );
     }
-}
 
 
 
-tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 )
-{
-    tg::Matrix4f result;
-    for( size_t x = 0; x < 4; x++ )
-        for( size_t y = 0; y < 4; y++ )
-        {
-            result[ x + y * 4 ] = 0.0f;
+    tg::Matrix4f operator*( const tg::Matrix4f& mat1, const tg::Matrix4f& mat2 )
+    {
+        tg::Matrix4f result;
+        for( size_t x = 0; x < 4; x++ )
+            for( size_t y = 0; y < 4; y++ )
+            {
+                result[ x + y * 4 ] = 0.0f;
 
-            for( size_t i = 0; i < 4; i++ )
-                result[ x + y * 4 ] += mat1[ i + y * 4 ] * mat2[ x + i * 4 ];
-        }
+                for( size_t i = 0; i < 4; i++ )
+                    result[ x + y * 4 ] += mat1[ i + y * 4 ] * mat2[ x + i * 4 ];
+            }
 
-    return result;
-}
+        return result;
+    }
 
-std::ostream& operator<<( std::ostream& stream, const tg::Matrix4f& matrix )
-{
-    return stream << "/" << matrix[ 0 ] << ", " << matrix[ 1 ] << ", " << matrix[ 2 ] << ", "
-                  << matrix[ 3 ] << "\\" << std::endl
-                  << "|" << matrix[ 4 ] << ", " << matrix[ 5 ] << ", " << matrix[ 6 ] << ", "
-                  << matrix[ 7 ] << "|" << std::endl
-                  << "|" << matrix[ 8 ] << ", " << matrix[ 9 ] << ", " << matrix[ 10 ] << ", "
-                  << matrix[ 11 ] << "|" << std::endl
-                  << "\\" << matrix[ 12 ] << ", " << matrix[ 13 ] << ", " << matrix[ 14 ] << ", "
-                  << matrix[ 15 ] << "/";
+    std::ostream& operator<<( std::ostream& stream, const tg::Matrix4f& matrix )
+    {
+        return stream << "/" << matrix[ 0 ] << ", " << matrix[ 1 ] << ", " << matrix[ 2 ] << ", "
+                      << matrix[ 3 ] << "\\" << std::endl
+                      << "|" << matrix[ 4 ] << ", " << matrix[ 5 ] << ", " << matrix[ 6 ] << ", "
+                      << matrix[ 7 ] << "|" << std::endl
+                      << "|" << matrix[ 8 ] << ", " << matrix[ 9 ] << ", " << matrix[ 10 ] << ", "
+                      << matrix[ 11 ] << "|" << std::endl
+                      << "\\" << matrix[ 12 ] << ", " << matrix[ 13 ] << ", " << matrix[ 14 ]
+                      << ", " << matrix[ 15 ] << "/";
+    }
 }

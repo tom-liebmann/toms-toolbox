@@ -47,50 +47,53 @@ namespace tg
         std::array< T, size > m_values;
     };
 
+
+
     template < typename T, size_t... D >
     bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
 
     template < typename T, size_t... D >
     bool operator!=( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator+( const tg::Tensor< T1, D... >& lhs,
+                                                           const tg::Tensor< T2, D... >& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator-( const tg::Tensor< T1, D... >& lhs,
+                                                           const tg::Tensor< T2, D... >& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator+=( tg::Tensor< T1, D... >& lhs,
+                                        const tg::Tensor< T2, D... >& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator-=( tg::Tensor< T1, D... >& lhs,
+                                        const tg::Tensor< T2, D... >& rhs );
+
+    template < typename T1, typename T2, size_t... D,
+               typename Enabled = typename std::enable_if< std::is_arithmetic< T2 >::value >::type >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator*( const tg::Tensor< T1, D... >& lhs,
+                                                           T2 rhs );
+
+    template < typename T1, typename T2, size_t... D,
+               typename Enabled = typename std::enable_if< std::is_arithmetic< T1 >::value >::type >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator*( T1 lhs,
+                                                           const tg::Tensor< T2, D... >& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< decltype( T1() / T2() ), D... > operator/( const tg::Tensor< T1, D... >& lhs,
+                                                           T2 rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator*=( tg::Tensor< T1, D... >& lhs, const T2& rhs );
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs );
+
+    template < typename T, size_t... D >
+    std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor );
 }
-
-
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator+( const tg::Tensor< T1, D... >& lhs,
-                                                       const tg::Tensor< T2, D... >& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator-( const tg::Tensor< T1, D... >& lhs,
-                                                       const tg::Tensor< T2, D... >& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator+=( tg::Tensor< T1, D... >& lhs,
-                                    const tg::Tensor< T2, D... >& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator-=( tg::Tensor< T1, D... >& lhs,
-                                    const tg::Tensor< T2, D... >& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator*( const tg::Tensor< T1, D... >& lhs, T2 rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator*( T1 lhs, const tg::Tensor< T2, D... >& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator/( const tg::Tensor< T1, D... >& lhs,
-                                                       const T2& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator*=( tg::Tensor< T1, D... >& lhs, const T2& rhs );
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs );
-
-template < typename T, size_t... D >
-std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor );
-
 
 
 // definitions
@@ -177,6 +180,8 @@ namespace tg
         return m_values[ 2 ];
     }
 
+
+
     template < typename T, size_t... D >
     bool operator==( tg::Tensor< T, D... > const& lhs, tg::Tensor< T, D... > const& rhs )
     {
@@ -194,113 +199,115 @@ namespace tg
                 return true;
         return false;
     }
-}
 
-
-
-template < typename T1, typename T2, size_t... D >
-inline tg::Tensor< decltype( T1() * T2() ), D... > operator+( const tg::Tensor< T1, D... >& lhs,
-                                                              const tg::Tensor< T2, D... >& rhs )
-{
-    tg::Tensor< decltype( T1() * T2() ), D... > result;
-
-    for( size_t i = 0; i < result.size; ++i )
-        result[ i ] = lhs[ i ] + rhs[ i ];
-
-    return result;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator-( const tg::Tensor< T1, D... >& lhs,
-                                                       const tg::Tensor< T2, D... >& rhs )
-{
-    tg::Tensor< decltype( T1() * T2() ), D... > result;
-
-    for( size_t i = 0; i < result.size; ++i )
-        result[ i ] = lhs[ i ] - rhs[ i ];
-
-    return result;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator+=( tg::Tensor< T1, D... >& lhs, const tg::Tensor< T2, D... >& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        lhs[ i ] += rhs[ i ];
-
-    return lhs;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator-=( tg::Tensor< T1, D... >& lhs, const tg::Tensor< T2, D... >& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        lhs[ i ] -= rhs[ i ];
-
-    return lhs;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator*( const tg::Tensor< T1, D... >& lhs, T2 rhs )
-{
-    tg::Tensor< decltype( T1() * T2() ), D... > result;
-
-    for( size_t i = 0; i < lhs.size; ++i )
-        result[ i ] = lhs[ i ] * rhs;
-
-    return result;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator*( T1 lhs, const tg::Tensor< T2, D... >& rhs )
-{
-    tg::Tensor< decltype( T1() * T2() ), D... > result;
-
-    for( size_t i = 0; i < rhs.size; ++i )
-        result[ i ] = lhs * rhs[ i ];
-
-    return result;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< decltype( T1() * T2() ), D... > operator/( const tg::Tensor< T1, D... >& lhs,
-                                                       const T2& rhs )
-{
-    tg::Tensor< decltype( T1() * T2() ), D... > result;
-
-    for( size_t i = 0; i < lhs.size; ++i )
-        result[ i ] = lhs[ i ] / rhs;
-
-    return result;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator*=( tg::Tensor< T1, D... >& lhs, const T2& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        lhs[ i ] *= rhs;
-
-    return lhs;
-}
-
-template < typename T1, typename T2, size_t... D >
-tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs )
-{
-    for( size_t i = 0; i < lhs.size; ++i )
-        lhs[ i ] /= rhs;
-
-    return lhs;
-}
-
-template < class T, size_t... D >
-std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor )
-{
-    stream << "(";
-    for( size_t i = 0; i < tensor.size; ++i )
+    template < typename T1, typename T2, size_t... D >
+    inline tg::Tensor< decltype( T1() * T2() ), D... > operator+(
+        const tg::Tensor< T1, D... >& lhs, const tg::Tensor< T2, D... >& rhs )
     {
-        if( i != 0 )
-            stream << ", ";
-        stream << tensor[ i ];
+        tg::Tensor< decltype( T1() * T2() ), D... > result;
+
+        for( size_t i = 0; i < result.size; ++i )
+            result[ i ] = lhs[ i ] + rhs[ i ];
+
+        return result;
     }
-    stream << ")";
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator-( const tg::Tensor< T1, D... >& lhs,
+                                                           const tg::Tensor< T2, D... >& rhs )
+    {
+        tg::Tensor< decltype( T1() * T2() ), D... > result;
+
+        for( size_t i = 0; i < result.size; ++i )
+            result[ i ] = lhs[ i ] - rhs[ i ];
+
+        return result;
+    }
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator+=( tg::Tensor< T1, D... >& lhs,
+                                        const tg::Tensor< T2, D... >& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            lhs[ i ] += rhs[ i ];
+
+        return lhs;
+    }
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator-=( tg::Tensor< T1, D... >& lhs,
+                                        const tg::Tensor< T2, D... >& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            lhs[ i ] -= rhs[ i ];
+
+        return lhs;
+    }
+
+    template < typename T1, typename T2, size_t... D, typename Enabled >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator*( const tg::Tensor< T1, D... >& lhs,
+                                                           T2 rhs )
+    {
+        tg::Tensor< decltype( T1() * T2() ), D... > result;
+
+        for( size_t i = 0; i < lhs.size; ++i )
+            result[ i ] = lhs[ i ] * rhs;
+
+        return result;
+    }
+
+    template < typename T1, typename T2, size_t... D, typename Enabled >
+    tg::Tensor< decltype( T1() * T2() ), D... > operator*( T1 lhs,
+                                                           const tg::Tensor< T2, D... >& rhs )
+    {
+        tg::Tensor< decltype( T1() * T2() ), D... > result;
+
+        for( size_t i = 0; i < rhs.size; ++i )
+            result[ i ] = lhs * rhs[ i ];
+
+        return result;
+    }
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< decltype( T1() / T2() ), D... > operator/( const tg::Tensor< T1, D... >& lhs,
+                                                           T2 rhs )
+    {
+        tg::Tensor< decltype( T1() / T2() ), D... > result;
+
+        for( size_t i = 0; i < lhs.size; ++i )
+            result[ i ] = lhs[ i ] / rhs;
+
+        return result;
+    }
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator*=( tg::Tensor< T1, D... >& lhs, const T2& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            lhs[ i ] *= rhs;
+
+        return lhs;
+    }
+
+    template < typename T1, typename T2, size_t... D >
+    tg::Tensor< T1, D... >& operator/=( tg::Tensor< T1, D... >& lhs, const T2& rhs )
+    {
+        for( size_t i = 0; i < lhs.size; ++i )
+            lhs[ i ] /= rhs;
+
+        return lhs;
+    }
+
+    template < class T, size_t... D >
+    std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor )
+    {
+        stream << "(";
+        for( size_t i = 0; i < tensor.size; ++i )
+        {
+            if( i != 0 )
+                stream << ", ";
+            stream << tensor[ i ];
+        }
+        stream << ")";
+    }
 }
