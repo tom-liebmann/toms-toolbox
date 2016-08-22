@@ -4,6 +4,7 @@
 
 #include <array>
 #include <iostream>
+#include <cmath>
 
 
 
@@ -93,6 +94,12 @@ namespace tg
 
     template < typename T, size_t... D >
     std::ostream& operator<<( std::ostream& stream, const tg::Tensor< T, D... >& tensor );
+
+    template < typename T, size_t... D >
+    Tensor< T, D... > min( Tensor< T, D... > const& lhs, Tensor< T, D... > const& rhs );
+
+    template < typename T, size_t... D >
+    Tensor< T, D... > max( Tensor< T, D... > const& lhs, Tensor< T, D... > const& rhs );
 }
 
 
@@ -309,5 +316,31 @@ namespace tg
             stream << tensor[ i ];
         }
         stream << ")";
+    }
+
+    template < typename T, size_t... D >
+    Tensor< T, D... > min( Tensor< T, D... > const& lhs, Tensor< T, D... > const& rhs )
+    {
+        using std::min;
+
+        Tensor< T, D... > result;
+
+        for( size_t i = 0; i < lhs.size; ++i )
+            result[ i ] = min( lhs[ i ], rhs[ i ] );
+
+        return result;
+    }
+
+    template < typename T, size_t... D >
+    Tensor< T, D... > max( Tensor< T, D... > const& lhs, Tensor< T, D... > const& rhs )
+    {
+        using std::max;
+
+        Tensor< T, D... > result;
+
+        for( size_t i = 0; i < lhs.size; ++i )
+            result[ i ] = max( lhs[ i ], rhs[ i ] );
+
+        return result;
     }
 }

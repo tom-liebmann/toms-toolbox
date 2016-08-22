@@ -129,7 +129,8 @@ namespace tg
     template < typename T, size_t D >
     inline Range< T, D > intersect( const Range< T, D >& lhs, const Range< T, D >& rhs )
     {
-        using namespace std;
+        using std::max;
+        using std::min;
         return Range< T, D >( Vector< T, D >( { max( lhs.getMin( 0 ), rhs.getMin( 0 ) ),
                                                 max( lhs.getMin( 1 ), rhs.getMin( 1 ) ) } ),
                               Vector< T, D >( { min( lhs.getMax( 0 ), rhs.getMax( 0 ) ),
