@@ -37,12 +37,15 @@ namespace tg
 
         // projection
         void setProjectionMatrix( const tg::Matrix4f& matrix );
+        tg::Matrix4f const& getProjectionMatrix() const;
 
         // modelview
         void pushMatrix();
         void popMatrix();
         void setMatrix( const tg::Matrix4f& matrix );
         void applyMatrix( const tg::Matrix4f& matrix );
+
+        tg::Matrix4f const& getModelViewMatrix() const;
 
         // shader
         void pushShader( std::shared_ptr< ShaderProgram > shader );

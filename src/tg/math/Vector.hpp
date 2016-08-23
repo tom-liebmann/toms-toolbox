@@ -19,6 +19,9 @@ namespace tg
     template < typename T, size_t D >
     T norm2( Vector< T, D > const& vec );
 
+    template < typename T, size_t D >
+    Vector< T, D > normalize( Vector< T, D > const& vec );
+
     template < typename T1, typename T2 >
     Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 > cross(
         Vector< T1, 3 > const& lhs, Vector< T2, 3 > const& rhs );
@@ -51,6 +54,12 @@ namespace tg
             result += vec[ i ] * vec[ i ];
 
         return result;
+    }
+
+    template < typename T, size_t D >
+    Vector< T, D > normalize( Vector< T, D > const& vec )
+    {
+        return vec / norm( vec );
     }
 
     template < typename T1, typename T2 >

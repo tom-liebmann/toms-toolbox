@@ -25,7 +25,22 @@ tg::ShaderProgram::ShaderProgram(
 
     glLinkProgram( m_programObject );
 
-    // TODO: check for errors
+    // check error log for info
+    GLint linkStatus;
+    glGetProgramiv( m_programObject, GL_LINK_STATUS, &linkStatus );
+
+    if( linkStatus != GL_TRUE )
+    {
+        GLint size;
+        glGetProgramiv( m_programObject, GL_INFO_LOG_LENGTH, &size );
+        GLchar* log = new GLchar[ size + 1 ];
+        glGetProgramInfoLog( m_programObject, size, NULL, log );
+
+        std::cout << "################ ERROR ################" << std::endl;
+        std::cout << log << std::endl;
+
+        delete[] log;
+    }
 }
 
 tg::ShaderProgram::~ShaderProgram()

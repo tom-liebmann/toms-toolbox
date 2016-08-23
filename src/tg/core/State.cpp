@@ -33,6 +33,11 @@ void tg::State::setProjectionMatrix( const tg::Matrix4f& matrix )
     m_projectionMatrixSet = false;
 }
 
+tg::Matrix4f const& tg::State::getProjectionMatrix() const
+{
+    return *m_projectionMatrix;
+}
+
 void tg::State::pushMatrix()
 {
     m_modelViewMatrixStack.push_back( 
@@ -60,6 +65,11 @@ void tg::State::applyMatrix( const tg::Matrix4f& matrix )
         (*m_modelViewMatrixStack.back()) * matrix );
 
     m_modelViewMatrixSet = false;
+}
+
+tg::Matrix4f const& tg::State::getModelViewMatrix() const
+{
+    return *m_modelViewMatrixStack.back();
 }
 
 void tg::State::pushShader( std::shared_ptr< ShaderProgram > shader )

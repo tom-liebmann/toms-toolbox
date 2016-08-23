@@ -51,17 +51,19 @@ tg::Shader::Shader( Type type, const char* code )
     glCompileShader( m_shaderObject );
 
     // check error log for info
-    GLint size;
-    glGetShaderiv( m_shaderObject, GL_INFO_LOG_LENGTH, &size );
+    GLint compileStatus;
+    glGetShaderiv( m_shaderObject, GL_COMPILE_STATUS, &compileStatus );
 
-    if( size > 1 )
+    if( compileStatus != GL_TRUE )
     {
+        GLint size;
+        glGetShaderiv( m_shaderObject, GL_INFO_LOG_LENGTH, &size );
         GLchar* log = new GLchar[ size + 1 ];
         glGetShaderInfoLog( m_shaderObject, size, NULL, log );
 
-        std::cout << "################ ERROR ################" << std::endl;
-        std::cout << code << std::endl;
         std::cout << "################ CODE #################" << std::endl;
+        std::cout << code << std::endl;
+        std::cout << "################ ERROR ################" << std::endl;
         std::cout << log << std::endl;
 
         delete[] log;
