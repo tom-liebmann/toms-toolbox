@@ -91,6 +91,11 @@ void tg::VertexBuffer::render( State& state ) const
 
     glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_iBufferObject );
     glDrawElements( m_mode, m_iBuffer.size(), GL_UNSIGNED_INT, 0 );
+
+    for( GLuint index = 0; index < m_attributes->size(); ++index )
+    {
+        glDisableVertexAttribArray( index );
+    }
 }
 
 
