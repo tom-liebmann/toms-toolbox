@@ -54,8 +54,6 @@ ENDFOREACH()
 
 
 # Export build tree to Targets.cmake file.
-SET( CONF_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/include" )
-
 EXPORT(
     TARGETS tgCore tgMath tgNet tgTools
     FILE "${PROJECT_BINARY_DIR}/TengomTargets.cmake"
