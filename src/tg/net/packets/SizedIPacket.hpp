@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tg/net/IPacket.hpp>
+#include <tg/net/Endianess.hpp>
 
 #include <vector>
 
@@ -20,11 +21,10 @@ namespace tg
 
 namespace tg
 {
-    class SizedIPacket
-        : public IPacket
+    class SizedIPacket : public IPacket
     {
     public:
-        SizedIPacket( TCPSocket& socket );
+        SizedIPacket( TCPSocket& socket, Endianess endianess = Endianess::LITTLEENDIAN );
 
         // IPacket
         virtual const uint8_t* getData() const override;
@@ -33,5 +33,6 @@ namespace tg
 
     private:
         std::vector< uint8_t > m_data;
+        Endianess m_endianess;
     };
 }

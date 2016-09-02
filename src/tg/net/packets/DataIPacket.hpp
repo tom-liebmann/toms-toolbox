@@ -1,8 +1,10 @@
 #pragma once
 
 #include <tg/net/IPacket.hpp>
+#include <tg/net/Endianess.hpp>
 
 #include <memory>
+#include <algorithm>
 
 
 
@@ -11,13 +13,12 @@
 
 namespace tg
 {
-    class DataIPacket
-        : public IPacket
+    class DataIPacket : public IPacket
     {
     public:
-        DataIPacket( const IPacket& frame );
+        DataIPacket( const IPacket& frame, Endianess endianess = Endianess::LITTLEENDIAN );
 
-        template< typename T >
+        template < typename T >
         T read();
 
         // IPacket
@@ -28,6 +29,7 @@ namespace tg
     private:
         const IPacket& m_frame;
 
+        Endianess m_endianess;
         size_t m_offset;
     };
 }
@@ -39,19 +41,26 @@ namespace tg
 
 namespace tg
 {
-    inline DataIPacket::DataIPacket( const IPacket& frame )
-        : m_frame( frame )
-        , m_offset( 0 )
-    { }
+    inline DataIPacket::DataIPacket( const IPacket& frame, Endianess endianess )
+        : m_frame( frame ), m_endianess( endianess ), m_offset( 0 )
+    {
+    }
 
-    template< typename T >
+    template < typename T >
     inline T DataIPacket::read()
     {
         T result = *reinterpret_cast< const T* >( m_frame.getData() + m_offset );
+
+        if( m_endianess != nativeEndianess() )
+        {
+            std::reverse( reinterpret_cast< uint8_t* >( &result ),
+                          reinterpret_cast< uint8_t* >( &result ) + sizeof( T ) );
+        }
+
         m_offset += sizeof( T );
         return result;
     }
 
-    template<>
+    template <>
     std::string DataIPacket::read< std::string >();
 }

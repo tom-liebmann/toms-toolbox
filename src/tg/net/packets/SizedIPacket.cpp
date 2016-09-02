@@ -4,10 +4,13 @@
 
 namespace tg
 {
-    SizedIPacket::SizedIPacket( TCPSocket& socket )
+    SizedIPacket::SizedIPacket( TCPSocket& socket, Endianess endianess )
     {
         uint32_t size;
         socket.receive( reinterpret_cast< void* >( &size ), sizeof( uint32_t ) );
+
+        if( endianess != nativeEndianess() )
+            size = reverse( size );
 
         m_data.resize( size );
         socket.receive( reinterpret_cast< void* >( m_data.data() ), size );

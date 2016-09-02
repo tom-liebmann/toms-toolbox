@@ -96,10 +96,13 @@ namespace tg
     template< class Type >
     Quaternion< Type >::Quaternion( const Vector< Type, 3 >& from, const Vector< Type, 3 >& to )
     {
-        Vector< Type, 3 > halfVec = from + to;
-        halfVec = halfVec / norm( halfVec );
-        m_w = halfVec * to;
-        halfVec = halfVec % to;
+        auto nf = from / norm( from );
+        auto nt = to / norm( to );
+        Vector< Type, 3 > halfVec = nf + nt;
+        auto len = norm( halfVec );
+        halfVec = halfVec / len;
+        m_w = dot( halfVec, nt );
+        halfVec = cross( halfVec, nt );
         m_x = halfVec.x();
         m_y = halfVec.y();
         m_z = halfVec.z();
