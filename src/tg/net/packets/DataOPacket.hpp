@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tg/net/OPacket.hpp>
+#include <tg/net/Endianess.hpp>
 
 #include <vector>
 
@@ -11,14 +12,13 @@
 
 namespace tg
 {
-    class DataOPacket
-        : public OPacket
+    class DataOPacket : public OPacket
     {
     public:
-        DataOPacket() = default;
-        DataOPacket( uint32_t size );
+        DataOPacket( Endianess endianess = Endianess::LITTLEENDIAN );
+        DataOPacket( uint32_t size, Endianess endianess = Endianess::LITTLEENDIAN );
 
-        template< typename T >
+        template < typename T >
         void write( const T& value );
 
         // OPacket
@@ -27,17 +27,17 @@ namespace tg
         virtual std::string getContent() const override;
 
     private:
-        void append( const uint8_t* data, uint32_t size );
+        void append( const uint8_t* data, uint32_t size, bool checkEndianess = true );
 
+        Endianess m_endianess;
         std::vector< uint8_t > m_data;
     };
 }
 
 
 
-template< typename T >
+template < typename T >
 tg::DataOPacket& operator<<( tg::DataOPacket& packet, const T& value );
-
 
 
 
@@ -46,23 +46,28 @@ tg::DataOPacket& operator<<( tg::DataOPacket& packet, const T& value );
 
 namespace tg
 {
-    inline DataOPacket::DataOPacket( uint32_t size )
-        : m_data( size )
-    { }
+    inline DataOPacket::DataOPacket( Endianess endianess ) : m_endianess( endianess )
+    {
+    }
 
-    template< typename T >
+    inline DataOPacket::DataOPacket( uint32_t size, Endianess endianess )
+        : m_endianess( endianess ), m_data( size )
+    {
+    }
+
+    template < typename T >
     void DataOPacket::write( const T& value )
     {
         append( reinterpret_cast< const uint8_t* >( &value ), sizeof( T ) );
     }
 
-    template<>
+    template <>
     void DataOPacket::write< std::string >( const std::string& value );
 }
 
 
 
-template< typename T >
+template < typename T >
 inline tg::DataOPacket& operator<<( tg::DataOPacket& packet, const T& value )
 {
     packet.write< T >( value );

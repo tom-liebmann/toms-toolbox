@@ -1,6 +1,7 @@
 #pragma once
 
 #include <tg/net/OPacket.hpp>
+#include <tg/net/Endianess.hpp>
 
 #include <memory>
 
@@ -11,11 +12,11 @@
 
 namespace tg
 {
-    class SizedOPacket
-        : public OPacket
+    class SizedOPacket : public OPacket
     {
     public:
-        SizedOPacket( const OPacket& packet );
+        SizedOPacket( std::unique_ptr< OPacket > packet,
+                      Endianess endianess = Endianess::LITTLEENDIAN );
 
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
@@ -23,7 +24,8 @@ namespace tg
         virtual std::string getContent() const override;
 
     private:
-        const OPacket& m_packet;
+        std::unique_ptr< OPacket > m_packet;
+        Endianess m_endianess;
     };
 }
 
@@ -34,7 +36,8 @@ namespace tg
 
 namespace tg
 {
-    inline SizedOPacket::SizedOPacket( const OPacket& packet )
-        : m_packet( packet )
-    { }
+    inline SizedOPacket::SizedOPacket( std::unique_ptr< OPacket > packet, Endianess endianess )
+        : m_packet( std::move( packet ) ), m_endianess( endianess )
+    {
+    }
 }

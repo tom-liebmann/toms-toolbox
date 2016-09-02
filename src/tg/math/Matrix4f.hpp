@@ -6,6 +6,9 @@
 #include <cstdint>
 #include <ostream>
 
+// declarations
+//=================================================================================================
+
 namespace tg
 {
     class Matrix4f

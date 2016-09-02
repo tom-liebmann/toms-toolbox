@@ -1,13 +1,14 @@
 #pragma once
 
 #ifdef WIN32
-    #include <winsock2.h>
+#include <winsock2.h>
 #else
-    #include <sys/epoll.h>
+#include <sys/epoll.h>
 #endif
 
 #include <tg/core/EventManager.hpp>
 #include <tg/net/IPacket.hpp>
+#include <tg/net/Endianess.hpp>
 
 #include <functional>
 #include <vector>
@@ -51,13 +52,13 @@ namespace tg
             virtual std::shared_ptr< SocketContainer > getSource() const = 0;
         };
 
-        PacketSelector();
+        PacketSelector( Endianess endianess = Endianess::LITTLEENDIAN );
 
         ~PacketSelector();
 
         void addSocket( std::shared_ptr< SocketContainer > container );
         void removeSocket( const std::shared_ptr< SocketContainer >& container );
-        
+
         std::unique_ptr< Event > wait();
         void interrupt();
 
@@ -96,78 +97,74 @@ namespace tg
          */
         std::list< size_t > m_eventSockets;
 
-    #ifdef WIN32
-        private:
-            std::vector< WSAEVENT > m_eventHandles;
-            std::vector< WSAEVENT > m_events;
-            std::vector< size_t > m_eventIds;
+        Endianess m_endianess;
 
-            HANDLE m_notifyEvent;
-    #else
-        private:
-            /**
-             * Handle to polling mechanism.
-             */
-            int m_epoll;
+#ifdef WIN32
+    private:
+        std::vector< WSAEVENT > m_eventHandles;
+        std::vector< WSAEVENT > m_events;
+        std::vector< size_t > m_eventIds;
 
-            /**
-             * Buffer for incomming events.
-             */
-            std::array< epoll_event, 64 > m_events;
+        HANDLE m_notifyEvent;
+#else
+    private:
+        /**
+         * Handle to polling mechanism.
+         */
+        int m_epoll;
 
-            /**
-             * Read/Write pipe to interrupt event polling.
-             */
-            int m_pipe[ 2 ];
-    #endif
+        /**
+         * Buffer for incomming events.
+         */
+        std::array< epoll_event, 64 > m_events;
+
+        /**
+         * Read/Write pipe to interrupt event polling.
+         */
+        int m_pipe[ 2 ];
+#endif
     };
 
 
 
-    class PacketEvent
-        : public PacketSelector::Event
+    class PacketEvent : public PacketSelector::Event
     {
-        public:
-            PacketEvent(
-                std::shared_ptr< SocketContainer > source,
-                std::unique_ptr< IPacket > packet );
+    public:
+        PacketEvent( std::shared_ptr< SocketContainer > source, std::unique_ptr< IPacket > packet );
 
-            const std::unique_ptr< IPacket >& getPacket() const;
+        const std::unique_ptr< IPacket >& getPacket() const;
 
-            // PacketSelector::Event
-            virtual Type getType() const override; 
-            virtual std::shared_ptr< SocketContainer > getSource() const override;
+        // PacketSelector::Event
+        virtual Type getType() const override;
+        virtual std::shared_ptr< SocketContainer > getSource() const override;
 
-        private:
-            std::shared_ptr< SocketContainer > m_source;
-            std::unique_ptr< IPacket > m_packet;
+    private:
+        std::shared_ptr< SocketContainer > m_source;
+        std::unique_ptr< IPacket > m_packet;
     };
 
 
 
-    class DisconnectEvent
-        : public PacketSelector::Event
+    class DisconnectEvent : public PacketSelector::Event
     {
-        public:
-            enum class Reason
-            {
-                NORMAL,
-                BROKEN
-            };
+    public:
+        enum class Reason
+        {
+            NORMAL,
+            BROKEN
+        };
 
-            DisconnectEvent(
-                std::shared_ptr< SocketContainer > source,
-                Reason reason );
+        DisconnectEvent( std::shared_ptr< SocketContainer > source, Reason reason );
 
-            Reason getReason() const;
+        Reason getReason() const;
 
-            // PacketSelector::Event
-            virtual Type getType() const override;
-            virtual std::shared_ptr< SocketContainer > getSource() const override;
+        // PacketSelector::Event
+        virtual Type getType() const override;
+        virtual std::shared_ptr< SocketContainer > getSource() const override;
 
-        private:
-            std::shared_ptr< SocketContainer > m_source;
-            Reason m_reason;
+    private:
+        std::shared_ptr< SocketContainer > m_source;
+        Reason m_reason;
     };
 }
 
@@ -179,16 +176,16 @@ namespace tg
 namespace tg
 {
     inline PacketSelector::Event::~Event()
-    { }
+    {
+    }
 
 
 
-    inline PacketEvent::PacketEvent(
-        std::shared_ptr< SocketContainer > source,
-        std::unique_ptr< IPacket > packet )
-        : m_source( std::move( source ) )
-        , m_packet( std::move( packet ) )
-    { }
+    inline PacketEvent::PacketEvent( std::shared_ptr< SocketContainer > source,
+                                     std::unique_ptr< IPacket > packet )
+        : m_source( std::move( source ) ), m_packet( std::move( packet ) )
+    {
+    }
 
     inline PacketSelector::Event::Type PacketEvent::getType() const
     {
@@ -207,12 +204,11 @@ namespace tg
 
 
 
-    inline DisconnectEvent::DisconnectEvent(
-        std::shared_ptr< SocketContainer > source,
-        Reason reason )
-        : m_source( std::move( source ) )
-        , m_reason( reason )
-    { }
+    inline DisconnectEvent::DisconnectEvent( std::shared_ptr< SocketContainer > source,
+                                             Reason reason )
+        : m_source( std::move( source ) ), m_reason( reason )
+    {
+    }
 
     inline PacketSelector::Event::Type DisconnectEvent::getType() const
     {

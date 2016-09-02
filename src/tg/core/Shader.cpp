@@ -10,6 +10,9 @@ std::shared_ptr< tg::Shader > tg::Shader::fromFile( Type type, const std::string
 {
     std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
+    if( !stream.is_open() )
+        throw std::runtime_error( "Unable to open file " + filename );
+
     // determine length of file
     stream.seekg( 0, std::ios::end );
     size_t size = stream.tellg();
@@ -58,15 +61,11 @@ tg::Shader::Shader( Type type, const char* code )
     {
         GLint size;
         glGetShaderiv( m_shaderObject, GL_INFO_LOG_LENGTH, &size );
-        GLchar* log = new GLchar[ size + 1 ];
-        glGetShaderInfoLog( m_shaderObject, size, NULL, log );
 
-        std::cout << "################ CODE #################" << std::endl;
-        std::cout << code << std::endl;
-        std::cout << "################ ERROR ################" << std::endl;
-        std::cout << log << std::endl;
+        std::unique_ptr< GLchar[] > log( new GLchar[ size + 1 ] );
+        glGetShaderInfoLog( m_shaderObject, size, NULL, log.get() );
 
-        delete[] log;
+        throw std::runtime_error( "Shader error: " + std::string( log.get() ) );
     }
 }
 

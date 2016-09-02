@@ -11,56 +11,56 @@
 
 #else
 
-    #include <sys/socket.h>
-    #include <sys/types.h>
-    #include <fcntl.h>
-    #include <netdb.h>
-    #include <unistd.h>
-    #include <stdio.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <unistd.h>
+#include <stdio.h>
 
 #endif
 
 namespace tg
 {
-    PacketSelector::PacketSelector()
+    PacketSelector::PacketSelector( Endianess endianess ) : m_endianess( endianess )
     {
-        #ifdef WIN32
+#ifdef WIN32
 
-            m_notifyEvent = WSACreateEvent();
-            m_events = std::vector< WSAEVENT >( { m_notifyEvent } );
+        m_notifyEvent = WSACreateEvent();
+        m_events = std::vector< WSAEVENT >( { m_notifyEvent } );
 
-        #else
+#else
 
-            m_epoll = epoll_create1( 0 );
-            if( m_epoll == -1 )
-                throw std::runtime_error( "Unable to initialize epoll." );
+        m_epoll = epoll_create1( 0 );
+        if( m_epoll == -1 )
+            throw std::runtime_error( "Unable to initialize epoll." );
 
-            // init interruption pipe
-            epoll_event event;
-            event.events = EPOLLIN;
-            event.data.fd = -1;
-            pipe( m_pipe );
-            if( epoll_ctl( m_epoll, EPOLL_CTL_ADD, m_pipe[ 0 ], &event ) == -1 )
-                throw std::runtime_error( "Unable to initialize interruption pipe." );
+        // init interruption pipe
+        epoll_event event;
+        event.events = EPOLLIN;
+        event.data.fd = -1;
+        pipe( m_pipe );
+        if( epoll_ctl( m_epoll, EPOLL_CTL_ADD, m_pipe[ 0 ], &event ) == -1 )
+            throw std::runtime_error( "Unable to initialize interruption pipe." );
 
-        #endif
+#endif
     }
 
     PacketSelector::~PacketSelector()
     {
-        #ifdef WIN32
+#ifdef WIN32
 
-            for( auto& event : m_eventHandles ) 
-                WSACloseEvent( event );
+        for( auto& event : m_eventHandles )
+            WSACloseEvent( event );
 
-            WSACloseEvent( m_notifyEvent );
+        WSACloseEvent( m_notifyEvent );
 
-        #else
+#else
 
-            close( m_pipe[ 0 ] );
-            close( m_pipe[ 1 ] );
+        close( m_pipe[ 0 ] );
+        close( m_pipe[ 1 ] );
 
-        #endif
+#endif
     }
 
     std::unique_ptr< PacketSelector::Event > PacketSelector::wait()
@@ -102,15 +102,15 @@ namespace tg
 
     void PacketSelector::addSocket( std::shared_ptr< SocketContainer > container )
     {
-        // set flags of socket to non-blocking
-        #ifdef WIN32
-        #else
+// set flags of socket to non-blocking
+#ifdef WIN32
+#else
 
-            int flags = fcntl( container->getSocket().getHandle(), F_GETFL, 0 );
-            flags |= O_NONBLOCK;
-            fcntl( container->getSocket().getHandle(), F_SETFL, flags );
+        int flags = fcntl( container->getSocket().getHandle(), F_GETFL, 0 );
+        flags |= O_NONBLOCK;
+        fcntl( container->getSocket().getHandle(), F_SETFL, flags );
 
-        #endif
+#endif
 
         // push socket to change list
         std::unique_lock< std::mutex > lock( m_changeMutex );
@@ -138,17 +138,17 @@ namespace tg
 
     void PacketSelector::wakeUp()
     {
-        // interrupt event polling
-        #ifdef WIN32
+// interrupt event polling
+#ifdef WIN32
 
-            WSASetEvent( m_notifyEvent );
+        WSASetEvent( m_notifyEvent );
 
-        #else
+#else
 
-            char buff = ' ';
-            write( m_pipe[ 1 ], &buff, 1 );
+        char buff = ' ';
+        write( m_pipe[ 1 ], &buff, 1 );
 
-        #endif
+#endif
     }
 
     void PacketSelector::processChanges()
@@ -168,11 +168,11 @@ namespace tg
 
                 switch( type )
                 {
-                    case 0: // INSERTION
+                    case 0:  // INSERTION
                         insertManagedSocket( std::move( container ) );
                         break;
 
-                    case 1: // DELETION
+                    case 1:  // DELETION
                         removeManagedSocket( container );
                         break;
                 }
@@ -182,26 +182,26 @@ namespace tg
                 m_changeList.pop_front();
             } while( !m_changeList.empty() );
 
-            #ifdef WIN32
+#ifdef WIN32
 
-                m_events.resize( m_managedSockets.size() - m_freeSlots.size() + 1 );
-                m_eventIds.resize( m_events.size() );
+            m_events.resize( m_managedSockets.size() - m_freeSlots.size() + 1 );
+            m_eventIds.resize( m_events.size() );
 
-                size_t k = 0;
-                for( size_t i = 0; i < m_events.size() - 1; ++i )
-                {
-                    while( !m_managedSockets[ k ] )
-                        ++k;
-
-                    m_events[ i ] = m_eventHandles[ k ];
-                    m_eventIds[ i ] = k;
-
+            size_t k = 0;
+            for( size_t i = 0; i < m_events.size() - 1; ++i )
+            {
+                while( !m_managedSockets[ k ] )
                     ++k;
-                }
 
-                m_events[ m_events.size() - 1 ] = m_notifyEvent;
+                m_events[ i ] = m_eventHandles[ k ];
+                m_eventIds[ i ] = k;
 
-            #endif
+                ++k;
+            }
+
+            m_events[ m_events.size() - 1 ] = m_notifyEvent;
+
+#endif
         }
         lock.unlock();
     }
@@ -223,22 +223,23 @@ namespace tg
         if( !container->m_events.empty() )
             m_eventSockets.push_back( index );
 
-        #ifdef WIN32
+#ifdef WIN32
 
-            if( m_eventHandles.size() < index + 1 )
-                m_eventHandles.resize( index + 1 );
+        if( m_eventHandles.size() < index + 1 )
+            m_eventHandles.resize( index + 1 );
 
-            m_eventHandles[ index ] = WSACreateEvent();
-            WSAEventSelect( container->getSocket()->getHandle(), m_eventHandles[ index ], FD_READ | FD_CLOSE );
+        m_eventHandles[ index ] = WSACreateEvent();
+        WSAEventSelect( container->getSocket()->getHandle(), m_eventHandles[ index ],
+                        FD_READ | FD_CLOSE );
 
-        #else
+#else
 
-            struct epoll_event event;
-            event.events = EPOLLIN;
-            event.data.fd = index;
-            epoll_ctl( m_epoll, EPOLL_CTL_ADD, container->getSocket().getHandle(), &event );
+        struct epoll_event event;
+        event.events = EPOLLIN;
+        event.data.fd = index;
+        epoll_ctl( m_epoll, EPOLL_CTL_ADD, container->getSocket().getHandle(), &event );
 
-        #endif
+#endif
 
         m_managedSockets[ index ] = std::move( container );
     }
@@ -248,25 +249,22 @@ namespace tg
         // check, whether socket is in the managed list
         size_t index = std::distance(
             m_managedSockets.begin(),
-            std::find(
-                m_managedSockets.begin(),
-                m_managedSockets.end(),
-                container ) );
+            std::find( m_managedSockets.begin(), m_managedSockets.end(), container ) );
 
         if( index != m_managedSockets.size() )
         {
             if( !container->m_events.empty() )
                 m_eventSockets.remove( index );
 
-            #ifdef WIN32
+#ifdef WIN32
 
-                WSACloseEvent( m_eventHandles[ index ] );
+            WSACloseEvent( m_eventHandles[ index ] );
 
-            #else
+#else
 
-                epoll_ctl( m_epoll, EPOLL_CTL_DEL, container->getSocket().getHandle(), NULL );
+            epoll_ctl( m_epoll, EPOLL_CTL_DEL, container->getSocket().getHandle(), NULL );
 
-            #endif
+#endif
 
             m_managedSockets[ index ].reset();
             m_freeSlots.push_back( index );
@@ -275,64 +273,66 @@ namespace tg
 
     void PacketSelector::pollEvents( bool& interrupted )
     {
-        #ifdef WIN32
+#ifdef WIN32
 
-            DWORD res = WSAWaitForMultipleEvents( m_events.size(), m_events.data(), FALSE, WSA_INFINITE, FALSE );
+        DWORD res = WSAWaitForMultipleEvents( m_events.size(), m_events.data(), FALSE, WSA_INFINITE,
+                                              FALSE );
 
-            if( res == WSA_WAIT_FAILED )
+        if( res == WSA_WAIT_FAILED )
+        {
+            // woke up but nothing happened
+        }
+        else if( res - WSA_WAIT_EVENT_0 == m_eventIds.size() )
+        {
+            WSAResetEvent( m_notifyEvent );
+            interrupted = true;
+        }
+        else
+        {
+            auto event = m_events[ res - WSA_WAIT_EVENT_0 ];
+            size_t index = m_eventIds[ res - WSA_WAIT_EVENT_0 ];
+
+            WSAResetEvent( event );
+            WSAEventSelect( m_managedSockets[ index ]->getSocket()->getHandle(), event,
+                            FD_READ | FD_CLOSE );
+
+            handleEvent( index );
+        }
+
+#else
+
+        int numEvents = epoll_wait( m_epoll, m_events.data(), 64, -1 );
+
+        if( numEvents == -1 )
+        {
+            if( errno != EINTR )
+                throw std::runtime_error( "An epoll-error occured." );
+        }
+        else
+        {
+            interrupted = false;
+
+            for( size_t i = 0; i < numEvents; ++i )
             {
-                // woke up but nothing happened
-            }
-            else if( res - WSA_WAIT_EVENT_0 == m_eventIds.size() )
-            {
-                WSAResetEvent( m_notifyEvent );
-                interrupted = true;
-            }
-            else
-            {
-                auto event = m_events[ res - WSA_WAIT_EVENT_0 ];
-                size_t index = m_eventIds[ res - WSA_WAIT_EVENT_0 ];
-
-                WSAResetEvent( event );
-                WSAEventSelect( m_managedSockets[ index ]->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
-
-                handleEvent( index );
-            }
-
-        #else
-
-            int numEvents = epoll_wait( m_epoll, m_events.data(), 64, -1 );
-
-            if( numEvents == -1 )
-            {
-                if( errno != EINTR )
-                    throw std::runtime_error( "An epoll-error occured." );
-            }
-            else
-            {
-                interrupted = false;
-
-                for( size_t i = 0; i < numEvents; ++i )
+                if( m_events[ i ].data.fd == -1 )  // event on the pipe happened
                 {
-                    if( m_events[ i ].data.fd == -1 ) // event on the pipe happened
-                    {
-                        // empty the pipe
-                        // do I really need locking here?
-                        std::unique_lock< std::mutex > lock( m_changeMutex );
-                        char buff;
-                        read( m_pipe[ 0 ], &buff, 1 );
+                    // empty the pipe
+                    // do I really need locking here?
+                    std::unique_lock< std::mutex > lock( m_changeMutex );
+                    char buff;
+                    read( m_pipe[ 0 ], &buff, 1 );
 
-                        interrupted = true;
-                    }
-                    else
-                    {
-                        // handle event for socket with appropriate index
-                        handleEvent( m_events[ i ].data.fd  );
-                    }
+                    interrupted = true;
+                }
+                else
+                {
+                    // handle event for socket with appropriate index
+                    handleEvent( m_events[ i ].data.fd );
                 }
             }
+        }
 
-        #endif
+#endif
     }
 
     void PacketSelector::handleEvent( size_t index )
@@ -341,15 +341,14 @@ namespace tg
 
         try
         {
-            std::unique_ptr< IPacket > packet( new SizedIPacket( container->getSocket() ) );
+            std::unique_ptr< IPacket > packet(
+                new SizedIPacket( container->getSocket(), m_endianess ) );
 
             if( container->m_events.empty() )
                 m_eventSockets.push_back( index );
 
-            container->m_events.push_back( std::unique_ptr< Event >(
-                new PacketEvent(
-                    container,
-                    std::move( packet ) ) ) );
+            container->m_events.push_back(
+                std::unique_ptr< Event >( new PacketEvent( container, std::move( packet ) ) ) );
         }
         catch( TCPSocket::Error& e )
         {
@@ -361,10 +360,9 @@ namespace tg
                         m_eventSockets.push_back( index );
 
                     container->m_events.push_back( std::unique_ptr< Event >(
-                        new DisconnectEvent(
-                            container,
-                            DisconnectEvent::Reason::NORMAL ) ) );
-                } break;
+                        new DisconnectEvent( container, DisconnectEvent::Reason::NORMAL ) ) );
+                }
+                break;
 
                 case TCPSocket::Error::BROKEN:
                 {
@@ -372,10 +370,9 @@ namespace tg
                         m_eventSockets.push_back( index );
 
                     container->m_events.push_back( std::unique_ptr< Event >(
-                        new DisconnectEvent(
-                            container,
-                            DisconnectEvent::Reason::BROKEN ) ) );
-                } break;
+                        new DisconnectEvent( container, DisconnectEvent::Reason::BROKEN ) ) );
+                }
+                break;
 
                 default:
                     break;

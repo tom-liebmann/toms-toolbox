@@ -7,19 +7,26 @@
 
 namespace tg
 {
-    void DataOPacket::append( const uint8_t* data, uint32_t size )
+    void DataOPacket::append( const uint8_t* data, uint32_t size, bool checkEndianess )
     {
         size_t oldSize = m_data.size();
         m_data.resize( m_data.size() + size );
-        memcpy( m_data.data() + oldSize, data, size );
+
+        if( !checkEndianess || m_endianess == nativeEndianess() )
+            memcpy( m_data.data() + oldSize, data, size );
+        else
+        {
+            for( uint32_t i = 0; i < size; ++i )
+                m_data[ oldSize + i ] = *( data + size - 1 - i );
+        }
     }
 
-    template<>
+    template <>
     void DataOPacket::write< std::string >( const std::string& value )
     {
         uint32_t len = value.length();
         append( reinterpret_cast< const uint8_t* >( &len ), sizeof( uint32_t ) );
-        append( reinterpret_cast< const uint8_t* >( value.c_str() ), len );
+        append( reinterpret_cast< const uint8_t* >( value.c_str() ), len, false );
     }
 
     void DataOPacket::send( TCPSocket& socket ) const

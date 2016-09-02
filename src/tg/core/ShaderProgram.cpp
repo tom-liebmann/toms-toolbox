@@ -29,17 +29,15 @@ tg::ShaderProgram::ShaderProgram(
     GLint linkStatus;
     glGetProgramiv( m_programObject, GL_LINK_STATUS, &linkStatus );
 
-    if( linkStatus != GL_TRUE )
+    if( linkStatus == GL_TRUE )
     {
         GLint size;
         glGetProgramiv( m_programObject, GL_INFO_LOG_LENGTH, &size );
-        GLchar* log = new GLchar[ size + 1 ];
-        glGetProgramInfoLog( m_programObject, size, NULL, log );
 
-        std::cout << "################ ERROR ################" << std::endl;
-        std::cout << log << std::endl;
+        std::unique_ptr< GLchar[] > log( new GLchar[ size + 1 ] );
+        glGetProgramInfoLog( m_programObject, size, NULL, log.get() );
 
-        delete[] log;
+        throw std::runtime_error( "Program error: " + std::string( log.get() ) );
     }
 }
 
