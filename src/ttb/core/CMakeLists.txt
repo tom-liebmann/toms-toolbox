@@ -1,0 +1,57 @@
+FIND_PACKAGE( GLEW REQUIRED )
+FIND_PACKAGE( GLFW REQUIRED )
+FIND_PACKAGE( OpenGL REQUIRED )
+
+# find source files
+FILE(
+    GLOB_RECURSE
+    SOURCE_FILES
+    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
+    *.cpp
+)
+
+ADD_LIBRARY(
+    ttbCore
+    STATIC ${SOURCE_FILES}
+)
+
+TARGET_INCLUDE_DIRECTORIES(
+    ttbCore
+    PRIVATE ${GLFW_INCLUDE_DIR}
+    PUBLIC ${GLEW_INCLUDE_DIR}
+)
+
+TARGET_COMPILE_OPTIONS(
+    ttbCore
+    PRIVATE -std=c++14
+)
+
+TARGET_COMPILE_DEFINITIONS(
+    ttbCore
+    PRIVATE
+        GLEW_STATIC
+        GL_EXT_PROTOTYPES
+)
+
+IF( WIN32 )
+    TARGET_LINK_LIBRARIES(
+        ttbCore
+        PUBLIC
+            ${GLFW_LIBRARIES}
+            ${GLEW_LIBRARY}
+            ${OPENGL_LIBRARIES}
+    )
+
+    TARGET_COMPILE_DEFINITIONS(
+        ttbCore
+        PRIVATE WIN32
+    )
+ELSE()
+    TARGET_LINK_LIBRARIES(
+        ttbCore
+        PUBLIC
+            ${GLFW_LIBRARIES}
+            ${GLEW_LIBRARY}
+            ${OPENGL_LIBRARIES}
+    )
+ENDIF()

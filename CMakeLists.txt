@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 
-PROJECT( tengom )
+PROJECT( toms_toolbox )
 
 
 FUNCTION( COPY_HEADER SOURCE DESTINATION )
@@ -38,8 +38,8 @@ INCLUDE_DIRECTORIES( "${CMAKE_CURRENT_BINARY_DIR}/include" )
 FILE(
     GLOB
     SUBDIRECTORIES
-    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/tg"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/tg/*"
+    RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/src/ttb"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/ttb/*"
 )
 
 COPY_HEADER(
@@ -48,18 +48,18 @@ COPY_HEADER(
 )
 
 FOREACH( SUBDIRECTORY ${SUBDIRECTORIES} )
-    ADD_SUBDIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/src/tg/${SUBDIRECTORY}" )
+    ADD_SUBDIRECTORY( "${CMAKE_CURRENT_SOURCE_DIR}/src/ttb/${SUBDIRECTORY}" )
 ENDFOREACH()
 
 
 
 # Export build tree to Targets.cmake file.
 EXPORT(
-    TARGETS tgCore tgMath tgNet tgTools
-    FILE "${PROJECT_BINARY_DIR}/TengomTargets.cmake"
+    TARGETS ttbCore ttbMath ttbNet ttbTools
+    FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake"
 )
 
 CONFIGURE_FILE(
-    TengomConfig.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/TengomConfig.cmake"
+    TTBConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/TTBConfig.cmake"
 )
