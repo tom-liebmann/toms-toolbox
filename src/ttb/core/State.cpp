@@ -2,7 +2,7 @@
 
 #include <ttb/core/ShaderProgram.hpp>
 #include <ttb/core/Window.hpp>
-#include <ttb/math/Matrix4f.hpp>
+#include <ttb/math/Matrix.hpp>
 
 #include <iostream>
 
@@ -14,7 +14,8 @@ ttb::State::State( Window& window )
     , m_windowViewport(
           new Viewport( 0, 0, m_window.getMode().getWidth(), m_window.getMode().getHeight() ) )
 {
-    m_modelViewMatrixStack.push_back( std::unique_ptr< ttb::Matrix4f >( new ttb::Matrix4f() ) );
+    m_modelViewMatrixStack.emplace_back(
+        new Matrix< float, 4, 4 >( MatrixFactory< float >::fromIdentity() ) );
 
     glViewport( m_windowViewport->getX(), m_windowViewport->getY(), m_windowViewport->getWidth(),
                 m_windowViewport->getHeight() );
@@ -133,6 +134,10 @@ void ttb::State::apply()
             if( location != -1 )
                 shader->setUniform( location, *m_projectionMatrix );
 
+            location = shader->getUniformLocation( "u_invProjectionMatrix" );
+            if( location != -1 )
+                shader->setUniform( location, invert( *m_projectionMatrix ) );
+
             m_projectionMatrixSet = true;
         }
 
@@ -142,9 +147,9 @@ void ttb::State::apply()
             if( location != -1 )
                 shader->setUniform( location, *m_modelViewMatrixStack.back() );
 
-            location = shader->getUniformLocation( "u_normalMatrix" );
+            location = shader->getUniformLocation( "u_invModelViewMatrix" );
             if( location != -1 )
-                shader->setUniform( location, m_modelViewMatrixStack.back()->invert3x3() );
+                shader->setUniform( location, invert( *m_modelViewMatrixStack.back() ) );
 
             m_modelViewMatrixSet = true;
         }

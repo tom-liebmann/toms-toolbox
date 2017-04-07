@@ -5,6 +5,7 @@
 #include <GL/gl.h>
 
 #include <ttb/core/Viewport.hpp>
+#include <ttb/math/Matrix4f.hpp>
 
 #include <list>
 #include <memory>
@@ -16,11 +17,6 @@ namespace ttb
 {
     class Window;
     class ShaderProgram;
-}
-
-namespace ttb
-{
-    class Matrix4f;
 }
 
 
