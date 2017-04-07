@@ -5,17 +5,13 @@
 #include <GL/gl.h>
 
 #include <ttb/math/Vector.hpp>
+#include <ttb/math/Matrix.hpp>
 
 #include <initializer_list>
 #include <memory>
 
 // forward declarations
 //=============================================================================
-
-namespace ttb
-{
-    class Matrix4f;
-}
 
 namespace ttb
 {

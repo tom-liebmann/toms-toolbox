@@ -29,15 +29,12 @@ ttb::ShaderProgram::ShaderProgram( std::initializer_list< std::shared_ptr< Shade
     GLint linkStatus;
     glGetProgramiv( m_programObject, GL_LINK_STATUS, &linkStatus );
 
-    if( linkStatus == GL_TRUE )
+    if( !linkStatus )
     {
-        GLint size;
-        glGetProgramiv( m_programObject, GL_INFO_LOG_LENGTH, &size );
+        GLchar buffer[ 256 ];
+        glGetProgramInfoLog( m_programObject, 256, NULL, buffer );
 
-        std::unique_ptr< GLchar[] > log( new GLchar[ size + 1 ] );
-        glGetProgramInfoLog( m_programObject, size, NULL, log.get() );
-
-        throw std::runtime_error( "Program error: " + std::string( log.get() ) );
+        throw std::runtime_error( "Program error: " + std::string( buffer ) );
     }
 }
 
