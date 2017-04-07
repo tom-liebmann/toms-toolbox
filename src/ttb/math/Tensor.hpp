@@ -22,8 +22,7 @@ namespace ttb
 
         Tensor();
 
-        template < typename T1 >
-        Tensor( std::initializer_list< T1 > values );
+        Tensor( std::initializer_list< T > values );
 
         // Access
         T& operator[]( size_t index );
@@ -35,6 +34,8 @@ namespace ttb
 
         template < typename... I >
         const T& operator()( I... indices ) const;
+
+        T const* ptr() const;
 
         // Special access
         T& x();
@@ -115,8 +116,7 @@ namespace ttb
     }
 
     template < typename T, size_t... D >
-    template < typename T1 >
-    inline Tensor< T, D... >::Tensor( std::initializer_list< T1 > values )
+    inline Tensor< T, D... >::Tensor( std::initializer_list< T > values )
     {
         std::copy( values.begin(), values.end(), m_values.begin() );
     }
@@ -145,6 +145,12 @@ namespace ttb
     inline const T& Tensor< T, D... >::operator()( I... indices ) const
     {
         return m_values[ ttb_private::arg_product< D... >::value( indices... ) ];
+    }
+
+    template < typename T, size_t... D >
+    T const* Tensor< T, D... >::ptr() const
+    {
+        return m_values.data();
     }
 
     template < typename T, size_t... D >

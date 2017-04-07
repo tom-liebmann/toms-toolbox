@@ -14,8 +14,15 @@ namespace ttb
     template < typename T, size_t D1, size_t D2 >
     using Matrix = Tensor< T, D1, D2 >;
 
+    using Matrix4f = Matrix< float, 4, 4 >;
+
+
+
     template < typename T, size_t D1, size_t D2 >
     Matrix< T, D2, D1 > transpose( Matrix< T, D1, D2 > const& matrix );
+
+    template < typename T >
+    Matrix< T, 4, 4 > invert( Matrix< T, 4, 4 > const& matrix );
 
     template < typename T, size_t D1, size_t D2, size_t D3 >
     Matrix< T, D1, D3 > operator*( Matrix< T, D1, D2 > const& lhs, Matrix< T, D2, D3 > const& rhs );
@@ -74,6 +81,103 @@ namespace ttb
         for( size_t row = 0; row < D1; ++row )
             for( size_t col = 0; col < D2; ++col )
                 result( col, row ) = matrix( row, col );
+
+        return result;
+    }
+
+    template < typename T >
+    Matrix< T, 4, 4 > invert( Matrix< T, 4, 4 > const& matrix )
+    {
+        Matrix< T, 4, 4 > result;
+
+        result( 0, 0 ) =
+            matrix[ 5 ] * matrix[ 10 ] * matrix[ 15 ] - matrix[ 5 ] * matrix[ 11 ] * matrix[ 14 ] -
+            matrix[ 9 ] * matrix[ 6 ] * matrix[ 15 ] + matrix[ 9 ] * matrix[ 7 ] * matrix[ 14 ] +
+            matrix[ 13 ] * matrix[ 6 ] * matrix[ 11 ] - matrix[ 13 ] * matrix[ 7 ] * matrix[ 10 ];
+
+        result( 1, 0 ) =
+            -matrix[ 4 ] * matrix[ 10 ] * matrix[ 15 ] + matrix[ 4 ] * matrix[ 11 ] * matrix[ 14 ] +
+            matrix[ 8 ] * matrix[ 6 ] * matrix[ 15 ] - matrix[ 8 ] * matrix[ 7 ] * matrix[ 14 ] -
+            matrix[ 12 ] * matrix[ 6 ] * matrix[ 11 ] + matrix[ 12 ] * matrix[ 7 ] * matrix[ 10 ];
+
+        result( 2, 0 ) =
+            matrix[ 4 ] * matrix[ 9 ] * matrix[ 15 ] - matrix[ 4 ] * matrix[ 11 ] * matrix[ 13 ] -
+            matrix[ 8 ] * matrix[ 5 ] * matrix[ 15 ] + matrix[ 8 ] * matrix[ 7 ] * matrix[ 13 ] +
+            matrix[ 12 ] * matrix[ 5 ] * matrix[ 11 ] - matrix[ 12 ] * matrix[ 7 ] * matrix[ 9 ];
+
+        result( 3, 0 ) =
+            -matrix[ 4 ] * matrix[ 9 ] * matrix[ 14 ] + matrix[ 4 ] * matrix[ 10 ] * matrix[ 13 ] +
+            matrix[ 8 ] * matrix[ 5 ] * matrix[ 14 ] - matrix[ 8 ] * matrix[ 6 ] * matrix[ 13 ] -
+            matrix[ 12 ] * matrix[ 5 ] * matrix[ 10 ] + matrix[ 12 ] * matrix[ 6 ] * matrix[ 9 ];
+
+        result( 0, 1 ) =
+            -matrix[ 1 ] * matrix[ 10 ] * matrix[ 15 ] + matrix[ 1 ] * matrix[ 11 ] * matrix[ 14 ] +
+            matrix[ 9 ] * matrix[ 2 ] * matrix[ 15 ] - matrix[ 9 ] * matrix[ 3 ] * matrix[ 14 ] -
+            matrix[ 13 ] * matrix[ 2 ] * matrix[ 11 ] + matrix[ 13 ] * matrix[ 3 ] * matrix[ 10 ];
+
+        result( 1, 1 ) =
+            matrix[ 0 ] * matrix[ 10 ] * matrix[ 15 ] - matrix[ 0 ] * matrix[ 11 ] * matrix[ 14 ] -
+            matrix[ 8 ] * matrix[ 2 ] * matrix[ 15 ] + matrix[ 8 ] * matrix[ 3 ] * matrix[ 14 ] +
+            matrix[ 12 ] * matrix[ 2 ] * matrix[ 11 ] - matrix[ 12 ] * matrix[ 3 ] * matrix[ 10 ];
+
+        result( 2, 1 ) =
+            -matrix[ 0 ] * matrix[ 9 ] * matrix[ 15 ] + matrix[ 0 ] * matrix[ 11 ] * matrix[ 13 ] +
+            matrix[ 8 ] * matrix[ 1 ] * matrix[ 15 ] - matrix[ 8 ] * matrix[ 3 ] * matrix[ 13 ] -
+            matrix[ 12 ] * matrix[ 1 ] * matrix[ 11 ] + matrix[ 12 ] * matrix[ 3 ] * matrix[ 9 ];
+
+        result( 3, 1 ) =
+            matrix[ 0 ] * matrix[ 9 ] * matrix[ 14 ] - matrix[ 0 ] * matrix[ 10 ] * matrix[ 13 ] -
+            matrix[ 8 ] * matrix[ 1 ] * matrix[ 14 ] + matrix[ 8 ] * matrix[ 2 ] * matrix[ 13 ] +
+            matrix[ 12 ] * matrix[ 1 ] * matrix[ 10 ] - matrix[ 12 ] * matrix[ 2 ] * matrix[ 9 ];
+
+        result( 0, 2 ) =
+            matrix[ 1 ] * matrix[ 6 ] * matrix[ 15 ] - matrix[ 1 ] * matrix[ 7 ] * matrix[ 14 ] -
+            matrix[ 5 ] * matrix[ 2 ] * matrix[ 15 ] + matrix[ 5 ] * matrix[ 3 ] * matrix[ 14 ] +
+            matrix[ 13 ] * matrix[ 2 ] * matrix[ 7 ] - matrix[ 13 ] * matrix[ 3 ] * matrix[ 6 ];
+
+        result( 1, 2 ) =
+            -matrix[ 0 ] * matrix[ 6 ] * matrix[ 15 ] + matrix[ 0 ] * matrix[ 7 ] * matrix[ 14 ] +
+            matrix[ 4 ] * matrix[ 2 ] * matrix[ 15 ] - matrix[ 4 ] * matrix[ 3 ] * matrix[ 14 ] -
+            matrix[ 12 ] * matrix[ 2 ] * matrix[ 7 ] + matrix[ 12 ] * matrix[ 3 ] * matrix[ 6 ];
+
+        result( 2, 2 ) =
+            matrix[ 0 ] * matrix[ 5 ] * matrix[ 15 ] - matrix[ 0 ] * matrix[ 7 ] * matrix[ 13 ] -
+            matrix[ 4 ] * matrix[ 1 ] * matrix[ 15 ] + matrix[ 4 ] * matrix[ 3 ] * matrix[ 13 ] +
+            matrix[ 12 ] * matrix[ 1 ] * matrix[ 7 ] - matrix[ 12 ] * matrix[ 3 ] * matrix[ 5 ];
+
+        result( 3, 2 ) =
+            -matrix[ 0 ] * matrix[ 5 ] * matrix[ 14 ] + matrix[ 0 ] * matrix[ 6 ] * matrix[ 13 ] +
+            matrix[ 4 ] * matrix[ 1 ] * matrix[ 14 ] - matrix[ 4 ] * matrix[ 2 ] * matrix[ 13 ] -
+            matrix[ 12 ] * matrix[ 1 ] * matrix[ 6 ] + matrix[ 12 ] * matrix[ 2 ] * matrix[ 5 ];
+
+        result( 0, 3 ) =
+            -matrix[ 1 ] * matrix[ 6 ] * matrix[ 11 ] + matrix[ 1 ] * matrix[ 7 ] * matrix[ 10 ] +
+            matrix[ 5 ] * matrix[ 2 ] * matrix[ 11 ] - matrix[ 5 ] * matrix[ 3 ] * matrix[ 10 ] -
+            matrix[ 9 ] * matrix[ 2 ] * matrix[ 7 ] + matrix[ 9 ] * matrix[ 3 ] * matrix[ 6 ];
+
+        result( 1, 3 ) =
+            matrix[ 0 ] * matrix[ 6 ] * matrix[ 11 ] - matrix[ 0 ] * matrix[ 7 ] * matrix[ 10 ] -
+            matrix[ 4 ] * matrix[ 2 ] * matrix[ 11 ] + matrix[ 4 ] * matrix[ 3 ] * matrix[ 10 ] +
+            matrix[ 8 ] * matrix[ 2 ] * matrix[ 7 ] - matrix[ 8 ] * matrix[ 3 ] * matrix[ 6 ];
+
+        result( 2, 3 ) =
+            -matrix[ 0 ] * matrix[ 5 ] * matrix[ 11 ] + matrix[ 0 ] * matrix[ 7 ] * matrix[ 9 ] +
+            matrix[ 4 ] * matrix[ 1 ] * matrix[ 11 ] - matrix[ 4 ] * matrix[ 3 ] * matrix[ 9 ] -
+            matrix[ 8 ] * matrix[ 1 ] * matrix[ 7 ] + matrix[ 8 ] * matrix[ 3 ] * matrix[ 5 ];
+
+        result( 3, 3 ) =
+            matrix[ 0 ] * matrix[ 5 ] * matrix[ 10 ] - matrix[ 0 ] * matrix[ 6 ] * matrix[ 9 ] -
+            matrix[ 4 ] * matrix[ 1 ] * matrix[ 10 ] + matrix[ 4 ] * matrix[ 2 ] * matrix[ 9 ] +
+            matrix[ 8 ] * matrix[ 1 ] * matrix[ 6 ] - matrix[ 8 ] * matrix[ 2 ] * matrix[ 5 ];
+
+        double det = matrix[ 0 ] * result[ 0 ] + matrix[ 1 ] * result[ 4 ] +
+                     matrix[ 2 ] * result[ 8 ] + matrix[ 3 ] * result[ 12 ];
+
+        if( std::abs( det ) < 1e-7 )
+            throw std::runtime_error( "Not invertible" );
+
+        for( int i = 0; i < 16; i++ )
+            result[ i ] /= det;
 
         return result;
     }
@@ -154,21 +258,21 @@ namespace ttb
         fovy = 1.0 / std::tan( fovy / 114.5915590261646417536 );
 
         return { fovy / aspect,
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 0.0f,
                  fovy,
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 0.0f,
                  ( zFar + zNear ) / ( zNear - zFar ),
-                 2.0 * zFar * zNear / ( zNear - zFar ),
-                 0.0,
-                 0.0,
-                 -1.0,
-                 0.0 };
+                 2.0f * zFar * zNear / ( zNear - zFar ),
+                 0.0f,
+                 0.0f,
+                 -1.0f,
+                 0.0f };
     }
 
     template < typename T >
@@ -177,21 +281,21 @@ namespace ttb
         fovy = 1.0 / std::tan( fovy / 114.5915590261646417536 );
 
         return { aspect / fovy,
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
-                 1.0 / fovy,
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
-                 -1.0,
-                 0.0,
-                 0.0,
-                 ( zNear - zFar ) / 2.0 / zNear / zFar,
-                 ( zNear + zFar ) / 2.0 / zNear / zFar };
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 1.0f / fovy,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 0.0f,
+                 -1.0f,
+                 0.0f,
+                 0.0f,
+                 ( zNear - zFar ) / 2.0f / zNear / zFar,
+                 ( zNear + zFar ) / 2.0f / zNear / zFar };
     }
 
     template < typename T >
