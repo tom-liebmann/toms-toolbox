@@ -57,15 +57,12 @@ ttb::Shader::Shader( Type type, const char* code )
     GLint compileStatus;
     glGetShaderiv( m_shaderObject, GL_COMPILE_STATUS, &compileStatus );
 
-    if( compileStatus != GL_TRUE )
+    if( !compileStatus )
     {
-        GLint size;
-        glGetShaderiv( m_shaderObject, GL_INFO_LOG_LENGTH, &size );
+        GLchar buffer[ 256 ];
+        glGetShaderInfoLog( m_shaderObject, 256, NULL, buffer );
 
-        std::unique_ptr< GLchar[] > log( new GLchar[ size + 1 ] );
-        glGetShaderInfoLog( m_shaderObject, size, NULL, log.get() );
-
-        throw std::runtime_error( "Shader error: " + std::string( log.get() ) );
+        throw std::runtime_error( "Shader error: " + std::string( buffer ) );
     }
 }
 
