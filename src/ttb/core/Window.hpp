@@ -47,7 +47,7 @@ namespace ttb
         WindowMode m_mode;
         std::unique_ptr< State > m_state;
 
-        std::weak_ptr< EventManager > m_eventManager;
+        std::shared_ptr< EventManager > m_eventManager;
 
         GLFWwindow* m_handle;
     };
@@ -62,7 +62,7 @@ namespace ttb
 {
     inline std::shared_ptr< EventManager > Window::getEventManager() const
     {
-        return m_eventManager.lock();
+        return m_eventManager;
     }
 
     inline const WindowMode& Window::getMode() const
