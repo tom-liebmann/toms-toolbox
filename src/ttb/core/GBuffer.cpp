@@ -51,6 +51,8 @@ void ttb::GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buf
 
     m_drawBuffers[ unit ] = std::move( buffer );
     m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
+
+    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 }
 
 void ttb::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
@@ -61,6 +63,8 @@ void ttb::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
                             buffer ? buffer->getTextureObject() : 0, 0 );
 
     m_depthBuffer = std::move( buffer );
+
+    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 }
 
 void ttb::GBuffer::begin( State& state ) const
