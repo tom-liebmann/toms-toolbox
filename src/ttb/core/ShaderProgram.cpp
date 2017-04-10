@@ -1,6 +1,6 @@
 #include "ShaderProgram.hpp"
 
-#include <ttb/core/Shader.hpp>
+#include <ttb/core/shader/Shader.hpp>
 #include <ttb/core/VertexAttribute.hpp>
 #include <ttb/core/VertexAttributeList.hpp>
 #include <ttb/math/Matrix4f.hpp>
