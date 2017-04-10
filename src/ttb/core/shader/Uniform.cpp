@@ -11,7 +11,7 @@ namespace ttb
     {
     }
 
-    std::string const& name() const
+    std::string const& UniformBase::name() const
     {
         return m_name;
     }
