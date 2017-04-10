@@ -10,8 +10,8 @@ namespace ttb
 {
     enum class Endianess
     {
-        BIGENDIAN,
-        LITTLEENDIAN
+        BIG,
+        LITTLE
     };
 
     Endianess nativeEndianess();

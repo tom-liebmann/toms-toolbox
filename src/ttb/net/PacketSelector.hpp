@@ -52,7 +52,7 @@ namespace ttb
             virtual std::shared_ptr< SocketContainer > getSource() const = 0;
         };
 
-        PacketSelector( Endianess endianess = Endianess::LITTLEENDIAN );
+        PacketSelector( Endianess endianess = Endianess::LITTLE );
 
         ~PacketSelector();
 

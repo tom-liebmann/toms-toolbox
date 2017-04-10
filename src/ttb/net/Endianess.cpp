@@ -8,9 +8,9 @@ namespace
     {
         uint16_t value = 0x1234;
         if( *reinterpret_cast< uint8_t* >( &value ) == 0x12 )
-            return ttb::Endianess::BIGENDIAN;
+            return ttb::Endianess::BIG;
         else
-            return ttb::Endianess::LITTLEENDIAN;
+            return ttb::Endianess::LITTLE;
     }
 }
 
