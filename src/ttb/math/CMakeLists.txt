@@ -17,5 +17,5 @@ ADD_LIBRARY(
 
 TARGET_COMPILE_OPTIONS(
     ttbMath
-    PRIVATE -std=c++11
+    PRIVATE -std=gnu++14
 )

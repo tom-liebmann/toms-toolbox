@@ -18,7 +18,7 @@ ADD_LIBRARY(
 
 TARGET_COMPILE_OPTIONS(
     ttbNet
-    PRIVATE -std=c++11
+    PRIVATE -std=gnu++14
 )
 
 IF( WIN32 )
