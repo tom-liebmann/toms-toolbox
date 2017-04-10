@@ -24,7 +24,7 @@ namespace ttb
     class SizedIPacket : public IPacket
     {
     public:
-        SizedIPacket( TCPSocket& socket, Endianess endianess = Endianess::LITTLEENDIAN );
+        SizedIPacket( TCPSocket& socket, Endianess endianess = Endianess::LITTLE );
 
         // IPacket
         virtual const uint8_t* getData() const override;

@@ -16,7 +16,7 @@ namespace ttb
     class DataIPacket : public IPacket
     {
     public:
-        DataIPacket( const IPacket& frame, Endianess endianess = Endianess::LITTLEENDIAN );
+        DataIPacket( const IPacket& frame, Endianess endianess = Endianess::LITTLE );
 
         template < typename T >
         T read();

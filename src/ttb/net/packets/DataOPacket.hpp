@@ -15,8 +15,8 @@ namespace ttb
     class DataOPacket : public OPacket
     {
     public:
-        DataOPacket( Endianess endianess = Endianess::LITTLEENDIAN );
-        DataOPacket( uint32_t size, Endianess endianess = Endianess::LITTLEENDIAN );
+        DataOPacket( Endianess endianess = Endianess::LITTLE );
+        DataOPacket( uint32_t size, Endianess endianess = Endianess::LITTLE );
 
         template < typename T >
         void write( const T& value );

@@ -16,7 +16,7 @@ namespace ttb
     {
     public:
         SizedOPacket( std::unique_ptr< OPacket > packet,
-                      Endianess endianess = Endianess::LITTLEENDIAN );
+                      Endianess endianess = Endianess::LITTLE );
 
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
