@@ -337,35 +337,35 @@ namespace ttb
         T wy = quat.w() * quat.y();
         T wz = quat.w() * quat.z();
 
-        return { 1.0 - 2.0 * ( y2 + z2 ),
-                 2.0 * ( xy - wz ),
-                 2.0 * ( xz + wy ),
-                 0.0,
-                 2.0 * ( xy + wz ),
-                 1.0 - 2.0 * ( x2 + z2 ),
-                 2.0 * ( yz - wx ),
-                 0.0,
-                 2.0 * ( xz - wy ),
-                 2.0 * ( yz + wx ),
-                 1.0 - 2.0 * ( x2 + y2 ),
-                 0.0,
-                 0.0,
-                 0.0,
-                 0.0,
-                 1.0 };
+        return { T( 1 ) - T( 2 ) * ( y2 + z2 ),
+                 T( 2 ) * ( xy - wz ),
+                 T( 2 ) * ( xz + wy ),
+                 T( 0 ),
+                 T( 2 ) * ( xy + wz ),
+                 T( 1 ) - T( 2 ) * ( x2 + z2 ),
+                 T( 2 ) * ( yz - wx ),
+                 T( 0 ),
+                 T( 2 ) * ( xz - wy ),
+                 T( 2 ) * ( yz + wx ),
+                 T( 1 ) - T( 2 ) * ( x2 + y2 ),
+                 T( 0 ),
+                 T( 0 ),
+                 T( 0 ),
+                 T( 0 ),
+                 T( 1 ) };
     }
 
     template < typename T >
     Matrix< T, 4, 4 > MatrixFactory< T >::fromTranslation( Vector< T, 3 > const& vec )
     {
-        return { 1.0, 0.0, 0.0, vec( 0 ), 0.0, 1.0, 0.0, vec( 1 ),
-                 0.0, 0.0, 1.0, vec( 2 ), 0.0, 0.0, 0.0, 1.0 };
+        return { T( 1 ), T( 0 ), T( 0 ), vec( 0 ), T( 0 ), T( 1 ), T( 0 ), vec( 1 ),
+                 T( 0 ), T( 0 ), T( 1 ), vec( 2 ), T( 0 ), T( 0 ), T( 0 ), T( 1 ) };
     }
 
     template < typename T >
     Matrix< T, 4, 4 > MatrixFactory< T >::fromScale( Vector< T, 3 > const& vec )
     {
-        return { vec( 0 ), 0.0, 0.0,      0.0, 0.0, vec( 1 ), 0.0, 0.0,
-                 0.0,      0.0, vec( 2 ), 0.0, 0.0, 0.0,      0.0, 1.0 };
+        return { vec( 0 ), T( 0 ), T( 0 ),   T( 0 ), T( 0 ), vec( 1 ), T( 0 ), T( 0 ),
+                 T( 0 ),   T( 0 ), vec( 2 ), T( 0 ), T( 0 ), T( 0 ),   T( 0 ), T( 1 ) };
     }
 }

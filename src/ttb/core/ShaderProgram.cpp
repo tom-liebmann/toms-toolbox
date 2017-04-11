@@ -64,6 +64,11 @@ void ttb::ShaderProgram::setUniformInt( GLint location, GLint value )
     glUniform1i( location, value );
 }
 
+void ttb::ShaderProgram::setUniform( GLint location, GLfloat value )
+{
+    glUniform1f( location, value );
+}
+
 void ttb::ShaderProgram::setUniform( GLint location, const ttb::Matrix4f& matrix )
 {
     glUniformMatrix4fv( location, 1, GL_TRUE, matrix.ptr() );

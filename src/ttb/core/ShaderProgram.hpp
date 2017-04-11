@@ -41,6 +41,7 @@ namespace ttb
         GLint getUniformLocation( const std::string& name ) const;
 
         void setUniformInt( GLint location, GLint value );
+        void setUniform( GLint location, GLfloat value );
         void setUniform( GLint location, const ttb::Matrix4f& matrix );
         void setUniform( GLint location, const ttb::Vector< float, 3 >& vector );
 
