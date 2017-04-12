@@ -44,9 +44,9 @@ void ttb::EventManager::removeListener( Event::Type type,
     }
 }
 
-void ttb::EventManager::runEvent( std::unique_ptr< Event > const& event )
+void ttb::EventManager::runEvent( Event const& event )
 {
-    auto& container = m_listener[ event->getType() ];
+    auto& container = m_listener[ event.getType() ];
 
     for( auto iter = std::begin( container ); iter != std::end( container ); )
     {
@@ -71,7 +71,7 @@ void ttb::EventManager::process()
 {
     while( !m_events.empty() )
     {
-        runEvent( m_events.front() );
+        runEvent( *m_events.front() );
         m_events.pop_front();
     }
 }

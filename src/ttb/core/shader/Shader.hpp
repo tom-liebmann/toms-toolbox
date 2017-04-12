@@ -21,14 +21,14 @@ namespace ttb
             GEOMETRY
         };
 
-        static std::shared_ptr< Shader > fromFile( Type type, const std::string& filename );
+        static std::unique_ptr< Shader > fromFile( Type type, std::string const& filename );
 
         ~Shader();
 
-        GLuint getShaderObject() const;
+        GLuint shaderObject() const;
 
     private:
-        Shader( Type type, const char* code );
+        Shader( Type type, std::string const& source );
 
         GLuint m_shaderObject;
     };
@@ -41,7 +41,7 @@ namespace ttb
 
 namespace ttb
 {
-    inline GLuint Shader::getShaderObject() const
+    inline GLuint Shader::shaderObject() const
     {
         return m_shaderObject;
     }

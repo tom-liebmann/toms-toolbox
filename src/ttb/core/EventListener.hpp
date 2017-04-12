@@ -22,9 +22,17 @@ namespace ttb
     public:
         virtual ~EventListener();
 
-        virtual bool event( const std::unique_ptr< Event >& event ) = 0;
+        virtual bool event( Event const& event ) = 0;
     };
+}
 
+
+
+// definitions
+//=================================================================================================
+
+namespace ttb
+{
     inline EventListener::~EventListener()
     {
     }

@@ -43,7 +43,7 @@ namespace ttb
         void process();
 
     protected:
-        void runEvent( std::unique_ptr< Event > const& event );
+        void runEvent( Event const& event );
 
     private:
         struct SlotCompare;
