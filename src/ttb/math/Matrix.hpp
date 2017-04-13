@@ -11,8 +11,8 @@
 
 namespace ttb
 {
-    template < typename T, size_t D1, size_t D2 >
-    using Matrix = Tensor< T, D1, D2 >;
+    template < typename TType, size_t TDimension1, size_t TDimension2 >
+    using Matrix = Tensor< TType, TDimension1, TDimension2 >;
 
     using Matrix4f = Matrix< float, 4, 4 >;
 
@@ -73,22 +73,25 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename T, size_t D1, size_t D2 >
-    Matrix< T, D2, D1 > transpose( Matrix< T, D1, D2 > const& matrix )
+    template < typename TType, size_t TDimension1, size_t TDimension2 >
+    Matrix< TType, TDimension2, TDimension1 > transpose(
+        Matrix< TType, TDimension1, TDimension2 > const& matrix )
     {
-        Matrix< T, D2, D1 > result;
+        Matrix< TType, TDimension2, TDimension1 > result;
 
-        for( size_t row = 0; row < D1; ++row )
-            for( size_t col = 0; col < D2; ++col )
+        for( size_t row = 0; row < TDimension1; ++row )
+            for( size_t col = 0; col < TDimension2; ++col )
                 result( col, row ) = matrix( row, col );
 
         return result;
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > invert( Matrix< T, 4, 4 > const& matrix )
+    template < typename TType >
+    Matrix< TType, 4, 4 > invert( Matrix< TType, 4, 4 > const& matrix )
     {
-        Matrix< T, 4, 4 > result;
+        using std::abs;
+
+        Matrix< TType, 4, 4 > result;
 
         result( 0, 0 ) =
             matrix[ 5 ] * matrix[ 10 ] * matrix[ 15 ] - matrix[ 5 ] * matrix[ 11 ] * matrix[ 14 ] -
@@ -173,7 +176,7 @@ namespace ttb
         double det = matrix[ 0 ] * result[ 0 ] + matrix[ 1 ] * result[ 4 ] +
                      matrix[ 2 ] * result[ 8 ] + matrix[ 3 ] * result[ 12 ];
 
-        if( std::abs( det ) < 1e-7 )
+        if( abs( det ) < TType( 1e-7 ) )
             throw std::runtime_error( "Not invertible" );
 
         for( int i = 0; i < 16; i++ )
@@ -227,52 +230,54 @@ namespace ttb
     template < typename T >
     Matrix< T, 4, 4 > MatrixFactory< T >::fromIdentity()
     {
-        return { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
+        return { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromOrtho( T right, T top, T left, T bottom, T zNear,
-                                                     T zFar )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromOrtho( TType right, TType top, TType left,
+                                                             TType bottom, TType zNear, TType zFar )
     {
-        return { 2.0 / ( right - left ),
-                 0.0,
-                 0.0,
+        return { TType( 2 ) / ( right - left ),
+                 TType( 0 ),
+                 TType( 0 ),
                  ( right + left ) / ( left - right ),
-                 0.0,
-                 2.0 / ( top - bottom ),
-                 0.0,
+                 TType( 0 ),
+                 TType( 2 ) / ( top - bottom ),
+                 TType( 0 ),
                  ( top + bottom ) / ( bottom - top ),
-                 0.0,
-                 0.0,
-                 2.0 / ( zFar - zNear ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 2 ) / ( zFar - zNear ),
                  ( zFar + zNear ) / ( zNear - zFar ),
-                 0.0,
-                 0.0,
-                 0.0,
-                 1.0 };
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 1 ) };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromPerspective( T fovy, T aspect, T zNear, T zFar )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromPerspective( TType fovy, TType aspect,
+                                                                   TType zNear, TType zFar )
     {
-        fovy = 1.0 / std::tan( fovy / 114.5915590261646417536 );
+        using std::tan;
+        fovy = TType( 1 ) / tan( fovy / TType( 114.5915590261646417536 ) );
 
         return { fovy / aspect,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
                  fovy,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
                  ( zFar + zNear ) / ( zNear - zFar ),
-                 2.0f * zFar * zNear / ( zNear - zFar ),
-                 0.0f,
-                 0.0f,
-                 -1.0f,
-                 0.0f };
+                 TType( 2 ) * zFar * zNear / ( zNear - zFar ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( -1 ),
+                 TType( 0 ) };
     }
 
     template < typename T >

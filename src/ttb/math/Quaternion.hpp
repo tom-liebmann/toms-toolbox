@@ -16,8 +16,8 @@ namespace ttb
     public:
         Quaternion();
         Quaternion( TType w, TType x, TType y, TType z );
-        Quaternion( double rot, Vector< TType, 3 > const& axis );
-        Quaternion( Vector< TType, 3 > const from, Vector< TType, 3 > const& to );
+        Quaternion( TType rot, Vector< TType, 3 > const& axis );
+        Quaternion( Vector< TType, 3 > const& from, Vector< TType, 3 > const& to );
 
         TType w() const;
         TType x() const;
@@ -64,7 +64,7 @@ namespace ttb
     Quaternion< TType > operator+( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs );
 
     template < typename TType >
-    Vector< TType, 3 > operator*( Quaternion< Type > const& lhs, Vector< Type, 3 > const& rhs );
+    Vector< TType, 3 > operator*( Quaternion< TType > const& lhs, Vector< TType, 3 > const& rhs );
 
     template < typename TType >
     std::ostream& operator<<( std::ostream& stream, Quaternion< TType > const& quat );
@@ -102,15 +102,9 @@ namespace ttb
     }
 
     template < typename TType >
-    inline Quaternion< TType >::Quaternion( Quaternion< TType > const& quat )
-        : m_w( quat.m_w ), m_x( quat.m_x ), m_y( quat.m_y ), m_z( quat.m_z )
+    Quaternion< TType >::Quaternion( Vector< TType, 3 > const& from, Vector< TType, 3 > const& to )
     {
-    }
-
-    template < typename TType >
-    Quaternion< TType >::Quaternion( Vector< Type, 3 > const& from, Vector< Type, 3 > const& to )
-    {
-        Vector< Type, 3 > halfVec = from + to;
+        Vector< TType, 3 > halfVec = from + to;
         halfVec = halfVec / norm( halfVec );
         m_w = dot( halfVec, to );
         halfVec = cross( halfVec, to );
@@ -172,27 +166,23 @@ namespace ttb
     template < typename TType >
     inline Quaternion< TType > invert( Quaternion< TType > const& quat )
     {
-        return Quaternion< TType >( m_w, -m_x, -m_y, -m_z );
+        return { quat.w(), -quat.x(), -quat.y(), -quat.z() };
     }
 
     template < typename TType >
     inline Quaternion< TType > normalize( Quaternion< TType > const& quat )
     {
-        Type len = sqrt( lengthSq() );
-        return Quaternion< Type >( m_w / len, m_x / len, m_y / len, m_z / len );
+        TType len = norm( quat );
+        return { quat.w() / len, quat.x() / len, quat.y() / len, quat.z() / len };
     }
 
     template < typename TType >
     Quaternion< TType > operator*( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs )
     {
-        return { quat1.w() * quat2.w() - quat1.x() * quat2.x() - quat1.y() * quat2.y() -
-                     quat1.z() * quat2.z(),
-                 quat1.w() * quat2.x() + quat1.x() * quat2.w() + quat1.y() * quat2.z() -
-                     quat1.z() * quat2.y(),
-                 quat1.w() * quat2.y() + quat1.y() * quat2.w() + quat1.z() * quat2.x() -
-                     quat1.x() * quat2.z(),
-                 quat1.w() * quat2.z() + quat1.z() * quat2.w() + quat1.x() * quat2.y() -
-                     quat1.y() * quat2.x() };
+        return { lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z(),
+                 lhs.w() * rhs.x() + lhs.x() * rhs.w() + lhs.y() * rhs.z() - lhs.z() * rhs.y(),
+                 lhs.w() * rhs.y() + lhs.y() * rhs.w() + lhs.z() * rhs.x() - lhs.x() * rhs.z(),
+                 lhs.w() * rhs.z() + lhs.z() * rhs.w() + lhs.x() * rhs.y() - lhs.y() * rhs.x() };
     }
 
     template < typename TType >
@@ -210,16 +200,15 @@ namespace ttb
     template < typename TType >
     Quaternion< TType > operator+( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs )
     {
-        return { quat1.w() + quat2.w(), quat1.x() + quat2.x(), quat1.y() + quat2.y(),
-                 quat1.z() + quat2.z() };
+        return { lhs.w() + rhs.w(), lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z() };
     }
 
     template < typename TType >
-    Vector< Type, 3 > operator*( Quaternion< TType > const& quat, Vector< Type, 3 > const& vec )
+    Vector< TType, 3 > operator*( Quaternion< TType > const& lhs, Vector< TType, 3 > const& rhs )
     {
-        Quaternion< TType > inv = invert( quat );
-        Quaternion< TType > x( 0, vec.x(), vec.y(), vec.z() );
-        inv = quat * x * inv;
+        Quaternion< TType > inv = invert( lhs );
+        Quaternion< TType > x( 0, rhs.x(), rhs.y(), rhs.z() );
+        inv = lhs * x * inv;
         return { inv.x(), inv.y(), inv.z() };
     }
 

@@ -22,7 +22,8 @@ namespace ttb
 
         Tensor();
 
-        Tensor( std::initializer_list< T > values );
+        template < typename TType2 >
+        Tensor( std::initializer_list< TType2 > values );
 
         // Access
         T& operator[]( size_t index );
@@ -116,7 +117,8 @@ namespace ttb
     }
 
     template < typename T, size_t... D >
-    inline Tensor< T, D... >::Tensor( std::initializer_list< T > values )
+    template < typename TType2 >
+    inline Tensor< T, D... >::Tensor( std::initializer_list< TType2 > values )
     {
         std::copy( values.begin(), values.end(), m_values.begin() );
     }
