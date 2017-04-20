@@ -89,8 +89,9 @@ namespace ttb
     ttb::Tensor< decltype( T1() / T2() ), D... > operator/( const ttb::Tensor< T1, D... >& lhs,
                                                             T2 rhs );
 
-    template < typename T1, typename T2, size_t... D >
-    ttb::Tensor< T1, D... >& operator*=( ttb::Tensor< T1, D... >& lhs, const T2& rhs );
+    template < typename T1, typename T2, size_t... D,
+               typename Enabled = typename std::enable_if< std::is_arithmetic< T2 >::value >::type >
+    ttb::Tensor< T1, D... >& operator*=( ttb::Tensor< T1, D... >& lhs, T2 rhs );
 
     template < typename T1, typename T2, size_t... D >
     ttb::Tensor< T1, D... >& operator/=( ttb::Tensor< T1, D... >& lhs, const T2& rhs );
@@ -297,7 +298,7 @@ namespace ttb
         return result;
     }
 
-    template < typename T1, typename T2, size_t... D >
+    template < typename T1, typename T2, size_t... D, typename Enabled >
     ttb::Tensor< T1, D... >& operator*=( ttb::Tensor< T1, D... >& lhs, const T2& rhs )
     {
         for( size_t i = 0; i < lhs.size; ++i )
