@@ -4,12 +4,12 @@
 
 #include <GL/gl.h>
 
-#include <ttb/core/shader/ProgramCreator.hpp>
 #include <ttb/math/Matrix.hpp>
 #include <ttb/math/Vector.hpp>
 
 #include <initializer_list>
 #include <memory>
+#include <vector>
 
 // forward declarations
 //=============================================================================
