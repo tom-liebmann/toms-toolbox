@@ -27,6 +27,9 @@ namespace ttb
     template < typename T, size_t D1, size_t D2, size_t D3 >
     Matrix< T, D1, D3 > operator*( Matrix< T, D1, D2 > const& lhs, Matrix< T, D2, D3 > const& rhs );
 
+    template < typename T, size_t D1, size_t D2, size_t D3 >
+    Matrix< T, D1, D3 >& operator*=( Matrix< T, D1, D2 >& lhs, Matrix< T, D2, D3 > const& rhs );
+
     template < typename T, size_t D1, size_t D2 >
     Vector< T, D1 > operator*( Matrix< T, D1, D2 > const& matrix, Vector< T, D2 > const& vector );
 
@@ -203,6 +206,12 @@ namespace ttb
         return result;
     }
 
+    template < typename T, size_t D1, size_t D2, size_t D3 >
+    Matrix< T, D1, D3 >& operator*=( Matrix< T, D1, D2 >& lhs, Matrix< T, D2, D3 > const& rhs )
+    {
+        return lhs = lhs * rhs;
+    }
+
     template < typename T, size_t D1, size_t D2 >
     Vector< T, D1 > operator*( Matrix< T, D1, D2 > const& matrix, Vector< T, D2 > const& vector )
     {
@@ -280,97 +289,105 @@ namespace ttb
                  TType( 0 ) };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromPerspectiveInv( T fovy, T aspect, T zNear, T zFar )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromPerspectiveInv( TType fovy, TType aspect,
+                                                                      TType zNear, TType zFar )
     {
-        fovy = 1.0 / std::tan( fovy / 114.5915590261646417536 );
+        using std::tan;
+
+        fovy = TType( 1 ) / tan( fovy / TType( 114.5915590261646417536 ) );
 
         return { aspect / fovy,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 1.0f / fovy,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 0.0f,
-                 -1.0f,
-                 0.0f,
-                 0.0f,
-                 ( zNear - zFar ) / 2.0f / zNear / zFar,
-                 ( zNear + zFar ) / 2.0f / zNear / zFar };
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 1 ) / fovy,
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( -1 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 ( zNear - zFar ) / TType( 2 ) / zNear / zFar,
+                 ( zNear + zFar ) / TType( 2 ) / zNear / zFar };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromLookAt( Vector< T, 3 > const& eye,
-                                                      Vector< T, 3 > const& center,
-                                                      Vector< T, 3 > const& up )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromLookAt( Vector< TType, 3 > const& eye,
+                                                              Vector< TType, 3 > const& center,
+                                                              Vector< TType, 3 > const& up )
     {
         auto F = normalize( center - eye );
         auto s = normalize( cross( F, up ) );
         auto u = cross( s, F );
 
-        return { s( 0 ),  s( 1 ),  s( 2 ),  -dot( eye, s ), u( 0 ), u( 1 ), u( 2 ), -dot( eye, u ),
-                 -F( 0 ), -F( 1 ), -F( 2 ), dot( eye, F ),  0.0,    0.0,    0.0,    1.0 };
+        return { s( 0 ),     s( 1 ),         s( 2 ),     -dot( eye, s ), u( 0 ),  u( 1 ),
+                 u( 2 ),     -dot( eye, u ), -F( 0 ),    -F( 1 ),        -F( 2 ), dot( eye, F ),
+                 TType( 0 ), TType( 0 ),     TType( 0 ), TType( 1 ) };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromLookAtInv( Vector< T, 3 > const& eye,
-                                                         Vector< T, 3 > const& center,
-                                                         Vector< T, 3 > const& up )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromLookAtInv( Vector< TType, 3 > const& eye,
+                                                                 Vector< TType, 3 > const& center,
+                                                                 Vector< TType, 3 > const& up )
     {
         auto F = normalize( center - eye );
         auto s = normalize( cross( F, up ) );
         auto u = cross( s, F );
 
-        return { s( 0 ), u( 0 ), -F( 0 ), eye( 0 ), s( 1 ), u( 1 ), -F( 1 ), eye( 1 ),
-                 s( 2 ), u( 2 ), -F( 2 ), eye( 2 ), 0.0,    0.0,    0.0,     1.0 };
+        return {
+            s( 0 ), u( 0 ), -F( 0 ), eye( 0 ), s( 1 ),     u( 1 ),     -F( 1 ),    eye( 1 ),
+            s( 2 ), u( 2 ), -F( 2 ), eye( 2 ), TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 )
+        };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromRotation( Quaternion< T > const& quat )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromRotation( Quaternion< TType > const& quat )
     {
-        T x2 = quat.x() * quat.x();
-        T y2 = quat.y() * quat.y();
-        T z2 = quat.z() * quat.z();
-        T xy = quat.x() * quat.y();
-        T xz = quat.x() * quat.z();
-        T yz = quat.y() * quat.z();
-        T wx = quat.w() * quat.x();
-        T wy = quat.w() * quat.y();
-        T wz = quat.w() * quat.z();
+        TType x2 = quat.x() * quat.x();
+        TType y2 = quat.y() * quat.y();
+        TType z2 = quat.z() * quat.z();
+        TType xy = quat.x() * quat.y();
+        TType xz = quat.x() * quat.z();
+        TType yz = quat.y() * quat.z();
+        TType wx = quat.w() * quat.x();
+        TType wy = quat.w() * quat.y();
+        TType wz = quat.w() * quat.z();
 
-        return { T( 1 ) - T( 2 ) * ( y2 + z2 ),
-                 T( 2 ) * ( xy - wz ),
-                 T( 2 ) * ( xz + wy ),
-                 T( 0 ),
-                 T( 2 ) * ( xy + wz ),
-                 T( 1 ) - T( 2 ) * ( x2 + z2 ),
-                 T( 2 ) * ( yz - wx ),
-                 T( 0 ),
-                 T( 2 ) * ( xz - wy ),
-                 T( 2 ) * ( yz + wx ),
-                 T( 1 ) - T( 2 ) * ( x2 + y2 ),
-                 T( 0 ),
-                 T( 0 ),
-                 T( 0 ),
-                 T( 0 ),
-                 T( 1 ) };
+        return { TType( 1 ) - TType( 2 ) * ( y2 + z2 ),
+                 TType( 2 ) * ( xy - wz ),
+                 TType( 2 ) * ( xz + wy ),
+                 TType( 0 ),
+                 TType( 2 ) * ( xy + wz ),
+                 TType( 1 ) - TType( 2 ) * ( x2 + z2 ),
+                 TType( 2 ) * ( yz - wx ),
+                 TType( 0 ),
+                 TType( 2 ) * ( xz - wy ),
+                 TType( 2 ) * ( yz + wx ),
+                 TType( 1 ) - TType( 2 ) * ( x2 + y2 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 0 ),
+                 TType( 1 ) };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromTranslation( Vector< T, 3 > const& vec )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromTranslation( Vector< TType, 3 > const& vec )
     {
-        return { T( 1 ), T( 0 ), T( 0 ), vec( 0 ), T( 0 ), T( 1 ), T( 0 ), vec( 1 ),
-                 T( 0 ), T( 0 ), T( 1 ), vec( 2 ), T( 0 ), T( 0 ), T( 0 ), T( 1 ) };
+        return { TType( 1 ), TType( 0 ), TType( 0 ), vec( 0 ),   TType( 0 ), TType( 1 ),
+                 TType( 0 ), vec( 1 ),   TType( 0 ), TType( 0 ), TType( 1 ), vec( 2 ),
+                 TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 ) };
     }
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromScale( Vector< T, 3 > const& vec )
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromScale( Vector< TType, 3 > const& vec )
     {
-        return { vec( 0 ), T( 0 ), T( 0 ),   T( 0 ), T( 0 ), vec( 1 ), T( 0 ), T( 0 ),
-                 T( 0 ),   T( 0 ), vec( 2 ), T( 0 ), T( 0 ), T( 0 ),   T( 0 ), T( 1 ) };
+        return { vec( 0 ),   TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 1 ),
+                 TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 2 ),   TType( 0 ),
+                 TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 ) };
     }
 }

@@ -96,9 +96,9 @@ namespace ttb
         auto s = sin( rot );
         auto len = norm( axis );
         m_w = std::cos( rot );
-        m_x = axis( 0 ) / len * sin;
-        m_y = axis( 1 ) / len * sin;
-        m_z = axis( 2 ) / len * sin;
+        m_x = axis( 0 ) / len * s;
+        m_y = axis( 1 ) / len * s;
+        m_z = axis( 2 ) / len * s;
     }
 
     template < typename TType >
