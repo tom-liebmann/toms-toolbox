@@ -1,5 +1,4 @@
 #include "shader/Shader.hpp"
 #include "shader/Program.hpp"
-#include "shader/ProgramCreator.hpp"
 #include "shader/Uniform.hpp"
 #include "shader/UniformPrimitive.hpp"
