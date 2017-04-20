@@ -1,5 +1,7 @@
 #pragma once
 
+#include "RenderTarget.hpp"
+
 #include <GL/glew.h>
 
 #include <GL/gl.h>
@@ -24,7 +26,7 @@ namespace ttb
 
 namespace ttb
 {
-    class GBuffer
+    class GBuffer : public RenderTarget
     {
     public:
         GBuffer();
@@ -39,8 +41,8 @@ namespace ttb
         void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
         void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
 
-        void begin( State& state ) const;
-        void end( State& state ) const;
+        virtual void begin( State& state ) const override;
+        virtual void end( State& state ) const override;
 
     private:
         GLuint m_frameBufferObject;

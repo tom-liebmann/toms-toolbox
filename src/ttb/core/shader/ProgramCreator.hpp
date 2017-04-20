@@ -9,7 +9,7 @@
 namespace ttb
 {
     class Shader;
-    class ShaderProgram;
+    class Program;
 }
 
 
@@ -19,17 +19,17 @@ namespace ttb
 
 namespace ttb
 {
-    class ShaderProgramCreator
+    class ProgramCreator
     {
     public:
-        ShaderProgramCreator& attachShader( std::unique_ptr< Shader > shader );
-        std::unique_ptr< ShaderProgram > finish();
+        ProgramCreator& attachShader( std::unique_ptr< Shader > shader );
+        std::unique_ptr< Program > finish();
 
     private:
-        ShaderProgramCreator();
+        ProgramCreator();
 
         std::vector< std::unique_ptr< Shader > > m_shaders;
 
-        friend class ShaderProgram;
+        friend class Program;
     };
 }

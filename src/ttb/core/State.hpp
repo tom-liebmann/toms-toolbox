@@ -5,7 +5,7 @@
 #include <GL/gl.h>
 
 #include <ttb/core/Viewport.hpp>
-#include <ttb/math/Matrix4f.hpp>
+#include <ttb/math/Matrix.hpp>
 
 #include <list>
 #include <memory>
@@ -16,7 +16,8 @@
 namespace ttb
 {
     class Window;
-    class ShaderProgram;
+    class Program;
+    class RenderTarget;
 }
 
 
@@ -32,24 +33,30 @@ namespace ttb
         State( Window& window );
         ~State();
 
+        // render target
+        void pushTarget( std::shared_ptr< RenderTarget > const& target );
+        void popTarget();
+
         // projection
-        void setProjectionMatrix( const ttb::Matrix4f& matrix );
-        ttb::Matrix4f const& getProjectionMatrix() const;
+        void projectionMatrix( ttb::Matrix< float, 4, 4 > const& matrix );
+        ttb::Matrix< float, 4, 4 > const& projectionMatrix() const;
 
         // modelview
         void pushMatrix();
         void popMatrix();
-        void setMatrix( const ttb::Matrix4f& matrix );
-        void applyMatrix( const ttb::Matrix4f& matrix );
+        void setMatrix( ttb::Matrix< float, 4, 4 > const& matrix );
+        void applyMatrix( ttb::Matrix< float, 4, 4 > const& matrix );
 
-        ttb::Matrix4f const& getModelViewMatrix() const;
+        ttb::Matrix< float, 4, 4 > const& modelViewMatrix() const;
 
         // shader
-        void pushShader( std::shared_ptr< ShaderProgram > shader );
-        void popShader();
+        void pushProgram( std::shared_ptr< Program > const& program );
+        void popProgram();
+
+        Program& program();
 
         // viewport
-        void pushViewport( Viewport viewport );
+        void pushViewport( Viewport const& viewport );
         void popViewport();
 
         // events
@@ -59,28 +66,22 @@ namespace ttb
     private:
         Window& m_window;
 
+        // render target
+        std::list< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
+
         // projection
-        std::unique_ptr< ttb::Matrix4f > m_projectionMatrix;
+        ttb::Matrix< float, 4, 4 > m_projectionMatrix;
         bool m_projectionMatrixSet;
 
         // modelview
-        std::list< std::unique_ptr< ttb::Matrix4f > > m_modelViewMatrixStack;
+        std::list< ttb::Matrix< float, 4, 4 > > m_modelViewMatrixStack;
         bool m_modelViewMatrixSet;
 
         // shader
-        std::list< std::shared_ptr< ShaderProgram > > m_shaderStack;
+        std::list< std::shared_ptr< Program > > m_programStack;
 
         // viewport
         std::unique_ptr< Viewport > m_windowViewport;
         std::list< Viewport > m_viewportStack;
     };
-}
-
-
-
-// definitions
-//=============================================================================
-
-namespace ttb
-{
 }

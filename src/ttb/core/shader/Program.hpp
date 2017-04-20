@@ -4,7 +4,7 @@
 
 #include <GL/gl.h>
 
-#include <ttb/core/shader/ShaderProgramCreator.hpp>
+#include <ttb/core/shader/ProgramCreator.hpp>
 #include <ttb/math/Matrix.hpp>
 #include <ttb/math/Vector.hpp>
 
@@ -16,7 +16,7 @@
 
 namespace ttb
 {
-    class ShaderProgramCreator;
+    class ProgramCreator;
     class Shader;
     class VertexAttributeList;
 }
@@ -28,15 +28,17 @@ namespace ttb
 
 namespace ttb
 {
-    class ShaderProgram
+    class Program
     {
     public:
-        static ShaderProgramCreator create();
+        static ProgramCreator create();
 
-        ~ShaderProgram();
+        ~Program();
 
         void use() const;
         void unuse() const;
+
+        GLint attributeLocation( std::string const& name ) const;
 
         GLint getUniformLocation( const std::string& name ) const;
         void setUniformInt( GLint location, GLint value );
@@ -45,10 +47,10 @@ namespace ttb
         void setUniform( GLint location, const ttb::Vector< float, 3 >& vector );
 
     private:
-        ShaderProgram( std::vector< std::unique_ptr< Shader > > const& shaders );
+        Program( std::vector< std::unique_ptr< Shader > > const& shaders );
 
         GLuint m_programObject;
 
-        friend class ShaderProgramCreator;
+        friend class ProgramCreator;
     };
 }

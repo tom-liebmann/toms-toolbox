@@ -1,20 +1,18 @@
-#include "ShaderProgram.hpp"
+#include "Program.hpp"
 
-#include <ttb/core/VertexAttribute.hpp>
-#include <ttb/core/VertexAttributeList.hpp>
 #include <ttb/core/shader/Shader.hpp>
-#include <ttb/math/Matrix4f.hpp>
+#include <ttb/math/Matrix.hpp>
 
 #include <iostream>
 
 namespace ttb
 {
-    ShaderProgramCreator ShaderProgram::create()
+    ProgramCreator Program::create()
     {
         return {};
     }
 
-    ShaderProgram::ShaderProgram( std::vector< std::unique_ptr< Shader > > const& shaders )
+    Program::Program( std::vector< std::unique_ptr< Shader > > const& shaders )
         : m_programObject( glCreateProgram() )
     {
         for( auto& shader : shaders )
@@ -35,43 +33,49 @@ namespace ttb
         }
     }
 
-    ttb::ShaderProgram::~ShaderProgram()
+    ttb::Program::~Program()
     {
         glDeleteProgram( m_programObject );
     }
 
-    void ttb::ShaderProgram::use() const
+    void ttb::Program::use() const
     {
         glUseProgram( m_programObject );
     }
 
-    void ttb::ShaderProgram::unuse() const
+    void ttb::Program::unuse() const
     {
         glUseProgram( 0 );
     }
 
-    GLint ttb::ShaderProgram::getUniformLocation( const std::string& name ) const
+    GLint ttb::Program::attributeLocation( std::string const& name ) const
+    {
+        return glGetAttribLocation( m_programObject,
+                                    reinterpret_cast< GLchar const* >( name.c_str() ) );
+    }
+
+    GLint ttb::Program::getUniformLocation( const std::string& name ) const
     {
         return glGetUniformLocation( m_programObject,
                                      reinterpret_cast< const GLchar* >( name.c_str() ) );
     }
 
-    void ttb::ShaderProgram::setUniformInt( GLint location, GLint value )
+    void ttb::Program::setUniformInt( GLint location, GLint value )
     {
         glUniform1i( location, value );
     }
 
-    void ttb::ShaderProgram::setUniform( GLint location, GLfloat value )
+    void ttb::Program::setUniform( GLint location, GLfloat value )
     {
         glUniform1f( location, value );
     }
 
-    void ttb::ShaderProgram::setUniform( GLint location, const ttb::Matrix4f& matrix )
+    void ttb::Program::setUniform( GLint location, const ttb::Matrix4f& matrix )
     {
         glUniformMatrix4fv( location, 1, GL_TRUE, matrix.ptr() );
     }
 
-    void ttb::ShaderProgram::setUniform( GLint location, const ttb::Vector< float, 3 >& vector )
+    void ttb::Program::setUniform( GLint location, const ttb::Vector< float, 3 >& vector )
     {
         glUniform3f( location, vector.x(), vector.y(), vector.z() );
     }

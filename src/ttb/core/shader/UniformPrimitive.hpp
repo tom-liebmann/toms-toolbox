@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ttb/math/Matrix.hpp>
-#include "ShaderProgram.hpp"
+#include "Program.hpp"
 #include "Uniform.hpp"
 
 // declarations
