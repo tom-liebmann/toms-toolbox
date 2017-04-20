@@ -123,6 +123,29 @@ namespace ttb
 
 namespace ttb
 {
+    namespace priv
+    {
+        template < typename TType >
+        struct gl_type;
+
+        template <>
+        struct gl_type< float >
+        {
+            using type = GLfloat;
+        };
+
+        template <>
+        struct gl_type< double >
+        {
+            using type = GLfloat;
+        };
+    }
+}
+
+
+
+namespace ttb
+{
     template < typename... TType >
     size_t VertexBuffer::Access::push( TType... data )
     {
@@ -134,9 +157,11 @@ namespace ttb
     template < typename TType >
     void VertexBuffer::Access::privPush( TType value )
     {
-        m_buffer.m_data.resize( m_buffer.m_data.size() + sizeof( value ) );
-        *reinterpret_cast< TType* >(
-            &m_buffer.m_data[ m_buffer.m_data.size() - sizeof( value ) ] ) = value;
+        using GLType = typename priv::gl_type< TType >::type;
+
+        m_buffer.m_data.resize( m_buffer.m_data.size() + sizeof( GLType ) );
+        *reinterpret_cast< GLType* >(
+            &m_buffer.m_data[ m_buffer.m_data.size() - sizeof( GLType ) ] ) = value;
     }
 
     template < typename TType, typename... TTypes >

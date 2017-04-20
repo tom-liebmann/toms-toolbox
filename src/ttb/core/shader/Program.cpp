@@ -7,7 +7,7 @@
 
 namespace ttb
 {
-    ProgramCreator Program::create()
+    Program::Creator Program::create()
     {
         return {};
     }
@@ -78,5 +78,21 @@ namespace ttb
     void ttb::Program::setUniform( GLint location, const ttb::Vector< float, 3 >& vector )
     {
         glUniform3f( location, vector.x(), vector.y(), vector.z() );
+    }
+
+
+
+    Program::Creator::Creator()
+    {
+    }
+
+    Program::Creator& Program::Creator::attachShader( std::unique_ptr< Shader > shader )
+    {
+        m_shaders.push_back( std::move( shader ) );
+    }
+
+    std::unique_ptr< Program > Program::Creator::finish()
+    {
+        return std::unique_ptr< Program >( new Program( std::move( m_shaders ) ) );
     }
 }

@@ -2,15 +2,15 @@
 
 #include <ttb/core/State.hpp>
 
+#include <cassert>
 #include <cstring>
 #include <numeric>
-#include <cassert>
 
 namespace ttb
 {
     VertexBuffer::Creator VertexBuffer::create()
     {
-        return VertexBuffer::Creator();
+        return {};
     }
 
     VertexBuffer::VertexBuffer( std::vector< Attribute > attributes )

@@ -11,7 +11,7 @@ namespace ttb
 {
     Geometry::Creator Geometry::create( GLenum mode )
     {
-        return Geometry::Creator( mode );
+        return { mode };
     }
 
     Geometry::Geometry( GLenum mode, std::vector< Attribute > attributes,

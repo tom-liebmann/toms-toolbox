@@ -30,8 +30,10 @@ namespace ttb
 {
     class Program
     {
+        class Creator;
+
     public:
-        static ProgramCreator create();
+        static Creator create();
 
         ~Program();
 
@@ -50,7 +52,22 @@ namespace ttb
         Program( std::vector< std::unique_ptr< Shader > > const& shaders );
 
         GLuint m_programObject;
+    };
 
-        friend class ProgramCreator;
+
+
+    class Program::Creator
+    {
+    public:
+        Creator& attachShader( std::unique_ptr< Shader > shader );
+
+        std::unique_ptr< Program > finish();
+
+    private:
+        Creator();
+
+        std::vector< std::unique_ptr< Shader > > m_shaders;
+
+        friend class Program;
     };
 }
