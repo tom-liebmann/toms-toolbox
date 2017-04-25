@@ -23,13 +23,13 @@ namespace ttb
 
         static std::unique_ptr< Shader > fromFile( Type type, std::string const& filename );
 
+        Shader( Type type, std::string const& source );
+
         ~Shader();
 
         GLuint shaderObject() const;
 
     private:
-        Shader( Type type, std::string const& source );
-
         GLuint m_shaderObject;
     };
 }
