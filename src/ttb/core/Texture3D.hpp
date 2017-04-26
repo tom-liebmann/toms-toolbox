@@ -18,6 +18,8 @@ namespace ttb
 
         void minMagFilter( GLint minFilter, GLint magFilter );
 
+        void bind( GLenum unit ) const;
+
         size_t width() const;
         size_t height() const;
         size_t depth() const;

@@ -26,6 +26,7 @@ namespace ttb
         {
             m_width = width;
             m_height = height;
+            m_depth = depth;
 
             glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, m_width, m_height, m_depth, 0, format,
                           type, data );
@@ -41,6 +42,12 @@ namespace ttb
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, minFilter );
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, magFilter );
 
+        glBindTexture( GL_TEXTURE_3D, 0 );
+    }
+
+    void Texture3D::bind( GLenum unit ) const
+    {
+        glActiveTexture( GL_TEXTURE0 + unit );
         glBindTexture( GL_TEXTURE_3D, m_object );
     }
 }
