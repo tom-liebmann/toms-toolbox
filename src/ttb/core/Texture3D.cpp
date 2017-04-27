@@ -50,4 +50,19 @@ namespace ttb
         glActiveTexture( GL_TEXTURE0 + unit );
         glBindTexture( GL_TEXTURE_3D, m_object );
     }
+
+    size_t Texture3D::width() const
+    {
+        return m_width;
+    }
+
+    size_t Texture3D::height() const
+    {
+        return m_height;
+    }
+
+    size_t Texture3D::depth() const
+    {
+        return m_depth;
+    }
 }
