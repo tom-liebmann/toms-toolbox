@@ -15,7 +15,6 @@
 
 namespace ttb
 {
-    class Window;
     class Program;
     class RenderTarget;
 }
@@ -30,12 +29,14 @@ namespace ttb
     class State
     {
     public:
-        State( Window& window );
+        State();
         ~State();
 
         // render target
         void pushTarget( std::shared_ptr< RenderTarget > const& target );
         void popTarget();
+
+        RenderTarget const& renderTarget() const;
 
         // projection
         void projectionMatrix( ttb::Matrix< float, 4, 4 > const& matrix );
@@ -60,12 +61,9 @@ namespace ttb
         void popViewport();
 
         // events
-        void onWindowResize();
         void apply();
 
     private:
-        Window& m_window;
-
         // render target
         std::list< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
 
@@ -81,7 +79,6 @@ namespace ttb
         std::list< std::shared_ptr< Program > > m_programStack;
 
         // viewport
-        std::unique_ptr< Viewport > m_windowViewport;
         std::list< Viewport > m_viewportStack;
     };
 }

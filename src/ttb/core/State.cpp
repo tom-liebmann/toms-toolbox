@@ -8,17 +8,9 @@
 
 namespace ttb
 {
-    State::State( Window& window )
-        : m_window( window )
-        , m_projectionMatrixSet( false )
-        , m_modelViewMatrixSet( false )
-        , m_windowViewport(
-              new Viewport( 0, 0, m_window.getMode().getWidth(), m_window.getMode().getHeight() ) )
+    State::State() : m_projectionMatrixSet( false ), m_modelViewMatrixSet( false )
     {
         m_modelViewMatrixStack.emplace_back( MatrixFactory< float >::fromIdentity() );
-
-        glViewport( m_windowViewport->getX(), m_windowViewport->getY(),
-                    m_windowViewport->getWidth(), m_windowViewport->getHeight() );
     }
 
     State::~State()
@@ -35,6 +27,11 @@ namespace ttb
     {
         m_renderTargetStack.back()->end( *this );
         m_renderTargetStack.pop_back();
+    }
+
+    RenderTarget const& State::renderTarget() const
+    {
+        return *m_renderTargetStack.back();
     }
 
     void State::projectionMatrix( Matrix< float, 4, 4 > const& matrix )
@@ -118,22 +115,6 @@ namespace ttb
             glViewport( viewport.getX(), viewport.getY(), viewport.getWidth(),
                         viewport.getHeight() );
         }
-        else
-        {
-            const auto& viewport = *m_windowViewport;
-            glViewport( viewport.getX(), viewport.getY(), viewport.getWidth(),
-                        viewport.getHeight() );
-        }
-    }
-
-    void State::onWindowResize()
-    {
-        *m_windowViewport =
-            Viewport( 0, 0, m_window.getMode().getWidth(), m_window.getMode().getHeight() );
-
-        if( m_viewportStack.empty() )
-            glViewport( m_windowViewport->getX(), m_windowViewport->getY(),
-                        m_windowViewport->getWidth(), m_windowViewport->getHeight() );
     }
 
     void State::apply()

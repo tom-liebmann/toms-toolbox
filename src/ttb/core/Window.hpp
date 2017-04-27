@@ -4,8 +4,8 @@
 #include <GLFW/glfw3.h>
 
 #include <ttb/core/EventManager.hpp>
-#include <ttb/core/State.hpp>
 #include <ttb/core/WindowMode.hpp>
+#include <ttb/core/RenderTarget.hpp>
 
 #include <memory>
 
@@ -16,7 +16,7 @@
 
 namespace ttb
 {
-    class Window
+    class Window : public RenderTarget
     {
     public:
         Window( std::string title, WindowMode mode );
@@ -27,11 +27,16 @@ namespace ttb
         std::shared_ptr< EventManager > getEventManager() const;
 
         const WindowMode& getMode() const;
-        State& getState();
 
         GLFWwindow* getHandle() const;
 
         void update();
+
+        // Override: RenderTarget
+        virtual size_t width() const override;
+        virtual size_t height() const override;
+        virtual void begin( State& state ) const override;
+        virtual void end( State& state ) const override;
 
     private:
         static void callbackWindowClose( GLFWwindow* window );
@@ -45,7 +50,6 @@ namespace ttb
 
         std::string m_title;
         WindowMode m_mode;
-        std::unique_ptr< State > m_state;
 
         std::shared_ptr< EventManager > m_eventManager;
 
@@ -68,11 +72,6 @@ namespace ttb
     inline const WindowMode& Window::getMode() const
     {
         return m_mode;
-    }
-
-    inline State& Window::getState()
-    {
-        return *m_state;
     }
 
     inline GLFWwindow* Window::getHandle() const
