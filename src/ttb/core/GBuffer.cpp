@@ -67,6 +67,16 @@ void ttb::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
 }
 
+size_t ttb::GBuffer::width() const
+{
+    return m_drawBuffers[ 0 ]->getWidth();
+}
+
+size_t ttb::GBuffer::height() const
+{
+    return m_drawBuffers[ 0 ]->getHeight();
+}
+
 void ttb::GBuffer::begin( State& state ) const
 {
     glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );

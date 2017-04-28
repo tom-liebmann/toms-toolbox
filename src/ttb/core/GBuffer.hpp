@@ -41,6 +41,9 @@ namespace ttb
         void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
         void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
 
+        // Override: RenderTarget
+        virtual size_t width() const override;
+        virtual size_t height() const override;
         virtual void begin( State& state ) const override;
         virtual void end( State& state ) const override;
 
