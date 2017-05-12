@@ -10,7 +10,7 @@ namespace ttb
 {
     State::State() : m_projectionMatrixSet( false ), m_modelViewMatrixSet( false )
     {
-        m_modelViewMatrixStack.emplace_back( MatrixFactory< float >::fromIdentity() );
+        m_modelViewMatrixStack.emplace_back( MatrixFactory< float >::identity() );
     }
 
     State::~State()
@@ -112,8 +112,8 @@ namespace ttb
         if( !m_viewportStack.empty() )
         {
             const auto& viewport = m_viewportStack.back();
-            glViewport( viewport.getX(), viewport.getY(), viewport.getWidth(),
-                        viewport.getHeight() );
+            glViewport(
+                viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight() );
         }
     }
 

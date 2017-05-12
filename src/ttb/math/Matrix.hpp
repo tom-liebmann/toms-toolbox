@@ -42,27 +42,27 @@ namespace ttb
     class MatrixFactory
     {
     public:
-        static Matrix< T, 4, 4 > fromIdentity();
+        static Matrix< T, 4, 4 > identity();
 
-        static Matrix< T, 4, 4 > fromOrtho( T right, T top, T left, T bottom, T zNear, T zFar );
+        static Matrix< T, 4, 4 > ortho( T right, T top, T left, T bottom, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > fromPerspective( T fovy, T aspect, T zNear, T zFar );
+        static Matrix< T, 4, 4 > perspective( T fovy, T aspect, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > fromPerspectiveInv( T fovy, T aspect, T zNear, T zFar );
+        static Matrix< T, 4, 4 > perspectiveInv( T fovy, T aspect, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > fromLookAt( Vector< T, 3 > const& eye,
-                                             Vector< T, 3 > const& center,
-                                             Vector< T, 3 > const& up );
+        static Matrix< T, 4, 4 > lookAt( Vector< T, 3 > const& eye,
+                                         Vector< T, 3 > const& center,
+                                         Vector< T, 3 > const& up );
 
-        static Matrix< T, 4, 4 > fromLookAtInv( Vector< T, 3 > const& eye,
-                                                Vector< T, 3 > const& center,
-                                                Vector< T, 3 > const& up );
+        static Matrix< T, 4, 4 > lookAtInv( Vector< T, 3 > const& eye,
+                                            Vector< T, 3 > const& center,
+                                            Vector< T, 3 > const& up );
 
-        static Matrix< T, 4, 4 > fromRotation( Quaternion< T > const& quat );
+        static Matrix< T, 4, 4 > rotation( Quaternion< T > const& quat );
 
-        static Matrix< T, 4, 4 > fromTranslation( Vector< T, 3 > const& vec );
+        static Matrix< T, 4, 4 > translation( Vector< T, 3 > const& vec );
 
-        static Matrix< T, 4, 4 > fromScale( Vector< T, 3 > const& vec );
+        static Matrix< T, 4, 4 > scale( Vector< T, 3 > const& vec );
 
     private:
         MatrixFactory() = default;
@@ -77,8 +77,8 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TDimension1, size_t TDimension2 >
-    Matrix< TType, TDimension2, TDimension1 > transpose(
-        Matrix< TType, TDimension1, TDimension2 > const& matrix )
+    Matrix< TType, TDimension2, TDimension1 >
+        transpose( Matrix< TType, TDimension1, TDimension2 > const& matrix )
     {
         Matrix< TType, TDimension2, TDimension1 > result;
 
@@ -237,14 +237,14 @@ namespace ttb
 
 
     template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::fromIdentity()
+    Matrix< T, 4, 4 > MatrixFactory< T >::identity()
     {
         return { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromOrtho( TType right, TType top, TType left,
-                                                             TType bottom, TType zNear, TType zFar )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::ortho(
+        TType right, TType top, TType left, TType bottom, TType zNear, TType zFar )
     {
         return { TType( 2 ) / ( right - left ),
                  TType( 0 ),
@@ -265,8 +265,8 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromPerspective( TType fovy, TType aspect,
-                                                                   TType zNear, TType zFar )
+    Matrix< TType, 4, 4 >
+        MatrixFactory< TType >::perspective( TType fovy, TType aspect, TType zNear, TType zFar )
     {
         using std::tan;
         fovy = TType( 1 ) / tan( fovy / TType( 114.5915590261646417536 ) );
@@ -290,8 +290,8 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromPerspectiveInv( TType fovy, TType aspect,
-                                                                      TType zNear, TType zFar )
+    Matrix< TType, 4, 4 >
+        MatrixFactory< TType >::perspectiveInv( TType fovy, TType aspect, TType zNear, TType zFar )
     {
         using std::tan;
 
@@ -316,9 +316,9 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromLookAt( Vector< TType, 3 > const& eye,
-                                                              Vector< TType, 3 > const& center,
-                                                              Vector< TType, 3 > const& up )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAt( Vector< TType, 3 > const& eye,
+                                                          Vector< TType, 3 > const& center,
+                                                          Vector< TType, 3 > const& up )
     {
         auto F = normalize( center - eye );
         auto s = normalize( cross( F, up ) );
@@ -330,9 +330,9 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromLookAtInv( Vector< TType, 3 > const& eye,
-                                                                 Vector< TType, 3 > const& center,
-                                                                 Vector< TType, 3 > const& up )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAtInv( Vector< TType, 3 > const& eye,
+                                                             Vector< TType, 3 > const& center,
+                                                             Vector< TType, 3 > const& up )
     {
         auto F = normalize( center - eye );
         auto s = normalize( cross( F, up ) );
@@ -345,7 +345,7 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromRotation( Quaternion< TType > const& quat )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::rotation( Quaternion< TType > const& quat )
     {
         TType x2 = quat.x() * quat.x();
         TType y2 = quat.y() * quat.y();
@@ -376,7 +376,7 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromTranslation( Vector< TType, 3 > const& vec )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::translation( Vector< TType, 3 > const& vec )
     {
         return { TType( 1 ), TType( 0 ), TType( 0 ), vec( 0 ),   TType( 0 ), TType( 1 ),
                  TType( 0 ), vec( 1 ),   TType( 0 ), TType( 0 ), TType( 1 ), vec( 2 ),
@@ -384,7 +384,7 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::fromScale( Vector< TType, 3 > const& vec )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::scale( Vector< TType, 3 > const& vec )
     {
         return { vec( 0 ),   TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 1 ),
                  TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 2 ),   TType( 0 ),
