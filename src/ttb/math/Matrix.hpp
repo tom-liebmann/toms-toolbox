@@ -50,12 +50,10 @@ namespace ttb
 
         static Matrix< T, 4, 4 > perspectiveInv( T fovy, T aspect, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > lookAt( Vector< T, 3 > const& eye,
-                                         Vector< T, 3 > const& center,
+        static Matrix< T, 4, 4 > lookAt( Vector< T, 3 > const& eye, Vector< T, 3 > const& center,
                                          Vector< T, 3 > const& up );
 
-        static Matrix< T, 4, 4 > lookAtInv( Vector< T, 3 > const& eye,
-                                            Vector< T, 3 > const& center,
+        static Matrix< T, 4, 4 > lookAtInv( Vector< T, 3 > const& eye, Vector< T, 3 > const& center,
                                             Vector< T, 3 > const& up );
 
         static Matrix< T, 4, 4 > rotation( Quaternion< T > const& quat );
@@ -77,8 +75,8 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TDimension1, size_t TDimension2 >
-    Matrix< TType, TDimension2, TDimension1 >
-        transpose( Matrix< TType, TDimension1, TDimension2 > const& matrix )
+    Matrix< TType, TDimension2, TDimension1 > transpose(
+        Matrix< TType, TDimension1, TDimension2 > const& matrix )
     {
         Matrix< TType, TDimension2, TDimension1 > result;
 
@@ -243,8 +241,8 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::ortho(
-        TType right, TType top, TType left, TType bottom, TType zNear, TType zFar )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::ortho( TType right, TType top, TType left,
+                                                         TType bottom, TType zNear, TType zFar )
     {
         return { TType( 2 ) / ( right - left ),
                  TType( 0 ),
@@ -265,11 +263,11 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 >
-        MatrixFactory< TType >::perspective( TType fovy, TType aspect, TType zNear, TType zFar )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::perspective( TType fovy, TType aspect,
+                                                               TType zNear, TType zFar )
     {
         using std::tan;
-        fovy = TType( 1 ) / tan( fovy / TType( 114.5915590261646417536 ) );
+        fovy = TType( 1 ) / tan( fovy );
 
         return { fovy / aspect,
                  TType( 0 ),
@@ -290,12 +288,12 @@ namespace ttb
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 >
-        MatrixFactory< TType >::perspectiveInv( TType fovy, TType aspect, TType zNear, TType zFar )
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::perspectiveInv( TType fovy, TType aspect,
+                                                                  TType zNear, TType zFar )
     {
         using std::tan;
 
-        fovy = TType( 1 ) / tan( fovy / TType( 114.5915590261646417536 ) );
+        fovy = TType( 1 ) / tan( fovy );
 
         return { aspect / fovy,
                  TType( 0 ),
