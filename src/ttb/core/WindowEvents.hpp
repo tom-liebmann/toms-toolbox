@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttb/core/Window.hpp>
+
 // declarations
 //=============================================================================
 
@@ -126,7 +128,7 @@ namespace ttb
         public:
             WindowResize( Window& window );
 
-            Window& getWindow();
+            Window const& window() const;
 
             // Event
             virtual Type getType() const override;
@@ -258,7 +260,7 @@ namespace ttb
         {
         }
 
-        inline Window& WindowResize::getWindow()
+        inline Window const& WindowResize::window() const
         {
             return m_window;
         }
