@@ -136,6 +136,30 @@ namespace ttb
         return m_z;
     }
 
+    template < typename TType >
+    inline TType& Quaternion< TType >::w()
+    {
+        return m_w;
+    }
+
+    template < typename TType >
+    inline TType& Quaternion< TType >::x()
+    {
+        return m_x;
+    }
+
+    template < typename TType >
+    inline TType& Quaternion< TType >::y()
+    {
+        return m_y;
+    }
+
+    template < typename TType >
+    inline TType& Quaternion< TType >::z()
+    {
+        return m_z;
+    }
+
     template < class Type >
     inline Type Quaternion< Type >::azimuth() const
     {
