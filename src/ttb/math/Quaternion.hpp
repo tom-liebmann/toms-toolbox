@@ -92,7 +92,6 @@ namespace ttb
     Quaternion< TType >::Quaternion( TType rot, Vector< TType, 3 > const& axis )
     {
         using std::sin;
-        rot /= TType( 114.5915590262 );
         auto s = sin( rot );
         auto len = norm( axis );
         m_w = std::cos( rot );
