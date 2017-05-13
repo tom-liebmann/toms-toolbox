@@ -59,6 +59,9 @@ namespace ttb
     template < typename T, size_t... D >
     bool operator!=( ttb::Tensor< T, D... > const& lhs, ttb::Tensor< T, D... > const& rhs );
 
+    template < typename T, size_t... D >
+    ttb::Tensor< T, D... > operator-( ttb::Tensor< T, D... > const& tensor );
+
     template < typename T1, typename T2, size_t... D >
     ttb::Tensor< decltype( T1() * T2() ), D... > operator+( const ttb::Tensor< T1, D... >& lhs,
                                                             const ttb::Tensor< T2, D... >& rhs );
@@ -216,6 +219,15 @@ namespace ttb
             if( lhs[ i ] != rhs[ i ] )
                 return true;
         return false;
+    }
+
+    template < typename T, size_t... D >
+    inline ttb::Tensor< T, D... > operator-( ttb::Tensor< T, D... > const& tensor )
+    {
+        ttb::Tensor< T, D... > result;
+        for( size_t i = 0; i < result.size; ++i )
+            result[ i ] = -tensor[ i ];
+        return result;
     }
 
     template < typename T1, typename T2, size_t... D >
