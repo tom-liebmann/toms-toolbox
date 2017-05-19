@@ -128,6 +128,13 @@ void Texture2D::setTextureCompareFunc( GLint func )
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, func );
 }
 
+void Texture2D::wrap( GLenum xWrap, GLenum yWrap )
+{
+    glBindTexture( GL_TEXTURE_2D, m_textureObject );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, xWrap );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, yWrap );
+}
+
 void Texture2D::bind( GLenum unit ) const
 {
     glActiveTexture( GL_TEXTURE0 + unit );

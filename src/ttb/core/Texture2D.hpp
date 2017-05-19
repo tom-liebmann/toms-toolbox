@@ -39,6 +39,8 @@ namespace ttb
         void setTextureCompareMode( GLint mode );
         void setTextureCompareFunc( GLint func );
 
+        void wrap( GLenum xWrap, GLenum yWrap );
+
         uint16_t getWidth() const;
         uint16_t getHeight() const;
         GLuint getTextureObject() const;
