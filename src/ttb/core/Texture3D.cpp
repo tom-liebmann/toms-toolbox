@@ -12,15 +12,20 @@ namespace ttb
         glDeleteTextures( 1, &m_object );
     }
 
-    void Texture3D::data( size_t width, size_t height, size_t depth, GLint internalFormat,
-                          GLenum format, GLenum type, void* data )
+    void Texture3D::data( size_t width,
+                          size_t height,
+                          size_t depth,
+                          GLint internalFormat,
+                          GLenum format,
+                          GLenum type,
+                          void* data )
     {
         glBindTexture( GL_TEXTURE_3D, m_object );
 
         if( m_width == width && m_height == height && m_depth == depth )
         {
-            glTexSubImage3D( GL_TEXTURE_3D, 0, 0, 0, 0, m_width, m_height, m_depth, format, type,
-                             data );
+            glTexSubImage3D(
+                GL_TEXTURE_3D, 0, 0, 0, 0, m_width, m_height, m_depth, format, type, data );
         }
         else
         {
@@ -28,8 +33,16 @@ namespace ttb
             m_height = height;
             m_depth = depth;
 
-            glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, m_width, m_height, m_depth, 0, format,
-                          type, data );
+            glTexImage3D( GL_TEXTURE_3D,
+                          0,
+                          internalFormat,
+                          m_width,
+                          m_height,
+                          m_depth,
+                          0,
+                          format,
+                          type,
+                          data );
         }
 
         glBindTexture( GL_TEXTURE_3D, 0 );
@@ -41,6 +54,17 @@ namespace ttb
 
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, minFilter );
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, magFilter );
+
+        glBindTexture( GL_TEXTURE_3D, 0 );
+    }
+
+    void Texture3D::wrap( GLenum xWrap, GLenum yWrap, GLenum zWrap )
+    {
+        glBindTexture( GL_TEXTURE_3D, m_object );
+
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, xWrap );
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, yWrap );
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, zWrap );
 
         glBindTexture( GL_TEXTURE_3D, 0 );
     }

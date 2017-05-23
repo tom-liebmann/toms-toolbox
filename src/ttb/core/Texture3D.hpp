@@ -19,6 +19,7 @@ namespace ttb
                    GLenum type, void* data );
 
         void minMagFilter( GLint minFilter, GLint magFilter );
+        void wrap( GLenum xWrap, GLenum yWrap, GLenum zWrap );
 
         void bind( GLenum unit ) const;
 
