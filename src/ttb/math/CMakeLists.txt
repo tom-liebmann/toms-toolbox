@@ -18,4 +18,5 @@ ADD_LIBRARY(
 TARGET_COMPILE_OPTIONS(
     ttbMath
     PRIVATE -std=gnu++14
+            -fPIC
 )

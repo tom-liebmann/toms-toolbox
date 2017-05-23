@@ -19,6 +19,7 @@ ADD_LIBRARY(
 TARGET_COMPILE_OPTIONS(
     ttbNet
     PRIVATE -std=gnu++14
+            -fPIC
 )
 
 IF( WIN32 )
