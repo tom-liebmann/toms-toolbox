@@ -89,6 +89,7 @@ namespace ttb
     Program::Creator& Program::Creator::attachShader( std::unique_ptr< Shader > shader )
     {
         m_shaders.push_back( std::move( shader ) );
+        return *this;
     }
 
     std::unique_ptr< Program > Program::Creator::finish()
