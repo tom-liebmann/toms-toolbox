@@ -32,6 +32,8 @@ namespace ttb
     public:
         static Creator create( GLenum mode );
 
+        ~Geometry();
+
         void draw( State& state ) const;
 
     private:
@@ -39,6 +41,7 @@ namespace ttb
                   std::shared_ptr< IndexBuffer > const& indexBuffer );
 
         GLenum m_mode;
+        GLuint m_arrayObject;
         std::vector< Attribute > m_attributes;
         size_t m_minAttributeSize;
         std::shared_ptr< IndexBuffer > m_indexBuffer;

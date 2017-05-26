@@ -1,8 +1,8 @@
 #include "Window.hpp"
 
 #include <ttb/core/Monitor.hpp>
-#include <ttb/core/WindowEvents.hpp>
 #include <ttb/core/State.hpp>
+#include <ttb/core/WindowEvents.hpp>
 
 #include <iostream>
 
@@ -16,6 +16,11 @@ namespace
 
         if( eventManager )
             eventManager->pushEvent( std::move( event ) );
+    }
+
+    void errorCallback( int error, char const* description )
+    {
+        std::cout << "GLFW error (" << error << "): " << description << std::endl;
     }
 }
 
@@ -37,13 +42,15 @@ namespace ttb
         switch( action )
         {
             case GLFW_PRESS:
-                pushEvent( window, std::unique_ptr< Event >(
-                                       new events::Key( key, events::Key::Action::DOWN ) ) );
+                pushEvent(
+                    window,
+                    std::unique_ptr< Event >( new events::Key( key, events::Key::Action::DOWN ) ) );
                 break;
 
             case GLFW_RELEASE:
-                pushEvent( window, std::unique_ptr< Event >(
-                                       new events::Key( key, events::Key::Action::UP ) ) );
+                pushEvent(
+                    window,
+                    std::unique_ptr< Event >( new events::Key( key, events::Key::Action::UP ) ) );
                 break;
         }
     }
@@ -72,10 +79,13 @@ namespace ttb
         double mouseX, mouseY;
         glfwGetCursorPos( window, &mouseX, &mouseY );
 
-        pushEvent( window, std::unique_ptr< Event >( new events::MouseButton(
-                               mouseButton, action == GLFW_PRESS ? events::MouseButton::Action::DOWN
-                                                                 : events::MouseButton::Action::UP,
-                               mouseX, mouseY ) ) );
+        pushEvent( window,
+                   std::unique_ptr< Event >( new events::MouseButton(
+                       mouseButton,
+                       action == GLFW_PRESS ? events::MouseButton::Action::DOWN
+                                            : events::MouseButton::Action::UP,
+                       mouseX,
+                       mouseY ) ) );
     }
 
     void Window::callbackMouseMove( GLFWwindow* window, double x, double y )
@@ -103,10 +113,19 @@ namespace ttb
         if( s_windowCount == 0 )
             glfwInit();
 
+        glfwSetErrorCallback( errorCallback );
+
         //    glfwWindowHint( GLFW_DECORATED, GL_FALSE );
 
-        m_handle = glfwCreateWindow( m_mode.getWidth(), m_mode.getHeight(), m_title.c_str(),
-                                     m_mode.getMonitor().getHandle(), nullptr );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 2 );
+        glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+        m_handle = glfwCreateWindow( m_mode.getWidth(),
+                                     m_mode.getHeight(),
+                                     m_title.c_str(),
+                                     m_mode.getMonitor().getHandle(),
+                                     nullptr );
 
         glfwSetWindowUserPointer( m_handle, this );
 
@@ -140,6 +159,10 @@ namespace ttb
 
     void Window::update()
     {
+        auto error = glGetError();
+        if( error != GL_NO_ERROR )
+            throw std::runtime_error( "An OpenGL error occured!" );
+
         glfwSwapBuffers( m_handle );
         glfwPollEvents();
     }

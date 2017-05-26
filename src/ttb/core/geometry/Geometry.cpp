@@ -14,13 +14,21 @@ namespace ttb
         return { mode };
     }
 
-    Geometry::Geometry( GLenum mode, std::vector< Attribute > attributes,
+    Geometry::~Geometry()
+    {
+        glDeleteVertexArrays( 1, &m_arrayObject );
+    }
+
+    Geometry::Geometry( GLenum mode,
+                        std::vector< Attribute > attributes,
                         std::shared_ptr< IndexBuffer > const& indexBuffer )
         : m_mode( mode )
         , m_attributes( std::move( attributes ) )
         , m_minAttributeSize( 0 )
         , m_indexBuffer( indexBuffer )
     {
+        glGenVertexArrays( 1, &m_arrayObject );
+
         if( !m_attributes.empty() )
         {
             m_minAttributeSize = std::numeric_limits< size_t >::max();
@@ -39,6 +47,8 @@ namespace ttb
 
         // Bind all vertex attributes
         auto const& program = state.program();
+
+        glBindVertexArray( m_arrayObject );
 
         std::vector< GLuint > locations;
 
@@ -67,6 +77,8 @@ namespace ttb
 
         for( auto location : locations )
             glDisableVertexAttribArray( location );
+
+        glBindVertexArray( m_arrayObject );
     }
 
 
@@ -83,8 +95,8 @@ namespace ttb
         return *this;
     }
 
-    Geometry::Creator& Geometry::Creator::indices(
-        std::shared_ptr< IndexBuffer > const& indexBuffer )
+    Geometry::Creator&
+        Geometry::Creator::indices( std::shared_ptr< IndexBuffer > const& indexBuffer )
     {
         m_indexBuffer = indexBuffer;
         return *this;
