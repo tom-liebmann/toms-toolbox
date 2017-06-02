@@ -12,7 +12,7 @@ namespace
 
     void callbackErrorGLFW( int error, char const* description );
 
-    void callbackErrorOpenGL( GLenum source,
+    __attribute__((__stdcall__)) void callbackErrorOpenGL( GLenum source,
                               GLenum type,
                               GLuint id,
                               GLenum severity,
@@ -192,7 +192,7 @@ namespace
         std::cout << "GLFW error (" << error << "): " << description << std::endl;
     }
 
-    void callbackErrorOpenGL( GLenum source,
+    __attribute__((__stdcall__)) void callbackErrorOpenGL( GLenum source,
                               GLenum type,
                               GLuint id,
                               GLenum severity,
