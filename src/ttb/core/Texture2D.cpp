@@ -21,16 +21,19 @@ std::unique_ptr< Texture2D > Texture2D::fromPNG( const std::string& filename )
     glGenTextures( 1, &texture->m_textureObject );
     glBindTexture( GL_TEXTURE_2D, texture->m_textureObject );
 
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-                  pngData );
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pngData );
+
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
     free( pngData );
 
     return texture;
 }
 
-std::unique_ptr< Texture2D > Texture2D::fromRaw( uint16_t width, uint16_t height,
-                                                 const uint8_t* data )
+std::unique_ptr< Texture2D >
+    Texture2D::fromRaw( uint16_t width, uint16_t height, const uint8_t* data )
 {
     std::unique_ptr< Texture2D > texture( new Texture2D() );
 
@@ -45,8 +48,8 @@ std::unique_ptr< Texture2D > Texture2D::fromRaw( uint16_t width, uint16_t height
     return texture;
 }
 
-Texture2D::Texture2D( uint16_t width, uint16_t height, GLint internalFormat, GLenum format,
-                      GLenum type )
+Texture2D::Texture2D(
+    uint16_t width, uint16_t height, GLint internalFormat, GLenum format, GLenum type )
     : m_width( width ), m_height( height )
 {
     glGenTextures( 1, &m_textureObject );
@@ -66,8 +69,8 @@ Texture2D::~Texture2D()
     glDeleteTextures( 1, &m_textureObject );
 }
 
-void Texture2D::setFormat( uint16_t width, uint16_t height, GLint internalFormat, GLenum format,
-                           GLenum type )
+void Texture2D::setFormat(
+    uint16_t width, uint16_t height, GLint internalFormat, GLenum format, GLenum type )
 {
     glBindTexture( GL_TEXTURE_2D, m_textureObject );
 
@@ -78,8 +81,12 @@ void Texture2D::setFormat( uint16_t width, uint16_t height, GLint internalFormat
 }
 
 
-void Texture2D::setData( uint16_t width, uint16_t height, GLint internalFormat, GLenum format,
-                         GLenum type, const uint8_t* data )
+void Texture2D::setData( uint16_t width,
+                         uint16_t height,
+                         GLint internalFormat,
+                         GLenum format,
+                         GLenum type,
+                         const uint8_t* data )
 {
     glBindTexture( GL_TEXTURE_2D, m_textureObject );
 
