@@ -6,19 +6,25 @@
 
 #include <iostream>
 
+#ifdef WIN32
+#define STDCALL __attribute__( ( __stdcall__ ) )
+#else
+#define STDCALL
+#endif
+
 namespace
 {
     void pushEvent( GLFWwindow* window, std::unique_ptr< ttb::Event > event );
 
     void callbackErrorGLFW( int error, char const* description );
 
-    __attribute__((__stdcall__)) void callbackErrorOpenGL( GLenum source,
-                              GLenum type,
-                              GLuint id,
-                              GLenum severity,
-                              GLsizei length,
-                              GLchar const* message,
-                              void const* userParam );
+    STDCALL void callbackErrorOpenGL( GLenum source,
+                                      GLenum type,
+                                      GLuint id,
+                                      GLenum severity,
+                                      GLsizei length,
+                                      GLchar const* message,
+                                      void const* userParam );
 
     void callbackWindowClose( GLFWwindow* window );
 
@@ -192,13 +198,13 @@ namespace
         std::cout << "GLFW error (" << error << "): " << description << std::endl;
     }
 
-    __attribute__((__stdcall__)) void callbackErrorOpenGL( GLenum source,
-                              GLenum type,
-                              GLuint id,
-                              GLenum severity,
-                              GLsizei length,
-                              GLchar const* message,
-                              void const* userParam )
+    STDCALL void callbackErrorOpenGL( GLenum source,
+                                      GLenum type,
+                                      GLuint id,
+                                      GLenum severity,
+                                      GLsizei length,
+                                      GLchar const* message,
+                                      void const* userParam )
     {
         std::cout << "OpenGL error:" << std::endl;
         std::cout << "    Type: " << convertErrorType( type ) << std::endl;
