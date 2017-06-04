@@ -339,6 +339,8 @@ namespace ttb
             stream << tensor[ i ];
         }
         stream << ")";
+
+        return stream;
     }
 
     template < typename T, size_t... D >
