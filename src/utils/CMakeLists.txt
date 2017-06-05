@@ -9,3 +9,8 @@ add_library(
     ttbUtils
     STATIC
     ${SOURCE_FILES} )
+
+target_include_directories(
+    ttbUtils
+    PUBLIC
+    include )
