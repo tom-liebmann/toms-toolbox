@@ -1,0 +1,46 @@
+# find source files
+file(
+    GLOB_RECURSE
+    SOURCE_FILES
+    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
+    src/*.cpp )
+
+add_library(
+    ttbNet
+    STATIC
+    ${SOURCE_FILES} )
+
+target_include_directories(
+    ttbNet
+    PUBLIC
+    ${GLEW_INCLUDE_DIR}
+    ${GLFW_INCLUDE_DIR}
+    include
+    PRIVATE
+    src )
+
+target_compile_options(
+    ttbNet
+    PRIVATE
+    -std=gnu++14
+    -fPIC )
+
+target_link_libraries(
+    ttbNet
+    PUBLIC
+    ttbCore )
+
+if( WIN32 )
+
+    target_link_libraries(
+        ttbNet
+        PUBLIC
+        wsock32
+        ws2_32 )
+
+    target_compile_definitions(
+        ttbNet
+        PUBLIC
+        WIN32 )
+
+endif()

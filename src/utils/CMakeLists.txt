@@ -1,0 +1,11 @@
+# find source files
+file(
+    GLOB_RECURSE
+    SOURCE_FILES
+    ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.cpp )
+
+add_library(
+    ttbUtils
+    STATIC
+    ${SOURCE_FILES} )
