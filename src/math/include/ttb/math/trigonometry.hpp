@@ -5,8 +5,8 @@
 
 namespace ttb
 {
-    template < typename T >
-    T degToRad( T degrees );
+    template < typename TType >
+    auto degToRad( TType degrees );
 }
 
 
@@ -16,9 +16,9 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename T >
-    T degToRad( T degrees )
+    template < typename TType >
+    auto degToRad( TType degrees )
     {
-        return degrees / T( 57.2957795130823208768 );
+        return degrees / TType( 57.2957795130823208768 );
     }
 }

@@ -7,7 +7,6 @@
 #include <iostream>
 
 
-
 // declarations
 //=============================================================================
 
@@ -62,9 +61,9 @@ namespace ttb
     template < typename T, size_t... D >
     ttb::Tensor< T, D... > operator-( ttb::Tensor< T, D... > const& tensor );
 
-    template < typename T1, typename T2, size_t... D >
-    ttb::Tensor< decltype( T1() * T2() ), D... > operator+( const ttb::Tensor< T1, D... >& lhs,
-                                                            const ttb::Tensor< T2, D... >& rhs );
+    template < typename TType1, typename TType2, size_t... TDimensions >
+    auto operator+( ttb::Tensor< TType1, TDimensions... > const& lhs,
+                    ttb::Tensor< TType2, TDimensions... > const& rhs );
 
     template < typename T1, typename T2, size_t... D >
     ttb::Tensor< decltype( T1() * T2() ), D... > operator-( const ttb::Tensor< T1, D... >& lhs,
@@ -78,12 +77,16 @@ namespace ttb
     ttb::Tensor< T1, D... >& operator-=( ttb::Tensor< T1, D... >& lhs,
                                          const ttb::Tensor< T2, D... >& rhs );
 
-    template < typename T1, typename T2, size_t... D,
+    template < typename T1,
+               typename T2,
+               size_t... D,
                typename Enabled = typename std::enable_if< std::is_arithmetic< T2 >::value >::type >
     ttb::Tensor< decltype( T1() * T2() ), D... > operator*( const ttb::Tensor< T1, D... >& lhs,
                                                             T2 rhs );
 
-    template < typename T1, typename T2, size_t... D,
+    template < typename T1,
+               typename T2,
+               size_t... D,
                typename Enabled = typename std::enable_if< std::is_arithmetic< T1 >::value >::type >
     ttb::Tensor< decltype( T1() * T2() ), D... > operator*( T1 lhs,
                                                             const ttb::Tensor< T2, D... >& rhs );
@@ -92,7 +95,9 @@ namespace ttb
     ttb::Tensor< decltype( T1() / T2() ), D... > operator/( const ttb::Tensor< T1, D... >& lhs,
                                                             T2 rhs );
 
-    template < typename T1, typename T2, size_t... D,
+    template < typename T1,
+               typename T2,
+               size_t... D,
                typename Enabled = typename std::enable_if< std::is_arithmetic< T2 >::value >::type >
     ttb::Tensor< T1, D... >& operator*=( ttb::Tensor< T1, D... >& lhs, T2 rhs );
 
@@ -230,14 +235,18 @@ namespace ttb
         return result;
     }
 
-    template < typename T1, typename T2, size_t... D >
-    inline ttb::Tensor< decltype( T1() * T2() ), D... > operator+(
-        const ttb::Tensor< T1, D... >& lhs, const ttb::Tensor< T2, D... >& rhs )
+    template < typename TType1, typename TType2, size_t... TDimensions >
+    inline auto operator+( ttb::Tensor< TType1, TDimensions... > const& lhs,
+                           ttb::Tensor< TType2, TDimensions... > const& rhs )
     {
-        ttb::Tensor< decltype( T1() * T2() ), D... > result;
+        using ElementType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
+
+        ttb::Tensor< ElementType, TDimensions... > result;
 
         for( size_t i = 0; i < result.size; ++i )
+        {
             result[ i ] = lhs[ i ] + rhs[ i ];
+        }
 
         return result;
     }

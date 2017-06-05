@@ -10,27 +10,24 @@
 
 namespace ttb
 {
-    template < typename T, size_t D >
-    using Vector = Tensor< T, D >;
+    template < typename TType, size_t TDimension >
+    using Vector = Tensor< TType, TDimension >;
 
-    template < typename T, size_t D >
-    T norm( Vector< T, D > const& vec );
+    template < typename TType, size_t TDimension >
+    auto norm( Vector< TType, TDimension > const& vec );
 
-    template < typename T, size_t D >
-    T norm2( Vector< T, D > const& vec );
+    template < typename TType, size_t TDimension >
+    auto norm2( Vector< TType, TDimension > const& vec );
 
-    template < typename T, size_t D >
-    Vector< T, D > normalize( Vector< T, D > const& vec );
+    template < typename TType, size_t TDimension >
+    auto normalize( Vector< TType, TDimension > const& vec );
 
-    template < typename T1, typename T2 >
-    Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 > cross(
-        Vector< T1, 3 > const& lhs, Vector< T2, 3 > const& rhs );
+    template < typename TType1, typename TType2 >
+    auto cross( Vector< TType1, 3 > const& lhs, Vector< TType2, 3 > const& rhs );
 
-    template < typename T1, typename T2, size_t D >
-    decltype( std::declval< T1 >() * std::declval< T2 >() ) dot( Vector< T1, D > const& lhs,
-                                                                 Vector< T2, D > const& rhs );
+    template < typename TType1, typename TType2, size_t TDimension >
+    auto dot( Vector< TType1, TDimension > const& lhs, Vector< TType2, TDimension > const& rhs );
 }
-
 
 
 // definitions
@@ -38,47 +35,53 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename T, size_t D >
-    T norm( Vector< T, D > const& vec )
+    template < typename TType, size_t TDimension >
+    auto norm( Vector< TType, TDimension > const& vec )
     {
         using std::sqrt;
         return sqrt( norm2( vec ) );
     }
 
-    template < typename T, size_t D >
-    T norm2( Vector< T, D > const& vec )
+    template < typename TType, size_t TDimension >
+    auto norm2( Vector< TType, TDimension > const& vec )
     {
-        T result = 0;
+        TType result = 0;
 
-        for( size_t i = 0; i < D; ++i )
-            result += vec[ i ] * vec[ i ];
+        for( size_t d = 0; d < TDimension; ++d )
+        {
+            result += vec[ d ] * vec[ d ];
+        }
 
         return result;
     }
 
-    template < typename T, size_t D >
-    Vector< T, D > normalize( Vector< T, D > const& vec )
+    template < typename TType, size_t TDimension >
+    auto normalize( Vector< TType, TDimension > const& vec )
     {
         return vec / norm( vec );
     }
 
-    template < typename T1, typename T2 >
-    Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 > cross(
-        Vector< T1, 3 > const& lhs, Vector< T2, 3 > const& rhs )
+    template < typename TType1, typename TType2 >
+    auto cross( Vector< TType1, 3 > const& lhs, Vector< TType2, 3 > const& rhs )
     {
-        return Vector< decltype( std::declval< T1 >() * std::declval< T2 >() ), 3 >(
-            { lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ], lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
-              lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ] } );
+        using ElementType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
+
+        return Vector< ElementType, 3 >( { lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ],
+                                           lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
+                                           lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ] } );
     }
 
-    template < typename T1, typename T2, size_t D >
-    decltype( std::declval< T1 >() * std::declval< T2 >() ) dot( Vector< T1, D > const& lhs,
-                                                                 Vector< T2, D > const& rhs )
+    template < typename TType1, typename TType2, size_t TDimension >
+    auto dot( Vector< TType1, TDimension > const& lhs, Vector< TType2, TDimension > const& rhs )
     {
-        decltype( std::declval< T1 >() * std::declval< T2 >() ) result = 0;
+        using ReturnType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
 
-        for( size_t i = 0; i < D; ++i )
-            result += lhs[ i ] * rhs[ i ];
+        ReturnType result = 0;
+
+        for( size_t d = 0; d < TDimension; ++d )
+        {
+            result += lhs[ d ] * rhs[ d ];
+        }
 
         return result;
     }
