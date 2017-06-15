@@ -20,6 +20,7 @@ namespace ttb
 
         void minMagFilter( GLint minFilter, GLint magFilter );
         void wrap( GLenum xWrap, GLenum yWrap, GLenum zWrap );
+        void borderColor( float r, float g, float b, float a );
 
         void bind( GLenum unit ) const;
 

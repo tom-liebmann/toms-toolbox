@@ -69,6 +69,17 @@ namespace ttb
         glBindTexture( GL_TEXTURE_3D, 0 );
     }
 
+    void Texture3D::borderColor( float r, float g, float b, float a )
+    {
+        GLfloat col[ 4 ];
+        col[ 0 ] = r;
+        col[ 1 ] = g;
+        col[ 2 ] = b;
+        col[ 3 ] = a;
+        glBindTexture( GL_TEXTURE_3D, m_object );
+        glTexParameterfv( GL_TEXTURE_3D, GL_TEXTURE_BORDER_COLOR, col );
+    }
+
     void Texture3D::bind( GLenum unit ) const
     {
         glActiveTexture( GL_TEXTURE0 + unit );
