@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/net/Endianess.hpp>
 #include <ttb/net/OPacket.hpp>
+#include <ttb/utils/Endianness.hpp>
 
 #include <vector>
 
@@ -15,8 +15,8 @@ namespace ttb
     class DataOPacket : public OPacket
     {
     public:
-        DataOPacket( Endianess endianess = Endianess::LITTLE );
-        DataOPacket( uint32_t size, Endianess endianess = Endianess::LITTLE );
+        DataOPacket( Endianness endianness = Endianness::LITTLE );
+        DataOPacket( uint32_t size, Endianness endianness = Endianness::LITTLE );
 
         template < typename T >
         void write( const T& value );
@@ -27,9 +27,9 @@ namespace ttb
         virtual std::string getContent() const override;
 
     private:
-        void append( const uint8_t* data, uint32_t size, bool checkEndianess = true );
+        void append( const uint8_t* data, uint32_t size, bool checkEndianness = true );
 
-        Endianess m_endianess;
+        Endianness m_endianness;
         std::vector< uint8_t > m_data;
     };
 }
@@ -46,12 +46,12 @@ ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, const T& value );
 
 namespace ttb
 {
-    inline DataOPacket::DataOPacket( Endianess endianess ) : m_endianess( endianess )
+    inline DataOPacket::DataOPacket( Endianness endianness ) : m_endianness( endianness )
     {
     }
 
-    inline DataOPacket::DataOPacket( uint32_t size, Endianess endianess )
-        : m_endianess( endianess ), m_data( size )
+    inline DataOPacket::DataOPacket( uint32_t size, Endianness endianness )
+        : m_endianness( endianness ), m_data( size )
     {
     }
 

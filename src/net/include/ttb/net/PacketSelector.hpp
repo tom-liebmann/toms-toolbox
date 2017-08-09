@@ -7,8 +7,8 @@
 #endif
 
 #include <ttb/core/EventManager.hpp>
-#include <ttb/net/Endianess.hpp>
 #include <ttb/net/IPacket.hpp>
+#include <ttb/utils/Endianness.hpp>
 
 #include <atomic>
 #include <functional>
@@ -52,7 +52,7 @@ namespace ttb
             virtual std::shared_ptr< SocketContainer > getSource() const = 0;
         };
 
-        PacketSelector( Endianess endianess = Endianess::LITTLE );
+        PacketSelector( Endianness endianness = Endianness::LITTLE );
 
         ~PacketSelector();
 
@@ -97,7 +97,7 @@ namespace ttb
          */
         std::list< size_t > m_eventSockets;
 
-        Endianess m_endianess;
+        Endianness m_endianness;
 
 #ifdef WIN32
     private:

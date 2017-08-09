@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/net/Endianess.hpp>
 #include <ttb/net/OPacket.hpp>
+#include <ttb/utils/Endianness.hpp>
 
 #include <memory>
 
@@ -16,7 +16,7 @@ namespace ttb
     {
     public:
         SizedOPacket( std::unique_ptr< OPacket > packet,
-                      Endianess endianess = Endianess::LITTLE );
+                      Endianness endianness = Endianness::LITTLE );
 
         // OPacket
         virtual void send( TCPSocket& socket ) const override;
@@ -25,7 +25,7 @@ namespace ttb
 
     private:
         std::unique_ptr< OPacket > m_packet;
-        Endianess m_endianess;
+        Endianness m_endianness;
     };
 }
 
@@ -36,8 +36,8 @@ namespace ttb
 
 namespace ttb
 {
-    inline SizedOPacket::SizedOPacket( std::unique_ptr< OPacket > packet, Endianess endianess )
-        : m_packet( std::move( packet ) ), m_endianess( endianess )
+    inline SizedOPacket::SizedOPacket( std::unique_ptr< OPacket > packet, Endianness endianness )
+        : m_packet( std::move( packet ) ), m_endianness( endianness )
     {
     }
 }
