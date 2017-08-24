@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/net/Endianess.hpp>
 #include <ttb/net/IPacket.hpp>
+#include <ttb/utils/Endianness.hpp>
 
 #include <vector>
 
@@ -24,7 +24,7 @@ namespace ttb
     class SizedIPacket : public IPacket
     {
     public:
-        SizedIPacket( TCPSocket& socket, Endianess endianess = Endianess::LITTLE );
+        SizedIPacket( TCPSocket& socket, Endianness endianness = Endianness::LITTLE );
 
         // IPacket
         virtual const uint8_t* getData() const override;
@@ -33,6 +33,6 @@ namespace ttb
 
     private:
         std::vector< uint8_t > m_data;
-        Endianess m_endianess;
+        Endianness m_endianness;
     };
 }

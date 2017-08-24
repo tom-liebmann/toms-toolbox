@@ -4,12 +4,12 @@
 
 namespace ttb
 {
-    SizedIPacket::SizedIPacket( TCPSocket& socket, Endianess endianess )
+    SizedIPacket::SizedIPacket( TCPSocket& socket, Endianness endianness )
     {
         uint32_t size;
         socket.receive( reinterpret_cast< void* >( &size ), sizeof( uint32_t ) );
 
-        if( endianess != nativeEndianess() )
+        if( endianness != nativeEndianness() )
             size = reverse( size );
 
         m_data.resize( size );

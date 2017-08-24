@@ -22,7 +22,7 @@
 
 namespace ttb
 {
-    PacketSelector::PacketSelector( Endianess endianess ) : m_endianess( endianess )
+    PacketSelector::PacketSelector( Endianness endianness ) : m_endianness( endianness )
     {
 #ifdef WIN32
 
@@ -229,8 +229,8 @@ namespace ttb
             m_eventHandles.resize( index + 1 );
 
         m_eventHandles[ index ] = WSACreateEvent();
-        WSAEventSelect( container->getSocket()->getHandle(), m_eventHandles[ index ],
-                        FD_READ | FD_CLOSE );
+        WSAEventSelect(
+            container->getSocket()->getHandle(), m_eventHandles[ index ], FD_READ | FD_CLOSE );
 
 #else
 
@@ -275,8 +275,8 @@ namespace ttb
     {
 #ifdef WIN32
 
-        DWORD res = WSAWaitForMultipleEvents( m_events.size(), m_events.data(), FALSE, WSA_INFINITE,
-                                              FALSE );
+        DWORD res = WSAWaitForMultipleEvents(
+            m_events.size(), m_events.data(), FALSE, WSA_INFINITE, FALSE );
 
         if( res == WSA_WAIT_FAILED )
         {
@@ -293,8 +293,8 @@ namespace ttb
             size_t index = m_eventIds[ res - WSA_WAIT_EVENT_0 ];
 
             WSAResetEvent( event );
-            WSAEventSelect( m_managedSockets[ index ]->getSocket()->getHandle(), event,
-                            FD_READ | FD_CLOSE );
+            WSAEventSelect(
+                m_managedSockets[ index ]->getSocket()->getHandle(), event, FD_READ | FD_CLOSE );
 
             handleEvent( index );
         }
@@ -342,7 +342,7 @@ namespace ttb
         try
         {
             std::unique_ptr< IPacket > packet(
-                new SizedIPacket( container->getSocket(), m_endianess ) );
+                new SizedIPacket( container->getSocket(), m_endianness ) );
 
             if( container->m_events.empty() )
                 m_eventSockets.push_back( index );

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/net/Endianess.hpp>
 #include <ttb/net/IPacket.hpp>
+#include <ttb/utils/Endianness.hpp>
 
 #include <algorithm>
 #include <memory>
@@ -16,7 +16,7 @@ namespace ttb
     class DataIPacket : public IPacket
     {
     public:
-        DataIPacket( const IPacket& frame, Endianess endianess = Endianess::LITTLE );
+        DataIPacket( const IPacket& frame, Endianness endianness = Endianness::LITTLE );
 
         template < typename T >
         T read();
@@ -29,7 +29,7 @@ namespace ttb
     private:
         const IPacket& m_frame;
 
-        Endianess m_endianess;
+        Endianness m_endianness;
         size_t m_offset;
     };
 }
@@ -41,8 +41,8 @@ namespace ttb
 
 namespace ttb
 {
-    inline DataIPacket::DataIPacket( const IPacket& frame, Endianess endianess )
-        : m_frame( frame ), m_endianess( endianess ), m_offset( 0 )
+    inline DataIPacket::DataIPacket( const IPacket& frame, Endianness endianness )
+        : m_frame( frame ), m_endianness( endianness ), m_offset( 0 )
     {
     }
 
@@ -51,7 +51,7 @@ namespace ttb
     {
         T result = *reinterpret_cast< const T* >( m_frame.getData() + m_offset );
 
-        if( m_endianess != nativeEndianess() )
+        if( m_endianness != nativeEndianness() )
         {
             std::reverse( reinterpret_cast< uint8_t* >( &result ),
                           reinterpret_cast< uint8_t* >( &result ) + sizeof( T ) );

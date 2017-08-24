@@ -7,12 +7,12 @@
 
 namespace ttb
 {
-    void DataOPacket::append( const uint8_t* data, uint32_t size, bool checkEndianess )
+    void DataOPacket::append( const uint8_t* data, uint32_t size, bool checkEndianness )
     {
         size_t oldSize = m_data.size();
         m_data.resize( m_data.size() + size );
 
-        if( !checkEndianess || m_endianess == nativeEndianess() )
+        if( !checkEndianness || m_endianness == nativeEndianness() )
             memcpy( m_data.data() + oldSize, data, size );
         else
         {

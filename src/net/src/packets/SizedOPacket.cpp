@@ -8,7 +8,7 @@ namespace ttb
     {
         uint32_t size = m_packet->getSize();
 
-        if( m_endianess == nativeEndianess() )
+        if( m_endianness == nativeEndianness() )
             socket.send( &size, sizeof( uint32_t ) );
         else
         {
