@@ -110,44 +110,34 @@ else ()
     else ()
         # (*)NIX
         
-        find_package(Threads REQUIRED)
+        find_package(Threads)
 
-        find_package(X11 REQUIRED)
+        find_package(X11)
         
-        if(NOT X11_Xrandr_FOUND)
-            message(FATAL_ERROR "Xrandr library not found - required for GLFW")
+        if(X11_Xrandr_FOUND AND X11_xf86vmode_FOUND AND X11_Xcursor_FOUND)
+            list(APPEND GLFW_x11_LIBRARY "${X11_Xrandr_LIB}" "${X11_Xxf86vm_LIB}" "${X11_Xcursor_LIB}" "${CMAKE_THREAD_LIBS_INIT}" -lrt -lXi)
+
+            find_library( GLFW_glfw_LIBRARY
+                NAMES 
+                    glfw
+                    glfw3
+                PATHS
+                    "${GLFW_LOCATION}/lib"
+                    "$ENV{GLFW_LOCATION}/lib"
+                    "${GLFW_LOCATION}/lib/x11"
+                    "$ENV{GLFW_LOCATION}/lib/x11"
+                    /usr/lib64
+                    /usr/lib
+                    /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}
+                    /usr/local/lib64
+                    /usr/local/lib
+                    /usr/local/lib/${CMAKE_LIBRARY_ARCHITECTURE}
+                    /usr/openwin/lib
+                    /usr/X11R6/lib
+                DOC 
+                    "The GLFW library"
+            )
         endif()
-
-        if(NOT X11_xf86vmode_FOUND)
-            message(FATAL_ERROR "xf86vmode library not found - required for GLFW")
-        endif()
-
-        if(NOT X11_Xcursor_FOUND)
-            message(FATAL_ERROR "Xcursor library not found - required for GLFW")
-        endif()
-
-        list(APPEND GLFW_x11_LIBRARY "${X11_Xrandr_LIB}" "${X11_Xxf86vm_LIB}" "${X11_Xcursor_LIB}" "${CMAKE_THREAD_LIBS_INIT}" -lrt -lXi)
-
-        find_library( GLFW_glfw_LIBRARY
-            NAMES 
-                glfw
-                glfw3
-            PATHS
-                "${GLFW_LOCATION}/lib"
-                "$ENV{GLFW_LOCATION}/lib"
-                "${GLFW_LOCATION}/lib/x11"
-                "$ENV{GLFW_LOCATION}/lib/x11"
-                /usr/lib64
-                /usr/lib
-                /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}
-                /usr/local/lib64
-                /usr/local/lib
-                /usr/local/lib/${CMAKE_LIBRARY_ARCHITECTURE}
-                /usr/openwin/lib
-                /usr/X11R6/lib
-            DOC 
-                "The GLFW library"
-        )
     endif (APPLE)
 endif (WIN32)
 

@@ -2,7 +2,7 @@ find_package( GLEW )
 find_package( GLFW )
 find_package( OpenGL )
 
-if( ${GLEW_FOUND} AND ${GLFW_FOUND} AND ${OpenGL_FOUND} )
+if( GLEW_FOUND AND GLFW_FOUND AND OpenGL_FOUND )
     # find source files
     file(
         GLOB_RECURSE

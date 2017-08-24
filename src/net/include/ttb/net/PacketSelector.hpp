@@ -6,7 +6,6 @@
 #include <sys/epoll.h>
 #endif
 
-#include <ttb/core/EventManager.hpp>
 #include <ttb/net/IPacket.hpp>
 #include <ttb/utils/Endianness.hpp>
 
