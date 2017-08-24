@@ -44,3 +44,6 @@ if( WIN32 )
         WIN32 )
 
 endif()
+
+list( APPEND VALID_TARGETS ttbNet )
+set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

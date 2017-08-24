@@ -22,6 +22,8 @@ if( DOXYGEN_FOUND )
 
 endif( DOXYGEN_FOUND )
 
+set( VALID_TARGETS )
+
 add_subdirectory( src/math )
 add_subdirectory( src/core )
 add_subdirectory( src/net )
@@ -29,7 +31,7 @@ add_subdirectory( src/utils )
 
 # Export build tree to Targets.cmake file.
 export(
-    TARGETS ttbCore ttbMath ttbNet ttbUtils
+    TARGETS ${VALID_TARGETS}
     FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake" )
 
 configure_file(

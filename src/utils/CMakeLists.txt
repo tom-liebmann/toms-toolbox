@@ -14,3 +14,6 @@ target_include_directories(
     ttbUtils
     PUBLIC
     include )
+
+list( APPEND VALID_TARGETS ttbUtils )
+set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

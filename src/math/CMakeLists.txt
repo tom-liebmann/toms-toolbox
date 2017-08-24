@@ -32,3 +32,6 @@ if( WIN32 )
         WIN32 )
 
 endif()
+
+list( APPEND VALID_TARGETS ttbMath )
+set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
