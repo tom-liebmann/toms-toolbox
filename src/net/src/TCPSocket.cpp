@@ -98,8 +98,8 @@ namespace ttb
             throw std::runtime_error( "Unable to create socket." );
 
         sockaddr_in sockAddr = createAddress( address, port );
-        if( connect( m_handle, reinterpret_cast< struct sockaddr* >( &sockAddr ),
-                     sizeof( sockAddr ) ) )
+        if( connect(
+                m_handle, reinterpret_cast< struct sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
         {
             close( m_handle );
             throw std::runtime_error( "Unable to connect to remote host." );
@@ -134,19 +134,25 @@ namespace ttb
         {
 #ifdef WIN32
 
-            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset,
-                               size - offset, 0 );
+            auto ret = ::send(
+                m_handle, reinterpret_cast< const uint8_t* >( data ) + offset, size - offset, 0 );
 
             if( ret == SOCKET_ERROR )
-                throw Error::BROKEN;
+            {
+                throw Error( Error::Type::BROKEN );
+            }
 
 #else
 
-            auto ret = ::send( m_handle, reinterpret_cast< const uint8_t* >( data ) + offset,
-                               size - offset, MSG_NOSIGNAL );
+            auto ret = ::send( m_handle,
+                               reinterpret_cast< const uint8_t* >( data ) + offset,
+                               size - offset,
+                               MSG_NOSIGNAL );
 
             if( ret == -1 )
-                throw Error::BROKEN;
+            {
+                throw Error( Error::Type::BROKEN, errno );
+            }
 
 #endif
 
@@ -166,8 +172,8 @@ namespace ttb
             {
 #ifdef WIN32
 
-                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset,
-                            0 );
+                ret = recv(
+                    m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
 
                 if( ret == SOCKET_ERROR )
                 {
@@ -189,13 +195,17 @@ namespace ttb
 
 #else
 
-                ret = recv( m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset,
-                            0 );
+                ret = recv(
+                    m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
 
                 if( ret > 0 )
+                {
                     break;
+                }
                 else if( ret == 0 )
-                    throw Error::CLOSED;
+                {
+                    throw Error( Error::Type::CLOSED );
+                }
                 else
                 {
                     switch( errno )
@@ -203,7 +213,7 @@ namespace ttb
                         case EAGAIN:
                             break;
                         default:
-                            throw Error::BROKEN;
+                            throw Error( Error::Type::BROKEN );
                     }
                 }
 

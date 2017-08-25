@@ -134,6 +134,8 @@ namespace ttb
 
         const std::unique_ptr< IPacket >& getPacket() const;
 
+        std::unique_ptr< IPacket > getPacket();
+
         // PacketSelector::Event
         virtual Type getType() const override;
         virtual std::shared_ptr< SocketContainer > getSource() const override;
@@ -200,6 +202,11 @@ namespace ttb
     inline const std::unique_ptr< IPacket >& PacketEvent::getPacket() const
     {
         return m_packet;
+    }
+
+    inline std::unique_ptr< IPacket > PacketEvent::getPacket()
+    {
+        return std::move( m_packet );
     }
 
 

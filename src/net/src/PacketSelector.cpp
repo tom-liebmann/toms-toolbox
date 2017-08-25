@@ -352,9 +352,9 @@ namespace ttb
         }
         catch( TCPSocket::Error& e )
         {
-            switch( e )
+            switch( e.type() )
             {
-                case TCPSocket::Error::CLOSED:
+                case TCPSocket::Error::Type::CLOSED:
                 {
                     if( container->m_events.empty() )
                         m_eventSockets.push_back( index );
@@ -364,7 +364,7 @@ namespace ttb
                 }
                 break;
 
-                case TCPSocket::Error::BROKEN:
+                case TCPSocket::Error::Type::BROKEN:
                 {
                     if( container->m_events.empty() )
                         m_eventSockets.push_back( index );

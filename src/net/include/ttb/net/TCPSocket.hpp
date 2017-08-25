@@ -2,6 +2,7 @@
 
 #include <ttb/net/SocketContainer.hpp>
 
+#include <cstring>
 #include <string>
 
 #ifdef WIN32
@@ -24,14 +25,7 @@ namespace ttb
         using Handle = int;
 #endif
 
-        enum class Error
-        {
-            CREATE,
-            CLOSED,
-            BROKEN,
-            RESOLVE,
-            CONNECT
-        };
+        class Error;
 
         // Construction
         TCPSocket( const std::string& address, uint16_t port );
@@ -53,6 +47,34 @@ namespace ttb
 
     private:
         Handle m_handle;
+    };
+
+
+    class TCPSocket::Error
+    {
+    public:
+        enum class Type
+        {
+            CREATE,
+            CLOSED,
+            BROKEN,
+            RESOLVE,
+            CONNECT
+        };
+
+        Error( Type type );
+
+        Error( Type type, int code );
+
+        Error( Type type, std::string description );
+
+        Type type() const;
+
+        std::string const& what() const;
+
+    private:
+        Type m_type;
+        std::string m_description;
     };
 }
 
@@ -76,5 +98,30 @@ namespace ttb
     inline TCPSocket::Handle TCPSocket::getHandle() const
     {
         return m_handle;
+    }
+
+
+    inline TCPSocket::Error::Error( Type type ) : m_type( type )
+    {
+    }
+
+    inline TCPSocket::Error::Error( Type type, int code )
+        : m_type( type ), m_description( strerror( code ) )
+    {
+    }
+
+    inline TCPSocket::Error::Error( Type type, std::string description )
+        : m_type( type ), m_description( std::move( description ) )
+    {
+    }
+
+    inline TCPSocket::Error::Type TCPSocket::Error::type() const
+    {
+        return m_type;
+    }
+
+    std::string const& TCPSocket::Error::what() const
+    {
+        return m_description;
     }
 }
