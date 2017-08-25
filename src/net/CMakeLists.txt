@@ -13,8 +13,6 @@ add_library(
 target_include_directories(
     ttbNet
     PUBLIC
-    ${GLEW_INCLUDE_DIR}
-    ${GLFW_INCLUDE_DIR}
     include
     PRIVATE
     src )
