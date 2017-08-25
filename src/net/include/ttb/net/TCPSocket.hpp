@@ -2,7 +2,6 @@
 
 #include <ttb/net/SocketContainer.hpp>
 
-#include <cstring>
 #include <string>
 
 #ifdef WIN32
@@ -62,11 +61,7 @@ namespace ttb
             CONNECT
         };
 
-        Error( Type type );
-
-        Error( Type type, int code );
-
-        Error( Type type, std::string description );
+        Error( Type type, std::string description = "" );
 
         Type type() const;
 
@@ -100,15 +95,6 @@ namespace ttb
         return m_handle;
     }
 
-
-    inline TCPSocket::Error::Error( Type type ) : m_type( type )
-    {
-    }
-
-    inline TCPSocket::Error::Error( Type type, int code )
-        : m_type( type ), m_description( strerror( code ) )
-    {
-    }
 
     inline TCPSocket::Error::Error( Type type, std::string description )
         : m_type( type ), m_description( std::move( description ) )

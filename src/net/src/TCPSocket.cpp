@@ -12,6 +12,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <cstring>
 
 #endif
 
@@ -151,7 +152,10 @@ namespace ttb
 
             if( ret == -1 )
             {
-                throw Error( Error::Type::BROKEN, errno );
+                if( errno != EAGAIN && errno != EWOULDBLOCK )
+                {
+                    throw Error( Error::Type::BROKEN, std::string( strerror( errno ) ) );
+                }
             }
 
 #endif
