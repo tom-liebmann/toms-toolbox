@@ -120,7 +120,7 @@ namespace ttb
         return m_type;
     }
 
-    std::string const& TCPSocket::Error::what() const
+    inline std::string const& TCPSocket::Error::what() const
     {
         return m_description;
     }

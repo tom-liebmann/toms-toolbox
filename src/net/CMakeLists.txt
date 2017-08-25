@@ -26,7 +26,6 @@ target_compile_options(
 target_link_libraries(
     ttbNet
     PUBLIC
-    ttbCore
     ttbUtils )
 
 if( WIN32 )
