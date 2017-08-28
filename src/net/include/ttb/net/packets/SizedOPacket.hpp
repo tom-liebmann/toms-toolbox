@@ -6,7 +6,6 @@
 #include <memory>
 
 
-
 // declarations
 //=============================================================================
 
@@ -19,25 +18,11 @@ namespace ttb
                       Endianness endianness = Endianness::LITTLE );
 
         // OPacket
+        virtual size_t size() const override;
         virtual void send( TCPSocket& socket ) const override;
-        virtual size_t getSize() const override;
-        virtual std::string getContent() const override;
 
     private:
         std::unique_ptr< OPacket > m_packet;
         Endianness m_endianness;
     };
-}
-
-
-
-// definitions
-//=============================================================================
-
-namespace ttb
-{
-    inline SizedOPacket::SizedOPacket( std::unique_ptr< OPacket > packet, Endianness endianness )
-        : m_packet( std::move( packet ) ), m_endianness( endianness )
-    {
-    }
 }

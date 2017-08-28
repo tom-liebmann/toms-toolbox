@@ -2,21 +2,24 @@
 
 #include <ttb/net/OPacket.hpp>
 
+#include <memory>
+#include <vector>
+
+
 namespace ttb
 {
     class CombinedOPacket : public OPacket
     {
     public:
-        CombinedOPacket( const OPacket& first, const OPacket& second );
+        template < typename... TPackets >
+        CombinedOPacket( TPackets... packets );
 
         // OPacket
+        virtual size_t size() const override;
         virtual void send( TCPSocket& socket ) const override;
-        virtual size_t getSize() const override;
-        virtual std::string getContent() const override;
 
     private:
-        const OPacket& m_first;
-        const OPacket& m_second;
+        std::vector< std::shared_ptr< OPacket const > > m_packets;
     };
 }
 
@@ -24,8 +27,9 @@ namespace ttb
 
 namespace ttb
 {
-    inline CombinedOPacket::CombinedOPacket( const OPacket& first, const OPacket& second )
-        : m_first( first ), m_second( second )
+    template < typename... TPackets >
+    CombinedOPacket::CombinedOPacket( TPackets... packets )
+        : m_packets( { std::move( packets )... } )
     {
     }
 }

@@ -5,34 +5,31 @@
 
 namespace ttb
 {
+    DataIPacket::DataIPacket( std::shared_ptr< IPacket const > parent, Endianness endianness )
+        : m_parent( std::move( parent ) ), m_endianness( endianness )
+    {
+    }
+
     template <>
     std::string DataIPacket::read< std::string >()
     {
-        uint32_t len = read< uint32_t >();
+        auto len = read< uint32_t >();
 
-        std::string result( reinterpret_cast< const char* >( m_frame.getData() + m_offset ), len );
+        std::string result( reinterpret_cast< char const* >(
+                                reinterpret_cast< uint8_t const* >( m_parent->data() ) + m_offset ),
+                            len );
         m_offset += len;
 
         return result;
     }
 
-    const uint8_t* DataIPacket::getData() const
+    void const* DataIPacket::data() const
     {
-        return m_frame.getData() + m_offset;
+        return reinterpret_cast< uint8_t const* >( m_parent->data() ) + m_offset;
     }
 
-    size_t DataIPacket::getSize() const
+    size_t DataIPacket::size() const
     {
-        return m_frame.getSize() - m_offset;
-    }
-
-    std::string DataIPacket::getContent( const std::string& inner ) const
-    {
-        std::ostringstream os;
-
-        for( size_t i = 0; i < getSize(); ++i )
-            os << static_cast< uint32_t >( getData()[ i ] ) << " ";
-
-        return m_frame.getContent( os.str() );
+        return m_parent->size() - m_offset;
     }
 }

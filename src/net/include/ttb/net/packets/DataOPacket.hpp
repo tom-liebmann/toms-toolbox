@@ -6,7 +6,6 @@
 #include <vector>
 
 
-
 // declarations
 //=============================================================================
 
@@ -16,18 +15,18 @@ namespace ttb
     {
     public:
         DataOPacket( Endianness endianness = Endianness::LITTLE );
+
         DataOPacket( uint32_t size, Endianness endianness = Endianness::LITTLE );
 
         template < typename T >
-        void write( const T& value );
+        void write( T const& value );
 
         // OPacket
+        virtual size_t size() const override;
         virtual void send( TCPSocket& socket ) const override;
-        virtual size_t getSize() const override;
-        virtual std::string getContent() const override;
 
     private:
-        void append( const uint8_t* data, uint32_t size, bool checkEndianness = true );
+        void append( void const* data, size_t size, bool checkEndianness = true );
 
         Endianness m_endianness;
         std::vector< uint8_t > m_data;
@@ -35,10 +34,8 @@ namespace ttb
 }
 
 
-
 template < typename T >
-ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, const T& value );
-
+ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, T const& value );
 
 
 // definitions
@@ -46,29 +43,19 @@ ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, const T& value );
 
 namespace ttb
 {
-    inline DataOPacket::DataOPacket( Endianness endianness ) : m_endianness( endianness )
-    {
-    }
-
-    inline DataOPacket::DataOPacket( uint32_t size, Endianness endianness )
-        : m_endianness( endianness ), m_data( size )
-    {
-    }
-
     template < typename T >
-    void DataOPacket::write( const T& value )
+    void DataOPacket::write( T const& value )
     {
-        append( reinterpret_cast< const uint8_t* >( &value ), sizeof( T ) );
+        append( &value, sizeof( T ) );
     }
 
     template <>
-    void DataOPacket::write< std::string >( const std::string& value );
+    void DataOPacket::write< std::string >( std::string const& value );
 }
 
 
-
 template < typename T >
-inline ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, const T& value )
+inline ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, T const& value )
 {
     packet.write< T >( value );
     return packet;

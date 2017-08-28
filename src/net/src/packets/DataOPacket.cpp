@@ -7,44 +7,49 @@
 
 namespace ttb
 {
-    void DataOPacket::append( const uint8_t* data, uint32_t size, bool checkEndianness )
+    DataOPacket::DataOPacket( Endianness endianness ) : m_endianness( endianness )
+    {
+    }
+
+    DataOPacket::DataOPacket( uint32_t size, Endianness endianness )
+        : m_endianness( endianness ), m_data( size )
+    {
+    }
+
+    void DataOPacket::append( void const* data, size_t size, bool checkEndianness )
     {
         size_t oldSize = m_data.size();
         m_data.resize( m_data.size() + size );
 
         if( !checkEndianness || m_endianness == nativeEndianness() )
+        {
             memcpy( m_data.data() + oldSize, data, size );
+        }
         else
         {
-            for( uint32_t i = 0; i < size; ++i )
-                m_data[ oldSize + i ] = *( data + size - 1 - i );
+            for( size_t i = 0; i < size; ++i )
+            {
+                m_data[ oldSize + i ] =
+                    *( reinterpret_cast< uint8_t const* >( data ) + size - 1 - i );
+            }
         }
     }
 
-    template <>
-    void DataOPacket::write< std::string >( const std::string& value )
-    {
-        uint32_t len = value.length();
-        append( reinterpret_cast< const uint8_t* >( &len ), sizeof( uint32_t ) );
-        append( reinterpret_cast< const uint8_t* >( value.c_str() ), len, false );
-    }
-
-    void DataOPacket::send( TCPSocket& socket ) const
-    {
-        socket.send( reinterpret_cast< const uint8_t* >( m_data.data() ), getSize() );
-    }
-
-    size_t DataOPacket::getSize() const
+    size_t DataOPacket::size() const
     {
         return m_data.size();
     }
 
-    std::string DataOPacket::getContent() const
+    void DataOPacket::send( TCPSocket& socket ) const
     {
-        std::ostringstream os;
-        for( uint8_t value : m_data )
-            os << static_cast< uint32_t >( value ) << " ";
+        socket.send( m_data.data(), size() );
+    }
 
-        return os.str();
+    template <>
+    void DataOPacket::write< std::string >( std::string const& value )
+    {
+        uint32_t len = value.length();
+        append( &len, sizeof( uint32_t ) );
+        append( value.c_str(), len, false );
     }
 }

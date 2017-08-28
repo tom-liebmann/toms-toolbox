@@ -7,7 +7,6 @@
 #include <memory>
 
 
-
 // declarations
 //=============================================================================
 
@@ -16,24 +15,23 @@ namespace ttb
     class DataIPacket : public IPacket
     {
     public:
-        DataIPacket( const IPacket& frame, Endianness endianness = Endianness::LITTLE );
+        DataIPacket( std::shared_ptr< IPacket const > parent,
+                     Endianness endianness = Endianness::LITTLE );
 
         template < typename T >
         T read();
 
         // IPacket
-        virtual const uint8_t* getData() const override;
-        virtual size_t getSize() const override;
-        virtual std::string getContent( const std::string& inner ) const override;
+        virtual void const* data() const override;
+        virtual size_t size() const override;
 
     private:
-        const IPacket& m_frame;
-
+        std::shared_ptr< IPacket const > m_parent;
         Endianness m_endianness;
+
         size_t m_offset;
     };
 }
-
 
 
 // definitions
@@ -41,15 +39,11 @@ namespace ttb
 
 namespace ttb
 {
-    inline DataIPacket::DataIPacket( const IPacket& frame, Endianness endianness )
-        : m_frame( frame ), m_endianness( endianness ), m_offset( 0 )
-    {
-    }
-
     template < typename T >
     inline T DataIPacket::read()
     {
-        T result = *reinterpret_cast< const T* >( m_frame.getData() + m_offset );
+        T result = *reinterpret_cast< T const* >(
+            reinterpret_cast< uint8_t const* >( m_parent->data() ) + m_offset );
 
         if( m_endianness != nativeEndianness() )
         {
@@ -58,6 +52,7 @@ namespace ttb
         }
 
         m_offset += sizeof( T );
+
         return result;
     }
 

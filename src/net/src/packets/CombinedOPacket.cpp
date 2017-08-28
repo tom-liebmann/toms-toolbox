@@ -2,19 +2,23 @@
 
 namespace ttb
 {
+    size_t CombinedOPacket::size() const
+    {
+        size_t result = 0;
+
+        for( auto const& packet : m_packets )
+        {
+            result += packet->size();
+        }
+
+        return result;
+    }
+
     void CombinedOPacket::send( TCPSocket& socket ) const
     {
-        m_first.send( socket );
-        m_second.send( socket );
-    }
-
-    size_t CombinedOPacket::getSize() const
-    {
-        return m_first.getSize() + m_second.getSize();
-    }
-
-    std::string CombinedOPacket::getContent() const
-    {
-        return m_first.getContent() + m_second.getContent();
+        for( auto const& packet : m_packets )
+        {
+            packet->send( socket );
+        }
     }
 }

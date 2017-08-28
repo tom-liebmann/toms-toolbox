@@ -2,6 +2,7 @@
 
 #include <string>
 
+
 // forward declarations
 //=============================================================================
 
@@ -22,22 +23,8 @@ namespace ttb
     public:
         virtual ~OPacket();
 
+        virtual size_t size() const = 0;
+
         virtual void send( TCPSocket& socket ) const = 0;
-
-        virtual size_t getSize() const = 0;
-
-        virtual std::string getContent() const = 0;
     };
-}
-
-
-
-// definitions
-//=============================================================================
-
-namespace ttb
-{
-    inline OPacket::~OPacket()
-    {
-    }
 }

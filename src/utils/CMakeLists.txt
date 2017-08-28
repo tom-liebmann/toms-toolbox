@@ -10,6 +10,12 @@ add_library(
     STATIC
     ${SOURCE_FILES} )
 
+target_compile_options(
+    ttbUtils
+    PUBLIC
+    -std=c++14
+    )
+
 target_include_directories(
     ttbUtils
     PUBLIC
