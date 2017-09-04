@@ -4,7 +4,7 @@
 
 namespace ttb
 {
-    SizedOPacket::SizedOPacket( std::unique_ptr< OPacket > packet, Endianness endianness )
+    SizedOPacket::SizedOPacket( std::shared_ptr< OPacket const > packet, Endianness endianness )
         : m_packet( std::move( packet ) ), m_endianness( endianness )
     {
     }

@@ -14,7 +14,7 @@ namespace ttb
     class SizedOPacket : public OPacket
     {
     public:
-        SizedOPacket( std::unique_ptr< OPacket > packet,
+        SizedOPacket( std::shared_ptr< OPacket const > packet,
                       Endianness endianness = Endianness::LITTLE );
 
         // OPacket
@@ -22,7 +22,7 @@ namespace ttb
         virtual void send( TCPSocket& socket ) const override;
 
     private:
-        std::unique_ptr< OPacket > m_packet;
+        std::shared_ptr< OPacket const > m_packet;
         Endianness m_endianness;
     };
 }
