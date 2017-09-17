@@ -1,5 +1,18 @@
 cmake_minimum_required( VERSION 3.0 )
 
+set( COMPILATION_MODE "GCC" CACHE STRING "Mode to compile the libraries in" )
+set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG )
+
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
+    message( "Using gcc" )
+    set( CMAKE_C_COMPILER "gcc" )
+    set( CMAKE_CXX_COMPILER "g++" )
+elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+    message( "Using clang" )
+    set( CMAKE_C_COMPILER "clang" )
+    set( CMAKE_CXX_COMPILER "clang++" )
+endif()
+
 project( toms_toolbox )
 
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
