@@ -10,7 +10,7 @@ namespace ttb
 {
     State::State() : m_projectionMatrixSet( false ), m_modelViewMatrixSet( false )
     {
-        m_modelViewMatrixStack.emplace_back( MatrixFactory< float >::identity() );
+        m_modelViewMatrixStack.emplace( MatrixFactory< float >::identity() );
     }
 
     State::~State()
@@ -19,19 +19,29 @@ namespace ttb
 
     void State::pushTarget( std::shared_ptr< RenderTarget > const& target )
     {
-        m_renderTargetStack.push_back( target );
+        m_renderTargetStack.push( target );
         target->begin( *this );
     }
 
     void State::popTarget()
     {
-        m_renderTargetStack.back()->end( *this );
-        m_renderTargetStack.pop_back();
+        m_renderTargetStack.top()->end( *this );
+        m_renderTargetStack.pop();
+
+        if( !m_renderTargetStack.empty() )
+        {
+            m_renderTargetStack.top()->begin( *this );
+        }
     }
 
     RenderTarget const& State::renderTarget() const
     {
-        return *m_renderTargetStack.back();
+        if( m_renderTargetStack.empty() )
+        {
+            throw std::runtime_error( "Requested top of empty target stack" );
+        }
+
+        return *m_renderTargetStack.top();
     }
 
     void State::projectionMatrix( Matrix< float, 4, 4 > const& matrix )
@@ -47,36 +57,36 @@ namespace ttb
 
     void State::pushMatrix()
     {
-        m_modelViewMatrixStack.push_back( m_modelViewMatrixStack.back() );
+        m_modelViewMatrixStack.push( m_modelViewMatrixStack.top() );
     }
 
     void State::popMatrix()
     {
-        m_modelViewMatrixStack.pop_back();
+        m_modelViewMatrixStack.pop();
         m_modelViewMatrixSet = false;
     }
 
     void State::setMatrix( Matrix< float, 4, 4 > const& matrix )
     {
-        m_modelViewMatrixStack.back() = matrix;
+        m_modelViewMatrixStack.top() = matrix;
         m_modelViewMatrixSet = false;
     }
 
     void State::applyMatrix( Matrix< float, 4, 4 > const& matrix )
     {
-        m_modelViewMatrixStack.back() *= matrix;
+        m_modelViewMatrixStack.top() *= matrix;
         m_modelViewMatrixSet = false;
     }
 
     Matrix< float, 4, 4 > const& State::modelViewMatrix() const
     {
-        return m_modelViewMatrixStack.back();
+        return m_modelViewMatrixStack.top();
     }
 
     void State::pushProgram( std::shared_ptr< Program > const& program )
     {
         program->use();
-        m_programStack.push_back( program );
+        m_programStack.push( program );
 
         m_projectionMatrixSet = false;
         m_modelViewMatrixSet = false;
@@ -84,11 +94,13 @@ namespace ttb
 
     void State::popProgram()
     {
-        m_programStack.back()->unuse();
-        m_programStack.pop_back();
+        m_programStack.top()->unuse();
+        m_programStack.pop();
 
         if( !m_programStack.empty() )
-            m_programStack.back()->use();
+        {
+            m_programStack.top()->use();
+        }
 
         m_projectionMatrixSet = false;
         m_modelViewMatrixSet = false;
@@ -96,22 +108,22 @@ namespace ttb
 
     Program& State::program()
     {
-        return *m_programStack.back();
+        return *m_programStack.top();
     }
 
     void State::pushViewport( Viewport const& viewport )
     {
-        m_viewportStack.push_back( viewport );
+        m_viewportStack.push( viewport );
 
         glViewport( viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight() );
     }
 
     void State::popViewport()
     {
-        m_viewportStack.pop_back();
+        m_viewportStack.pop();
         if( !m_viewportStack.empty() )
         {
-            const auto& viewport = m_viewportStack.back();
+            auto const& viewport = m_viewportStack.top();
             glViewport(
                 viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight() );
         }
@@ -121,17 +133,21 @@ namespace ttb
     {
         if( !m_programStack.empty() )
         {
-            auto& program = m_programStack.back();
+            auto& program = m_programStack.top();
 
             if( !m_projectionMatrixSet )
             {
                 GLint location = program->getUniformLocation( "u_projectionMatrix" );
                 if( location != -1 )
+                {
                     program->setUniform( location, m_projectionMatrix );
+                }
 
                 location = program->getUniformLocation( "u_invProjectionMatrix" );
                 if( location != -1 )
+                {
                     program->setUniform( location, invert( m_projectionMatrix ) );
+                }
 
                 m_projectionMatrixSet = true;
             }
@@ -140,11 +156,15 @@ namespace ttb
             {
                 GLint location = program->getUniformLocation( "u_modelViewMatrix" );
                 if( location != -1 )
-                    program->setUniform( location, m_modelViewMatrixStack.back() );
+                {
+                    program->setUniform( location, m_modelViewMatrixStack.top() );
+                }
 
                 location = program->getUniformLocation( "u_invModelViewMatrix" );
                 if( location != -1 )
-                    program->setUniform( location, invert( m_modelViewMatrixStack.back() ) );
+                {
+                    program->setUniform( location, invert( m_modelViewMatrixStack.top() ) );
+                }
 
                 m_modelViewMatrixSet = true;
             }

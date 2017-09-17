@@ -7,7 +7,7 @@
 #include <ttb/core/Viewport.hpp>
 #include <ttb/math/Matrix.hpp>
 
-#include <list>
+#include <stack>
 #include <memory>
 
 // forward declarations
@@ -65,20 +65,20 @@ namespace ttb
 
     private:
         // render target
-        std::list< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
+        std::stack< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
 
         // projection
         ttb::Matrix< float, 4, 4 > m_projectionMatrix;
         bool m_projectionMatrixSet;
 
         // modelview
-        std::list< ttb::Matrix< float, 4, 4 > > m_modelViewMatrixStack;
+        std::stack< ttb::Matrix< float, 4, 4 > > m_modelViewMatrixStack;
         bool m_modelViewMatrixSet;
 
         // shader
-        std::list< std::shared_ptr< Program > > m_programStack;
+        std::stack< std::shared_ptr< Program > > m_programStack;
 
         // viewport
-        std::list< Viewport > m_viewportStack;
+        std::stack< Viewport > m_viewportStack;
     };
 }
