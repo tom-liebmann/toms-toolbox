@@ -39,7 +39,7 @@ namespace ttb
     template < typename TType >
     inline void write( std::ostream& stream, TType const& value, Endianness endianness )
     {
-        if( endianness == nativeEndianness )
+        if( endianness == nativeEndianness() )
         {
             stream.write( reinterpret_cast< char const* >( &value ), sizeof( TType ) );
         }
