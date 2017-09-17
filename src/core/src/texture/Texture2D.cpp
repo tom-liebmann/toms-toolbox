@@ -39,6 +39,12 @@ namespace ttb
         return m_height;
     }
 
+    void Texture2D::bind( uint8_t slot )
+    {
+        glActiveTexture( GL_TEXTURE0 + slot );
+        glBindTexture( GL_TEXTURE_2D, object() );
+    }
+
 
     Texture2DModifier::Texture2DModifier( Texture2D& texture ) : m_texture( texture )
     {

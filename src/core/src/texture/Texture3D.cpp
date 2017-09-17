@@ -26,6 +26,12 @@ namespace ttb
         return m_depth;
     }
 
+    void Texture3D::bind( uint8_t slot )
+    {
+        glActiveTexture( GL_TEXTURE0 + slot );
+        glBindTexture( GL_TEXTURE_3D, object() );
+    }
+
 
     Texture3DModifier::Texture3DModifier( Texture3D& texture ) : m_texture( texture )
     {

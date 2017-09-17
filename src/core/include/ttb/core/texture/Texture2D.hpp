@@ -37,6 +37,9 @@ namespace ttb
 
         uint16_t height() const;
 
+        // Override: Texture
+        virtual void bind( uint8_t slot ) override;
+
     private:
         uint16_t m_width;
         uint16_t m_height;
@@ -54,7 +57,8 @@ namespace ttb
         ~Texture2DModifier();
 
         /// Update a rectangular part of the texture
-        void upload( uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const;
+        void upload(
+            uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const;
 
         /// Upload values into the texture
         /*
@@ -67,7 +71,7 @@ namespace ttb
                      GLenum valueType,
                      void const* data ) const;
 
-        /// Update the textures data
+        /// Update the texture's data
         void upload( void const* data ) const;
 
         void minMagFilter( GLint minFilter, GLint magFilter ) const;

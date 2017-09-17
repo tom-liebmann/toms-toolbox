@@ -29,6 +29,9 @@ namespace ttb
 
         uint16_t depth() const;
 
+        // Override: Texture
+        virtual void bind( uint8_t slot ) override;
+
     private:
         uint16_t m_width;
 
