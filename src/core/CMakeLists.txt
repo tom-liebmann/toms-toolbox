@@ -1,60 +1,65 @@
-find_package( GLEW )
-find_package( GLFW )
-find_package( OpenGL )
+include( glew )
+if( NOT TARGET glew )
+    message( "Missing library: glew" )
+    return()
+endif()
 
-if( GLEW_FOUND AND GLFW_FOUND AND OpenGL_FOUND )
-    # find source files
-    file(
-        GLOB_RECURSE
-        SOURCE_FILES
-        ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-        src/*.cpp
+include( glfw )
+if( NOT TARGET glfw )
+    message( "Missing library: glfw" )
+    return()
+endif()
+
+include( opengl )
+if( NOT TARGET opengl )
+    message( "Missing library: opengl" )
+    return()
+endif()
+
+# find source files
+file(
+    GLOB_RECURSE
+    SOURCE_FILES
+    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
+    src/*.cpp
     )
 
-    add_library(
-        ttbCore
-        STATIC
-        ${SOURCE_FILES} )
+add_library(
+    ttbCore
+    STATIC
+    ${SOURCE_FILES}
+    )
 
-    target_include_directories(
-        ttbCore
-        PUBLIC
-        ${GLEW_INCLUDE_DIR}
-        ${GLFW_INCLUDE_DIR}
+target_include_directories(
+    ttbCore
+    PUBLIC
         include
-        PRIVATE
-        src )
+    PRIVATE
+        src
+    )
 
-    target_compile_options(
-        ttbCore
-        PRIVATE
+target_compile_options(
+    ttbCore
+    PRIVATE
         -std=gnu++14
-        -fPIC )
+        -fPIC
+    )
 
-    target_compile_definitions(
-        ttbCore
-        PRIVATE
+target_compile_definitions(
+    ttbCore
+    PRIVATE
         GLEW_STATIC
-        GL_EXT_PROTOTYPES )
+        GL_EXT_PROTOTYPES
+    )
 
-    target_link_libraries(
-        ttbCore
-        PUBLIC
+target_link_libraries(
+    ttbCore
+    PUBLIC
         ttbMath
-        ${GLFW_LIBRARIES}
-        ${GLEW_LIBRARY}
-        ${OPENGL_LIBRARIES} )
+        glew
+        glfw
+        opengl
+    )
 
-    if( WIN32 )
-
-        target_compile_definitions(
-            ttbCore
-            PRIVATE
-            WIN32 )
-
-    endif()
-
-    list( APPEND VALID_TARGETS ttbCore )
-    set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
-
-endif()
+list( APPEND VALID_TARGETS ttbCore )
+set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

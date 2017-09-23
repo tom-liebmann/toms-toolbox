@@ -1,6 +1,8 @@
-cmake_minimum_required( VERSION 3.0 )
+cmake_minimum_required( VERSION 3.2 )
 
-set( COMPILATION_MODE "GCC" CACHE STRING "Mode to compile the libraries in" )
+set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+
+set( COMPILATION_MODE "UNKNOWN" CACHE STRING "Mode to compile the libraries in" )
 set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
@@ -11,11 +13,11 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
     message( "Using clang" )
     set( CMAKE_C_COMPILER "clang" )
     set( CMAKE_CXX_COMPILER "clang++" )
+else()
+    message( FATAL_ERROR "Unknown compilation mode" )
 endif()
 
 project( toms_toolbox )
-
-set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
 # Generate documentation
 find_package( Doxygen )

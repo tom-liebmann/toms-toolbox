@@ -28,20 +28,5 @@ target_link_libraries(
     PUBLIC
     ttbUtils )
 
-if( WIN32 )
-
-    target_link_libraries(
-        ttbNet
-        PUBLIC
-        wsock32
-        ws2_32 )
-
-    target_compile_definitions(
-        ttbNet
-        PUBLIC
-        WIN32 )
-
-endif()
-
 list( APPEND VALID_TARGETS ttbNet )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

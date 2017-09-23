@@ -24,14 +24,5 @@ target_compile_options(
     -std=gnu++14
     -fPIC )
 
-if( WIN32 )
-
-    target_compile_definitions(
-        ttbMath
-        PRIVATE
-        WIN32 )
-
-endif()
-
 list( APPEND VALID_TARGETS ttbMath )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
