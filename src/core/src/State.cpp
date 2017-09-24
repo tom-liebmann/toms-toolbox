@@ -1,8 +1,8 @@
 #include <ttb/core/State.hpp>
 
 #include <ttb/core/RenderTarget.hpp>
-#include <ttb/core/Window.hpp>
 #include <ttb/core/shader/Program.hpp>
+#include <ttb/core/window/Window.hpp>
 
 #include <iostream>
 

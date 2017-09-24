@@ -6,6 +6,8 @@
 
 #include <memory>
 #include <vector>
+#include <string>
+
 
 // forward declarations
 //=================================================================================================

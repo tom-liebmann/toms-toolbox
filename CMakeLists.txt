@@ -6,15 +6,20 @@ set( COMPILATION_MODE "UNKNOWN" CACHE STRING "Mode to compile the libraries in" 
 set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
+
     message( "Using gcc" )
     set( CMAKE_C_COMPILER "gcc" )
     set( CMAKE_CXX_COMPILER "g++" )
+
 elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+
     message( "Using clang" )
-    set( CMAKE_C_COMPILER "clang" )
-    set( CMAKE_CXX_COMPILER "clang++" )
+    set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake )
+
 else()
+
     message( FATAL_ERROR "Unknown compilation mode" )
+
 endif()
 
 project( toms_toolbox )

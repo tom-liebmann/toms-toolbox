@@ -1,14 +1,11 @@
 #pragma once
 
-#include <GL/glew.h>
-
-#include <GL/gl.h>
-
 #include <ttb/core/Viewport.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <stack>
 #include <memory>
+
 
 // forward declarations
 //=============================================================================

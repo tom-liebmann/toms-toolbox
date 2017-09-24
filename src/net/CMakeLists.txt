@@ -1,32 +1,36 @@
-# find source files
-file(
-    GLOB_RECURSE
-    SOURCE_FILES
-    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-    src/*.cpp )
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
 
-add_library(
-    ttbNet
-    STATIC
-    ${SOURCE_FILES} )
+    # find source files
+    file(
+        GLOB_RECURSE
+        SOURCE_FILES
+        ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
+        src/*.cpp )
 
-target_include_directories(
-    ttbNet
-    PUBLIC
-    include
-    PRIVATE
-    src )
+    add_library(
+        ttbNet
+        STATIC
+        ${SOURCE_FILES} )
 
-target_compile_options(
-    ttbNet
-    PRIVATE
-    -std=gnu++14
-    -fPIC )
+    target_include_directories(
+        ttbNet
+        PUBLIC
+        include
+        PRIVATE
+        src )
 
-target_link_libraries(
-    ttbNet
-    PUBLIC
-    ttbUtils )
+    target_compile_options(
+        ttbNet
+        PRIVATE
+        -std=gnu++14
+        -fPIC )
 
-list( APPEND VALID_TARGETS ttbNet )
-set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+    target_link_libraries(
+        ttbNet
+        PUBLIC
+        ttbUtils )
+
+    list( APPEND VALID_TARGETS ttbNet )
+    set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+
+endif()

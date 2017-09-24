@@ -18,10 +18,15 @@ target_include_directories(
     PRIVATE
     src )
 
+target_compile_features(
+    ttbMath
+    PUBLIC
+    cxx_std_14
+    )
+
 target_compile_options(
     ttbMath
     PRIVATE
-    -std=gnu++14
     -fPIC )
 
 list( APPEND VALID_TARGETS ttbMath )

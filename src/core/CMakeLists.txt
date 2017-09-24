@@ -1,12 +1,8 @@
+set( LINK_LIBRARIES )
+
 include( glew )
 if( NOT TARGET glew )
     message( "Missing library: glew" )
-    return()
-endif()
-
-include( glfw )
-if( NOT TARGET glfw )
-    message( "Missing library: glfw" )
     return()
 endif()
 
@@ -16,13 +12,46 @@ if( NOT TARGET opengl )
     return()
 endif()
 
-# find source files
-file(
-    GLOB_RECURSE
-    SOURCE_FILES
-    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-    src/*.cpp
-    )
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
+
+    include( glfw )
+    if( NOT TARGET glfw )
+        message( "Missing library: glfw" )
+        return()
+    endif()
+
+    set( LINK_LIBRARIES glew glfw opengl )
+
+    set(
+        SOURCE_FILES
+
+        src/impl/glfw/Window.cpp
+        )
+
+elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+
+    include( sdl )
+    if( NOT TARGET sdl )
+        message( "Missing library: sdl" )
+        return()
+    endif()
+
+    set( LINK_LIBRARIES glew sdl opengl )
+
+    set(
+        SOURCE_FILES
+
+        src/RenderTarget.cpp
+        src/State.cpp
+        src/geometry/Geometry.cpp
+        src/geometry/IndexBuffer.cpp
+        src/geometry/VertexBuffer.cpp
+        src/impl/sdl/window/Window.cpp
+        src/shader/Program.cpp
+        src/shader/Shader.cpp
+        )
+
+endif()
 
 add_library(
     ttbCore
@@ -45,6 +74,23 @@ target_compile_options(
         -fPIC
     )
 
+if( ${COMPILATION_MODE} STREQUAL "CLANG" )
+
+    target_compile_options(
+        ttbCore
+        PRIVATE
+            -s USE_SDL=2
+        )
+
+    target_link_libraries(
+        ttbCore
+        PUBLIC
+        "-s USE_SDL=2"
+        "-s DISABLE_EXCEPTION_CATCHING=0"
+        )
+
+endif()
+
 target_compile_definitions(
     ttbCore
     PRIVATE
@@ -56,9 +102,8 @@ target_link_libraries(
     ttbCore
     PUBLIC
         ttbMath
-        glew
-        glfw
-        opengl
+        ttbUtils
+        ${LINK_LIBRARIES}
     )
 
 list( APPEND VALID_TARGETS ttbCore )

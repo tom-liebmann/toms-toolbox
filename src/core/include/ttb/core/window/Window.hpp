@@ -1,15 +1,12 @@
 #pragma once
 
-#define GLFW_INCLUDE_GLEXT
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
 #include <ttb/core/EventManager.hpp>
 #include <ttb/core/RenderTarget.hpp>
-#include <ttb/core/WindowMode.hpp>
+#include <ttb/core/window/WindowMode.hpp>
+#include <ttb/utils/dataIO.hpp>
 
 #include <memory>
-
+#include <string>
 
 
 // declarations
@@ -20,18 +17,17 @@ namespace ttb
     class Window : public RenderTarget
     {
     public:
-        Window( std::string title, WindowMode mode );
+        Window( std::string const& title, WindowMode const& mode );
 
         ~Window();
-
-        void eventManager( std::shared_ptr< EventManager > const& eventManager );
-        std::shared_ptr< EventManager > eventManager() const;
 
         void mode( WindowMode const& mode );
         WindowMode const& mode() const;
 
-        GLFWwindow* handle() const;
+        std::string const& title() const;
 
+        // Event handling
+        std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > eventOutput() const;
         void update();
 
         // Override: RenderTarget
@@ -41,12 +37,11 @@ namespace ttb
         virtual void end( State& state ) const override;
 
     private:
-        static uint8_t s_windowCount;
+        class Impl;
+        std::unique_ptr< Impl > m_impl;
+
+        WindowMode m_mode;
 
         std::string m_title;
-
-        std::shared_ptr< EventManager > m_eventManager;
-        WindowMode m_mode;
-        GLFWwindow* m_handle;
     };
 }

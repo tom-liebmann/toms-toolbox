@@ -19,7 +19,9 @@ namespace ttb
         glGenBuffers( 1, &m_bufferObject );
 
         m_blockSize = std::accumulate(
-            std::begin( m_attributes ), std::end( m_attributes ), 0,
+            std::begin( m_attributes ),
+            std::end( m_attributes ),
+            0,
             []( size_t size, Attribute const& attr ) { return size + attr.byteSize(); } );
     }
 
@@ -51,13 +53,20 @@ namespace ttb
         switch( attribute.type() )
         {
             case GL_FLOAT:
-                glVertexAttribPointer( location, attribute.size(), attribute.type(), GL_FALSE,
-                                       m_blockSize, reinterpret_cast< const GLvoid* >( offset ) );
+                glVertexAttribPointer( location,
+                                       attribute.size(),
+                                       attribute.type(),
+                                       GL_FALSE,
+                                       m_blockSize,
+                                       reinterpret_cast< const GLvoid* >( offset ) );
                 break;
 
             case GL_BYTE:
             case GL_UNSIGNED_INT:
-                glVertexAttribIPointer( location, attribute.size(), attribute.type(), m_blockSize,
+                glVertexAttribIPointer( location,
+                                        attribute.size(),
+                                        attribute.type(),
+                                        m_blockSize,
                                         reinterpret_cast< const GLvoid* >( offset ) );
                 break;
 
@@ -77,7 +86,8 @@ namespace ttb
     void VertexBuffer::Access::finish( Access* access )
     {
         glBindBuffer( GL_ARRAY_BUFFER, access->m_buffer.m_bufferObject );
-        glBufferData( GL_ARRAY_BUFFER, access->m_buffer.m_data.size(),
+        glBufferData( GL_ARRAY_BUFFER,
+                      access->m_buffer.m_data.size(),
                       reinterpret_cast< const GLvoid* >( access->m_buffer.m_data.data() ),
                       GL_STATIC_DRAW );
 
