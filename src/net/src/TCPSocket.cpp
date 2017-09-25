@@ -1,20 +1,9 @@
 #include <ttb/net/TCPSocket.hpp>
 
-#include <ttb/net/Socket.hpp>
+#include <emscripten.h>
 
 #include <iostream>
 
-#ifdef WIN32
-#else
-
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <cstring>
-
-#endif
 
 namespace
 {

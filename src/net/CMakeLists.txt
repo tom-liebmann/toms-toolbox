@@ -1,36 +1,48 @@
-if( ${COMPILATION_MODE} STREQUAL "GCC" )
+if( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
-    # find source files
-    file(
-        GLOB_RECURSE
+    set(
         SOURCE_FILES
-        ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-        src/*.cpp )
+        src/impl/emscripten/TCPSocket.cpp
+        )
 
-    add_library(
-        ttbNet
-        STATIC
-        ${SOURCE_FILES} )
+endif()
+
+add_library(
+    ttbNet
+    STATIC
+    ${SOURCE_FILES}
+    )
+
+if( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
     target_include_directories(
         ttbNet
-        PUBLIC
-        include
         PRIVATE
-        src )
-
-    target_compile_options(
-        ttbNet
-        PRIVATE
-        -std=gnu++14
-        -fPIC )
-
-    target_link_libraries(
-        ttbNet
-        PUBLIC
-        ttbUtils )
-
-    list( APPEND VALID_TARGETS ttbNet )
-    set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+        src/impl/emscripten
+        )
 
 endif()
+
+target_include_directories(
+    ttbNet
+    PUBLIC
+    include
+    PRIVATE
+    src
+    )
+
+target_compile_options(
+    ttbNet
+    PRIVATE
+    -std=gnu++14
+    -fPIC
+    )
+
+target_link_libraries(
+    ttbNet
+    PUBLIC
+    ttbUtils
+    )
+
+list( APPEND VALID_TARGETS ttbNet )
+set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

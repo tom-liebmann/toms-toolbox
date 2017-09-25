@@ -1,51 +1,24 @@
 #pragma once
 
-#include <ttb/net/SocketContainer.hpp>
-
 #include <string>
 
-#ifdef WIN32
-#include <winsock2.h>
-#endif
-
-
-
-// declarations
-//=============================================================================
 
 namespace ttb
 {
-    class TCPSocket : public SocketContainer
+    class TCPSocket
     {
     public:
-#ifdef WIN32
-        using Handle = SOCKET;
-#else
-        using Handle = int;
-#endif
-
         class Error;
 
         // Construction
-        TCPSocket( const std::string& address, uint16_t port );
+        static std::unique_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
-        TCPSocket( Handle handle );
-
-        ~TCPSocket();
-
-        // Getter
-        Handle getHandle() const;
+        virtual ~TCPSocket();
 
         // Misc
-        void send( const void* data, size_t size ) const;
-        void receive( void* data, size_t size ) const;
+        virtual void send( void const* data, size_t size ) const = 0;
 
-        // SocketContainer
-        virtual TCPSocket& getSocket() override;
-        virtual const TCPSocket& getSocket() const override;
-
-    private:
-        Handle m_handle;
+        virtual void receive( void* data, size_t size ) const = 0;
     };
 
 
@@ -74,28 +47,11 @@ namespace ttb
 }
 
 
-
 // definitions
 //=============================================================================
 
 namespace ttb
 {
-    inline TCPSocket& TCPSocket::getSocket()
-    {
-        return *this;
-    }
-
-    inline const TCPSocket& TCPSocket::getSocket() const
-    {
-        return *this;
-    }
-
-    inline TCPSocket::Handle TCPSocket::getHandle() const
-    {
-        return m_handle;
-    }
-
-
     inline TCPSocket::Error::Error( Type type, std::string description )
         : m_type( type ), m_description( std::move( description ) )
     {
