@@ -1,4 +1,4 @@
-#include <ttb/net/TCPSocket.hpp>
+#include "TCPSocket.hpp"
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -22,134 +22,110 @@ namespace
 
 namespace ttb
 {
-    class TCPSocket::Impl
+    std::unique_ptr< TCPSocket > TCPSocket::connect( std::string const& address, uint16_t port )
     {
-    public:
-        Impl( std::string const& address, uint16_t port );
-
-        ~Impl();
-
-        void send( void const* data, size_t size ) const;
-
-        void receive( void* data, size_t size ) const;
-
-    private:
-        int m_handle;
-    };
-}
-
-
-namespace ttb
-{
-    TCPSocket::TCPSocket( std::string const& address, uint16_t port )
-        : m_impl( std::make_unique< Impl >( address, port ) )
-    {
+        return std::make_unique< linux::TCPSocket >( address, port );
     }
 
-    TCPSocket::~TCPSocket()
+    TCPSocket::~TCPSocket() = default;
+
+
+    namespace linux
     {
-    }
-
-    void TCPSocket::send( void const* data, size_t size ) const
-    {
-        m_impl->send( data, size );
-    }
-
-    void TCPSocket::receive( void* data, size_t size ) const
-    {
-        m_impl->receive( data, size );
-    }
-}
-
-
-namespace ttb
-{
-    TCPSocket::Impl::Impl( std::string const& address, uint16_t port )
-    {
-        // create socket
-        m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
-
-        if( m_handle == -1 )
+        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
         {
-            throw std::runtime_error( "Unable to create socket." );
+            // create socket
+            m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
+
+            if( m_handle == -1 )
+            {
+                throw std::runtime_error( "Unable to create socket." );
+            }
+
+            sockaddr_in sockAddr = createAddress( address, port );
+
+            if(::connect( m_handle,
+                          reinterpret_cast< struct sockaddr* >( &sockAddr ),
+                          sizeof( sockAddr ) ) )
+            {
+                close( m_handle );
+                throw std::runtime_error( "Unable to connect to remote host." );
+            }
         }
 
-        sockaddr_in sockAddr = createAddress( address, port );
-
-        if( connect(
-                m_handle, reinterpret_cast< struct sockaddr* >( &sockAddr ), sizeof( sockAddr ) ) )
+        TCPSocket::TCPSocket( int handle ) : m_handle( handle )
         {
+        }
+
+        TCPSocket::~TCPSocket()
+        {
+            shutdown( m_handle, 0 );
             close( m_handle );
-            throw std::runtime_error( "Unable to connect to remote host." );
         }
-    }
 
-    TCPSocket::Impl::~Impl()
-    {
-    }
-
-    void TCPSocket::Impl::send( void const* data, size_t size ) const
-    {
-        size_t offset = 0;
-        while( offset < size )
+        void TCPSocket::send( void const* data, size_t size ) const
         {
-            int ret;
-
-            while( true )
+            size_t offset = 0;
+            while( offset < size )
             {
-                auto ret = ::send( m_handle,
-                                   reinterpret_cast< uint8_t const* >( data ) + offset,
-                                   size - offset,
-                                   MSG_NOSIGNAL );
+                int ret;
 
-                if( ret > 0 )
+                while( true )
                 {
-                    break;
-                }
-                else if( ret < 0 )
-                {
-                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    auto ret = ::send( m_handle,
+                                       reinterpret_cast< uint8_t const* >( data ) + offset,
+                                       size - offset,
+                                       MSG_NOSIGNAL );
+
+                    if( ret > 0 )
                     {
-                        throw Error( Error::Type::BROKEN, std::string( strerror( errno ) ) );
+                        break;
+                    }
+                    else if( ret < 0 )
+                    {
+                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        {
+                            throw Error( Error::Type::BROKEN, std::string( strerror( errno ) ) );
+                        }
                     }
                 }
+
+                offset += ret;
             }
-
-            offset += ret;
         }
-    }
 
-    void TCPSocket::Impl::receive( void* data, size_t size ) const
-    {
-        size_t offset = 0;
-
-        while( offset < size )
+        void TCPSocket::receive( void* data, size_t size ) const
         {
-            int ret;
+            size_t offset = 0;
 
-            while( true )
+            while( offset < size )
             {
-                ret = recv(
-                    m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+                int ret;
 
-                if( ret > 0 )
+                while( true )
                 {
-                    break;
-                }
-                else if( ret == 0 )
-                {
-                    throw Error( Error::Type::CLOSED );
-                }
-                else
-                {
-                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    ret = recv(
+                        m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
+
+                    if( ret > 0 )
                     {
-                        throw Error( Error::Type::BROKEN );
+                        break;
+                    }
+                    else if( ret == 0 )
+                    {
+                        throw Error( Error::Type::CLOSED );
+                    }
+                    else
+                    {
+                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        {
+                            throw Error( Error::Type::BROKEN );
+                        }
                     }
                 }
-            }
 
-            offset += ret;
+                offset += ret;
+            }
         }
     }
 }

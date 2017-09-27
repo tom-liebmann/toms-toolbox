@@ -1,4 +1,7 @@
-#include <ttb/core/Window.hpp>
+#include <ttb/core/window/Window.hpp>
+
+#include <GLFW/glfw3.h>
+
 
 #ifdef WIN32
 #define STDCALL __attribute__( ( __stdcall__ ) )
@@ -43,14 +46,14 @@ namespace ttb
     class Window::Impl
     {
     public:
-        Impl();
+        Impl( std::string const& title, WindowMode const& mode );
 
         ~Impl();
 
         void update();
 
     private:
-        static size_t s_windowCount = 0;
+        static size_t s_windowCount;
 
         GLFWwindow* m_handle;
     };
@@ -60,7 +63,7 @@ namespace ttb
 namespace ttb
 {
     Window::Window( std::string const& title, WindowMode const& mode )
-        : m_title( title ), m_mode( mode ) : m_impl( std::make_unique< Impl >( title, mode ) )
+        : m_title( title ), m_mode( mode ), m_impl( std::make_unique< Impl >( title, mode ) )
     {
     }
 
@@ -111,6 +114,8 @@ namespace ttb
 
 namespace ttb
 {
+    size_t Window::Impl::s_windowCount = 0;
+
     Window::Impl::Impl( std::string const& title, WindowMode const& mode )
     {
         if( s_windowCount == 0 )
