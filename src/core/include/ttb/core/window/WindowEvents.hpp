@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/core/Window.hpp>
+#include <ttb/core/window/Window.hpp>
 
 // declarations
 //=============================================================================

@@ -25,7 +25,8 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
     set(
         SOURCE_FILES
 
-        src/impl/glfw/Window.cpp
+        src/window/Window.cpp
+        src/impl/linux/window/Window.cpp
         )
 
 elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
@@ -46,9 +47,10 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/geometry/Geometry.cpp
         src/geometry/IndexBuffer.cpp
         src/geometry/VertexBuffer.cpp
-        src/impl/sdl/window/Window.cpp
+        src/impl/emscripten/window/Window.cpp
         src/shader/Program.cpp
         src/shader/Shader.cpp
+        src/window/Window.cpp
         )
 
 endif()

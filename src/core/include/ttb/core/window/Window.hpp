@@ -17,29 +17,35 @@ namespace ttb
     class Window : public RenderTarget
     {
     public:
-        Window( std::string const& title, WindowMode const& mode );
+        std::unique_ptr< Window > create( std::string const& title, WindowMode const& mode );
 
-        ~Window();
+        virtual ~Window();
 
         void mode( WindowMode const& mode );
+
         WindowMode const& mode() const;
 
         std::string const& title() const;
 
         // Event handling
-        std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > eventOutput() const;
-        void update();
+        virtual std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > >
+            eventOutput() const = 0;
+
+        virtual void update() = 0;
 
         // Override: RenderTarget
         virtual size_t width() const override;
+
         virtual size_t height() const override;
+
         virtual void begin( State& state ) const override;
+
         virtual void end( State& state ) const override;
 
-    private:
-        class Impl;
-        std::unique_ptr< Impl > m_impl;
+    protected:
+        Window( std::string const& title, WindowMode const& mode );
 
+    private:
         WindowMode m_mode;
 
         std::string m_title;

@@ -1,4 +1,8 @@
+#include "Window.hpp"
 #include <ttb/core/window/Window.hpp>
+#include <ttb/core/window/WindowEvents.hpp>
+
+#include <ttb/core/State.hpp>
 
 #include <GLFW/glfw3.h>
 
@@ -11,7 +15,7 @@
 
 namespace
 {
-    void pushEvent( GLFWwindow* window, std::unique_ptr< ttb::Event > event );
+    void pushEvent( GLFWwindow* window, ttb::Event const& event );
 
     void callbackErrorGLFW( int error, char const* description );
 
@@ -43,169 +47,120 @@ namespace
 
 namespace ttb
 {
-    class Window::Impl
+    std::unique_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
     {
-    public:
-        Impl( std::string const& title, WindowMode const& mode );
-
-        ~Impl();
-
-        void update();
-
-    private:
-        static size_t s_windowCount;
-
-        GLFWwindow* m_handle;
-    };
-}
-
-
-namespace ttb
-{
-    Window::Window( std::string const& title, WindowMode const& mode )
-        : m_title( title ), m_mode( mode ), m_impl( std::make_unique< Impl >( title, mode ) )
-    {
+        return std::make_unique< linux::Window >( title, mode );
     }
 
-    void Window::mode( WindowMode const& mode )
+
+    namespace linux
     {
-    }
+        size_t Window::s_windowCount = 0;
 
-    WindowMode const& Window::mode() const
-    {
-        return m_mode;
-    }
-
-    std::string const& Window::title() const
-    {
-        return m_title;
-    }
-
-    std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > const& Window::eventOutput() const
-    {
-    }
-
-    void Window::update()
-    {
-        m_impl->update();
-    }
-
-    size_t Window::width() const
-    {
-        return m_mode.width();
-    }
-
-    size_t Window::height() const
-    {
-        return m_mode.height();
-    }
-
-    void Window::begin( State& state ) const
-    {
-        state.pushViewport( Viewport( 0, 0, width(), height() ) );
-    }
-
-    void Window::end( State& state ) const
-    {
-        state.popViewport();
-    }
-}
-
-
-namespace ttb
-{
-    size_t Window::Impl::s_windowCount = 0;
-
-    Window::Impl::Impl( std::string const& title, WindowMode const& mode )
-    {
-        if( s_windowCount == 0 )
+        Window::Window( std::string const& title, WindowMode const& mode )
+            : ttb::Window( title, mode )
         {
-            glfwInit();
-        }
+            if( s_windowCount == 0 )
+            {
+                glfwInit();
+            }
 
-        glfwSetErrorCallback( callbackErrorGLFW );
+            glfwSetErrorCallback( callbackErrorGLFW );
 
 //        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
 // glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
 // glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
 #ifndef NDEBUG
-        glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
+            glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
 
-        m_handle = glfwCreateWindow(
-            mode.width(), mode.height(), title.c_str(), mode.getMonitor().getHandle(), nullptr );
+            auto monitor = glfwGetPrimaryMonitor();
 
-        glfwMakeContextCurrent( m_handle );
+            m_handle =
+                glfwCreateWindow( mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+
+            glfwMakeContextCurrent( m_handle );
 
 #ifdef GLEW_STATIC
-        if( s_windowCount == 0 )
-        {
-            glewInit();
-        }
+            if( s_windowCount == 0 )
+            {
+                glewInit();
+            }
 #endif
 
 #ifndef NDEBUG
-        if( !glfwExtensionSupported( "GL_ARB_debug_output" ) )
-        {
-            std::cout << "Debugging extension not supported" << std::endl;
-        }
+            if( !glfwExtensionSupported( "GL_ARB_debug_output" ) )
+            {
+                std::cout << "Debugging extension not supported" << std::endl;
+            }
 
-        if( glDebugMessageCallback )
-        {
-            std::cout << "Debugging enabled" << std::endl;
-            glEnable( GL_DEBUG_OUTPUT );
-            glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-            glDebugMessageCallback( callbackErrorOpenGL, nullptr );
-        }
-        else
-        {
-            std::cout << "Debugging not available" << std::endl;
-        }
+            if( glDebugMessageCallback )
+            {
+                std::cout << "Debugging enabled" << std::endl;
+                glEnable( GL_DEBUG_OUTPUT );
+                glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+                glDebugMessageCallback( callbackErrorOpenGL, nullptr );
+            }
+            else
+            {
+                std::cout << "Debugging not available" << std::endl;
+            }
 #endif
 
-        glfwSetWindowUserPointer( m_handle, this );
+            glfwSetWindowUserPointer( m_handle, this );
 
-        glfwSetWindowCloseCallback( m_handle, callbackWindowClose );
-        glfwSetKeyCallback( m_handle, callbackKey );
-        glfwSetMouseButtonCallback( m_handle, callbackMouseButton );
-        glfwSetCursorPosCallback( m_handle, callbackMouseMove );
-        glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
-        glfwSetScrollCallback( m_handle, callbackScroll );
+            glfwSetWindowCloseCallback( m_handle, callbackWindowClose );
+            glfwSetKeyCallback( m_handle, callbackKey );
+            glfwSetMouseButtonCallback( m_handle, callbackMouseButton );
+            glfwSetCursorPosCallback( m_handle, callbackMouseMove );
+            glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
+            glfwSetScrollCallback( m_handle, callbackScroll );
 
-        ++s_windowCount;
-    }
+            m_eventOutput = std::make_shared< SimpleProvider< SlotType::ACTIVE, Event const& > >();
 
-    Window::Impl::~Impl()
-    {
-        glfwDestroyWindow( m_handle );
-
-        --s_windowCount;
-
-        if( s_windowCount == 0 )
-        {
-            glfwTerminate();
+            ++s_windowCount;
         }
-    }
 
-    void Window::Impl::update()
-    {
-        glfwSwapBuffers( m_handle );
-        glfwPollEvents();
+        Window::~Window()
+        {
+            glfwDestroyWindow( m_handle );
+
+            --s_windowCount;
+
+            if( s_windowCount == 0 )
+            {
+                glfwTerminate();
+            }
+        }
+
+        std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event const& > > const&
+            Window::eventOutput()
+        {
+            return m_eventOutput;
+        }
+
+        std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > Window::eventOutput() const
+        {
+            return m_eventOutput;
+        }
+
+        void Window::update()
+        {
+            glfwSwapBuffers( m_handle );
+            glfwPollEvents();
+        }
     }
 }
 
 
 namespace
 {
-    void pushEvent( GLFWwindow* window, std::unique_ptr< ttb::Event > event )
+    void pushEvent( GLFWwindow* window, ttb::Event const& event )
     {
-        auto wnd = reinterpret_cast< ttb::Window* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        auto eventManager = wnd->eventManager();
-
-        if( eventManager )
-            eventManager->pushEvent( std::move( event ) );
+        wnd->eventOutput()->push( event );
     }
 
     void callbackErrorGLFW( int error, char const* description )
@@ -229,9 +184,9 @@ namespace
 
     void callbackWindowClose( GLFWwindow* window )
     {
-        auto wnd = reinterpret_cast< ttb::Window::Impl* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        pushEvent( window, std::unique_ptr< ttb::Event >( new ttb::events::WindowClose( *wnd ) ) );
+        pushEvent( window, ttb::events::WindowClose( *wnd ) );
     }
 
     void callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
@@ -239,15 +194,11 @@ namespace
         switch( action )
         {
             case GLFW_PRESS:
-                pushEvent( window,
-                           std::unique_ptr< ttb::Event >(
-                               new ttb::events::Key( key, ttb::events::Key::Action::DOWN ) ) );
+                pushEvent( window, ttb::events::Key( key, ttb::events::Key::Action::DOWN ) );
                 break;
 
             case GLFW_RELEASE:
-                pushEvent( window,
-                           std::unique_ptr< ttb::Event >(
-                               new ttb::events::Key( key, ttb::events::Key::Action::UP ) ) );
+                pushEvent( window, ttb::events::Key( key, ttb::events::Key::Action::UP ) );
                 break;
         }
     }
@@ -277,32 +228,31 @@ namespace
         glfwGetCursorPos( window, &mouseX, &mouseY );
 
         pushEvent( window,
-                   std::unique_ptr< ttb::Event >( new ttb::events::MouseButton(
-                       mouseButton,
-                       action == GLFW_PRESS ? ttb::events::MouseButton::Action::DOWN
-                                            : ttb::events::MouseButton::Action::UP,
-                       mouseX,
-                       mouseY ) ) );
+                   ttb::events::MouseButton( mouseButton,
+                                             action == GLFW_PRESS
+                                                 ? ttb::events::MouseButton::Action::DOWN
+                                                 : ttb::events::MouseButton::Action::UP,
+                                             mouseX,
+                                             mouseY ) );
     }
 
     void callbackMouseMove( GLFWwindow* window, double x, double y )
     {
-        pushEvent( window, std::unique_ptr< ttb::Event >( new ttb::events::MouseMove( x, y ) ) );
+        pushEvent( window, ttb::events::MouseMove( x, y ) );
     }
 
     void callbackWindowSize( GLFWwindow* window, int width, int height )
     {
-        auto wnd = reinterpret_cast< ttb::Window* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->mode( ttb::WindowMode( width, height, wnd->mode().isFullscreen() ) );
+        wnd->mode( ttb::WindowMode( width, height, wnd->mode().fullscreen() ) );
 
-        pushEvent( window, std::unique_ptr< ttb::Event >( new ttb::events::WindowResize( *wnd ) ) );
+        pushEvent( window, ttb::events::WindowResize( *wnd ) );
     }
 
     void callbackScroll( GLFWwindow* window, double xoffset, double yoffset )
     {
-        pushEvent( window,
-                   std::unique_ptr< ttb::Event >( new ttb::events::Scroll( xoffset, yoffset ) ) );
+        pushEvent( window, ttb::events::Scroll( xoffset, yoffset ) );
     }
 
     std::string convertErrorType( GLenum type )
