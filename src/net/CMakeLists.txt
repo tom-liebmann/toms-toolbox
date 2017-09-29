@@ -5,6 +5,15 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/impl/emscripten/TCPSocket.cpp
         )
 
+elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
+
+    set(
+        SOURCE_FILES
+        src/Listener.cpp
+        src/impl/linux/TCPSocket.cpp
+        src/impl/linux/Listener.cpp
+        )
+
 endif()
 
 add_library(
@@ -12,16 +21,6 @@ add_library(
     STATIC
     ${SOURCE_FILES}
     )
-
-if( ${COMPILATION_MODE} STREQUAL "CLANG" )
-
-    target_include_directories(
-        ttbNet
-        PRIVATE
-        src/impl/emscripten
-        )
-
-endif()
 
 target_include_directories(
     ttbNet

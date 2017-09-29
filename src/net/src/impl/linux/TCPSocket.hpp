@@ -1,9 +1,11 @@
 #include <ttb/net/TCPSocket.hpp>
 
+#undef linux
+
 
 namespace ttb
 {
-    namespace emscripten
+    namespace linux
     {
         class TCPSocket : public ttb::TCPSocket
         {

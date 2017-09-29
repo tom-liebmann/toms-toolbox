@@ -1,5 +1,9 @@
 #pragma once
 
+#undef linux
+
+#include <ttb/net/Listener.hpp>
+
 
 namespace ttb
 {
@@ -9,6 +13,8 @@ namespace ttb
         {
         public:
             Listener( uint16_t port );
+
+            ~Listener();
 
             // Override: Listener
             virtual std::unique_ptr< TCPSocket > accept() override;

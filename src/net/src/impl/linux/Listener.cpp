@@ -1,29 +1,28 @@
 #include "Listener.hpp"
 #include "TCPSocket.hpp"
 
-
-namespace ttb
-{
-    std::unique_ptr< TCPSocket > Listener::create( uint16_t port )
-    {
-        return std::make_unique< linux::TCPSocket >( port );
-    }
-
-    Listener::Listener( uint16_t port ) : m_port( port )
-    {
-    }
-
-    Listener::~Listener() = default;
-
-    uint16_t Listener::port() const
-    {
-        return m_port;
-    }
-}
+#include <arpa/inet.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netinet/in.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 
 namespace ttb
 {
+    std::unique_ptr< Listener > Listener::create( uint16_t port )
+    {
+        return std::make_unique< linux::Listener >( port );
+    }
+
+
     namespace linux
     {
         Listener::Listener( uint16_t port ) : ttb::Listener( port )
@@ -63,7 +62,7 @@ namespace ttb
             close( m_handle );
         }
 
-        std::unique_ptr< TCPSocket > accept()
+        std::unique_ptr< ttb::TCPSocket > Listener::accept()
         {
             auto socketHandle = ::accept( m_handle, NULL, NULL );
 
