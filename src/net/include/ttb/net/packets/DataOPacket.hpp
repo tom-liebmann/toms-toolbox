@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/net/OPacket.hpp>
+#include <ttb/net/packets/OPacket.hpp>
 #include <ttb/utils/Endianness.hpp>
 
 #include <vector>

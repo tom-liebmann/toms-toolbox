@@ -3,6 +3,13 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
     set(
         SOURCE_FILES
         src/impl/emscripten/TCPSocket.cpp
+        src/packets/IPacket.cpp
+        src/packets/OPacket.cpp
+        src/packets/DataIPacket.cpp
+        src/packets/DataOPacket.cpp
+        src/packets/SizedOPacket.cpp
+        src/packets/SizedIPacket.cpp
+        src/packets/CombinedOPacket.cpp
         )
 
 elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
@@ -12,6 +19,13 @@ elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/Listener.cpp
         src/impl/linux/TCPSocket.cpp
         src/impl/linux/Listener.cpp
+        src/packets/IPacket.cpp
+        src/packets/OPacket.cpp
+        src/packets/DataIPacket.cpp
+        src/packets/DataOPacket.cpp
+        src/packets/SizedOPacket.cpp
+        src/packets/SizedIPacket.cpp
+        src/packets/CombinedOPacket.cpp
         )
 
 endif()
@@ -28,13 +42,6 @@ target_include_directories(
     include
     PRIVATE
     src
-    )
-
-target_compile_options(
-    ttbNet
-    PRIVATE
-    -std=gnu++14
-    -fPIC
     )
 
 target_link_libraries(

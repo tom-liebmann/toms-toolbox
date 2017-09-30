@@ -1,4 +1,4 @@
-#include <ttb/net/IPacket.hpp>
+#include <ttb/net/packets/IPacket.hpp>
 
 namespace ttb
 {

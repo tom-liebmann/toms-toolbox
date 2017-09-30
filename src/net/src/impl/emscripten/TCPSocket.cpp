@@ -16,7 +16,7 @@
 
 namespace
 {
-    sockaddr_in createAddress( const std::string& address, uint16_t port );
+    sockaddr_in createAddress( std::string const& address, uint16_t port );
 }
 
 
@@ -42,11 +42,13 @@ namespace ttb
                 throw std::runtime_error( "Unable to create socket." );
             }
 
+            fcntl( m_handle, F_SETFL, 0 );
+
             sockaddr_in sockAddr = createAddress( address, port );
 
             if(::connect( m_handle,
                           reinterpret_cast< struct sockaddr* >( &sockAddr ),
-                          sizeof( sockAddr ) ) )
+                          sizeof( sockAddr ) ) == -1 )
             {
                 close( m_handle );
                 throw std::runtime_error( "Unable to connect to remote host." );
@@ -129,9 +131,11 @@ namespace ttb
 
 namespace
 {
-    sockaddr_in createAddress( const std::string& address, uint16_t port )
+    sockaddr_in createAddress( std::string const& address, uint16_t port )
     {
         sockaddr_in sockAddr;
+
+        memset( &sockAddr, 0, sizeof( sockAddr ) );
 
         // Address family for socket connection. Usually this is AF_INET.
         sockAddr.sin_family = AF_INET;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/net/IPacket.hpp>
+#include <ttb/net/packets/IPacket.hpp>
 
 #include <memory>
 

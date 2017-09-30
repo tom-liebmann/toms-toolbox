@@ -69,13 +69,6 @@ target_include_directories(
         src
     )
 
-target_compile_options(
-    ttbCore
-    PRIVATE
-        -std=gnu++14
-        -fPIC
-    )
-
 if( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
     target_compile_options(

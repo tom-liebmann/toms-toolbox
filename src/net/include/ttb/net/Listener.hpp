@@ -1,12 +1,8 @@
 #pragma once
 
+#include <ttb/net/TCPSocket.hpp>
+
 #include <memory>
-
-
-namespace ttb
-{
-    class TCPSocket;
-}
 
 
 namespace ttb

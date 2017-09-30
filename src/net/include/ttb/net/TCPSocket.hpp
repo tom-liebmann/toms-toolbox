@@ -11,12 +11,10 @@ namespace ttb
     public:
         class Error;
 
-        // Construction
         static std::unique_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
         virtual ~TCPSocket();
 
-        // Misc
         virtual void send( void const* data, size_t size ) const = 0;
 
         virtual void receive( void* data, size_t size ) const = 0;

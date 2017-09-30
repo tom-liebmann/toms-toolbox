@@ -1,4 +1,4 @@
-#include <ttb/net/OPacket.hpp>
+#include <ttb/net/packets/OPacket.hpp>
 
 namespace ttb
 {
