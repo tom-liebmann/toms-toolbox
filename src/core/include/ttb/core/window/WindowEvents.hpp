@@ -29,7 +29,7 @@ namespace ttb
             Action getAction() const;
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             uint32_t m_key;
@@ -61,7 +61,7 @@ namespace ttb
             double getY() const;
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             Button m_button;
@@ -98,7 +98,7 @@ namespace ttb
             double getY() const;
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             double m_x;
@@ -115,7 +115,7 @@ namespace ttb
             Window& getWindow();
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             Window& m_window;
@@ -131,7 +131,7 @@ namespace ttb
             Window const& window() const;
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             Window& m_window;
@@ -148,7 +148,7 @@ namespace ttb
             double getYOffset() const;
 
             // Event
-            virtual Type getType() const override;
+            virtual Type type() const override;
 
         private:
             double m_xoffset;
@@ -180,7 +180,7 @@ namespace ttb
             return m_action;
         }
 
-        inline Event::Type Key::getType() const
+        inline Event::Type Key::type() const
         {
             return KEY;
         }
@@ -212,7 +212,7 @@ namespace ttb
             return m_y;
         }
 
-        inline Event::Type MouseButton::getType() const
+        inline Event::Type MouseButton::type() const
         {
             return MOUSE_BUTTON;
         }
@@ -233,7 +233,7 @@ namespace ttb
             return m_y;
         }
 
-        inline Event::Type MouseMove::getType() const
+        inline Event::Type MouseMove::type() const
         {
             return MOUSE_MOVE;
         }
@@ -249,7 +249,7 @@ namespace ttb
             return m_window;
         }
 
-        inline Event::Type WindowClose::getType() const
+        inline Event::Type WindowClose::type() const
         {
             return WINDOW_CLOSE;
         }
@@ -265,7 +265,7 @@ namespace ttb
             return m_window;
         }
 
-        inline Event::Type WindowResize::getType() const
+        inline Event::Type WindowResize::type() const
         {
             return WINDOW_RESIZE;
         }
@@ -287,7 +287,7 @@ namespace ttb
             return m_yoffset;
         }
 
-        inline Event::Type Scroll::getType() const
+        inline Event::Type Scroll::type() const
         {
             return SCROLL;
         }

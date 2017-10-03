@@ -21,6 +21,9 @@ elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/Listener.cpp
         src/impl/linux/TCPSocket.cpp
         src/impl/linux/Listener.cpp
+        src/DataWriter.cpp
+        src/NetSelector.cpp
+        src/impl/linux/NetSelector.cpp
         src/packets/IPacket.cpp
         src/packets/OPacket.cpp
         src/packets/DataIPacket.cpp

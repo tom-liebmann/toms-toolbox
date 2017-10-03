@@ -4,7 +4,6 @@
 
 #include <arpa/inet.h>
 #include <assert.h>
-#include <emscripten.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -16,17 +15,18 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <iostream>
 
 namespace ttb
 {
     std::unique_ptr< NetSelector > NetSelector::create()
     {
-        return std::make_unique< emscripten::NetSelector >();
+        return std::make_unique< linux::NetSelector >();
     }
 
 
-    namespace emscripten
+    namespace linux
     {
         NetSelector::NetSelector()
         {
@@ -39,7 +39,7 @@ namespace ttb
 
         void NetSelector::add( std::shared_ptr< ttb::TCPSocket > socket )
         {
-            if( auto sck = std::dynamic_pointer_cast< emscripten::TCPSocket >( socket ) )
+            if( auto sck = std::dynamic_pointer_cast< linux::TCPSocket >( socket ) )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
 
@@ -56,7 +56,7 @@ namespace ttb
 
         void NetSelector::remove( std::shared_ptr< ttb::TCPSocket > socket )
         {
-            if( auto sck = std::dynamic_pointer_cast< emscripten::TCPSocket >( socket ) )
+            if( auto sck = std::dynamic_pointer_cast< linux::TCPSocket >( socket ) )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
 

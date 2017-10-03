@@ -1,5 +1,7 @@
 #include "TCPSocket.hpp"
 
+#include <ttb/net/DataWriter.hpp>
+
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
@@ -16,7 +18,19 @@
 
 namespace
 {
-    sockaddr_in createAddress( const std::string& address, uint16_t port );
+    sockaddr_in createAddress( std::string const& address, uint16_t port );
+
+
+    class SocketDataWriter : public ttb::DataWriter
+    {
+    public:
+        SocketDataWriter( ttb::linux::TCPSocket& socket );
+
+        virtual size_t write( void const* data, size_t size ) override;
+
+    private:
+        ttb::linux::TCPSocket& m_socket;
+    };
 }
 
 
@@ -42,14 +56,19 @@ namespace ttb
                 throw std::runtime_error( "Unable to create socket." );
             }
 
+            fcntl( m_handle, F_SETFL, O_NONBLOCK );
+
             sockaddr_in sockAddr = createAddress( address, port );
 
             if(::connect( m_handle,
                           reinterpret_cast< struct sockaddr* >( &sockAddr ),
-                          sizeof( sockAddr ) ) )
+                          sizeof( sockAddr ) ) == -1 )
             {
-                close( m_handle );
-                throw std::runtime_error( "Unable to connect to remote host." );
+                if( errno != EINPROGRESS )
+                {
+                    close( m_handle );
+                    throw std::runtime_error( "Unable to connect to remote host." );
+                }
             }
         }
 
@@ -63,69 +82,47 @@ namespace ttb
             close( m_handle );
         }
 
-        void TCPSocket::send( void const* data, size_t size ) const
+        int TCPSocket::handle()
         {
-            size_t offset = 0;
-            while( offset < size )
+            return m_handle;
+        }
+
+        void TCPSocket::send( std::shared_ptr< ttb::OPacket const > packet )
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            m_writeBuffer.push( std::move( packet ) );
+        }
+
+        bool TCPSocket::needsWriteUpdate() const
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+            return !m_writeBuffer.empty();
+        }
+
+        void TCPSocket::updateWrite()
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            if( !m_writeBuffer.empty() )
             {
-                int ret;
+                auto& packet = m_writeBuffer.front();
 
-                while( true )
+                SocketDataWriter writer( *this );
+
+                m_writeOffset += packet->write( writer, m_writeOffset );
+
+                if( m_writeOffset >= packet->size() )
                 {
-                    auto ret = ::send( m_handle,
-                                       reinterpret_cast< uint8_t const* >( data ) + offset,
-                                       size - offset,
-                                       MSG_NOSIGNAL );
-
-                    if( ret > 0 )
-                    {
-                        break;
-                    }
-                    else if( ret < 0 )
-                    {
-                        if( errno != EAGAIN && errno != EWOULDBLOCK )
-                        {
-                            throw Error( Error::Type::BROKEN, std::string( strerror( errno ) ) );
-                        }
-                    }
+                    m_writeOffset = 0;
+                    m_writeBuffer.pop();
                 }
-
-                offset += ret;
             }
         }
 
-        void TCPSocket::receive( void* data, size_t size ) const
+        std::unique_ptr< ttb::IPacket > TCPSocket::updateRead()
         {
-            size_t offset = 0;
-
-            while( offset < size )
-            {
-                int ret;
-
-                while( true )
-                {
-                    ret = recv(
-                        m_handle, reinterpret_cast< uint8_t* >( data ) + offset, size - offset, 0 );
-
-                    if( ret > 0 )
-                    {
-                        break;
-                    }
-                    else if( ret == 0 )
-                    {
-                        throw Error( Error::Type::CLOSED );
-                    }
-                    else
-                    {
-                        if( errno != EAGAIN && errno != EWOULDBLOCK )
-                        {
-                            throw Error( Error::Type::BROKEN );
-                        }
-                    }
-                }
-
-                offset += ret;
-            }
+            return std::unique_ptr< ttb::IPacket >();
         }
     }
 }
@@ -133,9 +130,11 @@ namespace ttb
 
 namespace
 {
-    sockaddr_in createAddress( const std::string& address, uint16_t port )
+    sockaddr_in createAddress( std::string const& address, uint16_t port )
     {
         sockaddr_in sockAddr;
+
+        memset( &sockAddr, 0, sizeof( sockAddr ) );
 
         // Address family for socket connection. Usually this is AF_INET.
         sockAddr.sin_family = AF_INET;
@@ -150,5 +149,29 @@ namespace
         }
 
         return sockAddr;
+    }
+
+
+    SocketDataWriter::SocketDataWriter( ttb::linux::TCPSocket& socket ) : m_socket( socket )
+    {
+    }
+
+    size_t SocketDataWriter::write( void const* data, size_t size )
+    {
+        auto result = ::send(
+            m_socket.handle(), reinterpret_cast< uint8_t const* >( data ), size, MSG_NOSIGNAL );
+
+        if( result < 0 )
+        {
+            if( errno != EAGAIN && errno != EWOULDBLOCK )
+            {
+                throw ttb::TCPSocket::Error( ttb::TCPSocket::Error::Type::BROKEN,
+                                             std::string( strerror( errno ) ) );
+            }
+
+            return 0;
+        }
+
+        return result;
     }
 }
