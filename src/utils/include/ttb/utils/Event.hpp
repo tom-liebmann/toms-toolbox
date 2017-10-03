@@ -15,7 +15,7 @@ namespace ttb
 
         virtual ~Event();
 
-        virtual Type getType() const = 0;
+        virtual Type type() const = 0;
     };
 
 
@@ -25,7 +25,7 @@ namespace ttb
     public:
         constexpr Type( uint32_t value );
 
-        constexpr uint32_t getValue() const;
+        constexpr uint32_t value() const;
 
         constexpr bool operator<( const Type& type ) const;
         constexpr bool operator==( const Type& type ) const;
@@ -60,7 +60,7 @@ namespace ttb
     {
     }
 
-    inline constexpr uint32_t Event::Type::getValue() const
+    inline constexpr uint32_t Event::Type::value() const
     {
         return m_value;
     }
@@ -90,7 +90,7 @@ namespace std
     {
         size_t operator()( ttb::Event::Type const& type ) const
         {
-            return type.getValue();
+            return type.value();
         }
     };
 }

@@ -96,7 +96,7 @@ namespace ttb
     {
         if( m_callback )
         {
-            m_callback( std::move( data ) );
+            m_callback( std::forward< TData >( data ) );
         }
         else
         {

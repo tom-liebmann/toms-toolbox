@@ -3,13 +3,15 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
     set(
         SOURCE_FILES
         src/impl/emscripten/TCPSocket.cpp
+        src/impl/emscripten/NetSelector.cpp
+        src/NetSelector.cpp
+        src/DataWriter.cpp
         src/packets/IPacket.cpp
         src/packets/OPacket.cpp
         src/packets/DataIPacket.cpp
         src/packets/DataOPacket.cpp
         src/packets/SizedOPacket.cpp
         src/packets/SizedIPacket.cpp
-        src/packets/CombinedOPacket.cpp
         )
 
 elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
@@ -25,7 +27,6 @@ elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/packets/DataOPacket.cpp
         src/packets/SizedOPacket.cpp
         src/packets/SizedIPacket.cpp
-        src/packets/CombinedOPacket.cpp
         )
 
 endif()

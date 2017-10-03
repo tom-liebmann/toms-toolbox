@@ -1,6 +1,11 @@
+// TODO: handle endianness
+
+
 #include <ttb/net/packets/SizedOPacket.hpp>
 
+#include <ttb/net/DataWriter.hpp>
 #include <ttb/net/TCPSocket.hpp>
+
 
 namespace ttb
 {
@@ -14,25 +19,27 @@ namespace ttb
         return sizeof( uint32_t ) + m_packet->size();
     }
 
-    void SizedOPacket::send( TCPSocket& socket ) const
+    size_t SizedOPacket::write( DataWriter& writer, size_t offset ) const
     {
-        uint32_t size = m_packet->size();
+        size_t written = 0;
 
-        if( m_endianness == nativeEndianness() )
+        if( offset < sizeof( uint32_t ) )
         {
-            socket.send( &size, sizeof( uint32_t ) );
-        }
-        else
-        {
-            uint32_t invSize;
-            for( uint8_t i = 0; i < sizeof( size ); ++i )
+            uint32_t size = m_packet->size();
+            written = writer.write( reinterpret_cast< uint8_t const* >( &size ) + offset,
+                                    sizeof( uint32_t ) - offset );
+
+            if( written + offset < sizeof( uint32_t ) )
             {
-                *( reinterpret_cast< uint8_t* >( &invSize ) + i ) =
-                    *( reinterpret_cast< uint8_t const* >( &size ) + 3 - i );
+                return written;
             }
-            socket.send( &invSize, sizeof( uint32_t ) );
         }
 
-        m_packet->send( socket );
+        if( offset < sizeof( uint32_t ) + m_packet->size() )
+        {
+            return written + m_packet->write( writer, offset + written - sizeof( uint32_t ) );
+        }
+
+        return 0;
     }
 }

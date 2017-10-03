@@ -19,7 +19,7 @@ namespace ttb
 
         // OPacket
         virtual size_t size() const override;
-        virtual void send( TCPSocket& socket ) const override;
+        virtual size_t write( DataWriter& writer, size_t offset ) const override;
 
     private:
         std::shared_ptr< OPacket const > m_packet;

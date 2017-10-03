@@ -1,5 +1,6 @@
 #include <ttb/net/packets/DataOPacket.hpp>
 
+#include <ttb/net/DataWriter.hpp>
 #include <ttb/net/TCPSocket.hpp>
 
 #include <cstring>
@@ -40,9 +41,12 @@ namespace ttb
         return m_data.size();
     }
 
-    void DataOPacket::send( TCPSocket& socket ) const
+    size_t DataOPacket::write( DataWriter& writer, size_t offset ) const
     {
-        socket.send( m_data.data(), size() );
+        if( offset < m_data.size() )
+            return writer.write( m_data.data() + offset, m_data.size() );
+
+        return 0;
     }
 
     template <>

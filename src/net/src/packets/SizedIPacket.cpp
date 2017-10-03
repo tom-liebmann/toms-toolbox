@@ -4,18 +4,8 @@
 
 namespace ttb
 {
-    SizedIPacket::SizedIPacket( TCPSocket& socket, Endianness endianness )
+    SizedIPacket::SizedIPacket( std::vector< uint8_t > data ) : m_data( std::move( data ) )
     {
-        uint32_t size;
-        socket.receive( &size, sizeof( uint32_t ) );
-
-        if( endianness != nativeEndianness() )
-        {
-            size = reverse( size );
-        }
-
-        m_data.resize( size );
-        socket.receive( m_data.data(), size );
     }
 
     void const* SizedIPacket::data() const

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttb/net/packets/OPacket.hpp>
+
 #include <memory>
 #include <string>
 
@@ -15,9 +17,7 @@ namespace ttb
 
         virtual ~TCPSocket();
 
-        virtual void send( void const* data, size_t size ) const = 0;
-
-        virtual void receive( void* data, size_t size ) const = 0;
+        virtual void send( std::shared_ptr< ttb::OPacket const > packet ) = 0;
     };
 
 

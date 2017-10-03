@@ -8,7 +8,7 @@
 
 namespace ttb
 {
-    class TCPSocket;
+    class DataWriter;
 }
 
 
@@ -25,6 +25,6 @@ namespace ttb
 
         virtual size_t size() const = 0;
 
-        virtual void send( TCPSocket& socket ) const = 0;
+        virtual size_t write( DataWriter& writer, size_t offset ) const = 0;
     };
 }

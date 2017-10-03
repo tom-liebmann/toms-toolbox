@@ -1,8 +1,8 @@
 #pragma once
 
-#include <ttb/core/EventManager.hpp>
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/core/window/WindowMode.hpp>
+#include <ttb/utils/Event.hpp>
 #include <ttb/utils/dataIO.hpp>
 
 #include <memory>

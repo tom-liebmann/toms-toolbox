@@ -67,7 +67,7 @@ namespace ttb
 
         lock.unlock();
 
-        receiver->push( std::move( data ) );
+        receiver->push( std::forward< TData >( data ) );
     }
 
     template < typename TData >
