@@ -12,7 +12,11 @@ namespace ttb
                           public std::enable_shared_from_this< WebSocket >
         {
         public:
+            class State;
+
             WebSocket( std::shared_ptr< ttb::linux::TCPSocket > socket );
+
+            void state( std::unique_ptr< State > state );
 
             // Override: Selectable
             virtual int handle() const override;
@@ -26,6 +30,8 @@ namespace ttb
             virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;
 
         private:
+            std::unique_ptr< State > m_state;
+
             std::shared_ptr< ttb::linux::TCPSocket > m_socket;
         };
     }
