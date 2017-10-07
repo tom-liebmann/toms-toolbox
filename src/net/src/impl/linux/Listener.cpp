@@ -1,5 +1,6 @@
 #include "Listener.hpp"
 #include "TCPSocket.hpp"
+#include <ttb/net/netEvents.hpp>
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -17,9 +18,9 @@
 
 namespace ttb
 {
-    std::unique_ptr< Listener > Listener::create( uint16_t port )
+    std::shared_ptr< Listener > Listener::create( uint16_t port )
     {
-        return std::make_unique< linux::Listener >( port );
+        return std::make_shared< linux::Listener >( port );
     }
 
 
@@ -34,6 +35,8 @@ namespace ttb
             {
                 throw std::runtime_error( "Unable to create socket" );
             }
+
+            fcntl( m_handle, F_SETFL, O_NONBLOCK );
 
             // Initialize address structure.
             sockaddr_in sockAddr;
@@ -62,7 +65,17 @@ namespace ttb
             close( m_handle );
         }
 
-        std::unique_ptr< ttb::TCPSocket > Listener::accept()
+        int Listener::handle() const
+        {
+            return m_handle;
+        }
+
+        bool Listener::isReadable() const
+        {
+            return true;
+        }
+
+        void Listener::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
             auto socketHandle = ::accept( m_handle, NULL, NULL );
 
@@ -71,7 +84,19 @@ namespace ttb
                 throw std::runtime_error( "Error while waiting for connections" );
             }
 
-            return std::make_unique< linux::TCPSocket >( socketHandle );
+            ttb::events::ConnectionEvent event(
+                shared_from_this(), std::make_shared< ttb::linux::TCPSocket >( socketHandle ) );
+
+            eventOutput.push( event );
+        }
+
+        bool Listener::isWritable() const
+        {
+            return false;
+        }
+
+        void Listener::doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        {
         }
     }
 }

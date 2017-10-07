@@ -1,68 +1,19 @@
 #pragma once
 
-#include <ttb/net/packets/OPacket.hpp>
+#include <ttb/net/Socket.hpp>
 
-#include <memory>
 #include <string>
 
 
 namespace ttb
 {
-    class TCPSocket
+    class TCPSocket : public Socket
     {
     public:
-        class Error;
-
-        static std::unique_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
+        static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
         virtual ~TCPSocket();
 
         virtual void send( std::shared_ptr< ttb::OPacket const > packet ) = 0;
     };
-
-
-    class TCPSocket::Error
-    {
-    public:
-        enum class Type
-        {
-            CREATE,
-            CLOSED,
-            BROKEN,
-            RESOLVE,
-            CONNECT
-        };
-
-        Error( Type type, std::string description = "" );
-
-        Type type() const;
-
-        std::string const& what() const;
-
-    private:
-        Type m_type;
-        std::string m_description;
-    };
-}
-
-
-// definitions
-//=============================================================================
-
-namespace ttb
-{
-    inline TCPSocket::Error::Error( Type type, std::string description )
-        : m_type( type ), m_description( std::move( description ) )
-    {
-    }
-
-    inline TCPSocket::Error::Type TCPSocket::Error::type() const
-    {
-        return m_type;
-    }
-
-    inline std::string const& TCPSocket::Error::what() const
-    {
-        return m_description;
-    }
 }

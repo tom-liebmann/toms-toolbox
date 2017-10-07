@@ -1,24 +1,18 @@
-#pragma once
-
-#undef linux
-
 #include "Selectable.hpp"
-
-#include <ttb/net/Listener.hpp>
+#include "TCPSocket.hpp"
+#include <ttb/net/WebSocket.hpp>
 
 
 namespace ttb
 {
     namespace linux
     {
-        class Listener : public ttb::Listener,
-                         public ttb::linux::Selectable,
-                         public std::enable_shared_from_this< Listener >
+        class WebSocket : public ttb::WebSocket,
+                          public ttb::linux::Selectable,
+                          public std::enable_shared_from_this< WebSocket >
         {
         public:
-            Listener( uint16_t port );
-
-            ~Listener();
+            WebSocket( std::shared_ptr< ttb::linux::TCPSocket > socket );
 
             // Override: Selectable
             virtual int handle() const override;
@@ -28,8 +22,11 @@ namespace ttb
             virtual void
                 doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
 
+            // Override: WebSocket
+            virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;
+
         private:
-            int m_handle;
+            std::shared_ptr< ttb::linux::TCPSocket > m_socket;
         };
     }
 }

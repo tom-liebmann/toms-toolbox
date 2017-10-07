@@ -10,6 +10,15 @@ namespace ttb
 {
     namespace linux
     {
+        class Selectable;
+    }
+}
+
+
+namespace ttb
+{
+    namespace linux
+    {
         class NetSelector : public ttb::NetSelector
         {
         public:
@@ -17,12 +26,11 @@ namespace ttb
 
             ~NetSelector();
 
-            virtual void add( std::shared_ptr< ttb::TCPSocket > socket ) override;
+            virtual void add( std::shared_ptr< ttb::Selectable > const& socket ) override;
 
-            virtual void remove( std::shared_ptr< ttb::TCPSocket > socket ) override;
+            virtual void remove( std::shared_ptr< ttb::Selectable > const& socket ) override;
 
-            virtual std::shared_ptr< Provider< SlotType::ACTIVE, Event& > >
-                eventOutput() const override;
+            virtual std::shared_ptr< EventOutput > eventOutput() const override;
 
             virtual void update() override;
 
@@ -35,10 +43,10 @@ namespace ttb
 
             std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event& > > m_eventOutput;
 
-            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::linux::TCPSocket > > >
+            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::linux::Selectable > > >
                 m_changes;
 
-            std::vector< std::shared_ptr< ttb::linux::TCPSocket > > m_sockets;
+            std::vector< std::shared_ptr< ttb::linux::Selectable > > m_sockets;
 
             mutable std::mutex m_mutex;
         };

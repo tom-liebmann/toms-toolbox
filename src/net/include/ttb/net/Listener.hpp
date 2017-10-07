@@ -1,22 +1,20 @@
 #pragma once
 
-#include <ttb/net/TCPSocket.hpp>
+#include <ttb/net/Selectable.hpp>
 
 #include <memory>
 
 
 namespace ttb
 {
-    class Listener
+    class Listener : public Selectable
     {
     public:
-        static std::unique_ptr< Listener > create( uint16_t port );
+        static std::shared_ptr< Listener > create( uint16_t port );
 
         virtual ~Listener();
 
         uint16_t port() const;
-
-        virtual std::unique_ptr< TCPSocket > accept() = 0;
 
     protected:
         Listener( uint16_t port );

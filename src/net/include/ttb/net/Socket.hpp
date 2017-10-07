@@ -1,22 +1,18 @@
 #pragma once
 
-#include <string>
+#include <ttb/net/Selectable.hpp>
+#include <ttb/net/packets/OPacket.hpp>
 
-#ifndef WIN32
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#else
-#include <winsock2.h>
-#endif
+#include <memory>
+
 
 namespace ttb
 {
-    class Socket
+    class Socket : public Selectable
     {
     public:
-        static void init();
-        static void destroy();
+        virtual ~Socket();
+
+        virtual void send( std::shared_ptr< ttb::OPacket const > packet ) = 0;
     };
 }

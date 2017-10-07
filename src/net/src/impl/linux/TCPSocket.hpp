@@ -37,6 +37,10 @@ namespace ttb
             std::queue< std::shared_ptr< ttb::OPacket const > > m_writeBuffer;
             size_t m_writeOffset;
 
+            std::vector< uint8_t > m_readBuffer;
+            uint32_t m_readBufferSize;
+            size_t m_readOffset;
+
             int m_handle;
         };
     }

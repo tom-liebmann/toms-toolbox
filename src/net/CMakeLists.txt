@@ -18,18 +18,23 @@ elseif( ${COMPILATION_MODE} STREQUAL "GCC" )
 
     set(
         SOURCE_FILES
-        src/Listener.cpp
-        src/impl/linux/TCPSocket.cpp
-        src/impl/linux/Listener.cpp
         src/DataWriter.cpp
+        src/Listener.cpp
         src/NetSelector.cpp
+        src/Selectable.cpp
+        src/WebSocket.cpp
+        src/Socket.cpp
+        src/impl/linux/Listener.cpp
         src/impl/linux/NetSelector.cpp
-        src/packets/IPacket.cpp
-        src/packets/OPacket.cpp
+        src/impl/linux/Selectable.cpp
+        src/impl/linux/TCPSocket.cpp
+        src/impl/linux/WebSocket.cpp
         src/packets/DataIPacket.cpp
         src/packets/DataOPacket.cpp
-        src/packets/SizedOPacket.cpp
+        src/packets/IPacket.cpp
+        src/packets/OPacket.cpp
         src/packets/SizedIPacket.cpp
+        src/packets/SizedOPacket.cpp
         )
 
 endif()

@@ -1,6 +1,7 @@
 #include "TCPSocket.hpp"
 
 #include <ttb/net/DataWriter.hpp>
+#include <ttb/net/packets.hpp>
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -36,9 +37,9 @@ namespace
 
 namespace ttb
 {
-    std::unique_ptr< TCPSocket > TCPSocket::connect( std::string const& address, uint16_t port )
+    std::shared_ptr< TCPSocket > TCPSocket::connect( std::string const& address, uint16_t port )
     {
-        return std::make_unique< linux::TCPSocket >( address, port );
+        return std::make_shared< linux::TCPSocket >( address, port );
     }
 
     TCPSocket::~TCPSocket() = default;
@@ -46,7 +47,7 @@ namespace ttb
 
     namespace linux
     {
-        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
+        TCPSocket::TCPSocket( std::string const& address, uint16_t port ) : m_readOffset( 0 )
         {
             // create socket
             m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
@@ -122,6 +123,57 @@ namespace ttb
 
         std::unique_ptr< ttb::IPacket > TCPSocket::updateRead()
         {
+            if( m_readOffset < sizeof( uint32_t ) )
+            {
+                auto result = ::recv( m_handle,
+                                      reinterpret_cast< uint8_t* >( m_readBufferSize ),
+                                      sizeof( uint32_t ) - m_readOffset,
+                                      MSG_NOSIGNAL );
+
+                if( result < 0 )
+                {
+                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    {
+                        throw std::runtime_error( "Connection broken" );
+                    }
+
+                    return std::unique_ptr< ttb::IPacket >();
+                }
+
+                m_readOffset += result;
+
+                if( m_readOffset == sizeof( uint32_t ) )
+                {
+                    m_readBuffer.resize( m_readBufferSize );
+                }
+            }
+
+            if( m_readOffset >= sizeof( uint32_t ) )
+            {
+                auto result = ::recv( m_handle,
+                                      m_readBuffer.data(),
+                                      m_readBufferSize + sizeof( uint32_t ) - m_readOffset,
+                                      MSG_NOSIGNAL );
+
+                if( result < 0 )
+                {
+                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    {
+                        throw std::runtime_error( "Connection broken" );
+                    }
+
+                    return std::unique_ptr< ttb::IPacket >();
+                }
+
+                m_readOffset += result;
+
+                if( m_readOffset == sizeof( uint32_t ) + m_readBufferSize )
+                {
+                    m_readOffset = 0;
+                    return std::make_unique< ttb::SizedIPacket >( std::move( m_readBuffer ) );
+                }
+            }
+
             return std::unique_ptr< ttb::IPacket >();
         }
     }
@@ -165,8 +217,7 @@ namespace
         {
             if( errno != EAGAIN && errno != EWOULDBLOCK )
             {
-                throw ttb::TCPSocket::Error( ttb::TCPSocket::Error::Type::BROKEN,
-                                             std::string( strerror( errno ) ) );
+                throw std::runtime_error( "Connection broken" );
             }
 
             return 0;
