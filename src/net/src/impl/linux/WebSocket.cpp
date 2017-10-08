@@ -1,7 +1,10 @@
 #include "WebSocket.hpp"
 #include <ttb/net/netEvents.hpp>
+#include <ttb/utils/SHA1.hpp>
+#include <ttb/utils/base64.hpp>
 
 #include <iostream>
+#include <regex>
 #include <sstream>
 #include <sys/socket.h>
 
@@ -70,6 +73,21 @@ namespace
     private:
         size_t m_offset;
         std::string m_message;
+    };
+
+
+    class ConnectedState : public ttb::linux::WebSocket::State
+    {
+    public:
+        ConnectedState( ttb::linux::WebSocket& socket );
+
+        // Override: State
+        virtual bool isReadable() const override;
+        virtual void doRead(
+            ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput ) override;
+        virtual bool isWritable() const override;
+        virtual void doWrite(
+            ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput ) override;
     };
 }
 
@@ -194,8 +212,6 @@ namespace
                 if( m_data[ m_data.size() - 4 ] == 13 && m_data[ m_data.size() - 3 ] == 10 &&
                     m_data[ m_data.size() - 2 ] == 13 && m_data[ m_data.size() - 1 ] == 10 )
                 {
-                    std::cout << "Received end of handshake message" << std::endl;
-
                     socket().state( std::make_unique< SendingHandshakeState >(
                         std::string( std::begin( m_data ), std::end( m_data ) ), socket() ) );
                 }
@@ -218,13 +234,43 @@ namespace
                                                   ttb::linux::WebSocket& socket )
         : ttb::linux::WebSocket::State( socket ), m_offset( 0 )
     {
+        // Find Sec-WebSocket-Key in handshakeMessage
+        std::string key = [&handshakeMessage]() -> std::string {
+            std::istringstream stream( handshakeMessage );
+            std::string line;
+
+            std::regex reg( "Sec-WebSocket-Key: ([A-Za-z0-9=+]*)[\r\n]*" );
+            std::smatch match;
+
+            while( true )
+            {
+                std::getline( stream, line );
+
+                if( stream.eof() )
+                {
+                    throw std::runtime_error( "Key not found" );
+                }
+
+                if( std::regex_match( line, match, reg ) )
+                {
+                    return match[ 1 ];
+                }
+            }
+        }();
+
+        ttb::SHA1 hasher;
+        hasher.update( key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11" );
+        auto hash = hasher.finish();
+
+        auto responseKey = ttb::base64::encode( std::begin( hash ), std::end( hash ) );
+
         std::ostringstream stream;
 
         stream << "HTTP/1.1 101 Switching Protocols\r\n"
                << "Upgrade: websocket\r\n"
                << "Connection: Upgrade\r\n"
-               << "Sec-WebSocket-Accept:\r\n"
-               << "\r\n\r\n";
+               << "Sec-WebSocket-Accept: " << responseKey << "\r\n"
+               << "Sec-WebSocket-Protocol: binary\r\n\r\n";
 
         m_message = stream.str();
     }
@@ -270,8 +316,34 @@ namespace
 
             if( m_offset == m_message.length() )
             {
-                std::cout << "Done sending response" << std::endl;
+                socket().state( std::make_unique< ConnectedState >( socket() ) );
             }
         }
+    }
+
+
+    ConnectedState::ConnectedState( ttb::linux::WebSocket& socket )
+        : ttb::linux::WebSocket::State( socket )
+    {
+    }
+
+    bool ConnectedState::isReadable() const
+    {
+        return true;
+    }
+
+    void ConnectedState::doRead(
+        ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+    {
+    }
+
+    bool ConnectedState::isWritable() const
+    {
+        return false;
+    }
+
+    void ConnectedState::doWrite(
+        ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+    {
     }
 }
