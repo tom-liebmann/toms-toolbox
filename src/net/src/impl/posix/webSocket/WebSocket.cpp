@@ -2,6 +2,7 @@
 #include "states/ReceivingHandshakeState.hpp"
 #include <ttb/net/netEvents.hpp>
 #include <ttb/net/packets/SizedIPacket.hpp>
+#include <ttb/net/packets/WebSocketOPacket.hpp>
 #include <ttb/utils/SHA1.hpp>
 #include <ttb/utils/base64.hpp>
 
@@ -73,6 +74,8 @@ namespace ttb
 
         void WebSocket::send( std::shared_ptr< ttb::OPacket const > packet )
         {
+            std::lock_guard< std::mutex > lock( m_mutex );
+            m_packets.push( std::make_shared< ttb::WebSocketOPacket >( std::move( packet ) ) );
         }
     }
 }

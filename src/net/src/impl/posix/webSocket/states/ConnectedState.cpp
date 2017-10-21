@@ -27,6 +27,7 @@ namespace ttb
                 , m_readState( ReadState::READ_START )
                 , m_readOffset( 0 )
                 , m_readData( 2 )
+                , m_writeOffset( 0 )
             {
             }
 
@@ -231,12 +232,32 @@ namespace ttb
 
             bool ConnectedState::isWritable() const
             {
-                return false;
+                auto const& sck = socket();
+                std::lock_guard< std::mutex > lock( sck.m_mutex );
+                return !sck.m_packets.empty();
             }
 
             void ConnectedState::doWrite(
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
+                auto const& sck = socket();
+                std::unique_lock< std::mutex > lock( sck.m_mutex );
+                if( sck.m_packets.empty() )
+                    return;
+
+                auto packet = sck.m_packets.front();
+                lock.unlock();
+
+                SocketDataWriter writer( sck );
+
+                m_writeOffset +=
+                    packet->write( writer, m_writeOffset, packet->size() - m_writeOffset );
+
+                if( m_writeOffset >= packet->size() )
+                {
+                    lock.lock();
+                    sck.m_packets.pop();
+                }
             }
         }
     }

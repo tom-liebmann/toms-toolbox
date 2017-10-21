@@ -19,27 +19,26 @@ namespace ttb
         return sizeof( uint32_t ) + m_packet->size();
     }
 
-    size_t SizedOPacket::write( DataWriter& writer, size_t offset ) const
+    size_t SizedOPacket::write( DataWriter& writer, size_t offset, size_t size ) const
     {
         size_t written = 0;
 
         if( offset < sizeof( uint32_t ) )
         {
-            uint32_t size = m_packet->size();
-            written = writer.write( reinterpret_cast< uint8_t const* >( &size ) + offset,
-                                    sizeof( uint32_t ) - offset );
-
-            if( written + offset < sizeof( uint32_t ) )
-            {
-                return written;
-            }
+            uint32_t packetSize = m_packet->size();
+            written += writer.write( reinterpret_cast< uint8_t const* >( &packetSize ) + offset,
+                                     std::min( sizeof( uint32_t ) - offset, size ) );
+            offset += written;
         }
 
-        if( offset < sizeof( uint32_t ) + m_packet->size() )
+        if( offset >= sizeof( uint32_t ) )
         {
-            return written + m_packet->write( writer, offset + written - sizeof( uint32_t ) );
+            written += m_packet->write(
+                writer,
+                offset - sizeof( uint32_t ),
+                std::min( size - written, m_packet->size() + sizeof( uint32_t ) - offset ) );
         }
 
-        return 0;
+        return written;
     }
 }

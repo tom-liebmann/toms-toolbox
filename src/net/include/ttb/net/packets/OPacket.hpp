@@ -25,6 +25,9 @@ namespace ttb
 
         virtual size_t size() const = 0;
 
-        virtual size_t write( DataWriter& writer, size_t offset ) const = 0;
+        /**
+         * \returns Bytes written
+         */
+        virtual size_t write( DataWriter& writer, size_t offset, size_t size ) const = 0;
     };
 }

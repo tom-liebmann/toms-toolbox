@@ -45,6 +45,8 @@ namespace ttb
                 size_t m_readOffset;
                 std::vector< uint8_t > m_readData;
 
+                size_t m_writeOffset;
+
                 std::vector< uint8_t > m_packetData;
             };
         }

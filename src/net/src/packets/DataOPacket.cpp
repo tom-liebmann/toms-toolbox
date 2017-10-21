@@ -41,12 +41,16 @@ namespace ttb
         return m_data.size();
     }
 
-    size_t DataOPacket::write( DataWriter& writer, size_t offset ) const
+    size_t DataOPacket::write( DataWriter& writer, size_t offset, size_t size ) const
     {
         if( offset < m_data.size() )
-            return writer.write( m_data.data() + offset, m_data.size() );
-
-        return 0;
+        {
+            return writer.write( m_data.data() + offset, std::min( size, m_data.size() - offset ) );
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     template <>

@@ -1,4 +1,5 @@
 #include "TCPSocket.hpp"
+#include "SocketDataWriter.hpp"
 
 #include <ttb/net/DataWriter.hpp>
 #include <ttb/net/netEvents.hpp>
@@ -22,18 +23,6 @@
 namespace
 {
     sockaddr_in createAddress( std::string const& address, uint16_t port );
-
-
-    class SocketDataWriter : public ttb::DataWriter
-    {
-    public:
-        SocketDataWriter( ttb::posix::TCPSocket& socket );
-
-        virtual size_t write( void const* data, size_t size ) override;
-
-    private:
-        ttb::posix::TCPSocket& m_socket;
-    };
 }
 
 
@@ -193,7 +182,8 @@ namespace ttb
 
                 try
                 {
-                    m_writeOffset += packet->write( writer, m_writeOffset );
+                    m_writeOffset +=
+                        packet->write( writer, m_writeOffset, packet->size() - m_writeOffset );
                 }
                 catch( std::runtime_error& e )
                 {
@@ -241,28 +231,5 @@ namespace
         }
 
         return sockAddr;
-    }
-
-
-    SocketDataWriter::SocketDataWriter( ttb::posix::TCPSocket& socket ) : m_socket( socket )
-    {
-    }
-
-    size_t SocketDataWriter::write( void const* data, size_t size )
-    {
-        auto result = ::send(
-            m_socket.handle(), reinterpret_cast< uint8_t const* >( data ), size, MSG_NOSIGNAL );
-
-        if( result < 0 )
-        {
-            if( errno != EAGAIN && errno != EWOULDBLOCK )
-            {
-                throw std::runtime_error( "Connection broken" );
-            }
-
-            return 0;
-        }
-
-        return result;
     }
 }

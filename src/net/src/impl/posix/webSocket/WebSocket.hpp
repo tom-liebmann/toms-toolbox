@@ -47,6 +47,10 @@ namespace ttb
 
             std::shared_ptr< ttb::posix::TCPSocket > m_socket;
 
+            std::queue< std::shared_ptr< ttb::OPacket const > > m_packets;
+
+            std::mutex m_mutex;
+
             friend class webSocket::ReceivingHandshakeState;
             friend class webSocket::SendingHandshakeState;
             friend class webSocket::ConnectedState;
