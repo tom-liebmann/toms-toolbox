@@ -11,6 +11,10 @@ set(
     src/impl/posix/Selectable.cpp
     src/impl/posix/TCPSocket.cpp
     src/impl/posix/webSocket/WebSocket.cpp
+    src/impl/posix/webSocket/states/SocketState.cpp
+    src/impl/posix/webSocket/states/ReceivingHandshakeState.cpp
+    src/impl/posix/webSocket/states/SendingHandshakeState.cpp
+    src/impl/posix/webSocket/states/ConnectedState.cpp
     src/packets/DataIPacket.cpp
     src/packets/DataOPacket.cpp
     src/packets/IPacket.cpp

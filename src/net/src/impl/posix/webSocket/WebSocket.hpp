@@ -7,16 +7,27 @@ namespace ttb
 {
     namespace posix
     {
+        namespace webSocket
+        {
+            class SocketState;
+            class ReceivingHandshakeState;
+            class SendingHandshakeState;
+            class ConnectedState;
+        }
+    }
+}
+
+
+namespace ttb
+{
+    namespace posix
+    {
         class WebSocket : public ttb::WebSocket,
                           public ttb::posix::Selectable,
                           public std::enable_shared_from_this< WebSocket >
         {
         public:
-            class State;
-
             WebSocket( std::shared_ptr< ttb::posix::TCPSocket > socket );
-
-            void state( std::unique_ptr< State > state );
 
             // Override: Selectable
             virtual int handle() const override;
@@ -30,9 +41,15 @@ namespace ttb
             virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;
 
         private:
-            std::unique_ptr< State > m_state;
+            void state( std::unique_ptr< webSocket::SocketState > state );
+
+            std::unique_ptr< webSocket::SocketState > m_state;
 
             std::shared_ptr< ttb::posix::TCPSocket > m_socket;
+
+            friend class webSocket::ReceivingHandshakeState;
+            friend class webSocket::SendingHandshakeState;
+            friend class webSocket::ConnectedState;
         };
     }
 }
