@@ -5,16 +5,16 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class WebSocket : public ttb::WebSocket,
-                          public ttb::linux::Selectable,
+                          public ttb::posix::Selectable,
                           public std::enable_shared_from_this< WebSocket >
         {
         public:
             class State;
 
-            WebSocket( std::shared_ptr< ttb::linux::TCPSocket > socket );
+            WebSocket( std::shared_ptr< ttb::posix::TCPSocket > socket );
 
             void state( std::unique_ptr< State > state );
 
@@ -32,7 +32,7 @@ namespace ttb
         private:
             std::unique_ptr< State > m_state;
 
-            std::shared_ptr< ttb::linux::TCPSocket > m_socket;
+            std::shared_ptr< ttb::posix::TCPSocket > m_socket;
         };
     }
 }

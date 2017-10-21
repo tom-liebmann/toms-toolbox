@@ -1,12 +1,14 @@
 #include "TCPSocket.hpp"
 
 #include <ttb/net/DataWriter.hpp>
+#include <ttb/net/netEvents.hpp>
 #include <ttb/net/packets.hpp>
 
 #include <arpa/inet.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <iostream>
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,12 +27,12 @@ namespace
     class SocketDataWriter : public ttb::DataWriter
     {
     public:
-        SocketDataWriter( ttb::linux::TCPSocket& socket );
+        SocketDataWriter( ttb::posix::TCPSocket& socket );
 
         virtual size_t write( void const* data, size_t size ) override;
 
     private:
-        ttb::linux::TCPSocket& m_socket;
+        ttb::posix::TCPSocket& m_socket;
     };
 }
 
@@ -39,15 +41,16 @@ namespace ttb
 {
     std::shared_ptr< TCPSocket > TCPSocket::connect( std::string const& address, uint16_t port )
     {
-        return std::make_shared< linux::TCPSocket >( address, port );
+        return std::make_shared< posix::TCPSocket >( address, port );
     }
 
     TCPSocket::~TCPSocket() = default;
 
 
-    namespace linux
+    namespace posix
     {
-        TCPSocket::TCPSocket( std::string const& address, uint16_t port ) : m_readOffset( 0 )
+        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
+            : m_connected( false ), m_readOffset( 0 )
         {
             // create socket
             m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
@@ -83,45 +86,17 @@ namespace ttb
             close( m_handle );
         }
 
-        int TCPSocket::handle()
+        int TCPSocket::handle() const
         {
             return m_handle;
         }
 
-        void TCPSocket::send( std::shared_ptr< ttb::OPacket const > packet )
+        bool TCPSocket::isReadable() const
         {
-            std::lock_guard< std::mutex > lock( m_mutex );
-
-            m_writeBuffer.push( std::move( packet ) );
+            return true;
         }
 
-        bool TCPSocket::needsWriteUpdate() const
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
-            return !m_writeBuffer.empty();
-        }
-
-        void TCPSocket::updateWrite()
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
-
-            if( !m_writeBuffer.empty() )
-            {
-                auto& packet = m_writeBuffer.front();
-
-                SocketDataWriter writer( *this );
-
-                m_writeOffset += packet->write( writer, m_writeOffset );
-
-                if( m_writeOffset >= packet->size() )
-                {
-                    m_writeOffset = 0;
-                    m_writeBuffer.pop();
-                }
-            }
-        }
-
-        std::unique_ptr< ttb::IPacket > TCPSocket::updateRead()
+        void TCPSocket::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
             if( m_readOffset < sizeof( uint32_t ) )
             {
@@ -134,10 +109,10 @@ namespace ttb
                 {
                     if( errno != EAGAIN && errno != EWOULDBLOCK )
                     {
-                        throw std::runtime_error( "Connection broken" );
+                        ttb::events::SocketBrokenEvent event( shared_from_this() );
+                        eventOutput.push( event );
+                        return;
                     }
-
-                    return std::unique_ptr< ttb::IPacket >();
                 }
 
                 m_readOffset += result;
@@ -159,10 +134,10 @@ namespace ttb
                 {
                     if( errno != EAGAIN && errno != EWOULDBLOCK )
                     {
-                        throw std::runtime_error( "Connection broken" );
+                        ttb::events::SocketBrokenEvent event( shared_from_this() );
+                        eventOutput.push( event );
+                        return;
                     }
-
-                    return std::unique_ptr< ttb::IPacket >();
                 }
 
                 m_readOffset += result;
@@ -170,11 +145,76 @@ namespace ttb
                 if( m_readOffset == sizeof( uint32_t ) + m_readBufferSize )
                 {
                     m_readOffset = 0;
-                    return std::make_unique< ttb::SizedIPacket >( std::move( m_readBuffer ) );
+                    ttb::events::PacketEvent event(
+                        shared_from_this(),
+                        std::make_shared< ttb::SizedIPacket >( std::move( m_readBuffer ) ) );
+                    eventOutput.push( event );
                 }
             }
+        }
 
-            return std::unique_ptr< ttb::IPacket >();
+        bool TCPSocket::isWritable() const
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            // If the socket isn't connected yet, we use the writability as an indicator for
+            // successful establishment
+            if( !m_connected )
+            {
+                return true;
+            }
+
+            // There is actual data to be written
+            if( !m_writeBuffer.empty() )
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        void TCPSocket::doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            if( !m_connected )
+            {
+                m_connected = true;
+                ttb::events::ConnectionEvent event( std::shared_ptr< ttb::Listener >(),
+                                                    shared_from_this() );
+                eventOutput.push( event );
+            }
+
+            if( !m_writeBuffer.empty() )
+            {
+                auto& packet = m_writeBuffer.front();
+
+                SocketDataWriter writer( *this );
+
+                try
+                {
+                    m_writeOffset += packet->write( writer, m_writeOffset );
+                }
+                catch( std::runtime_error& e )
+                {
+                    ttb::events::SocketBrokenEvent event( shared_from_this() );
+                    eventOutput.push( event );
+                    return;
+                }
+
+                if( m_writeOffset >= packet->size() )
+                {
+                    m_writeOffset = 0;
+                    m_writeBuffer.pop();
+                }
+            }
+        }
+
+        void TCPSocket::send( std::shared_ptr< ttb::OPacket const > packet )
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            m_writeBuffer.push( std::move( packet ) );
         }
     }
 }
@@ -204,7 +244,7 @@ namespace
     }
 
 
-    SocketDataWriter::SocketDataWriter( ttb::linux::TCPSocket& socket ) : m_socket( socket )
+    SocketDataWriter::SocketDataWriter( ttb::posix::TCPSocket& socket ) : m_socket( socket )
     {
     }
 

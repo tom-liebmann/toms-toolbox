@@ -8,7 +8,7 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class Selectable;
     }
@@ -17,7 +17,7 @@ namespace ttb
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class NetSelector : public ttb::NetSelector
         {
@@ -43,10 +43,10 @@ namespace ttb
 
             std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event& > > m_eventOutput;
 
-            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::linux::Selectable > > >
+            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::posix::Selectable > > >
                 m_changes;
 
-            std::vector< std::shared_ptr< ttb::linux::Selectable > > m_sockets;
+            std::vector< std::shared_ptr< ttb::posix::Selectable > > m_sockets;
 
             mutable std::mutex m_mutex;
         };

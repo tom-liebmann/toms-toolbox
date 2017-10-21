@@ -11,7 +11,7 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class WebSocket::State
         {
@@ -39,10 +39,10 @@ namespace ttb
 
 namespace
 {
-    class ReceivingHandshakeState : public ttb::linux::WebSocket::State
+    class ReceivingHandshakeState : public ttb::posix::WebSocket::State
     {
     public:
-        ReceivingHandshakeState( ttb::linux::WebSocket& socket );
+        ReceivingHandshakeState( ttb::posix::WebSocket& socket );
 
         // Override: State
         virtual bool isReadable() const override;
@@ -57,10 +57,10 @@ namespace
     };
 
 
-    class SendingHandshakeState : public ttb::linux::WebSocket::State
+    class SendingHandshakeState : public ttb::posix::WebSocket::State
     {
     public:
-        SendingHandshakeState( std::string handshakeMessage, ttb::linux::WebSocket& socket );
+        SendingHandshakeState( std::string handshakeMessage, ttb::posix::WebSocket& socket );
 
         // Override: State
         virtual bool isReadable() const override;
@@ -76,10 +76,10 @@ namespace
     };
 
 
-    class ConnectedState : public ttb::linux::WebSocket::State
+    class ConnectedState : public ttb::posix::WebSocket::State
     {
     public:
-        ConnectedState( ttb::linux::WebSocket& socket );
+        ConnectedState( ttb::posix::WebSocket& socket );
 
         // Override: State
         virtual bool isReadable() const override;
@@ -88,7 +88,22 @@ namespace
         virtual bool isWritable() const override;
         virtual void doWrite(
             ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput ) override;
+
+    private:
+        enum class ReadState
+        {
+            READ_START,
+            READ_EXTENDED_LEN
+        };
+
+        ReadState m_readState;
+        size_t m_readOffset;
+        uint64_t m_payloadLength;
+        std::vector< uint8_t > m_readData;
     };
+
+
+    std::string toBits( uint8_t value );
 }
 
 
@@ -98,9 +113,9 @@ namespace ttb
     {
         if( socket )
         {
-            if( auto sck = std::dynamic_pointer_cast< ttb::linux::TCPSocket >( socket ) )
+            if( auto sck = std::dynamic_pointer_cast< ttb::posix::TCPSocket >( socket ) )
             {
-                return std::make_shared< ttb::linux::WebSocket >( sck );
+                return std::make_shared< ttb::posix::WebSocket >( sck );
             }
             else
             {
@@ -114,9 +129,9 @@ namespace ttb
     }
 
 
-    namespace linux
+    namespace posix
     {
-        WebSocket::WebSocket( std::shared_ptr< ttb::linux::TCPSocket > socket )
+        WebSocket::WebSocket( std::shared_ptr< ttb::posix::TCPSocket > socket )
             : m_socket( std::move( socket ) )
         {
             state( std::make_unique< ReceivingHandshakeState >( *this ) );
@@ -173,8 +188,8 @@ namespace ttb
 
 namespace
 {
-    ReceivingHandshakeState::ReceivingHandshakeState( ttb::linux::WebSocket& socket )
-        : ttb::linux::WebSocket::State( socket )
+    ReceivingHandshakeState::ReceivingHandshakeState( ttb::posix::WebSocket& socket )
+        : ttb::posix::WebSocket::State( socket )
     {
     }
 
@@ -231,15 +246,15 @@ namespace
 
 
     SendingHandshakeState::SendingHandshakeState( std::string handshakeMessage,
-                                                  ttb::linux::WebSocket& socket )
-        : ttb::linux::WebSocket::State( socket ), m_offset( 0 )
+                                                  ttb::posix::WebSocket& socket )
+        : ttb::posix::WebSocket::State( socket ), m_offset( 0 )
     {
         // Find Sec-WebSocket-Key in handshakeMessage
         std::string key = [&handshakeMessage]() -> std::string {
             std::istringstream stream( handshakeMessage );
             std::string line;
 
-            std::regex reg( "Sec-WebSocket-Key: ([A-Za-z0-9=+]*)[\r\n]*" );
+            std::regex reg( "Sec-WebSocket-Key: ([A-Za-z0-9=+/]*)[\r\n]*" );
             std::smatch match;
 
             while( true )
@@ -248,7 +263,7 @@ namespace
 
                 if( stream.eof() )
                 {
-                    throw std::runtime_error( "Key not found" );
+                    throw std::runtime_error( "Key not found in " + handshakeMessage );
                 }
 
                 if( std::regex_match( line, match, reg ) )
@@ -322,8 +337,11 @@ namespace
     }
 
 
-    ConnectedState::ConnectedState( ttb::linux::WebSocket& socket )
-        : ttb::linux::WebSocket::State( socket )
+    ConnectedState::ConnectedState( ttb::posix::WebSocket& socket )
+        : ttb::posix::WebSocket::State( socket )
+        , m_readState( ReadState::READ_START )
+        , m_readOffset( 0 )
+        , m_readData( 2 )
     {
     }
 
@@ -335,6 +353,77 @@ namespace
     void ConnectedState::doRead(
         ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
     {
+        std::cout << "Doing read" << std::endl;
+
+        switch( m_readState )
+        {
+            case ReadState::READ_START:
+            {
+                std::cout << "Reading start" << std::endl;
+                auto result = ::recv( socket().handle(),
+                                      m_readData.data() + m_readOffset,
+                                      2 - m_readOffset,
+                                      MSG_DONTWAIT );
+
+                std::cout << "done: " << result << std::endl;
+
+                if( result < 0 )
+                {
+                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    {
+                        std::cout << "Error: " << errno << std::endl;
+                        ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                        eventOutput.push( event );
+                        return;
+                    }
+                }
+                else if( result == 0 )
+                {
+                    std::cout << "Read zero" << std::endl;
+                    ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                    eventOutput.push( event );
+                    return;
+                }
+                else
+                {
+                    m_readOffset += result;
+
+                    if( m_readOffset == 2 )
+                    {
+                        bool fin = m_readData[ 0 ] >> 7;
+                        int opcode = m_readData[ 0 ] & 0xF;
+                        bool mask = m_readData[ 1 ] >> 7;
+                        uint64_t payloadLength = m_readData[ 1 ] & 0x7F;
+
+                        if( payloadLength == 126 )
+                        {
+                            m_readState = ReadState::READ_EXTENDED_LEN;
+                            m_readData.resize( 4 );
+                        }
+                        else if( payloadLength == 127 )
+                        {
+                            m_readState = ReadState::READ_EXTENDED_LEN;
+                            m_readData.resize( 8 );
+                        }
+                        else
+                        {
+                            m_payloadLength = payloadLength;
+                            m_readState = ReadState::READ_MASKING_KEY;
+                            m_readData.resize( 4 );
+                        }
+
+                        std::cout << toBits( m_readData[ 0 ] ) << ' ' << toBits( m_readData[ 1 ] )
+                                  << std::endl;
+                    }
+                }
+                break;
+            }
+
+            case ReadState::READ_EXTENDED_LEN:
+            {
+                break;
+            }
+        }
     }
 
     bool ConnectedState::isWritable() const
@@ -345,5 +434,18 @@ namespace
     void ConnectedState::doWrite(
         ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
     {
+    }
+
+
+    std::string toBits( uint8_t value )
+    {
+        std::ostringstream stream;
+
+        for( size_t i = 0; i < 8; ++i )
+        {
+            stream << ( ( ( value >> ( 7 - i ) ) & 1 ) ? '1' : '0' );
+        }
+
+        return stream.str();
     }
 }

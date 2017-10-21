@@ -20,11 +20,11 @@ namespace ttb
 {
     std::shared_ptr< Listener > Listener::create( uint16_t port )
     {
-        return std::make_shared< linux::Listener >( port );
+        return std::make_shared< posix::Listener >( port );
     }
 
 
-    namespace linux
+    namespace posix
     {
         Listener::Listener( uint16_t port ) : ttb::Listener( port )
         {
@@ -85,7 +85,7 @@ namespace ttb
             }
 
             ttb::events::ConnectionEvent event(
-                shared_from_this(), std::make_shared< ttb::linux::TCPSocket >( socketHandle ) );
+                shared_from_this(), std::make_shared< ttb::posix::TCPSocket >( socketHandle ) );
 
             eventOutput.push( event );
         }

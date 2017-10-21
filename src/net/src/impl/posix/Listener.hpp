@@ -1,6 +1,6 @@
 #pragma once
 
-#undef linux
+#undef posix
 
 #include "Selectable.hpp"
 
@@ -9,10 +9,10 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class Listener : public ttb::Listener,
-                         public ttb::linux::Selectable,
+                         public ttb::posix::Selectable,
                          public std::enable_shared_from_this< Listener >
         {
         public:

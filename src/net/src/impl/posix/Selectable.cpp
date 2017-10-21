@@ -3,7 +3,7 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         Selectable::~Selectable() = default;
     }

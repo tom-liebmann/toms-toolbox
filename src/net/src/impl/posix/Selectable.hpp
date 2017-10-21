@@ -6,7 +6,7 @@
 
 namespace ttb
 {
-    namespace linux
+    namespace posix
     {
         class Selectable
         {
