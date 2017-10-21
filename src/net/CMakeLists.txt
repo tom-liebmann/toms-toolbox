@@ -10,7 +10,7 @@ set(
     src/impl/posix/NetSelector.cpp
     src/impl/posix/Selectable.cpp
     src/impl/posix/TCPSocket.cpp
-    src/impl/posix/WebSocket.cpp
+    src/impl/posix/webSocket/WebSocket.cpp
     src/packets/DataIPacket.cpp
     src/packets/DataOPacket.cpp
     src/packets/IPacket.cpp
