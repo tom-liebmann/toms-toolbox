@@ -28,6 +28,8 @@ namespace ttb
 
                 ttb::posix::WebSocket& socket();
 
+                ttb::posix::WebSocket const& socket() const;
+
                 virtual bool isReadable() const = 0;
 
                 virtual void doRead(

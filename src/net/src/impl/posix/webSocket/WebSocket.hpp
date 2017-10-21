@@ -49,7 +49,7 @@ namespace ttb
 
             std::queue< std::shared_ptr< ttb::OPacket const > > m_packets;
 
-            std::mutex m_mutex;
+            mutable std::mutex m_mutex;
 
             friend class webSocket::ReceivingHandshakeState;
             friend class webSocket::SendingHandshakeState;

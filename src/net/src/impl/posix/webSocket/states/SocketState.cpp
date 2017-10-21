@@ -19,6 +19,11 @@ namespace ttb
             {
                 return m_socket;
             }
+
+            ttb::posix::WebSocket const& SocketState::socket() const
+            {
+                return m_socket;
+            }
         }
     }
 }

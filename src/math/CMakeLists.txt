@@ -21,7 +21,6 @@ target_include_directories(
 target_compile_features(
     ttbMath
     PUBLIC
-    cxx_std_14
     )
 
 target_compile_options(

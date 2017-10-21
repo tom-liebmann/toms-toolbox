@@ -1,4 +1,5 @@
 #include "ConnectedState.hpp"
+#include "../../SocketDataWriter.hpp"
 #include "../WebSocket.hpp"
 
 #include <ttb/net/netEvents.hpp>
