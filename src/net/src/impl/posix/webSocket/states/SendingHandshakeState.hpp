@@ -2,6 +2,8 @@
 
 #include "SocketState.hpp"
 
+#include <string>
+
 
 namespace ttb
 {

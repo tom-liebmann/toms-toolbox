@@ -241,10 +241,12 @@ namespace ttb
             void ConnectedState::doWrite(
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
-                auto const& sck = socket();
+                auto& sck = socket();
                 std::unique_lock< std::mutex > lock( sck.m_mutex );
                 if( sck.m_packets.empty() )
+                {
                     return;
+                }
 
                 auto packet = sck.m_packets.front();
                 lock.unlock();
@@ -282,6 +284,8 @@ namespace
             {
                 throw 0;
             }
+
+            return 0;
         }
         else if( result == 0 )
         {

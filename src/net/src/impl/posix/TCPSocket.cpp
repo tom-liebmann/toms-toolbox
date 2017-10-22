@@ -104,6 +104,7 @@ namespace ttb
                     }
                 }
 
+                std::cout << "Got " << result << " bytes" << std::endl;
                 m_readOffset += result;
 
                 if( m_readOffset == sizeof( uint32_t ) )

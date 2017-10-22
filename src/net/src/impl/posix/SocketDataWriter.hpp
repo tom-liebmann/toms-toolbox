@@ -11,12 +11,12 @@ namespace ttb
         class SocketDataWriter : public ttb::DataWriter
         {
         public:
-            SocketDataWriter( ttb::posix::Selectable& socket );
+            SocketDataWriter( ttb::posix::Selectable const& socket );
 
             virtual size_t write( void const* data, size_t size ) override;
 
         private:
-            ttb::posix::Selectable& m_socket;
+            ttb::posix::Selectable const& m_socket;
         };
     }
 }

@@ -1,11 +1,23 @@
 #include "SocketDataWriter.hpp"
 
+#include <sys/socket.h>
+
+#include <iostream>
+#include <sstream>
+
+
+namespace
+{
+    std::string toBits( uint8_t value );
+}
+
 
 namespace ttb
 {
     namespace posix
     {
-        SocketDataWriter::SocketDataWriter( ttb::posix::Selectable& socket ) : m_socket( socket )
+        SocketDataWriter::SocketDataWriter( ttb::posix::Selectable const& socket )
+            : m_socket( socket )
         {
         }
 
@@ -24,7 +36,28 @@ namespace ttb
                 return 0;
             }
 
+            for( size_t i = 0; i < result; ++i )
+            {
+                std::cout << "Written: " << toBits( reinterpret_cast< uint8_t const* >( data )[ i ] ) << std::endl;
+            }
+
             return result;
         }
+    }
+}
+
+
+namespace
+{
+    std::string toBits( uint8_t value )
+    {
+        std::ostringstream stream;
+
+        for( size_t i = 0; i < 8; ++i )
+        {
+            stream << ( ( ( value >> ( 7 - i ) ) & 1 ) ? '1' : '0' );
+        }
+
+        return stream.str();
     }
 }

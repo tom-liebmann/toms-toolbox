@@ -1,4 +1,7 @@
-#include <ttb/net/packets/WebSocketPacket.hpp>
+#include <ttb/net/DataWriter.hpp>
+#include <ttb/net/packets/WebSocketOPacket.hpp>
+
+#include <iostream>
 
 #define FRAGMENT_SIZE 200000
 
@@ -14,7 +17,7 @@ namespace ttb
                   size_t payloadOffset,
                   size_t payloadSize );
 
-        size_t write( DataWriter& writer, size_t offset ) const;
+        size_t write( DataWriter& writer, size_t offset, size_t size ) const;
 
         size_t size() const;
 
@@ -71,6 +74,7 @@ namespace ttb
 
     size_t WebSocketOPacket::write( DataWriter& writer, size_t offset, size_t size ) const
     {
+        size_t i = 0;
         for( auto const& fragment : m_fragments )
         {
             if( offset >= fragment.size() )
@@ -79,8 +83,10 @@ namespace ttb
             }
             else
             {
+                std::cout << "Writing fragment " << i << " " << offset << std::endl;
                 return fragment.write( writer, offset, std::min( fragment.size() - offset, size ) );
             }
+            ++i;
         }
 
         return 0;
@@ -95,10 +101,14 @@ namespace ttb
                                           OPacket const& payloadPacket,
                                           size_t payloadOffset,
                                           size_t payloadSize )
+        : m_payloadPacket( payloadPacket )
+        , m_payloadOffset( payloadOffset )
+        , m_payloadSize( payloadSize )
     {
         if( payloadSize < 126 )
         {
             m_header.resize( 2, 0 );
+            std::cout << "Payload size: " << payloadSize << std::endl;
             m_header[ 1 ] = payloadSize;
         }
         else if( payloadSize < 65526 )
@@ -138,6 +148,8 @@ namespace ttb
 
         if( offset >= m_header.size() )
         {
+            std::cout << "Writing payload: " << m_payloadOffset << " " << offset << " "
+                      << m_header.size() << " " << written << " " << size << std::endl;
             written += m_payloadPacket.write(
                 writer,
                 m_payloadOffset + offset - m_header.size(),
@@ -147,7 +159,7 @@ namespace ttb
         return written;
     }
 
-    size_t WebSocketOPacket::size() const
+    size_t WebSocketOPacket::Fragment::size() const
     {
         return m_header.size() + m_payloadSize;
     }

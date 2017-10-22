@@ -2,13 +2,16 @@
 
 #include <ttb/net/packets/OPacket.hpp>
 
+#include <memory>
+#include <vector>
+
 
 namespace ttb
 {
-    class WebSocketOPacket : public OPacket
+    class WebSocketOPacket : public ttb::OPacket
     {
     public:
-        WebSocketOPacket( std::shared_ptr< OPacket const > packet );
+        WebSocketOPacket( std::shared_ptr< ttb::OPacket const > packet );
 
         ~WebSocketOPacket();
 
