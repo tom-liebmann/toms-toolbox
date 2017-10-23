@@ -39,7 +39,10 @@ namespace ttb
     namespace posix
     {
         TCPSocket::TCPSocket( std::string const& address, uint16_t port )
-            : m_connected( false ), m_readOffset( 0 )
+            : m_connected( false )
+            , m_readBuffer( sizeof( uint32_t ) )
+            , m_readOffset( 0 )
+            , m_readState( ReadState::READ_SIZE )
         {
             // create socket
             m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
@@ -87,58 +90,74 @@ namespace ttb
 
         void TCPSocket::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
-            if( m_readOffset < sizeof( uint32_t ) )
+            switch( m_readState )
             {
-                auto result = ::recv( m_handle,
-                                      reinterpret_cast< uint8_t* >( m_readBufferSize ),
-                                      sizeof( uint32_t ) - m_readOffset,
-                                      MSG_NOSIGNAL );
-
-                if( result < 0 )
+                case ReadState::READ_SIZE:
                 {
-                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    auto result = ::recv( m_handle,
+                                          m_readBuffer.data() + m_readOffset,
+                                          sizeof( uint32_t ) - m_readOffset,
+                                          MSG_NOSIGNAL );
+
+                    if( result < 0 )
                     {
-                        ttb::events::SocketBrokenEvent event( shared_from_this() );
-                        eventOutput.push( event );
-                        return;
+                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        {
+                            ttb::events::SocketBrokenEvent event( shared_from_this() );
+                            eventOutput.push( event );
+                            return;
+                        }
                     }
-                }
-
-                std::cout << "Got " << result << " bytes" << std::endl;
-                m_readOffset += result;
-
-                if( m_readOffset == sizeof( uint32_t ) )
-                {
-                    m_readBuffer.resize( m_readBufferSize );
-                }
-            }
-
-            if( m_readOffset >= sizeof( uint32_t ) )
-            {
-                auto result = ::recv( m_handle,
-                                      m_readBuffer.data(),
-                                      m_readBufferSize + sizeof( uint32_t ) - m_readOffset,
-                                      MSG_NOSIGNAL );
-
-                if( result < 0 )
-                {
-                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    else if( result > 0 )
                     {
-                        ttb::events::SocketBrokenEvent event( shared_from_this() );
-                        eventOutput.push( event );
-                        return;
+                        m_readOffset += result;
+
+                        if( m_readOffset == sizeof( uint32_t ) )
+                        {
+                            uint32_t payloadSize =
+                                *reinterpret_cast< uint32_t const* >( m_readBuffer.data() );
+
+                            m_readOffset = 0;
+                            m_readBuffer.resize( payloadSize );
+                            m_readState = ReadState::READ_PAYLOAD;
+                        }
                     }
+                    break;
                 }
 
-                m_readOffset += result;
-
-                if( m_readOffset == sizeof( uint32_t ) + m_readBufferSize )
+                case ReadState::READ_PAYLOAD:
                 {
-                    m_readOffset = 0;
-                    ttb::events::PacketEvent event(
-                        shared_from_this(),
-                        std::make_shared< ttb::SizedIPacket >( std::move( m_readBuffer ) ) );
-                    eventOutput.push( event );
+                    auto result = ::recv( m_handle,
+                                          m_readBuffer.data() + m_readOffset,
+                                          m_readBuffer.size() - m_readOffset,
+                                          MSG_NOSIGNAL );
+
+                    if( result < 0 )
+                    {
+                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        {
+                            ttb::events::SocketBrokenEvent event( shared_from_this() );
+                            eventOutput.push( event );
+                            return;
+                        }
+                    }
+                    else if( result > 0 )
+                    {
+                        m_readOffset += result;
+
+                        if( m_readOffset == m_readBuffer.size() )
+                        {
+                            ttb::events::PacketEvent event( shared_from_this(),
+                                                            std::make_shared< ttb::SizedIPacket >(
+                                                                std::move( m_readBuffer ) ) );
+                            eventOutput.push( event );
+
+                            m_readOffset = 0;
+                            m_readBuffer.resize( sizeof( uint32_t ) );
+                            m_readState = ReadState::READ_SIZE;
+                        }
+                    }
+                    break;
                 }
             }
         }

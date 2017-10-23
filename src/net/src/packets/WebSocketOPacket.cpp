@@ -83,7 +83,6 @@ namespace ttb
             }
             else
             {
-                std::cout << "Writing fragment " << i << " " << offset << std::endl;
                 return fragment.write( writer, offset, std::min( fragment.size() - offset, size ) );
             }
             ++i;
@@ -108,7 +107,6 @@ namespace ttb
         if( payloadSize < 126 )
         {
             m_header.resize( 2, 0 );
-            std::cout << "Payload size: " << payloadSize << std::endl;
             m_header[ 1 ] = payloadSize;
         }
         else if( payloadSize < 65526 )
@@ -148,8 +146,6 @@ namespace ttb
 
         if( offset >= m_header.size() )
         {
-            std::cout << "Writing payload: " << m_payloadOffset << " " << offset << " "
-                      << m_header.size() << " " << written << " " << size << std::endl;
             written += m_payloadPacket.write(
                 writer,
                 m_payloadOffset + offset - m_header.size(),

@@ -32,13 +32,10 @@ namespace ttb
                 {
                     throw std::runtime_error( "Connection broken" );
                 }
-
-                return 0;
-            }
-
-            for( size_t i = 0; i < result; ++i )
-            {
-                std::cout << "Written: " << toBits( reinterpret_cast< uint8_t const* >( data )[ i ] ) << std::endl;
+                else
+                {
+                    return 0;
+                }
             }
 
             return result;

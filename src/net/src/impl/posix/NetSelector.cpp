@@ -99,7 +99,6 @@ namespace ttb
                     {
                         case ChangeType::ADD:
                         {
-                        std::cout << "adding" << std::endl;
                             auto socket = std::get< 1 >( change );
                             auto iter =
                                 std::find( std::begin( m_sockets ), std::end( m_sockets ), socket );

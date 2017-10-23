@@ -12,8 +12,6 @@
 namespace
 {
     bool readData( int handle, uint8_t* buffer, size_t size, size_t& offset );
-
-    std::string toBits( uint8_t value );
 }
 
 
@@ -297,17 +295,5 @@ namespace
 
             return offset == size;
         }
-    }
-
-    std::string toBits( uint8_t value )
-    {
-        std::ostringstream stream;
-
-        for( size_t i = 0; i < 8; ++i )
-        {
-            stream << ( ( ( value >> ( 7 - i ) ) & 1 ) ? '1' : '0' );
-        }
-
-        return stream.str();
     }
 }
