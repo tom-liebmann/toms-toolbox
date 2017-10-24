@@ -1,5 +1,6 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/window/Window.hpp>
+#include <ttb/core/window/WindowEvents.hpp>
 #include <ttb/utils/dataIO.hpp>
 
 #include "Window.hpp"
@@ -66,6 +67,27 @@ namespace ttb
         void Window::update()
         {
             SDL_GL_SwapWindow( m_handle );
+
+            SDL_Event event;
+            while( SDL_PollEvent( &event ) )
+            {
+                switch( event.type )
+                {
+                    case SDL_KEYDOWN:
+                    {
+                        m_eventOutput->push(
+                            ttb::events::Key( event.key.type, ttb::events::Key::Action::DOWN ) );
+                        break;
+                    }
+
+                    case SDL_KEYUP:
+                    {
+                        m_eventOutput->push(
+                            ttb::events::Key( event.key.type, ttb::events::Key::Action::UP ) );
+                        break;
+                    }
+                }
+            }
         }
     }
 }
