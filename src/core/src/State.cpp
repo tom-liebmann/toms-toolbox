@@ -8,7 +8,10 @@
 
 namespace ttb
 {
-    State::State() : m_projectionMatrixSet( false ), m_modelViewMatrixSet( false )
+    State::State()
+        : m_projectionMatrix( MatrixFactory< float >::identity() )
+        , m_projectionMatrixSet( false )
+        , m_modelViewMatrixSet( false )
     {
         m_modelViewMatrixStack.emplace( MatrixFactory< float >::identity() );
     }
