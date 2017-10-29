@@ -29,6 +29,6 @@ namespace ttb
 
         virtual std::shared_ptr< EventOutput > eventOutput() const = 0;
 
-        virtual void update() = 0;
+        virtual void update( bool block = false ) = 0;
     };
 }

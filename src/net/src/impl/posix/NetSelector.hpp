@@ -32,7 +32,7 @@ namespace ttb
 
             virtual std::shared_ptr< EventOutput > eventOutput() const override;
 
-            virtual void update() override;
+            virtual void update( bool block ) override;
 
         private:
             enum class ChangeType

@@ -86,7 +86,7 @@ namespace ttb
             return m_eventOutput;
         }
 
-        void NetSelector::update()
+        void NetSelector::update( bool block )
         {
             // process changes
             {
@@ -151,7 +151,7 @@ namespace ttb
                 }
             }
 
-            timeval timeout{ 0, 0 };
+            timeval timeout = block ? timeval{ 5, 0 } : timeval{ 0, 0 };
 
             auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 
