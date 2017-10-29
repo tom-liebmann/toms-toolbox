@@ -75,15 +75,48 @@ namespace ttb
                 {
                     case SDL_KEYDOWN:
                     {
-                        m_eventOutput->push(
-                            ttb::events::Key( event.key.type, ttb::events::Key::Action::DOWN ) );
+                        m_eventOutput->push( ttb::events::Key( event.key.keysym.sym,
+                                                               ttb::events::Key::Action::DOWN ) );
                         break;
                     }
 
                     case SDL_KEYUP:
                     {
+                        m_eventOutput->push( ttb::events::Key( event.key.keysym.sym,
+                                                               ttb::events::Key::Action::UP ) );
+                        break;
+                    }
+
+                    case SDL_MOUSEBUTTONDOWN:
+                    case SDL_MOUSEBUTTONUP:
+                    {
+                        auto button = [&event]() {
+                            switch( event.button.button )
+                            {
+                                case SDL_BUTTON_LEFT:
+                                    return ttb::events::MouseButton::Button::LEFT;
+                                case SDL_BUTTON_RIGHT:
+                                    return ttb::events::MouseButton::Button::RIGHT;
+                                case SDL_BUTTON_MIDDLE:
+                                    return ttb::events::MouseButton::Button::MIDDLE;
+                                default:
+                                    return ttb::events::MouseButton::Button::UNKNOWN;
+                            }
+                        }();
+
+                        auto action = event.type == SDL_MOUSEBUTTONDOWN
+                                          ? ttb::events::MouseButton::Action::DOWN
+                                          : ttb::events::MouseButton::Action::UP;
+
+                        m_eventOutput->push( ttb::events::MouseButton(
+                            button, action, event.button.x, event.button.y ) );
+                        break;
+                    }
+
+                    case SDL_MOUSEMOTION:
+                    {
                         m_eventOutput->push(
-                            ttb::events::Key( event.key.type, ttb::events::Key::Action::UP ) );
+                            ttb::events::MouseMove( event.motion.x, event.motion.y ) );
                         break;
                     }
                 }

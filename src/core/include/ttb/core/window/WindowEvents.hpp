@@ -76,7 +76,8 @@ namespace ttb
         {
             LEFT,
             RIGHT,
-            MIDDLE
+            MIDDLE,
+            UNKNOWN
         };
 
 
