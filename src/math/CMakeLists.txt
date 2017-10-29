@@ -21,6 +21,7 @@ target_include_directories(
 target_compile_features(
     ttbMath
     PUBLIC
+    cxx_return_type_deduction
     )
 
 target_compile_options(
