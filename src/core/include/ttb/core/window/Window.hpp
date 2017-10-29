@@ -17,7 +17,7 @@ namespace ttb
     class Window : public RenderTarget
     {
     public:
-        std::unique_ptr< Window > create( std::string const& title, WindowMode const& mode );
+        static std::unique_ptr< Window > create( std::string const& title, WindowMode const& mode );
 
         virtual ~Window();
 
