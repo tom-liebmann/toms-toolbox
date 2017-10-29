@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+
 namespace ttb
 {
     enum class Endianness

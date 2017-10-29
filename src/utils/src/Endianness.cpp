@@ -2,17 +2,12 @@
 
 #include <cstdint>
 
+
 namespace
 {
-    ttb::Endianness computeNativeEndianness()
-    {
-        uint16_t value = 0x1234;
-        if( *reinterpret_cast< uint8_t* >( &value ) == 0x12 )
-            return ttb::Endianness::BIG;
-        else
-            return ttb::Endianness::LITTLE;
-    }
+    ttb::Endianness computeNativeEndianness();
 }
+
 
 namespace ttb
 {
@@ -20,5 +15,22 @@ namespace ttb
     {
         static Endianness const endianness = computeNativeEndianness();
         return endianness;
+    }
+}
+
+
+namespace
+{
+    ttb::Endianness computeNativeEndianness()
+    {
+        uint16_t value = 0x1234;
+        if( *reinterpret_cast< uint8_t* >( &value ) == 0x12 )
+        {
+            return ttb::Endianness::BIG;
+        }
+        else
+        {
+            return ttb::Endianness::LITTLE;
+        }
     }
 }
