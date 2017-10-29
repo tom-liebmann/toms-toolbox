@@ -27,6 +27,19 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
 
         src/window/Window.cpp
         src/impl/linux/window/Window.cpp
+        src/State.cpp
+        src/geometry/Geometry.cpp
+        src/geometry/IndexBuffer.cpp
+        src/geometry/VertexBuffer.cpp
+        src/shader/Program.cpp
+        src/shader/Shader.cpp
+        src/RenderTarget.cpp
+        )
+
+    add_library(
+        ttbCore
+        SHARED
+        ${SOURCE_FILES}
         )
 
 elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
@@ -53,12 +66,17 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/window/Window.cpp
         )
 
+    add_library(
+        ttbCore
+        STATIC
+        ${SOURCE_FILES}
+        )
+
 endif()
 
-add_library(
-    ttbCore
-    STATIC
-    ${SOURCE_FILES}
+set_property(
+    TARGET ttbCore
+    PROPERTY POSITION_INDEPENDENT_CODE ON
     )
 
 target_include_directories(
