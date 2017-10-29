@@ -33,7 +33,7 @@ namespace ttb
                                          mode.width(),
                                          mode.height(),
                                          SDL_WINDOW_OPENGL |
-                                             ( mode.fullscreen() ? SDL_WINDOW_FULLSCREEN : 0 ) );
+                                             ( mode.fullscreen() ? SDL_WINDOW_RESIZABLE : 0 ) );
 
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
