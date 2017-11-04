@@ -2,7 +2,7 @@
 #include "../WebSocket.hpp"
 #include "SendingHandshakeState.hpp"
 
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 
 #include <sys/socket.h>
 
@@ -24,6 +24,7 @@ namespace ttb
             }
 
             void ReceivingHandshakeState::doRead(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
                 uint8_t buffer[ 256 ];
@@ -39,7 +40,7 @@ namespace ttb
                 }
                 else if( result == 0 )
                 {
-                    ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                    ttb::events::Disconnect event( source );
                     eventOutput.push( event );
                     return;
                 }
@@ -67,6 +68,7 @@ namespace ttb
             }
 
             void ReceivingHandshakeState::doWrite(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
             }

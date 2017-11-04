@@ -22,9 +22,7 @@ namespace ttb
 {
     namespace posix
     {
-        class WebSocket : public ttb::WebSocket,
-                          public ttb::posix::Selectable,
-                          public std::enable_shared_from_this< WebSocket >
+        class WebSocket : public ttb::WebSocket, public ttb::posix::Selectable
         {
         public:
             WebSocket( std::shared_ptr< ttb::posix::TCPSocket > socket );
@@ -32,10 +30,12 @@ namespace ttb
             // Override: Selectable
             virtual int handle() const override;
             virtual bool isReadable() const override;
-            virtual void doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+            virtual void doRead( std::shared_ptr< ttb::SelectableHolder > const& source,
+                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
             virtual bool isWritable() const override;
             virtual void
-                doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+                doWrite( std::shared_ptr< ttb::SelectableHolder > const& source,
+                         SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
 
             // Override: WebSocket
             virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;

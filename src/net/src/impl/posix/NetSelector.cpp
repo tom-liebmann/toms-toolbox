@@ -2,7 +2,8 @@
 
 #include "Selectable.hpp"
 #include <ttb/net/Selectable.hpp>
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/SelectableHolder.hpp>
+#include <ttb/net/events.hpp>
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -39,19 +40,18 @@ namespace ttb
         {
         }
 
-        void NetSelector::add( std::shared_ptr< ttb::Selectable > const& socket )
+        void NetSelector::add( std::shared_ptr< SelectableHolder > const& selectable )
         {
-            if( socket )
+            if( selectable )
             {
-                if( auto sck = std::dynamic_pointer_cast< posix::Selectable >( socket ) )
+                if( std::dynamic_pointer_cast< posix::Selectable >( selectable->selectable() ) )
                 {
                     std::lock_guard< std::mutex > lock( m_mutex );
-
-                    m_changes.emplace( ChangeType::ADD, std::move( sck ) );
+                    m_changes.emplace( ChangeType::ADD, selectable );
                 }
                 else
                 {
-                    throw std::runtime_error( "Invalid socket type" );
+                    throw std::runtime_error( "Invalid type" );
                 }
             }
             else
@@ -60,15 +60,14 @@ namespace ttb
             }
         }
 
-        void NetSelector::remove( std::shared_ptr< ttb::Selectable > const& socket )
+        void NetSelector::remove( std::shared_ptr< SelectableHolder > const& selectable )
         {
-            if( socket )
+            if( selectable )
             {
-                if( auto sck = std::dynamic_pointer_cast< posix::Selectable >( socket ) )
+                if( std::dynamic_pointer_cast< posix::Selectable >( selectable->selectable() ) )
                 {
                     std::lock_guard< std::mutex > lock( m_mutex );
-
-                    m_changes.emplace( ChangeType::REMOVE, std::move( sck ) );
+                    m_changes.emplace( ChangeType::REMOVE, selectable );
                 }
                 else
                 {
@@ -99,26 +98,28 @@ namespace ttb
                     {
                         case ChangeType::ADD:
                         {
-                            auto socket = std::get< 1 >( change );
-                            auto iter =
-                                std::find( std::begin( m_sockets ), std::end( m_sockets ), socket );
+                            auto selectable = std::get< 1 >( change );
+                            auto iter = std::find( std::begin( m_selectables ),
+                                                   std::end( m_selectables ),
+                                                   selectable );
 
-                            if( iter == std::end( m_sockets ) )
+                            if( iter == std::end( m_selectables ) )
                             {
-                                m_sockets.push_back( std::move( std::get< 1 >( change ) ) );
+                                m_selectables.push_back( std::move( std::get< 1 >( change ) ) );
                             }
                             break;
                         }
 
                         case ChangeType::REMOVE:
                         {
-                            auto socket = std::get< 1 >( change );
-                            auto iter =
-                                std::find( std::begin( m_sockets ), std::end( m_sockets ), socket );
+                            auto selectable = std::get< 1 >( change );
+                            auto iter = std::find( std::begin( m_selectables ),
+                                                   std::end( m_selectables ),
+                                                   selectable );
 
-                            if( iter != std::end( m_sockets ) )
+                            if( iter != std::end( m_selectables ) )
                             {
-                                m_sockets.erase( iter );
+                                m_selectables.erase( iter );
                             }
                             break;
                         }
@@ -136,18 +137,20 @@ namespace ttb
             FD_ZERO( &writeSockets );
 
             int maxFD = 0;
-            for( auto const& socket : m_sockets )
+            for( auto const& selectable : m_selectables )
             {
-                if( socket->isReadable() )
+                auto& sel = static_cast< posix::Selectable const& >( *selectable->selectable() );
+
+                if( sel.isReadable() )
                 {
-                    FD_SET( socket->handle(), &readSockets );
-                    maxFD = std::max( maxFD, socket->handle() );
+                    FD_SET( sel.handle(), &readSockets );
+                    maxFD = std::max( maxFD, sel.handle() );
                 }
 
-                if( socket->isWritable() )
+                if( sel.isWritable() )
                 {
-                    FD_SET( socket->handle(), &writeSockets );
-                    maxFD = std::max( maxFD, socket->handle() );
+                    FD_SET( sel.handle(), &writeSockets );
+                    maxFD = std::max( maxFD, sel.handle() );
                 }
             }
 
@@ -162,16 +165,18 @@ namespace ttb
 
             if( result > 0 )
             {
-                for( auto& socket : m_sockets )
+                for( auto& selectable : m_selectables )
                 {
-                    if( FD_ISSET( socket->handle(), &readSockets ) )
+                    auto& sel = static_cast< posix::Selectable& >( *selectable->selectable() );
+
+                    if( FD_ISSET( sel.handle(), &readSockets ) )
                     {
-                        socket->doRead( *m_eventOutput );
+                        sel.doRead( selectable, *m_eventOutput );
                     }
 
-                    if( FD_ISSET( socket->handle(), &writeSockets ) )
+                    if( FD_ISSET( sel.handle(), &writeSockets ) )
                     {
-                        socket->doWrite( *m_eventOutput );
+                        sel.doWrite( selectable, *m_eventOutput );
                     }
                 }
             }

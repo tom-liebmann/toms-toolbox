@@ -19,10 +19,12 @@ namespace ttb
 
                 // Override: State
                 virtual bool isReadable() const override;
-                virtual void doRead( ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >&
+                virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
+                                     ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >&
                                          eventOutput ) override;
                 virtual bool isWritable() const override;
-                virtual void doWrite( ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >&
+                virtual void doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                      ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >&
                                           eventOutput ) override;
 
             private:

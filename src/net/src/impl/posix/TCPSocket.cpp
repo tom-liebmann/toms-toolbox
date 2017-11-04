@@ -2,7 +2,7 @@
 #include "SocketDataWriter.hpp"
 
 #include <ttb/net/DataWriter.hpp>
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
 
 #include <arpa/inet.h>
@@ -88,7 +88,8 @@ namespace ttb
             return true;
         }
 
-        void TCPSocket::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void TCPSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
+                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
             switch( m_readState )
             {
@@ -103,7 +104,7 @@ namespace ttb
                     {
                         if( errno != EAGAIN && errno != EWOULDBLOCK )
                         {
-                            ttb::events::SocketBrokenEvent event( shared_from_this() );
+                            ttb::events::BrokenConnection event( source );
                             eventOutput.push( event );
                             return;
                         }
@@ -136,7 +137,7 @@ namespace ttb
                     {
                         if( errno != EAGAIN && errno != EWOULDBLOCK )
                         {
-                            ttb::events::SocketBrokenEvent event( shared_from_this() );
+                            ttb::events::BrokenConnection event( source );
                             eventOutput.push( event );
                             return;
                         }
@@ -147,9 +148,9 @@ namespace ttb
 
                         if( m_readOffset == m_readBuffer.size() )
                         {
-                            ttb::events::PacketEvent event( shared_from_this(),
-                                                            std::make_shared< ttb::SizedIPacket >(
-                                                                std::move( m_readBuffer ) ) );
+                            ttb::events::Packet event( source,
+                                                       std::make_shared< ttb::SizedIPacket >(
+                                                           std::move( m_readBuffer ) ) );
                             eventOutput.push( event );
 
                             m_readOffset = 0;
@@ -182,15 +183,15 @@ namespace ttb
             return false;
         }
 
-        void TCPSocket::doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void TCPSocket::doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 
             if( !m_connected )
             {
                 m_connected = true;
-                ttb::events::ConnectionEvent event( std::shared_ptr< ttb::Listener >(),
-                                                    shared_from_this() );
+                ttb::events::ServerConnection event( source );
                 eventOutput.push( event );
             }
 
@@ -207,7 +208,7 @@ namespace ttb
                 }
                 catch( std::runtime_error& e )
                 {
-                    ttb::events::SocketBrokenEvent event( shared_from_this() );
+                    ttb::events::BrokenConnection event( source );
                     eventOutput.push( event );
                     return;
                 }

@@ -23,6 +23,8 @@ set(
     src/packets/SizedIPacket.cpp
     src/packets/SizedOPacket.cpp
     src/packets/WebSocketOPacket.cpp
+    src/SimpleSelectableHolder.cpp
+    src/SelectableHolder.cpp
     )
 
 add_library(

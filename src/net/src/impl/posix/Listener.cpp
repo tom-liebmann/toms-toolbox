@@ -1,6 +1,6 @@
 #include "Listener.hpp"
 #include "TCPSocket.hpp"
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 
 #include <arpa/inet.h>
 #include <assert.h>
@@ -75,7 +75,8 @@ namespace ttb
             return true;
         }
 
-        void Listener::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void Listener::doRead( std::shared_ptr< SelectableHolder > const& source,
+                               SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
             auto socketHandle = ::accept( m_handle, NULL, NULL );
 
@@ -84,8 +85,8 @@ namespace ttb
                 throw std::runtime_error( "Error while waiting for connections" );
             }
 
-            ttb::events::ConnectionEvent event(
-                shared_from_this(), std::make_shared< ttb::posix::TCPSocket >( socketHandle ) );
+            ttb::events::ClientConnection event(
+                source, std::make_shared< ttb::posix::TCPSocket >( socketHandle ) );
 
             eventOutput.push( event );
         }
@@ -95,7 +96,8 @@ namespace ttb
             return false;
         }
 
-        void Listener::doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void Listener::doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
         }
     }

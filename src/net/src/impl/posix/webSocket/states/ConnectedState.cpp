@@ -2,7 +2,7 @@
 #include "../../SocketDataWriter.hpp"
 #include "../WebSocket.hpp"
 
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 #include <ttb/net/packets/SizedIPacket.hpp>
 
 #include <sstream>
@@ -36,6 +36,7 @@ namespace ttb
             }
 
             void ConnectedState::doRead(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
                 switch( m_readState )
@@ -86,12 +87,12 @@ namespace ttb
                         {
                             if( e )
                             {
-                                ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                                ttb::events::BrokenConnection event( source );
                                 eventOutput.push( event );
                             }
                             else
                             {
-                                ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                                ttb::events::Disconnect event( source );
                                 eventOutput.push( event );
                             }
                         }
@@ -122,12 +123,12 @@ namespace ttb
                         {
                             if( e == 0 )
                             {
-                                ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                                ttb::events::BrokenConnection event( source );
                                 eventOutput.push( event );
                             }
                             else
                             {
-                                ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                                ttb::events::Disconnect event( source );
                                 eventOutput.push( event );
                             }
                         }
@@ -154,12 +155,12 @@ namespace ttb
                         {
                             if( e == 0 )
                             {
-                                ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                                ttb::events::BrokenConnection event( source );
                                 eventOutput.push( event );
                             }
                             else
                             {
-                                ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                                ttb::events::Disconnect event( source );
                                 eventOutput.push( event );
                             }
                         }
@@ -198,8 +199,8 @@ namespace ttb
 
                                 if( m_lastFragment )
                                 {
-                                    ttb::events::PacketEvent event(
-                                        socket().shared_from_this(),
+                                    ttb::events::Packet event(
+                                        source,
                                         std::make_shared< ttb::SizedIPacket >(
                                             std::move( m_packetData ) ) );
                                     eventOutput.push( event );
@@ -215,12 +216,12 @@ namespace ttb
                         {
                             if( e == 0 )
                             {
-                                ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                                ttb::events::BrokenConnection event( source );
                                 eventOutput.push( event );
                             }
                             else
                             {
-                                ttb::events::SocketClosedEvent event( socket().shared_from_this() );
+                                ttb::events::Disconnect event( source );
                                 eventOutput.push( event );
                             }
                         }
@@ -237,6 +238,7 @@ namespace ttb
             }
 
             void ConnectedState::doWrite(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
                 auto& sck = socket();

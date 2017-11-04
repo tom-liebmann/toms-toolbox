@@ -2,7 +2,7 @@
 #include "../WebSocket.hpp"
 #include "ConnectedState.hpp"
 
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 #include <ttb/utils/SHA1.hpp>
 #include <ttb/utils/base64.hpp>
 
@@ -68,6 +68,7 @@ namespace ttb
             }
 
             void SendingHandshakeState::doRead(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
             }
@@ -78,6 +79,7 @@ namespace ttb
             }
 
             void SendingHandshakeState::doWrite(
+                std::shared_ptr< SelectableHolder > const& source,
                 ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
             {
                 if( m_offset < m_message.length() )
@@ -91,7 +93,7 @@ namespace ttb
                     {
                         if( errno != EAGAIN && errno != EWOULDBLOCK )
                         {
-                            ttb::events::SocketBrokenEvent event( socket().shared_from_this() );
+                            ttb::events::BrokenConnection event( source );
                             eventOutput.push( event );
                             return;
                         }

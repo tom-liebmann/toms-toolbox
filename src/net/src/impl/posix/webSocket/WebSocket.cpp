@@ -1,6 +1,6 @@
 #include "WebSocket.hpp"
 #include "states/ReceivingHandshakeState.hpp"
-#include <ttb/net/netEvents.hpp>
+#include <ttb/net/events.hpp>
 #include <ttb/net/packets/SizedIPacket.hpp>
 #include <ttb/net/packets/WebSocketOPacket.hpp>
 #include <ttb/utils/SHA1.hpp>
@@ -57,9 +57,10 @@ namespace ttb
             return m_state->isReadable();
         }
 
-        void WebSocket::doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void WebSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
+                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
-            m_state->doRead( eventOutput );
+            m_state->doRead( source, eventOutput );
         }
 
         bool WebSocket::isWritable() const
@@ -67,9 +68,10 @@ namespace ttb
             return m_state->isWritable();
         }
 
-        void WebSocket::doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+        void WebSocket::doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
         {
-            m_state->doWrite( eventOutput );
+            m_state->doWrite( source, eventOutput );
         }
 
         void WebSocket::send( std::shared_ptr< ttb::OPacket const > packet )

@@ -11,9 +11,7 @@ namespace ttb
 {
     namespace posix
     {
-        class Listener : public ttb::Listener,
-                         public ttb::posix::Selectable,
-                         public std::enable_shared_from_this< Listener >
+        class Listener : public ttb::Listener, public ttb::posix::Selectable
         {
         public:
             Listener( uint16_t port );
@@ -23,10 +21,12 @@ namespace ttb
             // Override: Selectable
             virtual int handle() const override;
             virtual bool isReadable() const override;
-            virtual void doRead( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+            virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
+                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
             virtual bool isWritable() const override;
             virtual void
-                doWrite( SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+                doWrite( std::shared_ptr< SelectableHolder > const& source,
+                         SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
 
         private:
             int m_handle;

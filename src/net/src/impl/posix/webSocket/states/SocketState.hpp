@@ -10,6 +10,8 @@ namespace ttb
     {
         class WebSocket;
     }
+
+    class SelectableHolder;
 }
 
 
@@ -33,11 +35,13 @@ namespace ttb
                 virtual bool isReadable() const = 0;
 
                 virtual void doRead(
+                    std::shared_ptr< SelectableHolder > const& source,
                     ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput ) = 0;
 
                 virtual bool isWritable() const = 0;
 
                 virtual void doWrite(
+                    std::shared_ptr< SelectableHolder > const& source,
                     ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput ) = 0;
 
             private:

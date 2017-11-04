@@ -26,9 +26,9 @@ namespace ttb
 
             ~NetSelector();
 
-            virtual void add( std::shared_ptr< ttb::Selectable > const& socket ) override;
+            virtual void add( std::shared_ptr< SelectableHolder > const& selectable ) override;
 
-            virtual void remove( std::shared_ptr< ttb::Selectable > const& socket ) override;
+            virtual void remove( std::shared_ptr< SelectableHolder > const& selectable ) override;
 
             virtual std::shared_ptr< EventOutput > eventOutput() const override;
 
@@ -43,10 +43,9 @@ namespace ttb
 
             std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event& > > m_eventOutput;
 
-            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::posix::Selectable > > >
-                m_changes;
+            std::queue< std::pair< ChangeType, std::shared_ptr< SelectableHolder > > > m_changes;
 
-            std::vector< std::shared_ptr< ttb::posix::Selectable > > m_sockets;
+            std::vector< std::shared_ptr< SelectableHolder > > m_selectables;
 
             mutable std::mutex m_mutex;
         };
