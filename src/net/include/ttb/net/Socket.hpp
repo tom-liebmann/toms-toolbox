@@ -8,7 +8,7 @@
 
 namespace ttb
 {
-    class Socket : public Selectable
+    class Socket
     {
     public:
         virtual ~Socket();

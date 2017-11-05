@@ -7,7 +7,7 @@
 
 namespace ttb
 {
-    class TCPSocket : public Socket
+    class TCPSocket : public Socket, public Selectable
     {
     public:
         static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );

@@ -139,7 +139,7 @@ namespace ttb
             int maxFD = 0;
             for( auto const& selectable : m_selectables )
             {
-                auto& sel = static_cast< posix::Selectable const& >( *selectable->selectable() );
+                auto& sel = dynamic_cast< posix::Selectable const& >( *selectable->selectable() );
 
                 if( sel.isReadable() )
                 {
@@ -167,7 +167,7 @@ namespace ttb
             {
                 for( auto& selectable : m_selectables )
                 {
-                    auto& sel = static_cast< posix::Selectable& >( *selectable->selectable() );
+                    auto& sel = dynamic_cast< posix::Selectable& >( *selectable->selectable() );
 
                     if( FD_ISSET( sel.handle(), &readSockets ) )
                     {

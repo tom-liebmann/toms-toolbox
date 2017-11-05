@@ -8,7 +8,7 @@
 
 namespace ttb
 {
-    class WebSocket : public Socket
+    class WebSocket : public Socket, public Selectable
     {
     public:
         static std::shared_ptr< WebSocket > create( std::shared_ptr< TCPSocket > socket );
