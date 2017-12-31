@@ -48,7 +48,7 @@ namespace ttb
         // Bind all vertex attributes
         auto const& program = state.program();
 
-        glBindVertexArray( m_arrayObject );
+        state.pushArrayObject( m_arrayObject );
 
         std::vector< GLuint > locations;
 
@@ -75,10 +75,12 @@ namespace ttb
             glDrawArrays( m_mode, 0, m_minAttributeSize );
         }
 
-        for( auto location : locations )
-            glDisableVertexAttribArray( location );
+        state.popArrayObject();
+    }
 
-        glBindVertexArray( m_arrayObject );
+    GLuint Geometry::arrayObject() const
+    {
+        return m_arrayObject;
     }
 
 

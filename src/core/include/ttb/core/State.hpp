@@ -53,6 +53,10 @@ namespace ttb
 
         Program& program();
 
+        // geometry
+        void pushArrayObject( GLuint arrayObject );
+        void popArrayObject();
+
         // viewport
         void pushViewport( Viewport const& viewport );
         void popViewport();
@@ -74,6 +78,9 @@ namespace ttb
 
         // shader
         std::stack< std::shared_ptr< Program > > m_programStack;
+
+        // geometry
+        std::stack< GLuint > m_arrayObjectStack;
 
         // viewport
         std::stack< Viewport > m_viewportStack;

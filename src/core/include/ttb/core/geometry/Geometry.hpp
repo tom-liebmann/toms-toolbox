@@ -38,6 +38,8 @@ namespace ttb
 
         void draw( State& state ) const;
 
+        GLuint arrayObject() const;
+
     private:
         Geometry( GLenum mode, std::vector< Attribute > attributes,
                   std::shared_ptr< IndexBuffer > const& indexBuffer );

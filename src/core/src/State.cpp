@@ -14,6 +14,11 @@ namespace ttb
         , m_modelViewMatrixSet( false )
     {
         m_modelViewMatrixStack.emplace( MatrixFactory< float >::identity() );
+
+        GLint boundArrayObject;
+        glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &boundArrayObject );
+
+        m_arrayObjectStack.push( boundArrayObject );
     }
 
     State::~State()
@@ -112,6 +117,26 @@ namespace ttb
     Program& State::program()
     {
         return *m_programStack.top();
+    }
+
+    void State::pushArrayObject( GLuint arrayObject )
+    {
+        glBindVertexArray( arrayObject );
+        m_arrayObjectStack.push( arrayObject );
+    }
+
+    void State::popArrayObject()
+    {
+        m_arrayObjectStack.pop();
+
+        if( m_arrayObjectStack.empty() )
+        {
+            glBindVertexArray( 0 );
+        }
+        else
+        {
+            glBindVertexArray( m_arrayObjectStack.top() );
+        }
     }
 
     void State::pushViewport( Viewport const& viewport )

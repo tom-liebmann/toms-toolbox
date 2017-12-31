@@ -77,12 +77,6 @@ namespace ttb
                                     GLenum valueType,
                                     void const* data ) const
     {
-        m_texture.m_width = width;
-        m_texture.m_height = height;
-        m_texture.m_internalFormat = internalFormat;
-        m_texture.m_format = format;
-        m_texture.m_valueType = valueType;
-
         upload( data );
     }
 

@@ -56,20 +56,20 @@ namespace ttb
     public:
         ~Texture2DModifier();
 
-        /// Update a rectangular part of the texture
-        void upload(
-            uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const;
-
         /// Upload values into the texture
         /*
-        * If dimensions do not match, the texture gets resized.
-        */
+         * If dimensions do not match, the texture gets resized.
+         */
         void upload( uint16_t width,
                      uint16_t height,
                      GLint internalFormat,
                      GLenum format,
                      GLenum valueType,
                      void const* data ) const;
+
+        /// Update a rectangular part of the texture
+        void upload(
+            uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const;
 
         /// Update the texture's data
         void upload( void const* data ) const;
