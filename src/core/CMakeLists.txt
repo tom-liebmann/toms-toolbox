@@ -34,6 +34,10 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/shader/Program.cpp
         src/shader/Shader.cpp
         src/RenderTarget.cpp
+        src/texture/Texture2D.cpp
+        src/texture/Texture3D.cpp
+        src/texture/Texture.cpp
+        src/texture/TextureFactory.cpp
         )
 
     add_library(
