@@ -2,6 +2,7 @@
 
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/core/shader/Program.hpp>
+#include <ttb/core/uniform/Uniform.hpp>
 #include <ttb/core/window/Window.hpp>
 
 #include <iostream>
@@ -9,16 +10,9 @@
 namespace ttb
 {
     State::State()
-        : m_projectionMatrix( MatrixFactory< float >::identity() )
-        , m_projectionMatrixSet( false )
-        , m_modelViewMatrixSet( false )
     {
-        m_modelViewMatrixStack.emplace( MatrixFactory< float >::identity() );
-
-        GLint boundArrayObject;
-        glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &boundArrayObject );
-
-        m_arrayObjectStack.push( boundArrayObject );
+        glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &m_parentArrayObject );
+        glGetIntegerv( GL_CURRENT_PROGRAM, &m_parentProgram );
     }
 
     State::~State()
@@ -52,66 +46,24 @@ namespace ttb
         return *m_renderTargetStack.top();
     }
 
-    void State::projectionMatrix( Matrix< float, 4, 4 > const& matrix )
-    {
-        m_projectionMatrix = matrix;
-        m_projectionMatrixSet = false;
-    }
-
-    Matrix< float, 4, 4 > const& State::projectionMatrix() const
-    {
-        return m_projectionMatrix;
-    }
-
-    void State::pushMatrix()
-    {
-        m_modelViewMatrixStack.push( m_modelViewMatrixStack.top() );
-    }
-
-    void State::popMatrix()
-    {
-        m_modelViewMatrixStack.pop();
-        m_modelViewMatrixSet = false;
-    }
-
-    void State::setMatrix( Matrix< float, 4, 4 > const& matrix )
-    {
-        m_modelViewMatrixStack.top() = matrix;
-        m_modelViewMatrixSet = false;
-    }
-
-    void State::applyMatrix( Matrix< float, 4, 4 > const& matrix )
-    {
-        m_modelViewMatrixStack.top() *= matrix;
-        m_modelViewMatrixSet = false;
-    }
-
-    Matrix< float, 4, 4 > const& State::modelViewMatrix() const
-    {
-        return m_modelViewMatrixStack.top();
-    }
-
     void State::pushProgram( std::shared_ptr< Program > const& program )
     {
         program->use();
         m_programStack.push( program );
-
-        m_projectionMatrixSet = false;
-        m_modelViewMatrixSet = false;
     }
 
     void State::popProgram()
     {
-        m_programStack.top()->unuse();
         m_programStack.pop();
 
-        if( !m_programStack.empty() )
+        if( m_programStack.empty() )
+        {
+            glUseProgram( m_parentProgram );
+        }
+        else
         {
             m_programStack.top()->use();
         }
-
-        m_projectionMatrixSet = false;
-        m_modelViewMatrixSet = false;
     }
 
     Program& State::program()
@@ -131,7 +83,7 @@ namespace ttb
 
         if( m_arrayObjectStack.empty() )
         {
-            glBindVertexArray( 0 );
+            glBindVertexArray( m_parentArrayObject );
         }
         else
         {
@@ -161,41 +113,26 @@ namespace ttb
     {
         if( !m_programStack.empty() )
         {
-            auto& program = m_programStack.top();
+            auto& program = *m_programStack.top();
 
-            if( !m_projectionMatrixSet )
+            for( auto const& uniformPair : m_uniforms )
             {
-                GLint location = program->getUniformLocation( "u_projectionMatrix" );
-                if( location != -1 )
-                {
-                    program->setUniform( location, m_projectionMatrix );
-                }
-
-                location = program->getUniformLocation( "u_invProjectionMatrix" );
-                if( location != -1 )
-                {
-                    program->setUniform( location, invert( m_projectionMatrix ) );
-                }
-
-                m_projectionMatrixSet = true;
+                program.applyUniform( uniformPair.first, *uniformPair.second.top() );
             }
+        }
+    }
 
-            if( !m_modelViewMatrixSet )
-            {
-                GLint location = program->getUniformLocation( "u_modelViewMatrix" );
-                if( location != -1 )
-                {
-                    program->setUniform( location, m_modelViewMatrixStack.top() );
-                }
+    void State::popUniform( std::string const& name )
+    {
+        auto iter = m_uniforms.find( name );
 
-                location = program->getUniformLocation( "u_invModelViewMatrix" );
-                if( location != -1 )
-                {
-                    program->setUniform( location, invert( m_modelViewMatrixStack.top() ) );
-                }
-
-                m_modelViewMatrixSet = true;
-            }
+        if( iter == std::end( m_uniforms ) )
+        {
+            throw std::runtime_error( "Reducing unknown uniform" );
+        }
+        else
+        {
+            iter->second.pop();
         }
     }
 }

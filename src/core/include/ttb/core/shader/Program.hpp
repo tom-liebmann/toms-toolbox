@@ -19,6 +19,7 @@ namespace ttb
     class ProgramCreator;
     class Shader;
     class VertexAttributeList;
+    class UniformBase;
 }
 
 
@@ -42,11 +43,7 @@ namespace ttb
 
         GLint attributeLocation( std::string const& name ) const;
 
-        GLint getUniformLocation( const std::string& name ) const;
-        void setUniformInt( GLint location, GLint value );
-        void setUniform( GLint location, GLfloat value );
-        void setUniform( GLint location, const ttb::Matrix4f& matrix );
-        void setUniform( GLint location, const ttb::Vector< float, 3 >& vector );
+        void applyUniform( std::string const& name, UniformBase const& uniform );
 
     private:
         Program( std::vector< std::unique_ptr< Shader > > const& shaders );

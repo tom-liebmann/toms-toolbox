@@ -38,6 +38,8 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/texture/Texture3D.cpp
         src/texture/Texture.cpp
         src/texture/TextureFactory.cpp
+        src/uniform/Uniform.cpp
+        src/uniform/uniformHelper.cpp
         )
 
     add_library(

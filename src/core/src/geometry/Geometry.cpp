@@ -34,9 +34,11 @@ namespace ttb
             m_minAttributeSize = std::numeric_limits< size_t >::max();
 
             for( auto const& attribute : m_attributes )
+            {
                 m_minAttributeSize =
                     std::min( m_minAttributeSize,
                               attribute.buffer().m_data.size() / attribute.buffer().m_blockSize );
+            }
         }
     }
 
