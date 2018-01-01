@@ -77,11 +77,12 @@ namespace ttb
                                     GLenum valueType,
                                     void const* data ) const
     {
-        upload( data );
-    }
+        m_texture.m_width = width;
+        m_texture.m_height = height;
+        m_texture.m_internalFormat = internalFormat;
+        m_texture.m_format = format;
+        m_texture.m_valueType = valueType;
 
-    void Texture2DModifier::upload( void const* data ) const
-    {
         glTexImage2D( GL_TEXTURE_2D,
                       0,
                       m_texture.m_internalFormat,
@@ -91,6 +92,19 @@ namespace ttb
                       m_texture.m_format,
                       m_texture.m_valueType,
                       data );
+    }
+
+    void Texture2DModifier::upload( void const* data ) const
+    {
+        glTexSubImage2D( GL_TEXTURE_2D,
+                         0,
+                         0,
+                         0,
+                         m_texture.m_width,
+                         m_texture.m_height,
+                         m_texture.m_format,
+                         m_texture.m_valueType,
+                         data );
     }
 
     void Texture2DModifier::minMagFilter( GLint minFilter, GLint magFilter ) const
