@@ -40,6 +40,7 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/texture/TextureFactory.cpp
         src/uniform/Uniform.cpp
         src/uniform/uniformHelper.cpp
+        src/GBuffer.cpp
         )
 
     add_library(

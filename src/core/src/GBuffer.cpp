@@ -3,95 +3,114 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/texture/Texture2D.hpp>
 
-using namespace ttb;
 
-ttb::GBuffer::GBuffer()
+namespace ttb
 {
-    glGenFramebuffers( 1, &m_frameBufferObject );
-}
+    // GBufferModifier
+    //=================================================================================================
 
-ttb::GBuffer::~GBuffer()
-{
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-    glDeleteFramebuffers( 1, &m_frameBufferObject );
-}
-
-uint16_t ttb::GBuffer::getWidth() const
-{
-    return m_drawBuffers[ 0 ]->width();
-}
-
-uint16_t ttb::GBuffer::getHeight() const
-{
-    return m_drawBuffers[ 0 ]->height();
-}
-
-const std::shared_ptr< Texture2D >& ttb::GBuffer::getDrawBuffer( int8_t unit ) const
-{
-    return m_drawBuffers[ unit ];
-}
-
-const std::shared_ptr< Texture2D >& ttb::GBuffer::getDepthBuffer() const
-{
-    return m_depthBuffer;
-}
-
-void ttb::GBuffer::setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer )
-{
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
-
-    if( m_drawBuffers.size() <= unit )
+    GBufferModifier::GBufferModifier( State& state, std::shared_ptr< GBuffer > buffer )
+        : m_state( state ), m_buffer( std::move( buffer ) )
     {
-        m_drawBuffers.resize( unit + 1 );
-        m_drawBufferIDs.resize( unit + 1 );
+        m_state.pushFramebuffer( m_buffer->m_frameBufferObject );
     }
 
-    glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D,
-                            buffer->object(), 0 );
+    GBufferModifier& GBufferModifier::drawBuffer( uint8_t unit,
+                                                  std::shared_ptr< Texture2D > buffer )
+    {
+        if( m_buffer->m_drawBuffers.size() <= unit )
+        {
+            m_buffer->m_drawBuffers.resize( unit + 1 );
+            m_buffer->m_drawBufferIDs.resize( unit + 1 );
+        }
 
-    m_drawBuffers[ unit ] = std::move( buffer );
-    m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
+        glFramebufferTexture2D(
+            GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D, buffer->object(), 0 );
 
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-}
+        m_buffer->m_drawBuffers[ unit ] = std::move( buffer );
+        m_buffer->m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
 
-void ttb::GBuffer::setDepthBuffer( std::shared_ptr< Texture2D > buffer )
-{
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
+        return *this;
+    }
 
-    glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                            buffer ? buffer->object() : 0, 0 );
+    GBufferModifier& GBufferModifier::depthBuffer( std::shared_ptr< Texture2D > buffer )
+    {
+        glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
+                                GL_DEPTH_ATTACHMENT,
+                                GL_TEXTURE_2D,
+                                buffer ? buffer->object() : 0,
+                                0 );
 
-    m_depthBuffer = std::move( buffer );
+        m_buffer->m_depthBuffer = std::move( buffer );
 
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
-}
+        return *this;
+    }
 
-size_t ttb::GBuffer::width() const
-{
-    return m_drawBuffers[ 0 ]->width();
-}
+    std::shared_ptr< GBuffer > GBufferModifier::finish()
+    {
+        m_state.popFramebuffer();
 
-size_t ttb::GBuffer::height() const
-{
-    return m_drawBuffers[ 0 ]->height();
-}
+        return m_buffer;
+    }
 
-void ttb::GBuffer::begin( State& state ) const
-{
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_frameBufferObject );
 
-    if( m_drawBufferIDs.size() == 1 )
-        glDrawBuffer( m_drawBufferIDs[ 0 ] );
-    else
-        glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
+    // GBuffer
+    //=================================================================================================
 
-    state.pushViewport( Viewport( 0, 0, getWidth(), getHeight() ) );
-}
+    GBufferModifier GBuffer::create( ttb::State& state )
+    {
+        return { state, std::shared_ptr< GBuffer >( new GBuffer() ) };
+    }
 
-void ttb::GBuffer::end( State& state ) const
-{
-    state.popViewport();
+    GBuffer::~GBuffer()
+    {
+        glDeleteFramebuffers( 1, &m_frameBufferObject );
+    }
 
-    glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+    std::shared_ptr< Texture2D > const& GBuffer::drawBuffer( uint8_t unit ) const
+    {
+        return m_drawBuffers[ unit ];
+    }
+
+    std::shared_ptr< Texture2D > const& GBuffer::depthBuffer() const
+    {
+        return m_depthBuffer;
+    }
+
+    size_t GBuffer::width() const
+    {
+        return m_drawBuffers[ 0 ]->width();
+    }
+
+    size_t ttb::GBuffer::height() const
+    {
+        return m_drawBuffers[ 0 ]->height();
+    }
+
+    void GBuffer::begin( State& state ) const
+    {
+        state.pushFramebuffer( m_frameBufferObject );
+
+        if( m_drawBufferIDs.size() == 1 )
+        {
+            glDrawBuffer( m_drawBufferIDs[ 0 ] );
+        }
+        else
+        {
+            glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
+        }
+
+        state.pushViewport( Viewport( 0, 0, width(), height() ) );
+    }
+
+    void ttb::GBuffer::end( State& state ) const
+    {
+        state.popViewport();
+        state.popFramebuffer();
+    }
+
+    GBuffer::GBuffer()
+    {
+        glGenFramebuffers( 1, &m_frameBufferObject );
+    }
 }

@@ -11,8 +11,6 @@ namespace ttb
 {
     State::State()
     {
-        glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &m_parentArrayObject );
-        glGetIntegerv( GL_CURRENT_PROGRAM, &m_parentProgram );
     }
 
     State::~State()
@@ -48,6 +46,11 @@ namespace ttb
 
     void State::pushProgram( std::shared_ptr< Program > const& program )
     {
+        if( m_programStack.empty() )
+        {
+            glGetIntegerv( GL_CURRENT_PROGRAM, &m_parentProgram );
+        }
+
         program->use();
         m_programStack.push( program );
     }
@@ -73,6 +76,11 @@ namespace ttb
 
     void State::pushArrayObject( GLuint arrayObject )
     {
+        if( m_arrayObjectStack.empty() )
+        {
+            glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &m_parentArrayObject );
+        }
+
         glBindVertexArray( arrayObject );
         m_arrayObjectStack.push( arrayObject );
     }
@@ -88,6 +96,31 @@ namespace ttb
         else
         {
             glBindVertexArray( m_arrayObjectStack.top() );
+        }
+    }
+
+    void State::pushFramebuffer( GLuint framebufferObject )
+    {
+        if( m_framebufferObjectStack.empty() )
+        {
+            glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_parentFramebufferObject );
+        }
+
+        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, framebufferObject );
+        m_framebufferObjectStack.push( framebufferObject );
+    }
+
+    void State::popFramebuffer()
+    {
+        m_framebufferObjectStack.pop();
+
+        if( m_framebufferObjectStack.empty() )
+        {
+            glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_parentFramebufferObject );
+        }
+        else
+        {
+            glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebufferObjectStack.top() );
         }
     }
 
@@ -133,6 +166,10 @@ namespace ttb
         else
         {
             iter->second.pop();
+            if( iter->second.empty() )
+            {
+                m_uniforms.erase( iter );
+            }
         }
     }
 }

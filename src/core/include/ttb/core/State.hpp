@@ -52,6 +52,10 @@ namespace ttb
         void pushArrayObject( GLuint arrayObject );
         void popArrayObject();
 
+        // framebuffer
+        void pushFramebuffer( GLuint framebufferObject );
+        void popFramebuffer();
+
         // viewport
         void pushViewport( Viewport const& viewport );
         void popViewport();
@@ -79,6 +83,10 @@ namespace ttb
         // geometry
         GLint m_parentArrayObject;
         std::stack< GLuint > m_arrayObjectStack;
+
+        // framebuffer
+        GLint m_parentFramebufferObject;
+        std::stack< GLuint > m_framebufferObjectStack;
 
         // viewport
         std::stack< Viewport > m_viewportStack;

@@ -26,20 +26,36 @@ namespace ttb
 
 namespace ttb
 {
+    class GBuffer;
+
+
+    class GBufferModifier
+    {
+    public:
+        GBufferModifier( State& state, std::shared_ptr< GBuffer > buffer );
+
+        GBufferModifier& drawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
+
+        GBufferModifier& depthBuffer( std::shared_ptr< Texture2D > buffer );
+
+        std::shared_ptr< GBuffer > finish();
+
+    private:
+        State& m_state;
+        std::shared_ptr< GBuffer > m_buffer;
+    };
+
+
     class GBuffer : public RenderTarget
     {
     public:
-        GBuffer();
+        static GBufferModifier create( ttb::State& state );
 
         ~GBuffer();
 
-        uint16_t getWidth() const;
-        uint16_t getHeight() const;
-        const std::shared_ptr< Texture2D >& getDrawBuffer( int8_t unit ) const;
-        const std::shared_ptr< Texture2D >& getDepthBuffer() const;
+        std::shared_ptr< Texture2D > const& drawBuffer( uint8_t unit ) const;
 
-        void setDrawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
-        void setDepthBuffer( std::shared_ptr< Texture2D > buffer );
+        std::shared_ptr< Texture2D > const& depthBuffer() const;
 
         // Override: RenderTarget
         virtual size_t width() const override;
@@ -48,10 +64,14 @@ namespace ttb
         virtual void end( State& state ) const override;
 
     private:
+        GBuffer();
+
         GLuint m_frameBufferObject;
 
         std::vector< std::shared_ptr< Texture2D > > m_drawBuffers;
         std::vector< GLenum > m_drawBufferIDs;
         std::shared_ptr< Texture2D > m_depthBuffer;
+
+        friend class GBufferModifier;
     };
 }
