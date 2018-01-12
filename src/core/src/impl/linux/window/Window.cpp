@@ -47,9 +47,9 @@ namespace
 
 namespace ttb
 {
-    std::unique_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
+    std::shared_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
     {
-        return std::make_unique< linux::Window >( title, mode );
+        return std::make_shared< linux::Window >( title, mode );
     }
 
 
