@@ -58,16 +58,14 @@ namespace ttb
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
-        while( !m_receiver )
+        if( m_receiver )
         {
-            m_condition.wait( lock );
+            auto receiver = m_receiver;
+
+            lock.unlock();
+
+            receiver->push( std::forward< TData >( data ) );
         }
-
-        auto receiver = m_receiver;
-
-        lock.unlock();
-
-        receiver->push( std::forward< TData >( data ) );
     }
 
     template < typename TData >

@@ -41,6 +41,7 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/uniform/Uniform.cpp
         src/uniform/uniformHelper.cpp
         src/GBuffer.cpp
+        src/PNGLoader.cpp
         )
 
     add_library(
