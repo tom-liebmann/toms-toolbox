@@ -1,4 +1,5 @@
-#include <ttb/core/shader/UniformPrimitive.hpp>
+#include <ttb/core/uniform/uniformHelper.hpp>
+
 
 namespace ttb
 {
