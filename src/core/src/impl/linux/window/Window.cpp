@@ -67,15 +67,15 @@ namespace ttb
 
             glfwSetErrorCallback( callbackErrorGLFW );
 
-//        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-// glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-// glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+            //        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+            // glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+            // glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
 #ifndef NDEBUG
             glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
 
-            auto monitor = glfwGetPrimaryMonitor();
+            GLFWmonitor* monitor = mode.fullscreen() ? glfwGetPrimaryMonitor() : nullptr;
 
             m_handle =
                 glfwCreateWindow( mode.width(), mode.height(), title.c_str(), monitor, nullptr );
