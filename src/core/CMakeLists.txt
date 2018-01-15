@@ -42,6 +42,8 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         src/uniform/uniformHelper.cpp
         src/GBuffer.cpp
         src/PNGLoader.cpp
+        src/font/Font.cpp
+        src/font/TextFactory.cpp
         )
 
     add_library(
