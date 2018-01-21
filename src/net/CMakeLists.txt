@@ -47,5 +47,10 @@ target_link_libraries(
     ttbUtils
     )
 
+set_property(
+    TARGET
+    ttbNet
+    PROPERTY POSITION_INDEPENDENT_CODE ON)
+
 list( APPEND VALID_TARGETS ttbNet )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

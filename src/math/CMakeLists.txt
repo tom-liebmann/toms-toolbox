@@ -24,10 +24,10 @@ target_compile_features(
     cxx_return_type_deduction
     )
 
-target_compile_options(
+set_property(
+    TARGET
     ttbMath
-    PRIVATE
-    -fPIC )
+    PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 list( APPEND VALID_TARGETS ttbMath )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
