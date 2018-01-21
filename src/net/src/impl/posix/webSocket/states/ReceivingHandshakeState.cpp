@@ -23,9 +23,8 @@ namespace ttb
                 return true;
             }
 
-            void ReceivingHandshakeState::doRead(
-                std::shared_ptr< SelectableHolder > const& source,
-                ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+            void ReceivingHandshakeState::doRead( std::shared_ptr< SelectableHolder > const& source,
+                                                  PushOutput< Event& >& eventOutput )
             {
                 uint8_t buffer[ 256 ];
 
@@ -67,9 +66,9 @@ namespace ttb
                 return false;
             }
 
-            void ReceivingHandshakeState::doWrite(
-                std::shared_ptr< SelectableHolder > const& source,
-                ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+            void
+                ReceivingHandshakeState::doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                                  PushOutput< Event& >& eventOutput )
             {
             }
         }

@@ -89,7 +89,7 @@ namespace ttb
         }
 
         void TCPSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
-                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                                PushOutput< Event& >& eventOutput )
         {
             switch( m_readState )
             {
@@ -184,7 +184,7 @@ namespace ttb
         }
 
         void TCPSocket::doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                                 PushOutput< Event& >& eventOutput )
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 

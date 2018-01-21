@@ -58,7 +58,7 @@ namespace ttb
         }
 
         void WebSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
-                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                                PushOutput< Event& >& eventOutput )
         {
             m_state->doRead( source, eventOutput );
         }
@@ -69,7 +69,7 @@ namespace ttb
         }
 
         void WebSocket::doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                                 PushOutput< Event& >& eventOutput )
         {
             m_state->doWrite( source, eventOutput );
         }

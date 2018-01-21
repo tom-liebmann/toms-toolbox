@@ -117,7 +117,7 @@ namespace ttb
             glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
             glfwSetScrollCallback( m_handle, callbackScroll );
 
-            m_eventOutput = std::make_shared< SimpleProvider< SlotType::ACTIVE, Event const& > >();
+            m_eventOutput = std::make_shared< PushOutput< Event const& > >();
 
             ++s_windowCount;
         }
@@ -134,15 +134,9 @@ namespace ttb
             }
         }
 
-        std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event const& > > const&
-            Window::eventOutput()
+        PushOutput< Event const& >& Window::eventOutput()
         {
-            return m_eventOutput;
-        }
-
-        std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > Window::eventOutput() const
-        {
-            return m_eventOutput;
+            return *m_eventOutput;
         }
 
         void Window::update()
@@ -160,7 +154,7 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->eventOutput()->push( event );
+        wnd->eventOutput().push( event );
     }
 
     void callbackErrorGLFW( int error, char const* description )

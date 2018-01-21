@@ -33,7 +33,7 @@ namespace ttb
     {
         NetSelector::NetSelector()
         {
-            m_eventOutput = std::make_shared< SimpleProvider< SlotType::ACTIVE, Event& > >();
+            m_eventOutput = std::make_shared< PushOutput< Event& > >();
         }
 
         NetSelector::~NetSelector()
@@ -80,9 +80,9 @@ namespace ttb
             }
         }
 
-        std::shared_ptr< Provider< SlotType::ACTIVE, Event& > > NetSelector::eventOutput() const
+        PushOutput< Event& >& NetSelector::eventOutput()
         {
-            return m_eventOutput;
+            return *m_eventOutput;
         }
 
         void NetSelector::update( bool block )

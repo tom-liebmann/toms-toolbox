@@ -22,11 +22,10 @@ namespace ttb
             virtual int handle() const override;
             virtual bool isReadable() const override;
             virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
-                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+                                 PushOutput< Event& >& eventOutput ) override;
             virtual bool isWritable() const override;
-            virtual void
-                doWrite( std::shared_ptr< SelectableHolder > const& source,
-                         SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+            virtual void doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                  PushOutput< Event& >& eventOutput ) override;
 
         private:
             int m_handle;

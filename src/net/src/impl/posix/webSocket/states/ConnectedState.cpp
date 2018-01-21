@@ -35,9 +35,8 @@ namespace ttb
                 return true;
             }
 
-            void ConnectedState::doRead(
-                std::shared_ptr< SelectableHolder > const& source,
-                ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+            void ConnectedState::doRead( std::shared_ptr< SelectableHolder > const& source,
+                                         PushOutput< Event& >& eventOutput )
             {
                 switch( m_readState )
                 {
@@ -237,9 +236,8 @@ namespace ttb
                 return !sck.m_packets.empty();
             }
 
-            void ConnectedState::doWrite(
-                std::shared_ptr< SelectableHolder > const& source,
-                ttb::SimpleProvider< ttb::SlotType::ACTIVE, ttb::Event& >& eventOutput )
+            void ConnectedState::doWrite( std::shared_ptr< SelectableHolder > const& source,
+                                          PushOutput< Event& >& eventOutput )
             {
                 auto& sck = socket();
                 std::unique_lock< std::mutex > lock( sck.m_mutex );

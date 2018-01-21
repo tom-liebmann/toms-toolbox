@@ -28,8 +28,7 @@ namespace ttb
         std::string const& title() const;
 
         // Event handling
-        virtual std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > >
-            eventOutput() const = 0;
+        virtual PushOutput< Event const& >& eventOutput() = 0;
 
         virtual void update() = 0;
 

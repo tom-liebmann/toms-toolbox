@@ -17,7 +17,7 @@ namespace ttb
     class NetSelector
     {
     public:
-        using EventOutput = Provider< SlotType::ACTIVE, Event& >;
+        using EventOutput = PushOutput< Event& >;
 
         static std::unique_ptr< NetSelector > create();
 
@@ -27,7 +27,7 @@ namespace ttb
 
         virtual void remove( std::shared_ptr< SelectableHolder > const& socket ) = 0;
 
-        virtual std::shared_ptr< EventOutput > eventOutput() const = 0;
+        virtual EventOutput& eventOutput() = 0;
 
         virtual void update( bool block = false ) = 0;
     };

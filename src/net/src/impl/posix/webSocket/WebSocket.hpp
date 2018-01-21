@@ -31,11 +31,10 @@ namespace ttb
             virtual int handle() const override;
             virtual bool isReadable() const override;
             virtual void doRead( std::shared_ptr< ttb::SelectableHolder > const& source,
-                                 SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+                                 PushOutput< Event& >& eventOutput ) override;
             virtual bool isWritable() const override;
-            virtual void
-                doWrite( std::shared_ptr< ttb::SelectableHolder > const& source,
-                         SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput ) override;
+            virtual void doWrite( std::shared_ptr< ttb::SelectableHolder > const& source,
+                                  PushOutput< Event& >& eventOutput ) override;
 
             // Override: WebSocket
             virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;

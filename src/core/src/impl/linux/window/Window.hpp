@@ -20,18 +20,14 @@ namespace ttb
 
             ~Window();
 
-            std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event const& > > const&
-                eventOutput();
-
-            virtual std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > >
-                eventOutput() const override;
+            virtual PushOutput< Event const& >& eventOutput() override;
 
             virtual void update() override;
 
         private:
             static size_t s_windowCount;
 
-            std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event const& > > m_eventOutput;
+            std::shared_ptr< PushOutput< Event const& > > m_eventOutput;
 
             GLFWwindow* m_handle;
         };

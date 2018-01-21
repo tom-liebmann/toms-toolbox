@@ -76,7 +76,7 @@ namespace ttb
         }
 
         void Listener::doRead( std::shared_ptr< SelectableHolder > const& source,
-                               SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                               PushOutput< Event& >& eventOutput )
         {
             auto socketHandle = ::accept( m_handle, NULL, NULL );
 
@@ -97,7 +97,7 @@ namespace ttb
         }
 
         void Listener::doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                SimpleProvider< SlotType::ACTIVE, Event& >& eventOutput )
+                                PushOutput< Event& >& eventOutput )
         {
         }
     }

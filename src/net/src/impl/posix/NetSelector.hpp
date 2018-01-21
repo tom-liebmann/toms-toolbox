@@ -30,7 +30,7 @@ namespace ttb
 
             virtual void remove( std::shared_ptr< SelectableHolder > const& selectable ) override;
 
-            virtual std::shared_ptr< EventOutput > eventOutput() const override;
+            virtual EventOutput& eventOutput() override;
 
             virtual void update( bool block ) override;
 
@@ -41,7 +41,7 @@ namespace ttb
                 REMOVE
             };
 
-            std::shared_ptr< SimpleProvider< SlotType::ACTIVE, Event& > > m_eventOutput;
+            std::shared_ptr< PushOutput< Event& > > m_eventOutput;
 
             std::queue< std::pair< ChangeType, std::shared_ptr< SelectableHolder > > > m_changes;
 
