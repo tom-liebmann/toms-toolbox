@@ -200,7 +200,7 @@ namespace ttb
                                 {
                                     ttb::events::Packet event(
                                         source,
-                                        std::make_shared< ttb::SizedIPacket >(
+                                        std::make_unique< ttb::SizedIPacket >(
                                             std::move( m_packetData ) ) );
                                     eventOutput.push( event );
                                     m_packetData.clear();

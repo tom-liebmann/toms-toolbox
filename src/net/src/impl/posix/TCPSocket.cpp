@@ -149,7 +149,7 @@ namespace ttb
                         if( m_readOffset == m_readBuffer.size() )
                         {
                             ttb::events::Packet event( source,
-                                                       std::make_shared< ttb::SizedIPacket >(
+                                                       std::make_unique< ttb::SizedIPacket >(
                                                            std::move( m_readBuffer ) ) );
                             eventOutput.push( event );
 
