@@ -9,7 +9,7 @@ namespace ttb
     class PushInput
     {
     public:
-        using Callback = std::function< void( TType const& ) >;
+        using Callback = std::function< void( TType ) >;
 
         PushInput( Callback callback );
 
