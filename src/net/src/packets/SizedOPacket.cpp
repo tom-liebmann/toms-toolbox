@@ -6,6 +6,8 @@
 #include <ttb/net/DataWriter.hpp>
 #include <ttb/net/TCPSocket.hpp>
 
+#include <iostream>
+
 
 namespace ttb
 {

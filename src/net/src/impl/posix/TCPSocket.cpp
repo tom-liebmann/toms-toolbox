@@ -68,7 +68,12 @@ namespace ttb
             }
         }
 
-        TCPSocket::TCPSocket( int handle ) : m_handle( handle )
+        TCPSocket::TCPSocket( int handle )
+            : m_connected( true )
+            , m_handle( handle )
+            , m_readBuffer( sizeof( uint32_t ) )
+            , m_readOffset( 0 )
+            , m_readState( ReadState::READ_SIZE )
         {
         }
 
@@ -85,80 +90,85 @@ namespace ttb
 
         bool TCPSocket::isReadable() const
         {
-            return true;
+            return m_connected;
         }
 
         void TCPSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
                                 PushOutput< Event& >& eventOutput )
         {
-            switch( m_readState )
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            if( m_connected )
             {
-                case ReadState::READ_SIZE:
+                switch( m_readState )
                 {
-                    auto result = ::recv( m_handle,
-                                          m_readBuffer.data() + m_readOffset,
-                                          sizeof( uint32_t ) - m_readOffset,
-                                          MSG_NOSIGNAL );
-
-                    if( result < 0 )
+                    case ReadState::READ_SIZE:
                     {
-                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        auto result = ::recv( m_handle,
+                                              m_readBuffer.data() + m_readOffset,
+                                              sizeof( uint32_t ) - m_readOffset,
+                                              MSG_NOSIGNAL );
+
+                        if( result < 0 )
                         {
-                            ttb::events::BrokenConnection event( source );
-                            eventOutput.push( event );
-                            return;
+                            if( errno != EAGAIN && errno != EWOULDBLOCK )
+                            {
+                                ttb::events::BrokenConnection event( source );
+                                eventOutput.push( event );
+                                return;
+                            }
                         }
+                        else if( result > 0 )
+                        {
+                            m_readOffset += result;
+
+                            if( m_readOffset == sizeof( uint32_t ) )
+                            {
+                                uint32_t payloadSize =
+                                    *reinterpret_cast< uint32_t const* >( m_readBuffer.data() );
+
+                                m_readOffset = 0;
+                                m_readBuffer.resize( payloadSize );
+                                m_readState = ReadState::READ_PAYLOAD;
+                            }
+                        }
+                        break;
                     }
-                    else if( result > 0 )
+
+                    case ReadState::READ_PAYLOAD:
                     {
-                        m_readOffset += result;
+                        auto result = ::recv( m_handle,
+                                              m_readBuffer.data() + m_readOffset,
+                                              m_readBuffer.size() - m_readOffset,
+                                              MSG_NOSIGNAL );
 
-                        if( m_readOffset == sizeof( uint32_t ) )
+                        if( result < 0 )
                         {
-                            uint32_t payloadSize =
-                                *reinterpret_cast< uint32_t const* >( m_readBuffer.data() );
-
-                            m_readOffset = 0;
-                            m_readBuffer.resize( payloadSize );
-                            m_readState = ReadState::READ_PAYLOAD;
+                            if( errno != EAGAIN && errno != EWOULDBLOCK )
+                            {
+                                ttb::events::BrokenConnection event( source );
+                                eventOutput.push( event );
+                                return;
+                            }
                         }
-                    }
-                    break;
-                }
-
-                case ReadState::READ_PAYLOAD:
-                {
-                    auto result = ::recv( m_handle,
-                                          m_readBuffer.data() + m_readOffset,
-                                          m_readBuffer.size() - m_readOffset,
-                                          MSG_NOSIGNAL );
-
-                    if( result < 0 )
-                    {
-                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        else if( result > 0 )
                         {
-                            ttb::events::BrokenConnection event( source );
-                            eventOutput.push( event );
-                            return;
-                        }
-                    }
-                    else if( result > 0 )
-                    {
-                        m_readOffset += result;
+                            m_readOffset += result;
 
-                        if( m_readOffset == m_readBuffer.size() )
-                        {
-                            ttb::events::Packet event( source,
-                                                       std::make_unique< ttb::SizedIPacket >(
-                                                           std::move( m_readBuffer ) ) );
-                            eventOutput.push( event );
+                            if( m_readOffset == m_readBuffer.size() )
+                            {
+                                ttb::events::Packet event( source,
+                                                           std::make_unique< ttb::SizedIPacket >(
+                                                               std::move( m_readBuffer ) ) );
+                                eventOutput.push( event );
 
-                            m_readOffset = 0;
-                            m_readBuffer.resize( sizeof( uint32_t ) );
-                            m_readState = ReadState::READ_SIZE;
+                                m_readOffset = 0;
+                                m_readBuffer.resize( sizeof( uint32_t ) );
+                                m_readState = ReadState::READ_SIZE;
+                            }
                         }
+                        break;
                     }
-                    break;
                 }
             }
         }
@@ -203,8 +213,10 @@ namespace ttb
 
                 try
                 {
-                    m_writeOffset +=
+                    auto written =
                         packet->write( writer, m_writeOffset, packet->size() - m_writeOffset );
+
+                    m_writeOffset += written;
                 }
                 catch( std::runtime_error& e )
                 {

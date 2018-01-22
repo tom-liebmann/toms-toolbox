@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 
 namespace ttb
@@ -20,7 +21,7 @@ namespace ttb
         public:
             virtual ~PushOutputSlot();
 
-            virtual void push( TType const& data ) = 0;
+            virtual void push( TType data ) = 0;
         };
 
 
@@ -30,7 +31,7 @@ namespace ttb
         public:
             PushOutputSlotImpl( std::shared_ptr< PushInput< TType2 > > input );
 
-            virtual void push( TType const& data ) override;
+            virtual void push( TType data ) override;
 
         private:
             std::shared_ptr< PushInput< TType2 > > m_input;
@@ -57,9 +58,9 @@ namespace ttb
         }
 
         template < typename TType, typename TType2 >
-        void PushOutputSlotImpl< TType, TType2 >::push( TType const& data )
+        void PushOutputSlotImpl< TType, TType2 >::push( TType data )
         {
-            m_input->push( data );
+            m_input->push( std::forward< TType >( data ) );
         }
     }
 }
