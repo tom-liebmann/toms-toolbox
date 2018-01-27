@@ -106,11 +106,12 @@ namespace ttb
 
         if( iter == std::end( m_uniforms ) )
         {
-            m_uniforms[ name ].push( std::make_unique< Uniform< TType > >( value ) );
+            m_uniforms[ name ].push(
+                std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
         }
         else
         {
-            iter->second.push( std::make_unique< Uniform< TType > >( value ) );
+            iter->second.push( std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
         }
     }
 

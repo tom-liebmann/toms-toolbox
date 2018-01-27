@@ -26,9 +26,8 @@ namespace ttb
 
         TType const& value() const;
 
-        void value( TType const& value );
-
-        void value( TType&& value );
+        template < typename TType2 >
+        void value( TType2&& value );
 
         // Override: UniformBase
         virtual void apply( GLint location ) const override;
@@ -56,15 +55,10 @@ namespace ttb
     }
 
     template < typename TType >
-    void Uniform< TType >::value( TType const& value )
+    template < typename TType2 >
+    void Uniform< TType >::value( TType2&& value )
     {
-        m_value = value;
-    }
-
-    template < typename TType >
-    void Uniform< TType >::value( TType&& value )
-    {
-        m_value = value;
+        m_value = std::forward< TType2 >( value );
     }
 
     template < typename TType >
