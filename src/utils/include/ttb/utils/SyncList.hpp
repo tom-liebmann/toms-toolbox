@@ -16,8 +16,9 @@ namespace ttb
     class SyncList
     {
     public:
-        void push_back( T&& value );
-        void erase( T&& value );
+        void push_back( T value );
+
+        void erase( T value );
 
         template < typename Op >
         void iterate( Op op );
@@ -38,17 +39,17 @@ namespace ttb
 namespace ttb
 {
     template < typename T >
-    void SyncList< T >::push_back( T&& value )
+    void SyncList< T >::push_back( T value )
     {
         std::lock_guard< std::mutex > lock( m_mutex );
-        m_changes.emplace_back( 0, std::forward< T >( value ) );
+        m_changes.emplace_back( 0, std::move( value ) );
     }
 
     template < typename T >
-    void SyncList< T >::erase( T&& value )
+    void SyncList< T >::erase( T value )
     {
         std::lock_guard< std::mutex > lock( m_mutex );
-        m_changes.emplace_back( 1, std::forward< T >( value ) );
+        m_changes.emplace_back( 1, std::move( value ) );
     }
 
     template < typename T >
@@ -68,8 +69,8 @@ namespace ttb
                         break;
 
                     case 1:  // Deletion
-                        m_values.erase( std::find( m_values.begin(), m_values.end(),
-                                                   std::get< 1 >( change ) ) );
+                        m_values.erase( std::find(
+                            m_values.begin(), m_values.end(), std::get< 1 >( change ) ) );
                         break;
                 }
             }
@@ -82,7 +83,9 @@ namespace ttb
         lock.unlock();
 
         for( auto& value : m_values )
+        {
             op( value );
+        }
 
         lock.lock();
 
