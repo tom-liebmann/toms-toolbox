@@ -8,9 +8,9 @@
 
 namespace ttb
 {
-    std::unique_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
+    std::shared_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
     {
-        return std::make_unique< ttb::emscripten::Window >( title, mode );
+        return std::make_shared< ttb::emscripten::Window >( title, mode );
     }
 
 
@@ -41,7 +41,7 @@ namespace ttb
 
             m_context = SDL_GL_CreateContext( m_handle );
 
-            m_eventOutput = std::make_shared< SimpleProvider< SlotType::ACTIVE, Event const& > >();
+            m_eventOutput = std::make_unique< PushOutput< Event const& > >();
 
             ++s_windowCount;
         }
@@ -59,9 +59,9 @@ namespace ttb
             }
         }
 
-        std::shared_ptr< Provider< SlotType::ACTIVE, Event const& > > Window::eventOutput() const
+        PushOutput< Event const& >& Window::eventOutput()
         {
-            return m_eventOutput;
+            return *m_eventOutput;
         }
 
         void Window::update()
