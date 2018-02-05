@@ -74,6 +74,8 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/shader/Program.cpp
         src/shader/Shader.cpp
         src/window/Window.cpp
+        src/uniform/Uniform.cpp
+        src/uniform/uniformHelper.cpp
         )
 
     add_library(

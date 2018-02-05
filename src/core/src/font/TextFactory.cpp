@@ -3,13 +3,15 @@
 
 namespace ttb
 {
-    std::unique_ptr< ttb::Geometry > TextFactory::createText( Font const& font,
-                                                              std::string const& text )
+    std::unique_ptr< ttb::Geometry >
+        TextFactory::createText( float size, Font const& font, std::string const& text )
     {
         std::shared_ptr< VertexBuffer > vertexBuffer =
             VertexBuffer::create().attribute( GL_FLOAT, 2 ).attribute( GL_FLOAT, 2 ).finish();
 
         {
+            float scaleFactor = size / font.lineHeight();
+
             auto v = vertexBuffer->access();
 
             float x = 0.0f;
@@ -23,28 +25,33 @@ namespace ttb
                     auto const& c = font.character( text[ i ] );
                     // upper left triangle
                     v->push( c.x() / font.texture()->width(), c.y() / font.texture()->height() );
-                    v->push( x + c.xOffset(), y + c.yOffset() );
+                    v->push( ( x + c.xOffset() ) * scaleFactor, ( y + c.yOffset() ) * scaleFactor );
 
                     v->push( c.x() / font.texture()->width(),
                              ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( x + c.xOffset(), y + c.yOffset() + c.height() );
+                    v->push( ( x + c.xOffset() ) * scaleFactor,
+                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
                     v->push( ( c.x() + c.width() ) / font.texture()->width(),
                              c.y() / font.texture()->height() );
-                    v->push( x + c.xOffset() + c.width(), y + c.yOffset() );
+                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                             ( y + c.yOffset() ) * scaleFactor );
 
                     // lower right triangle
                     v->push( c.x() / font.texture()->width(),
                              ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( x + c.xOffset(), y + c.yOffset() + c.height() );
+                    v->push( ( x + c.xOffset() ) * scaleFactor,
+                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
                     v->push( ( c.x() + c.width() ) / font.texture()->width(),
                              ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( x + c.xOffset() + c.width(), y + c.yOffset() + c.height() );
+                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
                     v->push( ( c.x() + c.width() ) / font.texture()->width(),
                              c.y() / font.texture()->height() );
-                    v->push( x + c.xOffset() + c.width(), y + c.yOffset() );
+                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                             ( y + c.yOffset() ) * scaleFactor );
 
                     x += c.xAdvance();
                 }

@@ -15,7 +15,7 @@ namespace ttb
         TextFactory( TextFactory const& copy ) = delete;
         TextFactory( TextFactory&& copy ) = delete;
 
-        static std::unique_ptr< ttb::Geometry > createText( Font const& font,
-                                                            std::string const& text );
+        static std::unique_ptr< ttb::Geometry >
+            createText( float size, Font const& font, std::string const& text );
     };
 }
