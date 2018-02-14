@@ -14,9 +14,9 @@ namespace ttb
 {
     class IndexBuffer
     {
+    public:
         class Access;
 
-    public:
         IndexBuffer();
 
         ~IndexBuffer();

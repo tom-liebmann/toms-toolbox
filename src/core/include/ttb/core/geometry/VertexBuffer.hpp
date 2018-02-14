@@ -27,9 +27,10 @@ namespace ttb
     {
         class Creator;
         class Attribute;
-        class Access;
 
     public:
+        class Access;
+
         static Creator create();
 
         ~VertexBuffer();
