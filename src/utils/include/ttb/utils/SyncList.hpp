@@ -16,6 +16,8 @@ namespace ttb
     class SyncList
     {
     public:
+        SyncList();
+
         void push_back( T value );
 
         void erase( T value );
@@ -38,6 +40,11 @@ namespace ttb
 
 namespace ttb
 {
+    template < typename T >
+    SyncList< T >::SyncList() : m_iterationCount( 0 )
+    {
+    }
+
     template < typename T >
     void SyncList< T >::push_back( T value )
     {
