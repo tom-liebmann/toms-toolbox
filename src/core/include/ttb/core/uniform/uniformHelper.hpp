@@ -26,6 +26,12 @@ namespace ttb
         };
 
         template <>
+        struct set_uniform< Matrix< float, 3, 3 > >
+        {
+            static void apply( GLint location, Matrix< float, 3, 3 > const& value );
+        };
+
+        template <>
         struct set_uniform< Matrix< float, 4, 4 > >
         {
             static void apply( GLint location, Matrix< float, 4, 4 > const& value );

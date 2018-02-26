@@ -15,6 +15,12 @@ namespace ttb
             glUniform1i( location, value );
         }
 
+        void set_uniform< Matrix< float, 3, 3 > >::apply( GLint location,
+                                                          Matrix< float, 3, 3 > const& value )
+        {
+            glUniformMatrix3fv( location, 1, GL_TRUE, value.ptr() );
+        }
+
         void set_uniform< Matrix< float, 4, 4 > >::apply( GLint location,
                                                           Matrix< float, 4, 4 > const& value )
         {
