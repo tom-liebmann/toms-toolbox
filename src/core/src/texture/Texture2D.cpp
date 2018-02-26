@@ -136,6 +136,7 @@ namespace ttb
 
     void Texture2DModifier::anisotropicFiltering( bool enabled ) const
     {
+#ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
         {
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
@@ -144,6 +145,7 @@ namespace ttb
         {
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
         }
+#endif
     }
 
     void Texture2DModifier::generateMipMap() const
