@@ -45,14 +45,13 @@ namespace ttb
                 lodepng_decode_file(
                     &pngData, &imageWidth, &imageHeight, file.c_str(), LCT_RGBA, 8 );
 
-                auto const imageSize = imageWidth * imageHeight;
+                auto const imageSize = imageWidth * imageHeight * 4;
 
                 if( !textureData )
                 {
                     width = imageWidth;
                     height = imageHeight;
-                    textureData =
-                        std::make_unique< uint8_t[] >( width * height * filenames.size() );
+                    textureData = std::make_unique< uint8_t[] >( imageSize * filenames.size() );
                 }
 
                 if( width == imageWidth && height == imageHeight )
