@@ -67,11 +67,16 @@ namespace ttb
 
             glfwSetErrorCallback( callbackErrorGLFW );
 
-            //        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-            // glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-            // glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+            // prevent glfw to create a context < 3.3
+            glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+            glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+            glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+            glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
 #ifndef NDEBUG
+            std::cout << "glfw version: " << glfwGetVersionString() << std::endl;
+            std::cout << "glew version: " << glewGetString( GLEW_VERSION ) << std::endl;
+
             glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
 
@@ -85,11 +90,32 @@ namespace ttb
 #ifdef GLEW_STATIC
             if( s_windowCount == 0 )
             {
+                // workaround for glew <= 1.13
+                // see https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library
+                glewExperimental = GL_TRUE;
+
                 glewInit();
             }
 #endif
 
 #ifndef NDEBUG
+            std::cout << "context major version: "
+                      << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MAJOR ) << std::endl;
+            std::cout << "context minor version: "
+                      << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MINOR ) << std::endl;
+            std::cout << "is core profile: "
+                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
+                           GLFW_OPENGL_CORE_PROFILE )
+                      << std::endl;
+            std::cout << "is compat profile: "
+                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
+                           GLFW_OPENGL_COMPAT_PROFILE )
+                      << std::endl;
+            std::cout << "is any profile: "
+                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
+                           GLFW_OPENGL_ANY_PROFILE )
+                      << std::endl;
+
             if( !glfwExtensionSupported( "GL_ARB_debug_output" ) )
             {
                 std::cout << "Debugging extension not supported" << std::endl;
