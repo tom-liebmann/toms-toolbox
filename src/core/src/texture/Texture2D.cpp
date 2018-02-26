@@ -133,4 +133,21 @@ namespace ttb
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, xWrap );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, yWrap );
     }
+
+    void Texture2DModifier::anisotropicFiltering( bool enabled ) const
+    {
+        if( enabled )
+        {
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
+        }
+        else
+        {
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
+        }
+    }
+
+    void Texture2DModifier::generateMipMap() const
+    {
+        glGenerateMipmap( GL_TEXTURE_2D );
+    }
 }

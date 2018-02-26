@@ -84,6 +84,10 @@ namespace ttb
 
         void wrap( GLenum xWrap, GLenum yWrap ) const;
 
+        void anisotropicFiltering( bool enabled ) const;
+
+        void generateMipMap() const;
+
     private:
         Texture2DModifier( Texture2D& texture );
 
