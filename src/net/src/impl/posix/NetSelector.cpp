@@ -2,7 +2,6 @@
 
 #include "Selectable.hpp"
 #include <ttb/net/Selectable.hpp>
-#include <ttb/net/SelectableHolder.hpp>
 #include <ttb/net/events.hpp>
 
 #include <arpa/inet.h>
@@ -31,58 +30,34 @@ namespace ttb
 
     namespace posix
     {
-        NetSelector::NetSelector()
+        void NetSelector::add( std::shared_ptr< ttb::Selectable > const& selectable )
         {
-            m_eventOutput = std::make_shared< PushOutput< Event& > >();
-        }
+            auto sel = std::dynamic_pointer_cast< posix::Selectable >( selectable );
 
-        NetSelector::~NetSelector()
-        {
-        }
-
-        void NetSelector::add( std::shared_ptr< SelectableHolder > const& selectable )
-        {
-            if( selectable )
+            if( sel )
             {
-                if( std::dynamic_pointer_cast< posix::Selectable >( selectable->selectable() ) )
-                {
-                    std::lock_guard< std::mutex > lock( m_mutex );
-                    m_changes.emplace( ChangeType::ADD, selectable );
-                }
-                else
-                {
-                    throw std::runtime_error( "Invalid type" );
-                }
+                std::lock_guard< std::mutex > lock( m_mutex );
+                m_changes.emplace( ChangeType::ADD, sel );
             }
             else
             {
-                throw std::runtime_error( "Null socket" );
+                throw std::runtime_error( "Invalid selectable" );
             }
         }
 
-        void NetSelector::remove( std::shared_ptr< SelectableHolder > const& selectable )
+        void NetSelector::remove( std::shared_ptr< ttb::Selectable > const& selectable )
         {
-            if( selectable )
+            auto sel = std::dynamic_pointer_cast< posix::Selectable >( selectable );
+
+            if( sel )
             {
-                if( std::dynamic_pointer_cast< posix::Selectable >( selectable->selectable() ) )
-                {
-                    std::lock_guard< std::mutex > lock( m_mutex );
-                    m_changes.emplace( ChangeType::REMOVE, selectable );
-                }
-                else
-                {
-                    throw std::runtime_error( "Invalid socket type" );
-                }
+                std::lock_guard< std::mutex > lock( m_mutex );
+                m_changes.emplace( ChangeType::REMOVE, sel );
             }
             else
             {
-                throw std::runtime_error( "Null socket" );
+                throw std::runtime_error( "Invalid selectable" );
             }
-        }
-
-        PushOutput< Event& >& NetSelector::eventOutput()
-        {
-            return *m_eventOutput;
         }
 
         void NetSelector::update( bool block )
@@ -139,18 +114,16 @@ namespace ttb
             int maxFD = 0;
             for( auto const& selectable : m_selectables )
             {
-                auto& sel = dynamic_cast< posix::Selectable const& >( *selectable->selectable() );
-
-                if( sel.isReadable() )
+                if( selectable->isReadable() )
                 {
-                    FD_SET( sel.handle(), &readSockets );
-                    maxFD = std::max( maxFD, sel.handle() );
+                    FD_SET( selectable->handle(), &readSockets );
+                    maxFD = std::max( maxFD, selectable->handle() );
                 }
 
-                if( sel.isWritable() )
+                if( selectable->isWritable() )
                 {
-                    FD_SET( sel.handle(), &writeSockets );
-                    maxFD = std::max( maxFD, sel.handle() );
+                    FD_SET( selectable->handle(), &writeSockets );
+                    maxFD = std::max( maxFD, selectable->handle() );
                 }
             }
 
@@ -167,16 +140,14 @@ namespace ttb
             {
                 for( auto& selectable : m_selectables )
                 {
-                    auto& sel = dynamic_cast< posix::Selectable& >( *selectable->selectable() );
-
-                    if( FD_ISSET( sel.handle(), &readSockets ) )
+                    if( FD_ISSET( selectable->handle(), &readSockets ) )
                     {
-                        sel.doRead( selectable, *m_eventOutput );
+                        selectable->doRead();
                     }
 
-                    if( FD_ISSET( sel.handle(), &writeSockets ) )
+                    if( FD_ISSET( selectable->handle(), &writeSockets ) )
                     {
-                        sel.doWrite( selectable, *m_eventOutput );
+                        selectable->doWrite();
                     }
                 }
             }

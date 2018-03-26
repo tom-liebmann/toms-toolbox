@@ -1,19 +1,29 @@
 #pragma once
 
 #include <ttb/net/Socket.hpp>
+#include <ttb/utils/Event.hpp>
+#include <ttb/utils/dataIO.hpp>
 
 #include <string>
+#include <vector>
 
 
 namespace ttb
 {
-    class TCPSocket : public Socket, public Selectable
+    class TCPSocket : public Selectable
     {
     public:
+        using EventOutput = PushOutput< Event& >;
+
         static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
         virtual ~TCPSocket();
 
-        virtual void send( std::shared_ptr< ttb::OPacket const > packet ) = 0;
+        virtual void send( std::vector< uint8_t > data ) = 0;
+
+        EventOutput& eventOutput();
+
+    private:
+        EventOutput m_eventOutput;
     };
 }

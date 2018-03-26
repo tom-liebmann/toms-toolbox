@@ -23,12 +23,10 @@ namespace ttb
             virtual int handle() const = 0;
 
             virtual bool isReadable() const = 0;
-            virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
-                                 PushOutput< Event& >& eventOutput ) = 0;
+            virtual void doRead() = 0;
 
             virtual bool isWritable() const = 0;
-            virtual void doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                  PushOutput< Event& >& eventOutput ) = 0;
+            virtual void doWrite() = 0;
         };
     }
 }

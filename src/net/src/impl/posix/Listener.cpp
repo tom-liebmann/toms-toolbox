@@ -23,6 +23,11 @@ namespace ttb
         return std::make_shared< posix::Listener >( port );
     }
 
+    Listener::EventOutput& Listener::eventOutput()
+    {
+        return m_eventOutput;
+    }
+
 
     namespace posix
     {
@@ -75,8 +80,7 @@ namespace ttb
             return true;
         }
 
-        void Listener::doRead( std::shared_ptr< SelectableHolder > const& source,
-                               PushOutput< Event& >& eventOutput )
+        void Listener::doRead()
         {
             auto socketHandle = ::accept( m_handle, NULL, NULL );
 
@@ -86,9 +90,9 @@ namespace ttb
             }
 
             ttb::events::ClientConnection event(
-                source, std::make_shared< ttb::posix::TCPSocket >( socketHandle ) );
+                std::make_shared< ttb::posix::TCPSocket >( socketHandle ) );
 
-            eventOutput.push( event );
+            eventOutput().push( event );
         }
 
         bool Listener::isWritable() const
@@ -96,8 +100,7 @@ namespace ttb
             return false;
         }
 
-        void Listener::doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                PushOutput< Event& >& eventOutput )
+        void Listener::doWrite()
         {
         }
     }

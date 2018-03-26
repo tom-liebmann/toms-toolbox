@@ -25,32 +25,20 @@ namespace ttb
             // Override: Selectable
             virtual int handle() const override;
             virtual bool isReadable() const override;
-            virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
-                                 PushOutput< Event& >& eventOutput ) override;
+            virtual void doRead() override;
             virtual bool isWritable() const override;
-            virtual void doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                  PushOutput< Event& >& eventOutput ) override;
+            virtual void doWrite() override;
 
             // Override: ttb::TCPSocket
-            virtual void send( std::shared_ptr< ttb::OPacket const > packet ) override;
+            virtual void send( std::vector< uint8_t > data ) override;
 
         private:
             mutable std::mutex m_mutex;
 
             bool m_connected;
 
-            std::queue< std::shared_ptr< ttb::OPacket const > > m_writeBuffer;
+            std::queue< std::vector< uint8_t > > m_writeBuffer;
             size_t m_writeOffset;
-
-            enum class ReadState
-            {
-                READ_SIZE,
-                READ_PAYLOAD
-            };
-
-            ReadState m_readState;
-            std::vector< uint8_t > m_readBuffer;
-            size_t m_readOffset;
 
             int m_handle;
         };

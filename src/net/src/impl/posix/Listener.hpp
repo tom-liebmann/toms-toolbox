@@ -21,11 +21,9 @@ namespace ttb
             // Override: Selectable
             virtual int handle() const override;
             virtual bool isReadable() const override;
-            virtual void doRead( std::shared_ptr< SelectableHolder > const& source,
-                                 PushOutput< Event& >& eventOutput ) override;
+            virtual void doRead() override;
             virtual bool isWritable() const override;
-            virtual void doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                  PushOutput< Event& >& eventOutput ) override;
+            virtual void doWrite() override;
 
         private:
             int m_handle;

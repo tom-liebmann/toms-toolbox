@@ -22,15 +22,9 @@ namespace ttb
         class NetSelector : public ttb::NetSelector
         {
         public:
-            NetSelector();
+            virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
 
-            ~NetSelector();
-
-            virtual void add( std::shared_ptr< SelectableHolder > const& selectable ) override;
-
-            virtual void remove( std::shared_ptr< SelectableHolder > const& selectable ) override;
-
-            virtual EventOutput& eventOutput() override;
+            virtual void remove( std::shared_ptr< ttb::Selectable > const& selectable ) override;
 
             virtual void update( bool block ) override;
 
@@ -41,11 +35,10 @@ namespace ttb
                 REMOVE
             };
 
-            std::shared_ptr< PushOutput< Event& > > m_eventOutput;
+            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::posix::Selectable > > >
+                m_changes;
 
-            std::queue< std::pair< ChangeType, std::shared_ptr< SelectableHolder > > > m_changes;
-
-            std::vector< std::shared_ptr< SelectableHolder > > m_selectables;
+            std::vector< std::shared_ptr< ttb::posix::Selectable > > m_selectables;
 
             mutable std::mutex m_mutex;
         };

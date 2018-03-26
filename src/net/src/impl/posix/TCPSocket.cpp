@@ -1,7 +1,6 @@
 #include "TCPSocket.hpp"
-#include "SocketDataWriter.hpp"
+#include "SocketDataReader.hpp"
 
-#include <ttb/net/DataWriter.hpp>
 #include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
 
@@ -35,14 +34,15 @@ namespace ttb
 
     TCPSocket::~TCPSocket() = default;
 
+    TCPSocket::EventOutput& TCPSocket::eventOutput()
+    {
+        return m_eventOutput;
+    }
+
 
     namespace posix
     {
-        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
-            : m_connected( false )
-            , m_readBuffer( sizeof( uint32_t ) )
-            , m_readOffset( 0 )
-            , m_readState( ReadState::READ_SIZE )
+        TCPSocket::TCPSocket( std::string const& address, uint16_t port ) : m_connected( false )
         {
             // create socket
             m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
@@ -68,12 +68,7 @@ namespace ttb
             }
         }
 
-        TCPSocket::TCPSocket( int handle )
-            : m_connected( true )
-            , m_handle( handle )
-            , m_readBuffer( sizeof( uint32_t ) )
-            , m_readOffset( 0 )
-            , m_readState( ReadState::READ_SIZE )
+        TCPSocket::TCPSocket( int handle ) : m_connected( true ), m_handle( handle )
         {
         }
 
@@ -93,82 +88,24 @@ namespace ttb
             return m_connected;
         }
 
-        void TCPSocket::doRead( std::shared_ptr< SelectableHolder > const& source,
-                                PushOutput< Event& >& eventOutput )
+        void TCPSocket::doRead()
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 
             if( m_connected )
             {
-                switch( m_readState )
+                SocketDataReader reader( *this );
+
+                try
                 {
-                    case ReadState::READ_SIZE:
-                    {
-                        auto result = ::recv( m_handle,
-                                              m_readBuffer.data() + m_readOffset,
-                                              sizeof( uint32_t ) - m_readOffset,
-                                              MSG_NOSIGNAL );
-
-                        if( result < 0 )
-                        {
-                            if( errno != EAGAIN && errno != EWOULDBLOCK )
-                            {
-                                ttb::events::BrokenConnection event( source );
-                                eventOutput.push( event );
-                                return;
-                            }
-                        }
-                        else if( result > 0 )
-                        {
-                            m_readOffset += result;
-
-                            if( m_readOffset == sizeof( uint32_t ) )
-                            {
-                                uint32_t payloadSize =
-                                    *reinterpret_cast< uint32_t const* >( m_readBuffer.data() );
-
-                                m_readOffset = 0;
-                                m_readBuffer.resize( payloadSize );
-                                m_readState = ReadState::READ_PAYLOAD;
-                            }
-                        }
-                        break;
-                    }
-
-                    case ReadState::READ_PAYLOAD:
-                    {
-                        auto result = ::recv( m_handle,
-                                              m_readBuffer.data() + m_readOffset,
-                                              m_readBuffer.size() - m_readOffset,
-                                              MSG_NOSIGNAL );
-
-                        if( result < 0 )
-                        {
-                            if( errno != EAGAIN && errno != EWOULDBLOCK )
-                            {
-                                ttb::events::BrokenConnection event( source );
-                                eventOutput.push( event );
-                                return;
-                            }
-                        }
-                        else if( result > 0 )
-                        {
-                            m_readOffset += result;
-
-                            if( m_readOffset == m_readBuffer.size() )
-                            {
-                                ttb::events::Packet event( source,
-                                                           std::make_unique< ttb::SizedIPacket >(
-                                                               std::move( m_readBuffer ) ) );
-                                eventOutput.push( event );
-
-                                m_readOffset = 0;
-                                m_readBuffer.resize( sizeof( uint32_t ) );
-                                m_readState = ReadState::READ_SIZE;
-                            }
-                        }
-                        break;
-                    }
+                    ttb::events::Data event( reader );
+                    eventOutput().push( event );
+                }
+                catch( std::runtime_error& e )
+                {
+                    ttb::events::BrokenConnection event;
+                    eventOutput().push( event );
+                    return;
                 }
             }
         }
@@ -193,39 +130,39 @@ namespace ttb
             return false;
         }
 
-        void TCPSocket::doWrite( std::shared_ptr< SelectableHolder > const& source,
-                                 PushOutput< Event& >& eventOutput )
+        void TCPSocket::doWrite()
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 
             if( !m_connected )
             {
                 m_connected = true;
-                ttb::events::ServerConnection event( source );
-                eventOutput.push( event );
+                ttb::events::ServerConnection event;
+                eventOutput().push( event );
             }
 
             if( !m_writeBuffer.empty() )
             {
-                auto& packet = m_writeBuffer.front();
+                auto& buffer = m_writeBuffer.front();
 
-                SocketDataWriter writer( *this );
+                auto result = ::send( m_handle,
+                                      buffer.data() + m_writeOffset,
+                                      buffer.size() - m_writeOffset,
+                                      MSG_NOSIGNAL );
 
-                try
+                if( result < 0 )
                 {
-                    auto written =
-                        packet->write( writer, m_writeOffset, packet->size() - m_writeOffset );
-
-                    m_writeOffset += written;
-                }
-                catch( std::runtime_error& e )
-                {
-                    ttb::events::BrokenConnection event( source );
-                    eventOutput.push( event );
-                    return;
+                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    {
+                        ttb::events::BrokenConnection event;
+                        eventOutput().push( event );
+                        return;
+                    }
                 }
 
-                if( m_writeOffset >= packet->size() )
+                m_writeOffset += result;
+
+                if( m_writeOffset >= buffer.size() )
                 {
                     m_writeOffset = 0;
                     m_writeBuffer.pop();
@@ -233,11 +170,11 @@ namespace ttb
             }
         }
 
-        void TCPSocket::send( std::shared_ptr< ttb::OPacket const > packet )
+        void TCPSocket::send( std::vector< uint8_t > data )
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 
-            m_writeBuffer.push( std::move( packet ) );
+            m_writeBuffer.push( std::move( data ) );
         }
     }
 }
