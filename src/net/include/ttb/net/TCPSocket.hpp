@@ -14,16 +14,22 @@ namespace ttb
     {
     public:
         using EventOutput = PushOutput< Event& >;
+        using DataInput = PushInput< std::vector< uint8_t > >;
 
         static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
-        virtual ~TCPSocket();
+        TCPSocket();
 
-        virtual void send( std::vector< uint8_t > data ) = 0;
+        virtual ~TCPSocket();
 
         EventOutput& eventOutput();
 
+        std::shared_ptr< DataInput > const& dataInput();
+
     private:
+        virtual void onData( std::vector< uint8_t > data ) = 0;
+
         EventOutput m_eventOutput;
+        std::shared_ptr< DataInput > m_dataInput;
     };
 }

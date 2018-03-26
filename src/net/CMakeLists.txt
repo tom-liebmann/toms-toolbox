@@ -9,6 +9,8 @@ set(
     src/impl/posix/NetSelector.cpp
     src/impl/posix/Selectable.cpp
     src/impl/posix/TCPSocket.cpp
+    src/impl/posix/SocketDataReader.cpp
+    src/TCPSocket.cpp
 
     #src/packets/DataIPacket.cpp
     #src/packets/DataOPacket.cpp
@@ -23,7 +25,6 @@ set(
     #src/impl/posix/webSocket/states/ReceivingHandshakeState.cpp
     #src/impl/posix/webSocket/states/SendingHandshakeState.cpp
     #src/impl/posix/webSocket/states/ConnectedState.cpp
-    #src/impl/posix/SocketDataReader.cpp
     #src/packets/WebSocketOPacket.cpp
 
     )

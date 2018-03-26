@@ -32,13 +32,6 @@ namespace ttb
         return std::make_shared< posix::TCPSocket >( address, port );
     }
 
-    TCPSocket::~TCPSocket() = default;
-
-    TCPSocket::EventOutput& TCPSocket::eventOutput()
-    {
-        return m_eventOutput;
-    }
-
 
     namespace posix
     {
@@ -170,7 +163,7 @@ namespace ttb
             }
         }
 
-        void TCPSocket::send( std::vector< uint8_t > data )
+        void TCPSocket::onData( std::vector< uint8_t > data )
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 

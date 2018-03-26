@@ -29,10 +29,10 @@ namespace ttb
             virtual bool isWritable() const override;
             virtual void doWrite() override;
 
-            // Override: ttb::TCPSocket
-            virtual void send( std::vector< uint8_t > data ) override;
-
         private:
+            // Override: ttb::TCPSocket
+            virtual void onData( std::vector< uint8_t > data ) override;
+
             mutable std::mutex m_mutex;
 
             bool m_connected;
