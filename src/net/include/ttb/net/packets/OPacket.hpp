@@ -3,15 +3,6 @@
 #include <string>
 
 
-// forward declarations
-//=============================================================================
-
-namespace ttb
-{
-    class DataWriter;
-}
-
-
 
 // declarations
 //=============================================================================
@@ -24,7 +15,6 @@ namespace ttb
         virtual ~OPacket();
 
         virtual size_t size() const = 0;
-
-        virtual size_t write( DataWriter& writer, size_t offset, size_t size ) const = 0;
+        virtual void send( ttb::PushOutput< std::vector< uint8_t > >& output ) const = 0;
     };
 }

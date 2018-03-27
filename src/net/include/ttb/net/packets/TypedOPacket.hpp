@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/net/packets/OPacket.hpp>
 #include <ttb/net/TCPSocket.hpp>
+#include <ttb/net/packets/OPacket.hpp>
 
 #include <memory>
 
@@ -15,8 +15,8 @@ namespace ttb
         TypedOPacket( TType type, std::shared_ptr< ttb::OPacket const > const& packet );
 
         // Override: ttb::OPacket
-        virtual void send( ttb::TCPSocket& socket ) const override;
         virtual size_t size() const override;
+        virtual void send( ttb::PushOutput< std::vector< uint8_t > >& output ) const override;
 
     private:
         TType m_type;
@@ -45,5 +45,10 @@ namespace ttb
     size_t TypedOPacket< TType >::size() const
     {
         return m_packet->size() + sizeof( TType );
+    }
+
+    template < typename TType >
+    void TypedOPacket< TType >::send( ttb::PushOutput< std::vector< uint8_t > >& output ) const
+    {
     }
 }
