@@ -35,6 +35,7 @@ namespace ttb
             virtual ConnectionState connected() const override;
             virtual void connect( std::string const& address, uint16_t port ) override;
             virtual void disconnect() override;
+            virtual void clearWriteBuffer() override;
 
             mutable std::mutex m_mutex;
 

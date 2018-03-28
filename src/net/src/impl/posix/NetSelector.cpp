@@ -114,16 +114,19 @@ namespace ttb
             int maxFD = 0;
             for( auto const& selectable : m_selectables )
             {
-                if( selectable->isReadable() )
+                if( selectable->handle() >= 0 )
                 {
-                    FD_SET( selectable->handle(), &readSockets );
-                    maxFD = std::max( maxFD, selectable->handle() );
-                }
+                    if( selectable->isReadable() )
+                    {
+                        FD_SET( selectable->handle(), &readSockets );
+                        maxFD = std::max( maxFD, selectable->handle() );
+                    }
 
-                if( selectable->isWritable() )
-                {
-                    FD_SET( selectable->handle(), &writeSockets );
-                    maxFD = std::max( maxFD, selectable->handle() );
+                    if( selectable->isWritable() )
+                    {
+                        FD_SET( selectable->handle(), &writeSockets );
+                        maxFD = std::max( maxFD, selectable->handle() );
+                    }
                 }
             }
 
@@ -140,12 +143,14 @@ namespace ttb
             {
                 for( auto& selectable : m_selectables )
                 {
-                    if( FD_ISSET( selectable->handle(), &readSockets ) )
+                    if( selectable->handle() >= 0 &&
+                        FD_ISSET( selectable->handle(), &readSockets ) )
                     {
                         selectable->doRead();
                     }
 
-                    if( FD_ISSET( selectable->handle(), &writeSockets ) )
+                    if( selectable->handle() >= 0 &&
+                        FD_ISSET( selectable->handle(), &writeSockets ) )
                     {
                         selectable->doWrite();
                     }

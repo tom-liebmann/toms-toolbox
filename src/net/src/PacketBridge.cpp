@@ -2,6 +2,8 @@
 
 #include <ttb/net/events.hpp>
 
+#include <iostream>
+
 
 namespace ttb
 {
@@ -20,9 +22,9 @@ namespace ttb
         return m_packetInput;
     }
 
-    PacketBridge::EventOutput& PacketBridge::eventOutput()
+    PacketBridge::PacketOutput& PacketBridge::packetOutput()
     {
-        return m_eventOutput;
+        return m_packetOutput;
     }
 
     std::shared_ptr< PacketBridge::EventInput > const& PacketBridge::eventInput()
@@ -45,6 +47,7 @@ namespace ttb
             {
                 case ReadState::SIZE:
                 {
+                    std::cout << "Reading size: " << m_readOffset << std::endl;
                     m_readOffset += e.read( reinterpret_cast< uint8_t* >( &m_size ) + m_readOffset,
                                             sizeof( uint32_t ) - m_readOffset );
 
@@ -60,6 +63,7 @@ namespace ttb
 
                 case ReadState::DATA:
                 {
+                    std::cout << "Reading data: " << m_readOffset << std::endl;
                     m_readOffset +=
                         e.read( m_data.data() + m_readOffset, m_data.size() - m_readOffset );
 
@@ -68,23 +72,25 @@ namespace ttb
                         m_readOffset = 0;
                         m_readState = ReadState::SIZE;
 
-                        ttb::events::Packet packetEvent(
+                        std::cout << "Packet" << std::endl;
+
+                        m_packetOutput.push(
                             std::make_unique< ttb::SizedIPacket >( std::move( m_data ) ) );
-                        m_eventOutput.push( packetEvent );
                     }
 
                     break;
                 }
             }
         }
-        else
-        {
-            m_eventOutput.push( event );
-        }
     }
 
     void PacketBridge::onPacketInput( std::shared_ptr< ttb::OPacket const > packet )
     {
+        uint32_t packetSize = packet->size();
+        m_dataOutput.push(
+            std::vector< uint8_t >( reinterpret_cast< uint8_t* >( &packetSize ),
+                                    reinterpret_cast< uint8_t* >( &packetSize + 1 ) ) );
+
         packet->send( m_dataOutput );
     }
 }

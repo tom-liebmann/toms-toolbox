@@ -28,6 +28,10 @@ namespace ttb
 {
     namespace events
     {
+        inline Packet::Packet( std::unique_ptr< IPacket > packet ) : m_packet( std::move( packet ) )
+        {
+        }
+
         inline std::unique_ptr< IPacket >& Packet::packet()
         {
             return m_packet;

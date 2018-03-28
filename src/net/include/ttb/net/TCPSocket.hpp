@@ -23,7 +23,7 @@ namespace ttb
             CONNECTING
         };
 
-        static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
+        static std::shared_ptr< TCPSocket > create( std::string const& address, uint16_t port );
 
         TCPSocket();
 
@@ -34,6 +34,8 @@ namespace ttb
         virtual void connect( std::string const& address, uint16_t port ) = 0;
 
         virtual void disconnect() = 0;
+
+        virtual void clearWriteBuffer() = 0;
 
         EventOutput& eventOutput();
 

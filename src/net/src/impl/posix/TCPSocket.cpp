@@ -27,7 +27,7 @@ namespace
 
 namespace ttb
 {
-    std::shared_ptr< TCPSocket > TCPSocket::connect( std::string const& address, uint16_t port )
+    std::shared_ptr< TCPSocket > TCPSocket::create( std::string const& address, uint16_t port )
     {
         return std::make_shared< posix::TCPSocket >( address, port );
     }
@@ -36,13 +36,15 @@ namespace ttb
     namespace posix
     {
         TCPSocket::TCPSocket( std::string const& address, uint16_t port )
-            : m_connectionState( ConnectionState::DISCONNECTED ), m_handle( -1 )
+            : m_connectionState( ConnectionState::DISCONNECTED ), m_writeOffset( 0 ), m_handle( -1 )
         {
             connect( address, port );
         }
 
         TCPSocket::TCPSocket( int handle )
-            : m_connectionState( ConnectionState::CONNECTED ), m_handle( handle )
+            : m_connectionState( ConnectionState::CONNECTED )
+            , m_writeOffset( 0 )
+            , m_handle( handle )
         {
         }
 
@@ -77,7 +79,17 @@ namespace ttb
                 fcntl( m_handle, F_SETFL, O_NONBLOCK );
             }
 
-            auto sockAddr = createAddress( address, port );
+            sockaddr_in sockAddr;
+
+            try
+            {
+                sockAddr = createAddress( address, port );
+            }
+            catch( std::runtime_error& e )
+            {
+                close( m_handle );
+                m_handle = -1;
+            }
 
             if(::connect( m_handle,
                           reinterpret_cast< struct sockaddr* >( &sockAddr ),
@@ -125,24 +137,35 @@ namespace ttb
 
         bool TCPSocket::isReadable() const
         {
-            return m_connected;
+            return m_connectionState == ConnectionState::CONNECTED;
         }
 
         void TCPSocket::doRead()
         {
-            std::lock_guard< std::mutex > lock( m_mutex );
+            std::unique_lock< std::mutex > lock( m_mutex );
 
-            if( m_connected )
+            if( m_connectionState == ConnectionState::CONNECTED )
             {
                 SocketDataReader reader( *this );
 
                 try
                 {
+                    lock.unlock();
+
                     ttb::events::Data event( reader );
                     eventOutput().push( event );
                 }
                 catch( std::runtime_error& e )
                 {
+                    lock.lock();
+
+                    shutdown( m_handle, SHUT_RDWR );
+                    close( m_handle );
+                    m_handle = -1;
+                    m_connectionState = ConnectionState::DISCONNECTED;
+
+                    lock.unlock();
+
                     ttb::events::BrokenConnection event;
                     eventOutput().push( event );
                     return;
@@ -156,7 +179,7 @@ namespace ttb
 
             // If the socket isn't connected yet, we use the writability as an indicator for
             // successful establishment
-            if( !m_connected )
+            if( m_connectionState == ConnectionState::CONNECTING )
             {
                 return true;
             }
@@ -172,40 +195,54 @@ namespace ttb
 
         void TCPSocket::doWrite()
         {
-            std::lock_guard< std::mutex > lock( m_mutex );
+            std::unique_lock< std::mutex > lock( m_mutex );
 
-            if( !m_connected )
+            if( m_connectionState == ConnectionState::CONNECTING )
             {
-                m_connected = true;
+                m_connectionState = ConnectionState::CONNECTED;
+
+                lock.unlock();
+
                 ttb::events::ServerConnection event;
                 eventOutput().push( event );
+
+                lock.lock();
             }
 
-            if( !m_writeBuffer.empty() )
+            if( m_connectionState == ConnectionState::CONNECTED )
             {
-                auto& buffer = m_writeBuffer.front();
-
-                auto result = ::send( m_handle,
-                                      buffer.data() + m_writeOffset,
-                                      buffer.size() - m_writeOffset,
-                                      MSG_NOSIGNAL );
-
-                if( result < 0 )
+                if( !m_writeBuffer.empty() )
                 {
-                    if( errno != EAGAIN && errno != EWOULDBLOCK )
+                    auto& buffer = m_writeBuffer.front();
+
+                    auto result = ::send( m_handle,
+                                          buffer.data() + m_writeOffset,
+                                          buffer.size() - m_writeOffset,
+                                          MSG_NOSIGNAL );
+
+                    if( result < 0 )
                     {
-                        ttb::events::BrokenConnection event;
-                        eventOutput().push( event );
-                        return;
+                        if( errno != EAGAIN && errno != EWOULDBLOCK )
+                        {
+                            m_connectionState = ConnectionState::DISCONNECTED;
+                            shutdown( m_handle, SHUT_RDWR );
+                            close( m_handle );
+                            m_handle = -1;
+                            lock.unlock();
+
+                            ttb::events::BrokenConnection event;
+                            eventOutput().push( event );
+                            return;
+                        }
                     }
-                }
 
-                m_writeOffset += result;
+                    m_writeOffset += result;
 
-                if( m_writeOffset >= buffer.size() )
-                {
-                    m_writeOffset = 0;
-                    m_writeBuffer.pop();
+                    if( m_writeOffset >= buffer.size() )
+                    {
+                        m_writeOffset = 0;
+                        m_writeBuffer.pop();
+                    }
                 }
             }
         }
@@ -215,6 +252,14 @@ namespace ttb
             std::lock_guard< std::mutex > lock( m_mutex );
 
             m_writeBuffer.push( std::move( data ) );
+        }
+
+        void TCPSocket::clearWriteBuffer()
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            std::queue< std::vector< uint8_t > > emptyQueue;
+            std::swap( m_writeBuffer, emptyQueue );
         }
     }
 }
