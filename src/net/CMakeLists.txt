@@ -12,12 +12,14 @@ set(
     src/impl/posix/SocketDataReader.cpp
     src/TCPSocket.cpp
 
-    #src/packets/DataIPacket.cpp
-    #src/packets/DataOPacket.cpp
-    #src/packets/IPacket.cpp
-    #src/packets/OPacket.cpp
-    #src/packets/SizedIPacket.cpp
-    #src/packets/SizedOPacket.cpp
+    src/packets/DataIPacket.cpp
+    src/packets/DataOPacket.cpp
+    src/packets/IPacket.cpp
+    src/packets/OPacket.cpp
+    src/packets/SizedIPacket.cpp
+    src/packets/SizedOPacket.cpp
+
+    src/PacketBridge.cpp
 
     #src/WebSocket.cpp
     #src/impl/posix/webSocket/WebSocket.cpp
