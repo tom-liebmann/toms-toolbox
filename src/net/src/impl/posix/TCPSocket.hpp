@@ -32,10 +32,13 @@ namespace ttb
         private:
             // Override: ttb::TCPSocket
             virtual void onData( std::vector< uint8_t > data ) override;
+            virtual ConnectionState connected() const override;
+            virtual void connect( std::string const& address, uint16_t port ) override;
+            virtual void disconnect() override;
 
             mutable std::mutex m_mutex;
 
-            bool m_connected;
+            ConnectionState m_connectionState;
 
             std::queue< std::vector< uint8_t > > m_writeBuffer;
             size_t m_writeOffset;

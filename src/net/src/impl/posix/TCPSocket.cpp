@@ -35,19 +35,49 @@ namespace ttb
 
     namespace posix
     {
-        TCPSocket::TCPSocket( std::string const& address, uint16_t port ) : m_connected( false )
+        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
+            : m_connectionState( ConnectionState::DISCONNECTED ), m_handle( -1 )
         {
-            // create socket
-            m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
+            connect( address, port );
+        }
+
+        TCPSocket::TCPSocket( int handle )
+            : m_connectionState( ConnectionState::CONNECTED ), m_handle( handle )
+        {
+        }
+
+        TCPSocket::~TCPSocket()
+        {
+            shutdown( m_handle, SHUT_RDWR );
+            close( m_handle );
+        }
+
+        TCPSocket::ConnectionState TCPSocket::connected() const
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+            return m_connectionState;
+        }
+
+        void TCPSocket::connect( std::string const& address, uint16_t port )
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            if( m_connectionState != ConnectionState::DISCONNECTED )
+            {
+                return;
+            }
 
             if( m_handle == -1 )
             {
-                throw std::runtime_error( "Unable to create socket." );
+                if( ( m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == -1 )
+                {
+                    // TODO: push failed connection event
+                }
+
+                fcntl( m_handle, F_SETFL, O_NONBLOCK );
             }
 
-            fcntl( m_handle, F_SETFL, O_NONBLOCK );
-
-            sockaddr_in sockAddr = createAddress( address, port );
+            auto sockAddr = createAddress( address, port );
 
             if(::connect( m_handle,
                           reinterpret_cast< struct sockaddr* >( &sockAddr ),
@@ -56,19 +86,36 @@ namespace ttb
                 if( errno != EINPROGRESS )
                 {
                     close( m_handle );
-                    throw std::runtime_error( "Unable to connect to remote host." );
+                    m_handle = -1;
+                    // TODO: push failed connection event
                 }
             }
+
+            m_connectionState = ConnectionState::CONNECTING;
         }
 
-        TCPSocket::TCPSocket( int handle ) : m_connected( true ), m_handle( handle )
+        void TCPSocket::disconnect()
         {
-        }
+            {
+                std::lock_guard< std::mutex > lock( m_mutex );
 
-        TCPSocket::~TCPSocket()
-        {
-            shutdown( m_handle, 0 );
-            close( m_handle );
+                if( m_connectionState == ConnectionState::DISCONNECTED )
+                {
+                    return;
+                }
+
+                if( m_handle != -1 )
+                {
+                    shutdown( m_handle, SHUT_RDWR );
+                    close( m_handle );
+                    m_handle = -1;
+                }
+
+                m_connectionState = ConnectionState::DISCONNECTED;
+            }
+
+            ttb::events::Disconnect event;
+            eventOutput().push( event );
         }
 
         int TCPSocket::handle() const

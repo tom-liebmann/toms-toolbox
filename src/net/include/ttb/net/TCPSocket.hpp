@@ -16,11 +16,24 @@ namespace ttb
         using EventOutput = PushOutput< Event& >;
         using DataInput = PushInput< std::vector< uint8_t > >;
 
+        enum class ConnectionState
+        {
+            CONNECTED,
+            DISCONNECTED,
+            CONNECTING
+        };
+
         static std::shared_ptr< TCPSocket > connect( std::string const& address, uint16_t port );
 
         TCPSocket();
 
         virtual ~TCPSocket();
+
+        virtual ConnectionState connected() const = 0;
+
+        virtual void connect( std::string const& address, uint16_t port ) = 0;
+
+        virtual void disconnect() = 0;
 
         EventOutput& eventOutput();
 
