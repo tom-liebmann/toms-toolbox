@@ -2,6 +2,14 @@
 
 #include <ttb/net/events.hpp>
 
+#include <memory>
+
+
+namespace ttb
+{
+    class TCPSocket;
+}
+
 
 namespace ttb
 {
