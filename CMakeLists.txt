@@ -14,7 +14,7 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
 elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
     message( "Using clang" )
-    set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake )
+    set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake CACHE PATH "Emscripten toolchain file" )
 
 else()
 
