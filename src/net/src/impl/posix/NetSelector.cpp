@@ -106,7 +106,6 @@ namespace ttb
 
             fd_set readSockets;
             fd_set writeSockets;
-            fd_set exceptSockets;
 
             FD_ZERO( &readSockets );
             FD_ZERO( &writeSockets );
@@ -114,25 +113,28 @@ namespace ttb
             int maxFD = 0;
             for( auto const& selectable : m_selectables )
             {
-                if( selectable->handle() >= 0 )
+                auto handle = selectable->handle();
+
+                if( handle >= 0 )
                 {
+                    maxFD = std::max( maxFD, handle );
+
                     if( selectable->isReadable() )
                     {
-                        FD_SET( selectable->handle(), &readSockets );
-                        maxFD = std::max( maxFD, selectable->handle() );
+                        FD_SET( handle, &readSockets );
                     }
 
                     if( selectable->isWritable() )
                     {
-                        FD_SET( selectable->handle(), &writeSockets );
-                        maxFD = std::max( maxFD, selectable->handle() );
+                        FD_SET( handle, &writeSockets );
                     }
                 }
             }
 
             timeval timeout = block ? timeval{ 5, 0 } : timeval{ 0, 0 };
 
-            auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
+            auto result =
+                select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 
             if( result == -1 )
             {
@@ -143,16 +145,19 @@ namespace ttb
             {
                 for( auto& selectable : m_selectables )
                 {
-                    if( selectable->handle() >= 0 &&
-                        FD_ISSET( selectable->handle(), &readSockets ) )
-                    {
-                        selectable->doRead();
-                    }
+                    auto handle = selectable->handle();
 
-                    if( selectable->handle() >= 0 &&
-                        FD_ISSET( selectable->handle(), &writeSockets ) )
+                    if( handle >= 0 )
                     {
-                        selectable->doWrite();
+                        if( FD_ISSET( handle, &readSockets ) )
+                        {
+                            selectable->doRead();
+                        }
+
+                        if( FD_ISSET( handle, &writeSockets ) )
+                        {
+                            selectable->doWrite();
+                        }
                     }
                 }
             }

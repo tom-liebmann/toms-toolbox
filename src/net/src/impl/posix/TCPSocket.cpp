@@ -62,7 +62,7 @@ namespace ttb
 
         void TCPSocket::connect( std::string const& address, uint16_t port )
         {
-            std::lock_guard< std::mutex > lock( m_mutex );
+            std::unique_lock< std::mutex > lock( m_mutex );
 
             if( m_connectionState != ConnectionState::DISCONNECTED )
             {
@@ -73,7 +73,12 @@ namespace ttb
             {
                 if( ( m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == -1 )
                 {
-                    // TODO: push failed connection event
+                    lock.unlock();
+
+                    ttb::events::BrokenConnection event;
+                    eventOutput().push( event );
+
+                    return;
                 }
 
                 fcntl( m_handle, F_SETFL, O_NONBLOCK );
@@ -89,6 +94,13 @@ namespace ttb
             {
                 close( m_handle );
                 m_handle = -1;
+
+                lock.unlock();
+
+                ttb::events::BrokenConnection event;
+                eventOutput().push( event );
+
+                return;
             }
 
             if(::connect( m_handle,
@@ -99,7 +111,13 @@ namespace ttb
                 {
                     close( m_handle );
                     m_handle = -1;
-                    // TODO: push failed connection event
+
+                    lock.unlock();
+
+                    ttb::events::BrokenConnection event;
+                    eventOutput().push( event );
+
+                    return;
                 }
             }
 
@@ -137,14 +155,14 @@ namespace ttb
 
         bool TCPSocket::isReadable() const
         {
-            return m_connectionState == ConnectionState::CONNECTED;
+            return m_connectionState != ConnectionState::DISCONNECTED;
         }
 
         void TCPSocket::doRead()
         {
             std::unique_lock< std::mutex > lock( m_mutex );
 
-            if( m_connectionState == ConnectionState::CONNECTED )
+            if( m_connectionState != ConnectionState::DISCONNECTED )
             {
                 SocketDataReader reader( *this );
 
@@ -159,7 +177,6 @@ namespace ttb
                 {
                     lock.lock();
 
-                    shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;

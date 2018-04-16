@@ -112,6 +112,7 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
         PUBLIC
         "-s USE_SDL=2"
         "-s DISABLE_EXCEPTION_CATCHING=0"
+        "-s DEMANGLE_SUPPORT=1"
         )
 
 endif()

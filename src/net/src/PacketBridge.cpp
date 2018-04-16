@@ -47,7 +47,6 @@ namespace ttb
             {
                 case ReadState::SIZE:
                 {
-                    std::cout << "Reading size: " << m_readOffset << std::endl;
                     m_readOffset += e.read( reinterpret_cast< uint8_t* >( &m_size ) + m_readOffset,
                                             sizeof( uint32_t ) - m_readOffset );
 
@@ -63,7 +62,6 @@ namespace ttb
 
                 case ReadState::DATA:
                 {
-                    std::cout << "Reading data: " << m_readOffset << std::endl;
                     m_readOffset +=
                         e.read( m_data.data() + m_readOffset, m_data.size() - m_readOffset );
 
@@ -71,8 +69,6 @@ namespace ttb
                     {
                         m_readOffset = 0;
                         m_readState = ReadState::SIZE;
-
-                        std::cout << "Packet" << std::endl;
 
                         m_packetOutput.push(
                             std::make_unique< ttb::SizedIPacket >( std::move( m_data ) ) );
