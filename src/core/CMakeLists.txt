@@ -104,7 +104,7 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
     target_compile_options(
         ttbCore
         PRIVATE
-            -s USE_SDL=2
+        -s USE_SDL=2
         )
 
     target_link_libraries(
@@ -113,6 +113,7 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
         "-s USE_SDL=2"
         "-s DISABLE_EXCEPTION_CATCHING=0"
         "-s DEMANGLE_SUPPORT=1"
+        "-s ASSERTIONS=2"
         )
 
 endif()
