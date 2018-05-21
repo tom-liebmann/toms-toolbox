@@ -2,7 +2,7 @@
 
 #include "uniformHelper.hpp"
 
-#include <GL/gl.h>
+#include <ttb/core/gl.hpp>
 
 #include <string>
 

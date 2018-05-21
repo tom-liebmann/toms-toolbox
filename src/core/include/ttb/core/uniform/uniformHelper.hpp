@@ -1,9 +1,7 @@
 #pragma once
 
+#include <ttb/core/gl.hpp>
 #include <ttb/math/Matrix.hpp>
-
-#include <GL/glew.h>
-#include <GL/gl.h>
 
 
 namespace ttb

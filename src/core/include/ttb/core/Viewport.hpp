@@ -1,8 +1,7 @@
 #pragma once
 
-#include <GL/glew.h>
+#include <ttb/core/gl.hpp>
 
-#include <GL/gl.h>
 
 // declarations
 //=============================================================================

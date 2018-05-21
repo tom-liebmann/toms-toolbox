@@ -2,9 +2,7 @@
 
 #include "RenderTarget.hpp"
 
-#include <GL/glew.h>
-
-#include <GL/gl.h>
+#include <ttb/core/gl.hpp>
 
 #include <cstdint>
 #include <memory>

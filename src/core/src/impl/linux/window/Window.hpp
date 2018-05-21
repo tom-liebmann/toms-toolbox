@@ -2,7 +2,7 @@
 
 #include <ttb/core/window/Window.hpp>
 
-#include <GL/glew.h>
+#include <ttb/core/gl.hpp>
 
 #include <GLFW/glfw3.h>
 
