@@ -13,6 +13,7 @@ namespace ttb
 
     void Window::mode( WindowMode const& mode )
     {
+        m_mode = mode;
     }
 
     WindowMode const& Window::mode() const
