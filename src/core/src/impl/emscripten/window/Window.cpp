@@ -37,9 +37,14 @@ namespace ttb
 
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
-            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
+            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
 
             m_context = SDL_GL_CreateContext( m_handle );
+
+            if( !m_context )
+            {
+                throw std::runtime_error( "Unable to create context" );
+            }
 
             m_eventOutput = std::make_unique< PushOutput< Event const& > >();
 
@@ -73,6 +78,21 @@ namespace ttb
             {
                 switch( event.type )
                 {
+                    case SDL_WINDOWEVENT:
+                    {
+                        switch( event.window.event )
+                        {
+                            case SDL_WINDOWEVENT_RESIZED:
+                            {
+                                mode( ttb::WindowMode(
+                                    event.window.data1, event.window.data2, true ) );
+
+                                m_eventOutput->push( ttb::events::WindowResize( *this ) );
+                                break;
+                            }
+                        }
+                    }
+
                     case SDL_KEYDOWN:
                     {
                         m_eventOutput->push( ttb::events::Key( event.key.keysym.sym,
