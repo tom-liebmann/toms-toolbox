@@ -22,24 +22,9 @@ namespace ttb
     Geometry::Geometry( GLenum mode,
                         std::vector< Attribute > attributes,
                         std::shared_ptr< IndexBuffer > const& indexBuffer )
-        : m_mode( mode )
-        , m_attributes( std::move( attributes ) )
-        , m_minAttributeSize( 0 )
-        , m_indexBuffer( indexBuffer )
+        : m_mode( mode ), m_attributes( std::move( attributes ) ), m_indexBuffer( indexBuffer )
     {
         glGenVertexArrays( 1, &m_arrayObject );
-
-        if( !m_attributes.empty() )
-        {
-            m_minAttributeSize = std::numeric_limits< size_t >::max();
-
-            for( auto const& attribute : m_attributes )
-            {
-                m_minAttributeSize =
-                    std::min( m_minAttributeSize,
-                              attribute.buffer().m_data.size() / attribute.buffer().m_blockSize );
-            }
-        }
     }
 
     void Geometry::draw( State& state ) const
@@ -74,7 +59,20 @@ namespace ttb
         }
         else
         {
-            glDrawArrays( m_mode, 0, m_minAttributeSize );
+            size_t minAttrSize = 0;
+            if( !m_attributes.empty() )
+            {
+                minAttrSize = std::numeric_limits< size_t >::max();
+
+                for( auto const& attribute : m_attributes )
+                {
+                    minAttrSize = std::min( minAttrSize,
+                                            attribute.buffer()->m_data.size() /
+                                                attribute.buffer()->m_blockSize );
+                }
+            }
+
+            glDrawArrays( m_mode, 0, minAttrSize );
         }
 
         state.popArrayObject();
