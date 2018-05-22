@@ -39,6 +39,18 @@ namespace ttb
         return m_height;
     }
 
+    uint8_t Texture2D::bytesPerPixel() const
+    {
+        switch( m_internalFormat )
+        {
+            case GL_RGBA:
+                return 4;
+
+            default:
+                throw std::runtime_error( "Unknown pixel format" );
+        }
+    }
+
     void Texture2D::bind( uint8_t slot )
     {
         glActiveTexture( GL_TEXTURE0 + slot );
@@ -105,6 +117,18 @@ namespace ttb
                          m_texture.m_format,
                          m_texture.m_valueType,
                          data );
+    }
+
+    void Texture2DModifier::download( size_t level, std::vector< uint8_t >& buffer ) const
+    {
+        GLint width, height;
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+
+        buffer.resize( width * height * m_texture.bytesPerPixel() );
+
+        glGetTexImage(
+            GL_TEXTURE_2D, level, m_texture.m_format, m_texture.m_valueType, buffer.data() );
     }
 
     void Texture2DModifier::minMagFilter( GLint minFilter, GLint magFilter ) const

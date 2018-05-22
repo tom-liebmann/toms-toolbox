@@ -8,6 +8,8 @@
 
 #include <cstdint>
 #include <memory>
+#include <vector>
+
 
 // declarations
 //=============================================================================
@@ -36,6 +38,8 @@ namespace ttb
         uint16_t width() const;
 
         uint16_t height() const;
+
+        uint8_t bytesPerPixel() const;
 
         // Override: Texture
         virtual void bind( uint8_t slot ) override;
@@ -73,6 +77,8 @@ namespace ttb
 
         /// Update the texture's data
         void upload( void const* data ) const;
+
+        void download( size_t level, std::vector< uint8_t >& buffer ) const;
 
         void minMagFilter( GLint minFilter, GLint magFilter ) const;
 
