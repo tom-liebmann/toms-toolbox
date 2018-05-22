@@ -62,7 +62,7 @@ namespace ttb
                 glEnableVertexAttribArray( location );
                 locations.push_back( location );
 
-                attribute.buffer().bind( attribute.index(), location );
+                attribute.buffer()->bind( attribute.index(), location );
             }
         }
 
@@ -78,6 +78,11 @@ namespace ttb
         }
 
         state.popArrayObject();
+    }
+
+    Geometry::Attribute const& Geometry::attribute( size_t index ) const
+    {
+        return m_attributes[ index ];
     }
 
     GLuint Geometry::arrayObject() const
@@ -126,9 +131,9 @@ namespace ttb
         return m_name;
     }
 
-    VertexBuffer const& Geometry::Attribute::buffer() const
+    std::shared_ptr< VertexBuffer > const& Geometry::Attribute::buffer() const
     {
-        return *m_buffer;
+        return m_buffer;
     }
 
     size_t Geometry::Attribute::index() const

@@ -3,8 +3,8 @@
 #include <ttb/core/gl.hpp>
 
 #include <memory>
-#include <vector>
 #include <string>
+#include <vector>
 
 
 // forward declarations
@@ -36,10 +36,13 @@ namespace ttb
 
         void draw( State& state ) const;
 
+        Attribute const& attribute( size_t index ) const;
+
         GLuint arrayObject() const;
 
     private:
-        Geometry( GLenum mode, std::vector< Attribute > attributes,
+        Geometry( GLenum mode,
+                  std::vector< Attribute > attributes,
                   std::shared_ptr< IndexBuffer > const& indexBuffer );
 
         GLenum m_mode;
@@ -54,12 +57,13 @@ namespace ttb
     class Geometry::Attribute
     {
     public:
-        Attribute( std::string const& name, std::shared_ptr< VertexBuffer > const& vertexBuffer,
+        Attribute( std::string const& name,
+                   std::shared_ptr< VertexBuffer > const& vertexBuffer,
                    size_t index );
 
         std::string const& name() const;
 
-        VertexBuffer const& buffer() const;
+        std::shared_ptr< VertexBuffer > const& buffer() const;
 
         size_t index() const;
 
@@ -74,7 +78,8 @@ namespace ttb
     class Geometry::Creator
     {
     public:
-        Creator& attribute( std::string const& name, std::shared_ptr< VertexBuffer > const& buffer,
+        Creator& attribute( std::string const& name,
+                            std::shared_ptr< VertexBuffer > const& buffer,
                             size_t index = 0 );
 
         Creator& indices( std::shared_ptr< IndexBuffer > const& indexBuffer );
