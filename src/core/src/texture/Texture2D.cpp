@@ -128,7 +128,7 @@ namespace ttb
         buffer.resize( width * height * m_texture.bytesPerPixel() );
 
         glGetTexImage(
-            GL_TEXTURE_2D, level, m_texture.m_format, m_texture.m_valueType, buffer.data() );
+            GL_TEXTURE_2D, level, m_texture.m_format, GL_UNSIGNED_BYTE, buffer.data() );
     }
 
     void Texture2DModifier::minMagFilter( GLint minFilter, GLint magFilter ) const
