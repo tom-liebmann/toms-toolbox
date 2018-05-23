@@ -24,30 +24,12 @@ namespace ttb
 
 namespace ttb
 {
-    class GBuffer;
-
-
-    class GBufferModifier
-    {
-    public:
-        GBufferModifier( State& state, std::shared_ptr< GBuffer > buffer );
-
-        GBufferModifier& drawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
-
-        GBufferModifier& depthBuffer( std::shared_ptr< Texture2D > buffer );
-
-        std::shared_ptr< GBuffer > finish();
-
-    private:
-        State& m_state;
-        std::shared_ptr< GBuffer > m_buffer;
-    };
-
-
     class GBuffer : public RenderTarget
     {
     public:
-        static GBufferModifier create( ttb::State& state );
+        class Modifier;
+
+        static Modifier create();
 
         ~GBuffer();
 
@@ -69,7 +51,26 @@ namespace ttb
         std::vector< std::shared_ptr< Texture2D > > m_drawBuffers;
         std::vector< GLenum > m_drawBufferIDs;
         std::shared_ptr< Texture2D > m_depthBuffer;
-
-        friend class GBufferModifier;
     };
+
+
+    class GBuffer::Modifier
+    {
+    public:
+        Modifier& drawBuffer( uint8_t unit, std::shared_ptr< Texture2D > buffer );
+
+        Modifier& depthBuffer( std::shared_ptr< Texture2D > buffer );
+
+        std::shared_ptr< GBuffer > finish();
+
+    private:
+        Modifier( std::shared_ptr< GBuffer > buffer );
+
+        std::shared_ptr< GBuffer > m_buffer;
+
+        friend Modifier modify( std::shared_ptr< GBuffer > buffer );
+    };
+
+
+    GBuffer::Modifier modify( std::shared_ptr< GBuffer > buffer );
 }

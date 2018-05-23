@@ -6,60 +6,12 @@
 
 namespace ttb
 {
-    // GBufferModifier
-    //=================================================================================================
-
-    GBufferModifier::GBufferModifier( State& state, std::shared_ptr< GBuffer > buffer )
-        : m_state( state ), m_buffer( std::move( buffer ) )
-    {
-        m_state.pushFramebuffer( m_buffer->m_frameBufferObject );
-    }
-
-    GBufferModifier& GBufferModifier::drawBuffer( uint8_t unit,
-                                                  std::shared_ptr< Texture2D > buffer )
-    {
-        if( m_buffer->m_drawBuffers.size() <= unit )
-        {
-            m_buffer->m_drawBuffers.resize( unit + 1 );
-            m_buffer->m_drawBufferIDs.resize( unit + 1 );
-        }
-
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D, buffer->object(), 0 );
-
-        m_buffer->m_drawBuffers[ unit ] = std::move( buffer );
-        m_buffer->m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
-
-        return *this;
-    }
-
-    GBufferModifier& GBufferModifier::depthBuffer( std::shared_ptr< Texture2D > buffer )
-    {
-        glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
-                                GL_DEPTH_ATTACHMENT,
-                                GL_TEXTURE_2D,
-                                buffer ? buffer->object() : 0,
-                                0 );
-
-        m_buffer->m_depthBuffer = std::move( buffer );
-
-        return *this;
-    }
-
-    std::shared_ptr< GBuffer > GBufferModifier::finish()
-    {
-        m_state.popFramebuffer();
-
-        return m_buffer;
-    }
-
-
     // GBuffer
     //=================================================================================================
 
-    GBufferModifier GBuffer::create( ttb::State& state )
+    GBuffer::Modifier GBuffer::create()
     {
-        return { state, std::shared_ptr< GBuffer >( new GBuffer() ) };
+        return modify( std::shared_ptr< GBuffer >( new GBuffer() ) );
     }
 
     GBuffer::~GBuffer()
@@ -112,5 +64,58 @@ namespace ttb
     GBuffer::GBuffer()
     {
         glGenFramebuffers( 1, &m_frameBufferObject );
+    }
+
+
+    // GBufferModifier
+    //=================================================================================================
+
+    GBuffer::Modifier& GBuffer::Modifier::drawBuffer( uint8_t unit,
+                                                      std::shared_ptr< Texture2D > buffer )
+    {
+        if( m_buffer->m_drawBuffers.size() <= unit )
+        {
+            m_buffer->m_drawBuffers.resize( unit + 1 );
+            m_buffer->m_drawBufferIDs.resize( unit + 1 );
+        }
+
+        glFramebufferTexture2D(
+            GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D, buffer->object(), 0 );
+
+        m_buffer->m_drawBuffers[ unit ] = std::move( buffer );
+        m_buffer->m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
+
+        return *this;
+    }
+
+    GBuffer::Modifier& GBuffer::Modifier::depthBuffer( std::shared_ptr< Texture2D > buffer )
+    {
+        glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
+                                GL_DEPTH_ATTACHMENT,
+                                GL_TEXTURE_2D,
+                                buffer ? buffer->object() : 0,
+                                0 );
+
+        m_buffer->m_depthBuffer = std::move( buffer );
+
+        return *this;
+    }
+
+    std::shared_ptr< GBuffer > GBuffer::Modifier::finish()
+    {
+        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, 0 );
+        return std::exchange( m_buffer, std::shared_ptr< GBuffer >() );
+    }
+
+    GBuffer::Modifier::Modifier( std::shared_ptr< GBuffer > buffer )
+        : m_buffer( std::move( buffer ) )
+    {
+        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_buffer->m_frameBufferObject );
+    }
+
+
+    GBuffer::Modifier modify( std::shared_ptr< GBuffer > buffer )
+    {
+        return { std::move( buffer ) };
     }
 }
