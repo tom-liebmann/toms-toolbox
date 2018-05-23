@@ -4,37 +4,24 @@
 
 namespace ttb
 {
-    Texture2D::Texture2D() : m_width( 0 ), m_height( 0 )
+    Texture2D::Modifier Texture2D::create()
     {
+        return modify( std::shared_ptr< Texture2D >( new Texture2D() ) );
     }
 
-    Texture2D::Texture2D(
-        uint16_t width, uint16_t height, GLint internalFormat, GLenum format, GLenum valueType )
-        : m_width( width )
-        , m_height( height )
-        , m_internalFormat( internalFormat )
-        , m_format( format )
-        , m_valueType( valueType )
+    Texture2D::Modifier Texture2D::create(
+        size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType )
     {
-        glBindTexture( GL_TEXTURE_2D, m_object );
-
-        glTexImage2D(
-            GL_TEXTURE_2D, 0, m_internalFormat, m_width, m_height, 0, m_format, m_valueType, NULL );
-
-        glBindTexture( GL_TEXTURE_2D, 0 );
+        return modify( std::shared_ptr< Texture2D >(
+            new Texture2D( width, height, internalFormat, format, valueType ) ) );
     }
 
-    std::unique_ptr< Texture2DModifier > Texture2D::modify()
-    {
-        return std::unique_ptr< Texture2DModifier >( new Texture2DModifier( *this ) );
-    }
-
-    uint16_t Texture2D::width() const
+    size_t Texture2D::width() const
     {
         return m_width;
     }
 
-    uint16_t Texture2D::height() const
+    size_t Texture2D::height() const
     {
         return m_height;
     }
@@ -44,6 +31,7 @@ namespace ttb
         switch( m_internalFormat )
         {
             case GL_RGBA:
+            case GL_R32F:
                 return 4;
 
             default:
@@ -57,19 +45,40 @@ namespace ttb
         glBindTexture( GL_TEXTURE_2D, object() );
     }
 
-
-    Texture2DModifier::Texture2DModifier( Texture2D& texture ) : m_texture( texture )
+    Texture2D::Texture2D() : m_width( 0 ), m_height( 0 )
     {
-        glBindTexture( GL_TEXTURE_2D, m_texture.object() );
     }
 
-    Texture2DModifier::~Texture2DModifier()
+    Texture2D::Texture2D(
+        size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType )
+        : m_width( width )
+        , m_height( height )
+        , m_internalFormat( internalFormat )
+        , m_format( format )
+        , m_valueType( valueType )
     {
+        glBindTexture( GL_TEXTURE_2D, m_object );
+
+        glTexImage2D(
+            GL_TEXTURE_2D, 0, m_internalFormat, m_width, m_height, 0, m_format, m_valueType, NULL );
+
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
         glBindTexture( GL_TEXTURE_2D, 0 );
     }
 
-    void Texture2DModifier::upload(
-        uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const
+
+    Texture2D::Modifier::~Modifier()
+    {
+        if( m_texture )
+        {
+            std::cerr << "Texture still in modification state" << std::endl;
+        }
+    }
+
+    Texture2D::Modifier& Texture2D::Modifier::upload(
+        size_t x, size_t y, size_t width, size_t height, void const* data )
     {
         glTexSubImage2D( GL_TEXTURE_2D,
                          0,
@@ -77,88 +86,109 @@ namespace ttb
                          y,
                          width,
                          height,
-                         m_texture.m_format,
-                         m_texture.m_valueType,
+                         m_texture->m_format,
+                         m_texture->m_valueType,
                          data );
+
+        return *this;
     }
 
-    void Texture2DModifier::upload( uint16_t width,
-                                    uint16_t height,
-                                    GLint internalFormat,
-                                    GLenum format,
-                                    GLenum valueType,
-                                    void const* data ) const
+    Texture2D::Modifier& Texture2D::Modifier::upload( size_t width,
+                                                      size_t height,
+                                                      GLint internalFormat,
+                                                      GLenum format,
+                                                      GLenum valueType,
+                                                      void const* data )
     {
-        m_texture.m_width = width;
-        m_texture.m_height = height;
-        m_texture.m_internalFormat = internalFormat;
-        m_texture.m_format = format;
-        m_texture.m_valueType = valueType;
+        m_texture->m_width = width;
+        m_texture->m_height = height;
+        m_texture->m_internalFormat = internalFormat;
+        m_texture->m_format = format;
+        m_texture->m_valueType = valueType;
 
         glTexImage2D( GL_TEXTURE_2D,
                       0,
-                      m_texture.m_internalFormat,
-                      m_texture.m_width,
-                      m_texture.m_height,
+                      m_texture->m_internalFormat,
+                      m_texture->m_width,
+                      m_texture->m_height,
                       0,
-                      m_texture.m_format,
-                      m_texture.m_valueType,
+                      m_texture->m_format,
+                      m_texture->m_valueType,
                       data );
+
+        return *this;
     }
 
-    void Texture2DModifier::upload( void const* data ) const
+    Texture2D::Modifier& Texture2D::Modifier::upload( void const* data )
     {
         glTexSubImage2D( GL_TEXTURE_2D,
                          0,
                          0,
                          0,
-                         m_texture.m_width,
-                         m_texture.m_height,
-                         m_texture.m_format,
-                         m_texture.m_valueType,
+                         m_texture->m_width,
+                         m_texture->m_height,
+                         m_texture->m_format,
+                         m_texture->m_valueType,
                          data );
+
+        return *this;
     }
 
-    void Texture2DModifier::download( size_t level, std::vector< uint8_t >& buffer ) const
+    Texture2D::Modifier& Texture2D::Modifier::download( size_t level,
+                                                        std::vector< uint8_t >& buffer )
     {
         GLint width, height;
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
 
-        buffer.resize( width * height * m_texture.bytesPerPixel() );
+        std::cout << "Size: " << width << " " << height << std::endl;
+
+        buffer.resize( width * height * m_texture->bytesPerPixel() );
 
         glGetTexImage(
-            GL_TEXTURE_2D, level, m_texture.m_format, GL_UNSIGNED_BYTE, buffer.data() );
+            GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
+
+        return *this;
     }
 
-    void Texture2DModifier::minMagFilter( GLint minFilter, GLint magFilter ) const
+    Texture2D::Modifier& Texture2D::Modifier::minMagFilter( GLint minFilter, GLint magFilter )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter );
+
+        return *this;
     }
 
-    void Texture2DModifier::depthMode( GLint mode ) const
+    Texture2D::Modifier& Texture2D::Modifier::depthMode( GLint mode )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, mode );
+
+        return *this;
     }
 
-    void Texture2DModifier::compareMode( GLint mode ) const
+    Texture2D::Modifier& Texture2D::Modifier::compareMode( GLint mode )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, mode );
+
+        return *this;
     }
 
-    void Texture2DModifier::compareFunc( GLint func ) const
+    Texture2D::Modifier& Texture2D::Modifier::compareFunc( GLint func )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, func );
+
+        return *this;
     }
 
-    void Texture2DModifier::wrap( GLenum xWrap, GLenum yWrap ) const
+    Texture2D::Modifier& Texture2D::Modifier::wrap( GLenum xWrap, GLenum yWrap )
     {
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, xWrap );
         glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, yWrap );
+
+        return *this;
     }
 
-    void Texture2DModifier::anisotropicFiltering( bool enabled ) const
+    Texture2D::Modifier& Texture2D::Modifier::anisotropicFiltering( bool enabled )
     {
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
@@ -170,10 +200,33 @@ namespace ttb
             glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
         }
 #endif
+
+        return *this;
     }
 
-    void Texture2DModifier::generateMipMap() const
+    Texture2D::Modifier& Texture2D::Modifier::generateMipMap()
     {
         glGenerateMipmap( GL_TEXTURE_2D );
+
+        return *this;
+    }
+
+    std::shared_ptr< Texture2D > Texture2D::Modifier::finish()
+    {
+        glBindTexture( GL_TEXTURE_2D, 0 );
+
+        return std::exchange( m_texture, std::shared_ptr< Texture2D >() );
+    }
+
+    Texture2D::Modifier::Modifier( std::shared_ptr< Texture2D > texture )
+        : m_texture( std::move( texture ) )
+    {
+        glBindTexture( GL_TEXTURE_2D, m_texture->object() );
+    }
+
+
+    Texture2D::Modifier modify( std::shared_ptr< Texture2D > texture )
+    {
+        return { std::move( texture ) };
     }
 }

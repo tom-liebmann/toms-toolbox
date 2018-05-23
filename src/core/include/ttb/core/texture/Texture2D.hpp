@@ -16,28 +16,20 @@
 
 namespace ttb
 {
-    class Texture2DModifier;
-
-
     class Texture2D : public Texture
     {
-        friend class Texture2DModifier;
-
     public:
-        Texture2D();
+        class Modifier;
 
-        Texture2D( uint16_t width,
-                   uint16_t height,
-                   GLint internalFormat,
-                   GLenum format,
-                   GLenum valueType );
+        static Modifier create();
 
-        std::unique_ptr< Texture2DModifier > modify();
+        static Modifier create(
+            size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType );
 
         // Properties
-        uint16_t width() const;
+        size_t width() const;
 
-        uint16_t height() const;
+        size_t height() const;
 
         uint8_t bytesPerPixel() const;
 
@@ -45,58 +37,67 @@ namespace ttb
         virtual void bind( uint8_t slot ) override;
 
     private:
-        uint16_t m_width;
-        uint16_t m_height;
+        Texture2D();
+
+        Texture2D(
+            size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType );
+
+        size_t m_width;
+        size_t m_height;
         GLint m_internalFormat;
         GLenum m_format;
         GLenum m_valueType;
     };
 
 
-    class Texture2DModifier
+    class Texture2D::Modifier
     {
-        friend class Texture2D;
-
     public:
-        ~Texture2DModifier();
+        ~Modifier();
 
         /// Upload values into the texture
         /*
          * If dimensions do not match, the texture gets resized.
          */
-        void upload( uint16_t width,
-                     uint16_t height,
-                     GLint internalFormat,
-                     GLenum format,
-                     GLenum valueType,
-                     void const* data ) const;
+        Modifier& upload( size_t width,
+                          size_t height,
+                          GLint internalFormat,
+                          GLenum format,
+                          GLenum valueType,
+                          void const* data );
 
         /// Update a rectangular part of the texture
-        void upload(
-            uint16_t x, uint16_t y, uint16_t width, uint16_t height, void const* data ) const;
+        Modifier& upload( size_t x, size_t y, size_t width, size_t height, void const* data );
 
         /// Update the texture's data
-        void upload( void const* data ) const;
+        Modifier& upload( void const* data );
 
-        void download( size_t level, std::vector< uint8_t >& buffer ) const;
+        Modifier& download( size_t level, std::vector< uint8_t >& buffer );
 
-        void minMagFilter( GLint minFilter, GLint magFilter ) const;
+        Modifier& minMagFilter( GLint minFilter, GLint magFilter );
 
-        void depthMode( GLint mode ) const;
+        Modifier& depthMode( GLint mode );
 
-        void compareMode( GLint mode ) const;
+        Modifier& compareMode( GLint mode );
 
-        void compareFunc( GLint func ) const;
+        Modifier& compareFunc( GLint func );
 
-        void wrap( GLenum xWrap, GLenum yWrap ) const;
+        Modifier& wrap( GLenum xWrap, GLenum yWrap );
 
-        void anisotropicFiltering( bool enabled ) const;
+        Modifier& anisotropicFiltering( bool enabled );
 
-        void generateMipMap() const;
+        Modifier& generateMipMap();
+
+        std::shared_ptr< Texture2D > finish();
 
     private:
-        Texture2DModifier( Texture2D& texture );
+        Modifier( std::shared_ptr< Texture2D > texture );
 
-        Texture2D& m_texture;
+        std::shared_ptr< Texture2D > m_texture;
+
+        friend Modifier modify( std::shared_ptr< Texture2D > texture );
     };
+
+
+    Texture2D::Modifier modify( std::shared_ptr< Texture2D > texture );
 }

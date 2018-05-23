@@ -126,8 +126,8 @@ namespace ttb
         {
             throw std::runtime_error( "Invalid file directory" );
         }
+
         m_texture = TextureFactory::loadPNG( match[ 1 ].str() + textureFile );
-        m_texture->modify()->minMagFilter( GL_LINEAR, GL_LINEAR );
     }
 
     Font::Character const& Font::character( char index ) const
