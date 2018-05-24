@@ -141,8 +141,6 @@ namespace ttb
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
 
-        std::cout << "Size: " << width << " " << height << std::endl;
-
         buffer.resize( width * height * m_texture->bytesPerPixel() );
 
         glGetTexImage(
