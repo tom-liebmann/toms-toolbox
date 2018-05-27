@@ -31,7 +31,11 @@ namespace ttb
 
         size_t height() const;
 
+        uint8_t colorChannel() const;
+
         uint8_t bytesPerPixel() const;
+
+        uint8_t bitDepth() const;
 
         // Override: Texture
         virtual void bind( uint8_t slot ) override;

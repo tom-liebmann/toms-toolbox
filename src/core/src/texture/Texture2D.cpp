@@ -26,16 +26,41 @@ namespace ttb
         return m_height;
     }
 
-    uint8_t Texture2D::bytesPerPixel() const
+    uint8_t Texture2D::colorChannel() const
     {
         switch( m_internalFormat )
         {
-            case GL_RGBA:
             case GL_R32F:
+                return 1;
+
+            case GL_RGB:
+                return 3;
+
+            case GL_RGBA:
                 return 4;
 
             default:
                 throw std::runtime_error( "Unknown pixel format" );
+        }
+    }
+
+    uint8_t Texture2D::bytesPerPixel() const
+    {
+        return colorChannel() * bitDepth();
+    }
+
+    uint8_t Texture2D::bitDepth() const
+    {
+        switch( m_valueType )
+        {
+            case GL_UNSIGNED_BYTE:
+                return 1;
+
+            case GL_FLOAT:
+                return 4;
+
+            default:
+                throw std::runtime_error( "Unknown value type" );
         }
     }
 
