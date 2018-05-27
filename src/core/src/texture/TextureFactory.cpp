@@ -82,5 +82,36 @@ namespace ttb
 
             return texture;
         }
+
+        void savePNG( std::shared_ptr< Texture2D > texture, std::string const& filename )
+        {
+            std::vector< uint8_t > data;
+
+            modify( texture ).download( 0, data ).finish();
+
+            LodePNGColorType type = []( uint8_t channel ) {
+                switch( channel )
+                {
+                    case 3:
+                        return LCT_RGB;
+
+                    case 4:
+                        return LCT_RGBA;
+
+                    default:
+                        throw std::runtime_error( "Unknown pixel format" );
+                }
+            }( texture->colorChannel() );
+
+            // TODO: Find out why lodepng crashes with "double free" error when textures are in RGB
+            // rather than RGBA format
+
+            lodepng_encode_file( filename.c_str(),
+                                 data.data(),
+                                 texture->width(),
+                                 texture->height(),
+                                 type,
+                                 texture->bitDepth() * 8 );
+        }
     }
 }

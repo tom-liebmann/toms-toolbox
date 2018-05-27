@@ -13,6 +13,8 @@ namespace ttb
     {
         std::shared_ptr< Texture2D > loadPNG( std::string const& filename );
 
+        void savePNG( std::shared_ptr< Texture2D > texture, std::string const& filename );
+
         std::unique_ptr< Texture3D > loadPNGArray( std::vector< std::string > const& filenames );
     }
 }
