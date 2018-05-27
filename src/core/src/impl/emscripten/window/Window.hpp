@@ -14,13 +14,14 @@ namespace ttb
         class Window : public ttb::Window
         {
         public:
-            Window( std::string const& title, WindowMode const& mode );
+            Window( std::string const& title, Mode const& mode );
 
             ~Window();
 
+            // Override: ttb::Window
             virtual PushOutput< Event const& >& eventOutput() override;
-
             virtual void update() override;
+            virtual void resize( uint16_t width, uint16_t height ) override;
 
         private:
             static size_t s_windowCount;

@@ -8,7 +8,7 @@
 
 namespace ttb
 {
-    std::shared_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
+    std::shared_ptr< Window > Window::create( std::string const& title, Mode const& mode )
     {
         return std::make_shared< ttb::emscripten::Window >( title, mode );
     }
@@ -18,8 +18,7 @@ namespace ttb
     {
         size_t Window::s_windowCount = 0;
 
-        Window::Window( std::string const& title, WindowMode const& mode )
-            : ttb::Window( title, mode )
+        Window::Window( std::string const& title, Mode const& mode ) : ttb::Window( title, mode )
         {
             if( s_windowCount == 0 )
             {
@@ -27,13 +26,13 @@ namespace ttb
                 glewInit();
             }
 
-            m_handle = SDL_CreateWindow( title.c_str(),
-                                         SDL_WINDOWPOS_UNDEFINED,
-                                         SDL_WINDOWPOS_UNDEFINED,
-                                         mode.width(),
-                                         mode.height(),
-                                         SDL_WINDOW_OPENGL |
-                                             ( mode.fullscreen() ? SDL_WINDOW_RESIZABLE : 0 ) );
+            m_handle = SDL_CreateWindow(
+                title.c_str(),
+                SDL_WINDOWPOS_UNDEFINED,
+                SDL_WINDOWPOS_UNDEFINED,
+                mode.width(),
+                mode.height(),
+                SDL_WINDOW_OPENGL | ( mode.flag( Flag::FULLSCREEN ) ? SDL_WINDOW_RESIZABLE : 0 ) );
 
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
@@ -84,8 +83,8 @@ namespace ttb
                         {
                             case SDL_WINDOWEVENT_RESIZED:
                             {
-                                mode( ttb::WindowMode(
-                                    event.window.data1, event.window.data2, true ) );
+                                mode( Mode(
+                                    event.window.data1, event.window.data2, mode().flags() ) );
 
                                 m_eventOutput->push( ttb::events::WindowResize( *this ) );
                                 break;
@@ -141,6 +140,10 @@ namespace ttb
                     }
                 }
             }
+        }
+
+        void Window::resize( uint16_t width, uint16_t height )
+        {
         }
     }
 }

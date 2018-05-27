@@ -47,7 +47,7 @@ namespace
 
 namespace ttb
 {
-    std::shared_ptr< Window > Window::create( std::string const& title, WindowMode const& mode )
+    std::shared_ptr< Window > Window::create( std::string const& title, Window::Mode const& mode )
     {
         return std::make_shared< linux::Window >( title, mode );
     }
@@ -57,7 +57,7 @@ namespace ttb
     {
         size_t Window::s_windowCount = 0;
 
-        Window::Window( std::string const& title, WindowMode const& mode )
+        Window::Window( std::string const& title, Window::Mode const& mode )
             : ttb::Window( title, mode )
         {
             if( s_windowCount == 0 )
@@ -68,7 +68,7 @@ namespace ttb
             glfwSetErrorCallback( callbackErrorGLFW );
 
             // prevent glfw to create a context < 3.3
-            glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 3 );
+            glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
             glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
             glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
             glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
@@ -80,12 +80,18 @@ namespace ttb
             glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
 #endif
 
-            GLFWmonitor* monitor = mode.fullscreen() ? glfwGetPrimaryMonitor() : nullptr;
+            GLFWmonitor* monitor =
+                mode.flag( Window::Flag::FULLSCREEN ) ? glfwGetPrimaryMonitor() : nullptr;
+
+            glfwWindowHint( GLFW_FLOATING, mode.flag( Window::Flag::FLOATING ) ? 1 : 0 );
+            glfwWindowHint( GLFW_RESIZABLE, mode.flag( Window::Flag::RESIZABLE ) ? 1 : 0 );
 
             m_handle =
                 glfwCreateWindow( mode.width(), mode.height(), title.c_str(), monitor, nullptr );
 
             glfwMakeContextCurrent( m_handle );
+
+            glfwSwapInterval( 0 );
 
 #ifdef GLEW_STATIC
             if( s_windowCount == 0 )
@@ -169,6 +175,15 @@ namespace ttb
         {
             glfwSwapBuffers( m_handle );
             glfwPollEvents();
+        }
+
+        void Window::resize( uint16_t width, uint16_t height )
+        {
+            glfwSetWindowSize( m_handle, width, height );
+
+            mode( ttb::Window::Mode( width, height, mode().flags() ) );
+
+            m_eventOutput->push( ttb::events::WindowResize( *this ) );
         }
     }
 }
@@ -265,7 +280,7 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->mode( ttb::WindowMode( width, height, wnd->mode().fullscreen() ) );
+        wnd->mode( ttb::Window::Mode( width, height, wnd->mode().flags() ) );
 
         pushEvent( window, ttb::events::WindowResize( *wnd ) );
     }
