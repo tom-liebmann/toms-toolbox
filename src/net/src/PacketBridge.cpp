@@ -22,9 +22,9 @@ namespace ttb
         return m_packetInput;
     }
 
-    PacketBridge::PacketOutput& PacketBridge::packetOutput()
+    PacketBridge::EventOutput& PacketBridge::eventOutput()
     {
-        return m_packetOutput;
+        return m_eventOutput;
     }
 
     std::shared_ptr< PacketBridge::EventInput > const& PacketBridge::eventInput()
@@ -70,13 +70,19 @@ namespace ttb
                         m_readOffset = 0;
                         m_readState = ReadState::SIZE;
 
-                        m_packetOutput.push(
+                        ttb::events::Packet event(
                             std::make_unique< ttb::SizedIPacket >( std::move( m_data ) ) );
+
+                        m_eventOutput.push( event );
                     }
 
                     break;
                 }
             }
+        }
+        else
+        {
+            m_eventOutput.push( event );
         }
     }
 

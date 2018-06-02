@@ -11,7 +11,7 @@ namespace ttb
     {
     public:
         using PacketInput = ttb::PushInput< std::shared_ptr< ttb::OPacket const > >;
-        using PacketOutput = ttb::PushOutput< std::unique_ptr< ttb::IPacket > >;
+        using EventOutput = ttb::PushOutput< ttb::Event& >;
 
         using EventInput = ttb::PushInput< ttb::Event& >;
         using DataOutput = ttb::PushOutput< std::vector< uint8_t > >;
@@ -19,7 +19,7 @@ namespace ttb
         PacketBridge();
 
         std::shared_ptr< PacketInput > const& packetInput();
-        PacketOutput& packetOutput();
+        EventOutput& eventOutput();
 
         std::shared_ptr< EventInput > const& eventInput();
         DataOutput& dataOutput();
@@ -29,7 +29,7 @@ namespace ttb
         void onPacketInput( std::shared_ptr< ttb::OPacket const > packet );
 
         std::shared_ptr< PacketInput > m_packetInput;
-        PacketOutput m_packetOutput;
+        EventOutput m_eventOutput;
 
         std::shared_ptr< EventInput > m_eventInput;
         DataOutput m_dataOutput;
