@@ -18,6 +18,7 @@ namespace ttb
     public:
         enum class Flag : uint32_t
         {
+            NONE,
             FULLSCREEN,
             FLOATING,
             RESIZABLE
@@ -26,7 +27,7 @@ namespace ttb
         class Mode
         {
         public:
-            Mode( uint16_t width, uint16_t height, Flag flags );
+            Mode( uint16_t width, uint16_t height, Flag flags = Flag::NONE );
 
             uint16_t width() const;
 
