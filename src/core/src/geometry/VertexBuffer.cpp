@@ -14,7 +14,7 @@ namespace ttb
     }
 
     VertexBuffer::VertexBuffer( std::vector< Attribute > attributes )
-        : m_access( nullptr ), m_attributes( std::move( attributes ) )
+        : m_attributes( std::move( attributes ) )
     {
         glGenBuffers( 1, &m_bufferObject );
 
@@ -28,14 +28,6 @@ namespace ttb
     VertexBuffer::~VertexBuffer()
     {
         glDeleteBuffers( 1, &m_bufferObject );
-    }
-
-    std::shared_ptr< VertexBuffer::Access > VertexBuffer::access()
-    {
-        if( m_access )
-            throw std::runtime_error( "Invalid buffer state" );
-
-        return std::shared_ptr< Access >( new Access( *this ), Access::finish );
     }
 
     void VertexBuffer::bind( size_t index, GLint location ) const
@@ -79,29 +71,47 @@ namespace ttb
 
 
 
-    VertexBuffer::Access::Access( VertexBuffer& buffer ) : m_buffer( buffer )
+    VertexBuffer::Modifier::Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start )
+        : m_buffer( std::move( buffer ) ), m_begin( start ), m_end( start ), m_clear( false )
     {
     }
 
-    void VertexBuffer::Access::finish( Access* access )
+    VertexBuffer::Modifier& VertexBuffer::Modifier::reserve( size_t elementCount )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, access->m_buffer.m_bufferObject );
-        glBufferData( GL_ARRAY_BUFFER,
-                      access->m_buffer.m_data.size(),
-                      reinterpret_cast< const GLvoid* >( access->m_buffer.m_data.data() ),
-                      GL_STATIC_DRAW );
+        m_buffer->m_data.reserve( m_end + elementCount * m_buffer->m_blockSize );
+        return *this;
+    }
+
+    VertexBuffer::Modifier& VertexBuffer::Modifier::trim()
+    {
+        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ), m_end ),
+                                std::end( m_buffer->m_data ) );
+        m_clear = true;
+        return *this;
+    }
+
+    void VertexBuffer::Modifier::finish()
+    {
+        glBindBuffer( GL_ARRAY_BUFFER, m_buffer->m_bufferObject );
+
+        if( m_clear )
+        {
+            glBufferData( GL_ARRAY_BUFFER,
+                          m_buffer->m_data.size(),
+                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                          GL_STATIC_DRAW );
+        }
+        else
+        {
+            glBufferSubData(
+                GL_ARRAY_BUFFER,
+                m_begin,
+                m_end - m_begin,
+                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+        }
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
-        access->m_buffer.m_access = nullptr;
-        delete access;
     }
-
-    void VertexBuffer::Access::clear()
-    {
-        m_buffer.m_data.clear();
-    }
-
 
 
     VertexBuffer::Attribute::Attribute( GLenum type, size_t size ) : m_type( type ), m_size( size )
@@ -148,8 +158,19 @@ namespace ttb
         return *this;
     }
 
-    std::unique_ptr< VertexBuffer > VertexBuffer::Creator::finish()
+    std::shared_ptr< VertexBuffer > VertexBuffer::Creator::finish()
     {
-        return std::unique_ptr< VertexBuffer >( new VertexBuffer( std::move( m_attributes ) ) );
+        return std::shared_ptr< VertexBuffer >( new VertexBuffer( std::move( m_attributes ) ) );
+    }
+
+
+    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start )
+    {
+        return { buffer, start * buffer->m_blockSize };
+    }
+
+    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer )
+    {
+        return { buffer, buffer->m_data.size() };
     }
 }
