@@ -12,7 +12,7 @@ namespace ttb
         {
             float scaleFactor = size / font.lineHeight();
 
-            auto v = vertexBuffer->access();
+            auto v = modify( vertexBuffer );
 
             float x = 0.0f;
             float y = 0.0f;
@@ -24,34 +24,34 @@ namespace ttb
                 {
                     auto const& c = font.character( text[ i ] );
                     // upper left triangle
-                    v->push( c.x() / font.texture()->width(), c.y() / font.texture()->height() );
-                    v->push( ( x + c.xOffset() ) * scaleFactor, ( y + c.yOffset() ) * scaleFactor );
+                    v.push( c.x() / font.texture()->width(), c.y() / font.texture()->height() );
+                    v.push( ( x + c.xOffset() ) * scaleFactor, ( y + c.yOffset() ) * scaleFactor );
 
-                    v->push( c.x() / font.texture()->width(),
-                             ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( ( x + c.xOffset() ) * scaleFactor,
-                             ( y + c.yOffset() + c.height() ) * scaleFactor );
+                    v.push( c.x() / font.texture()->width(),
+                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( ( x + c.xOffset() ) * scaleFactor,
+                            ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v->push( ( c.x() + c.width() ) / font.texture()->width(),
-                             c.y() / font.texture()->height() );
-                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
-                             ( y + c.yOffset() ) * scaleFactor );
+                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
+                            c.y() / font.texture()->height() );
+                    v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                            ( y + c.yOffset() ) * scaleFactor );
 
                     // lower right triangle
-                    v->push( c.x() / font.texture()->width(),
-                             ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( ( x + c.xOffset() ) * scaleFactor,
-                             ( y + c.yOffset() + c.height() ) * scaleFactor );
+                    v.push( c.x() / font.texture()->width(),
+                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( ( x + c.xOffset() ) * scaleFactor,
+                            ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v->push( ( c.x() + c.width() ) / font.texture()->width(),
-                             ( c.y() + c.height() ) / font.texture()->height() );
-                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
-                             ( y + c.yOffset() + c.height() ) * scaleFactor );
+                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
+                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                            ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v->push( ( c.x() + c.width() ) / font.texture()->width(),
-                             c.y() / font.texture()->height() );
-                    v->push( ( x + c.xOffset() + c.width() ) * scaleFactor,
-                             ( y + c.yOffset() ) * scaleFactor );
+                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
+                            c.y() / font.texture()->height() );
+                    v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
+                            ( y + c.yOffset() ) * scaleFactor );
 
                     x += c.xAdvance();
                 }
@@ -61,6 +61,8 @@ namespace ttb
                     y += font.lineHeight();
                 }
             }
+
+            v.finish();
         }
 
         return Geometry::create( GL_TRIANGLES )
