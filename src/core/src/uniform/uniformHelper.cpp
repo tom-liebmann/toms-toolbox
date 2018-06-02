@@ -24,7 +24,8 @@ namespace ttb
         void set_uniform< Matrix< float, 4, 4 > >::apply( GLint location,
                                                           Matrix< float, 4, 4 > const& value )
         {
-            glUniformMatrix4fv( location, 1, GL_TRUE, value.ptr() );
+            auto mat = transpose( value );
+            glUniformMatrix4fv( location, 1, GL_FALSE, mat.ptr() );
         }
     }
 }
