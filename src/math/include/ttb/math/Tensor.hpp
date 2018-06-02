@@ -21,6 +21,8 @@ namespace ttb
 
         Tensor();
 
+        Tensor( T value );
+
         template < typename TType2 >
         Tensor( std::initializer_list< TType2 > values );
 
@@ -123,6 +125,12 @@ namespace ttb
     template < typename T, size_t... D >
     inline Tensor< T, D... >::Tensor()
     {
+    }
+
+    template < typename T, size_t... D >
+    inline Tensor< T, D... >::Tensor( T value )
+    {
+        std::fill( std::begin( m_values ), std::end( m_values ), value );
     }
 
     template < typename T, size_t... D >
