@@ -11,7 +11,7 @@
 
 namespace ttb
 {
-    class WebSocket : public Socket, public Selectable
+    class WebSocket : public Selectable
     {
     public:
         using EventInput = PushInput< Event& >;
