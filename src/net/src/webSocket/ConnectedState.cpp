@@ -3,6 +3,8 @@
 #include <ttb/net/events.hpp>
 #include <ttb/net/webSocket/ConnectedState.hpp>
 
+#include <iostream>
+
 
 #define FRAGMENT_SIZE 200000
 
@@ -212,7 +214,8 @@ namespace ttb
 
 namespace
 {
-    VectorDataReader::VectorDataReader( std::vector< uint8_t > const& data ) : m_data( data )
+    VectorDataReader::VectorDataReader( std::vector< uint8_t > const& data )
+        : m_data( data ), m_offset( 0 )
     {
     }
 
