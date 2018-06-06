@@ -6,7 +6,7 @@
 namespace ttb
 {
     DataIPacket::DataIPacket( std::shared_ptr< IPacket const > parent, Endianness endianness )
-        : m_parent( std::move( parent ) ), m_endianness( endianness )
+        : m_parent( std::move( parent ) ), m_endianness( endianness ), m_offset( 0 )
     {
     }
 
