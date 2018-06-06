@@ -21,7 +21,7 @@ set(
 
     src/PacketBridge.cpp
 
-    src/webSocket/WebSocket.cpp
+    src/WebSocket.cpp
     src/webSocket/SocketState.cpp
     src/webSocket/ServerHandshakeState.cpp
     src/webSocket/ConnectedState.cpp

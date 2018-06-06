@@ -11,7 +11,7 @@
 
 namespace ttb
 {
-    class WebSocket : public Selectable
+    class WebSocket
     {
     public:
         using EventInput = PushInput< Event& >;
@@ -22,11 +22,11 @@ namespace ttb
 
         WebSocket();
 
-        std::shared_ptr< EventInput > const& eventInput();
+        WebSocket( ttb::TCPSocket& socket );
+
         std::shared_ptr< DataInput > const& dataInput();
 
         EventOutput& eventOutput();
-        DataOutput& dataOutput();
 
     private:
         void state( std::shared_ptr< webSocket::SocketState > state );
