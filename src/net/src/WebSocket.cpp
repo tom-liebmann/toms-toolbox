@@ -33,6 +33,25 @@ namespace ttb
         return m_eventOutput;
     }
 
+    void WebSocket::socket( ttb::TCPSocket& socket )
+    {
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            m_dataOutput.input( socket.dataInput() );
+            socket.eventOutput().input( m_eventInput );
+        }
+
+        state( std::make_unique< webSocket::ServerHandshakeState >( *this ) );
+    }
+
+    void WebSocket::resetSocket()
+    {
+        std::lock_guard< std::mutex > lock( m_mutex );
+
+        m_dataOutput.input( std::shared_ptr< DataInput >() );
+    }
+
     void WebSocket::state( std::shared_ptr< webSocket::SocketState > state )
     {
         std::lock_guard< std::mutex > lock( m_mutex );

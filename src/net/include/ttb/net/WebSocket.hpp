@@ -28,6 +28,10 @@ namespace ttb
 
         EventOutput& eventOutput();
 
+        void socket( ttb::TCPSocket& socket );
+
+        void resetSocket();
+
     private:
         void state( std::shared_ptr< webSocket::SocketState > state );
 
