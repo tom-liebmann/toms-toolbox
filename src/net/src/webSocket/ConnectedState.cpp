@@ -198,8 +198,8 @@ namespace ttb
                     }
                 }
 
-                socket().dataOutput().push( std::move( fragmentHeader ) );
-                socket().dataOutput().push( std::vector< uint8_t >(
+                socket().m_dataOutput.push( std::move( fragmentHeader ) );
+                socket().m_dataOutput.push( std::vector< uint8_t >(
                     data.data() + offset, data.data() + offset + fragmentSize ) );
 
                 offset += fragmentSize;

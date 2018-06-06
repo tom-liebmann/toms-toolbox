@@ -56,7 +56,7 @@ namespace ttb
 
                     auto response = stream.str();
 
-                    socket().dataOutput().push(
+                    socket().m_dataOutput.push(
                         std::vector< uint8_t >( std::begin( response ), std::end( response ) ) );
 
                     // Switch to connected state
