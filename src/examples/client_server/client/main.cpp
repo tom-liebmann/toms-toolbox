@@ -63,10 +63,11 @@ namespace
             {
                 std::cout << "Connected...\n";
 
-                auto packet = std::make_shared< ttb::DataOPacket >();
-                packet->write< uint32_t >( 245 );
+                m_packetBridge->packetInput()->push(
+                    ttb::DataOPacket::create().write< uint32_t >( 245 ).finish() );
 
-                m_packetBridge->packetInput()->push( packet );
+                m_packetBridge->packetInput()->push(
+                    ttb::DataOPacket::create().write< uint32_t >( 1234 ).finish() );
 
                 break;
             }

@@ -135,10 +135,8 @@ namespace
                 auto value = packet->read< uint32_t >();
                 std::cout << "Value: " << value << std::endl;
 
-                auto opacket = std::make_shared< ttb::DataOPacket >();
-                opacket->write< uint32_t >( value );
-
-                m_packetBridge->packetInput()->push( opacket );
+                m_packetBridge->packetInput()->push(
+                    ttb::DataOPacket::create().write< uint32_t >( value ).finish() );
 
                 break;
             }
