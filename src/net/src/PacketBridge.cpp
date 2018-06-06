@@ -37,6 +37,12 @@ namespace ttb
         return m_dataOutput;
     }
 
+    void PacketBridge::reset()
+    {
+        m_readState = ReadState::SIZE;
+        m_readOffset = 0;
+    }
+
     void PacketBridge::onEventInput( ttb::Event& event )
     {
         if( event.type() == ttb::events::DATA )

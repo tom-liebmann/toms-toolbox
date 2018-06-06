@@ -24,6 +24,8 @@ namespace ttb
         std::shared_ptr< EventInput > const& eventInput();
         DataOutput& dataOutput();
 
+        void reset();
+
     private:
         void onEventInput( ttb::Event& event );
         void onPacketInput( std::shared_ptr< ttb::OPacket const > packet );
