@@ -39,8 +39,11 @@ namespace ttb
     {
         std::lock_guard< std::mutex > lock( m_mutex );
 
-        m_slot =
-            std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( std::move( input ) );
+        if( input )
+            m_slot =
+                std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( std::move( input ) );
+        else
+            m_slot.reset();
     }
 
     template < typename TType >
@@ -48,13 +51,13 @@ namespace ttb
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
-        if( m_slot )
-        {
-            auto slot = m_slot;
+        if( !m_slot )
+            throw std::runtime_error( "Push to disconnected output" );
 
-            lock.unlock();
+        auto slot = m_slot;
 
-            slot->push( std::forward< TType >( data ) );
-        }
+        lock.unlock();
+
+        slot->push( std::forward< TType >( data ) );
     }
 }

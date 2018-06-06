@@ -31,8 +31,11 @@ namespace ttb
     {
         std::lock_guard< std::mutex > lock( m_mutex );
 
-        m_slot =
-            std::make_shared< priv::PullInputSlotImpl< TType, TType2 > >( std::move( output ) );
+        if( output )
+            m_slot =
+                std::make_shared< priv::PullInputSlotImpl< TType, TType2 > >( std::move( output ) );
+        else
+            m_slot.reset();
     }
 
     template < typename TType >
@@ -41,9 +44,7 @@ namespace ttb
         std::unique_lock< std::mutex > lock( m_mutex );
 
         if( !m_slot )
-        {
             throw std::runtime_error( "Pull from unconnected input" );
-        }
 
         auto slot = m_slot;
 
