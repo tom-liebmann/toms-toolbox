@@ -89,9 +89,9 @@ namespace ttb
     void PacketBridge::onPacketInput( std::shared_ptr< ttb::OPacket const > packet )
     {
         uint32_t packetSize = packet->size();
-        m_dataOutput.push(
-            std::vector< uint8_t >( reinterpret_cast< uint8_t* >( &packetSize ),
-                                    reinterpret_cast< uint8_t* >( &packetSize + 1 ) ) );
+        m_dataOutput.push( std::vector< uint8_t >( reinterpret_cast< uint8_t* >( &packetSize ),
+                                                   reinterpret_cast< uint8_t* >( &packetSize ) +
+                                                       sizeof( uint32_t ) ) );
 
         packet->send( m_dataOutput );
     }
