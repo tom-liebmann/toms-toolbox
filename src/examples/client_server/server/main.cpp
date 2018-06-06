@@ -121,6 +121,7 @@ namespace
                 std::cout << "Client disconnected..." << std::endl;
 
                 m_webSocket->resetSocket();
+                m_packetBridge->reset();
                 m_selector->remove( m_socket );
                 m_selector->add( m_listener );
                 break;
