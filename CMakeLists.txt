@@ -49,6 +49,12 @@ add_subdirectory( src/core )
 add_subdirectory( src/net )
 add_subdirectory( src/utils )
 
+set( BUILD_EXAMPLES FALSE CACHE BOOL "Builds all examples" )
+
+if( BUILD_EXAMPLES )
+    add_subdirectory( src/examples )
+endif( BUILD_EXAMPLES )
+
 # Export build tree to Targets.cmake file.
 export(
     TARGETS ${VALID_TARGETS}
