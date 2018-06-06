@@ -5,16 +5,54 @@
 
 namespace ttb
 {
-    DataOPacket::DataOPacket( Endianness endianness ) : m_endianness( endianness )
+    DataOPacket::Creator DataOPacket::create( Endianness endianness )
+    {
+        return { endianness };
+    }
+
+    DataOPacket::DataOPacket( Endianness endianness, std::vector< uint8_t > data )
+        : m_endianness( endianness ), m_data( std::move( data ) )
     {
     }
 
-    DataOPacket::DataOPacket( uint32_t size, Endianness endianness )
-        : m_endianness( endianness ), m_data( size )
+    size_t DataOPacket::size() const
+    {
+        return m_data.size();
+    }
+
+    void DataOPacket::send( ttb::PushOutput< std::vector< uint8_t > >& output ) const
+    {
+        output.push( m_data );
+    }
+
+
+    DataOPacket::Creator& DataOPacket::Creator::reserve( size_t size )
+    {
+        m_data.reserve( size );
+        return *this;
+    }
+
+    template <>
+    DataOPacket::Creator& DataOPacket::Creator::write< std::string >( std::string const& value )
+    {
+        uint32_t len = value.length();
+        append( &len, sizeof( uint32_t ) );
+        append( value.c_str(), len, false );
+
+        return *this;
+    }
+
+    std::shared_ptr< DataOPacket > DataOPacket::Creator::finish()
+    {
+        return std::shared_ptr< DataOPacket >(
+            new DataOPacket( m_endianness, std::move( m_data ) ) );
+    }
+
+    DataOPacket::Creator::Creator( Endianness endianness ) : m_endianness( endianness )
     {
     }
 
-    void DataOPacket::append( void const* data, size_t size, bool checkEndianness )
+    void DataOPacket::Creator::append( void const* data, size_t size, bool checkEndianness )
     {
         size_t oldSize = m_data.size();
         m_data.resize( m_data.size() + size );
@@ -31,23 +69,5 @@ namespace ttb
                     *( reinterpret_cast< uint8_t const* >( data ) + size - 1 - i );
             }
         }
-    }
-
-    size_t DataOPacket::size() const
-    {
-        return m_data.size();
-    }
-
-    void DataOPacket::send( ttb::PushOutput< std::vector< uint8_t > >& output ) const
-    {
-        output.push( m_data );
-    }
-
-    template <>
-    void DataOPacket::write< std::string >( std::string const& value )
-    {
-        uint32_t len = value.length();
-        append( &len, sizeof( uint32_t ) );
-        append( value.c_str(), len, false );
     }
 }

@@ -14,28 +14,43 @@ namespace ttb
     class DataOPacket : public OPacket
     {
     public:
-        DataOPacket( Endianness endianness = Endianness::LITTLE );
+        class Creator;
 
-        DataOPacket( uint32_t size, Endianness endianness = Endianness::LITTLE );
-
-        template < typename T >
-        void write( T const& value );
+        static Creator create( Endianness endianness = Endianness::LITTLE );
 
         // OPacket
         virtual size_t size() const override;
         virtual void send( ttb::PushOutput< std::vector< uint8_t > >& output ) const override;
 
     private:
-        void append( void const* data, size_t size, bool checkEndianness = true );
+        DataOPacket( Endianness endianness, std::vector< uint8_t > data );
 
         Endianness m_endianness;
         std::vector< uint8_t > m_data;
     };
+
+
+    class DataOPacket::Creator
+    {
+    public:
+        Creator& reserve( size_t size );
+
+        template < typename T >
+        Creator& write( T const& value );
+
+        std::shared_ptr< DataOPacket > finish();
+
+    private:
+        Creator( Endianness endianness );
+
+        void append( void const* data, size_t size, bool checkEndianness = true );
+
+        Endianness m_endianness;
+        std::vector< uint8_t > m_data;
+
+        friend class DataOPacket;
+    };
 }
-
-
-template < typename T >
-ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, T const& value );
 
 
 // definitions
@@ -44,19 +59,12 @@ ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, T const& value );
 namespace ttb
 {
     template < typename T >
-    void DataOPacket::write( T const& value )
+    DataOPacket::Creator& DataOPacket::Creator::write( T const& value )
     {
         append( &value, sizeof( T ) );
+        return *this;
     }
 
     template <>
-    void DataOPacket::write< std::string >( std::string const& value );
-}
-
-
-template < typename T >
-inline ttb::DataOPacket& operator<<( ttb::DataOPacket& packet, T const& value )
-{
-    packet.write< T >( value );
-    return packet;
+    DataOPacket::Creator& DataOPacket::Creator::write< std::string >( std::string const& value );
 }
