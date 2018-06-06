@@ -22,7 +22,9 @@ namespace ttb
     {
         uint32_t packetSize = m_packet->size();
 
-        output.push( std::vector< uint8_t >( &packetSize, &packetSize + 1 ) );
+        output.push( std::vector< uint8_t >( reinterpret_cast< uint8_t const* >( &packetSize ),
+                                             reinterpret_cast< uint8_t const* >( &packetSize ) +
+                                                 sizeof( uint32_t ) ) );
 
         m_packet->send( output );
     }
