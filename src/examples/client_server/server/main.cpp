@@ -67,16 +67,12 @@ namespace
         m_listener->eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
             [&]( auto& e ) { this->onEvent( e ); } ) );
 
-        m_packetBridge = std::make_shared< ttb::PacketBridge >();
+        m_webSocket = std::make_shared< ttb::WebSocket >();
+
+        m_packetBridge = std::make_shared< ttb::PacketBridge >( *m_webSocket );
 
         m_packetBridge->eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
             [&]( auto& e ) { this->onEvent( e ); } ) );
-
-        m_webSocket = std::make_shared< ttb::WebSocket >();
-
-        m_webSocket->eventOutput().input( m_packetBridge->eventInput() );
-
-        m_packetBridge->dataOutput().input( m_webSocket->dataInput() );
 
         m_selector->add( m_listener );
 
@@ -104,7 +100,7 @@ namespace
 
                 auto& e = static_cast< ttb::events::ClientConnection& >( event );
 
-                m_selector->remove( m_listener );
+                m_selector->remove( *m_listener );
 
                 m_socket = e.socket();
 
@@ -122,7 +118,7 @@ namespace
 
                 m_webSocket->resetSocket();
                 m_packetBridge->reset();
-                m_selector->remove( m_socket );
+                m_selector->remove( *m_socket );
                 m_selector->add( m_listener );
                 break;
             }
