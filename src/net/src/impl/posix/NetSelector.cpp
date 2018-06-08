@@ -37,7 +37,7 @@ namespace ttb
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
-                m_changes.emplace( ChangeType::ADD, sel );
+                m_changes.emplace( sel );
             }
             else
             {
@@ -45,14 +45,14 @@ namespace ttb
             }
         }
 
-        void NetSelector::remove( std::shared_ptr< ttb::Selectable > const& selectable )
+        void NetSelector::remove( ttb::Selectable const& selectable )
         {
-            auto sel = std::dynamic_pointer_cast< posix::Selectable >( selectable );
+            auto sel = dynamic_cast< posix::Selectable const* >( &selectable );
 
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
-                m_changes.emplace( ChangeType::REMOVE, sel );
+                m_changes.emplace( *sel );
             }
             else
             {
@@ -69,28 +69,29 @@ namespace ttb
                 {
                     auto& change = m_changes.front();
 
-                    switch( std::get< 0 >( change ) )
+                    switch( change.type() )
                     {
-                        case ChangeType::ADD:
+                        case Change::Type::ADD:
                         {
-                            auto selectable = std::get< 1 >( change );
+                            auto selectable = change.dataAdd();
                             auto iter = std::find( std::begin( m_selectables ),
                                                    std::end( m_selectables ),
                                                    selectable );
 
                             if( iter == std::end( m_selectables ) )
                             {
-                                m_selectables.push_back( std::move( std::get< 1 >( change ) ) );
+                                m_selectables.push_back( selectable );
                             }
                             break;
                         }
 
-                        case ChangeType::REMOVE:
+                        case Change::Type::REMOVE:
                         {
-                            auto selectable = std::get< 1 >( change );
-                            auto iter = std::find( std::begin( m_selectables ),
-                                                   std::end( m_selectables ),
-                                                   selectable );
+                            auto const& selectable = change.dataRemove();
+                            auto iter = std::find_if(
+                                std::begin( m_selectables ),
+                                std::end( m_selectables ),
+                                [&]( auto const& v ) { return v.get() == &selectable; } );
 
                             if( iter != std::end( m_selectables ) )
                             {
@@ -133,8 +134,7 @@ namespace ttb
 
             timeval timeout = block ? timeval{ 5, 0 } : timeval{ 0, 0 };
 
-            auto result =
-                select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
+            auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 
             if( result == -1 )
             {
@@ -161,6 +161,57 @@ namespace ttb
                     }
                 }
             }
+        }
+
+
+        NetSelector::Change::Change( std::shared_ptr< ttb::posix::Selectable > data )
+            : m_type( Type::ADD )
+        {
+            m_data.add = std::move( data );
+        }
+
+        NetSelector::Change::Change( Selectable const& remove ) : m_type( Type::REMOVE )
+        {
+            m_data.remove = &remove;
+        }
+
+        NetSelector::Change::~Change()
+        {
+            switch( m_type )
+            {
+                case Type::ADD:
+                {
+                    m_data.add.~shared_ptr< ttb::posix::Selectable >();
+                    break;
+                }
+
+                default:
+                    break;
+            }
+        }
+
+        NetSelector::Change::Type NetSelector::Change::type() const
+        {
+            return m_type;
+        }
+
+        std::shared_ptr< ttb::posix::Selectable > const& NetSelector::Change::dataAdd()
+        {
+            return m_data.add;
+        }
+
+        Selectable const& NetSelector::Change::dataRemove()
+        {
+            return *m_data.remove;
+        }
+
+
+        NetSelector::Change::Data::Data()
+        {
+        }
+
+        NetSelector::Change::Data::~Data()
+        {
         }
     }
 }

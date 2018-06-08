@@ -24,19 +24,46 @@ namespace ttb
         public:
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
 
-            virtual void remove( std::shared_ptr< ttb::Selectable > const& selectable ) override;
+            virtual void remove( ttb::Selectable const& selectable ) override;
 
             virtual void update( bool block ) override;
 
         private:
-            enum class ChangeType
+            struct Change
             {
-                ADD,
-                REMOVE
+            public:
+                enum class Type
+                {
+                    ADD,
+                    REMOVE
+                };
+
+                Change( std::shared_ptr< ttb::posix::Selectable > data );
+
+                Change( Selectable const& remove );
+
+                ~Change();
+
+                Type type() const;
+
+                std::shared_ptr< ttb::posix::Selectable > const& dataAdd();
+
+                Selectable const& dataRemove();
+
+            private:
+                Type m_type;
+
+                union Data {
+                    Data();
+
+                    ~Data();
+
+                    Selectable const* remove;
+                    std::shared_ptr< ttb::posix::Selectable > add;
+                } m_data;
             };
 
-            std::queue< std::pair< ChangeType, std::shared_ptr< ttb::posix::Selectable > > >
-                m_changes;
+            std::queue< Change > m_changes;
 
             std::vector< std::shared_ptr< ttb::posix::Selectable > > m_selectables;
 

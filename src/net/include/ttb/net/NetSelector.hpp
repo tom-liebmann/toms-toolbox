@@ -23,7 +23,7 @@ namespace ttb
 
         virtual void add( std::shared_ptr< Selectable > const& socket ) = 0;
 
-        virtual void remove( std::shared_ptr< Selectable > const& socket ) = 0;
+        virtual void remove( Selectable const& socket ) = 0;
 
         virtual void update( bool block = false ) = 0;
     };
