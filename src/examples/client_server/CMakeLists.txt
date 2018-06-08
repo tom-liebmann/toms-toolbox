@@ -34,6 +34,27 @@ else()
         PRIVATE
         ttbNet
         )
+
+
+    add_executable(
+        multiserver
+
+        multiserver/main.cpp
+        multiserver/Client.cpp
+        multiserver/World.cpp
+        )
+
+    target_link_libraries(
+        multiserver
+        PRIVATE
+        ttbNet
+        )
+
+    target_include_directories(
+        multiserver
+        PRIVATE
+        multiserver
+        )
 endif()
 
 
