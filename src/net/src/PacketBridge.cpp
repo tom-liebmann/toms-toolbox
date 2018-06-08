@@ -7,16 +7,6 @@
 
 namespace ttb
 {
-    PacketBridge::PacketBridge()
-        : m_packetInput( std::make_shared< PacketInput >(
-              [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
-        , m_eventInput( std::make_shared< EventInput >(
-              [this]( auto& event ) { this->onEventInput( event ); } ) )
-        , m_readState( ReadState::SIZE )
-        , m_readOffset( 0 )
-    {
-    }
-
     std::shared_ptr< PacketBridge::PacketInput > const& PacketBridge::packetInput()
     {
         return m_packetInput;
@@ -25,16 +15,6 @@ namespace ttb
     PacketBridge::EventOutput& PacketBridge::eventOutput()
     {
         return m_eventOutput;
-    }
-
-    std::shared_ptr< PacketBridge::EventInput > const& PacketBridge::eventInput()
-    {
-        return m_eventInput;
-    }
-
-    PacketBridge::DataOutput& PacketBridge::dataOutput()
-    {
-        return m_dataOutput;
     }
 
     void PacketBridge::reset()
