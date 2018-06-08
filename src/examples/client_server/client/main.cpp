@@ -117,16 +117,12 @@ namespace
 
         m_selector = ttb::NetSelector::create();
 
-        m_packetBridge = std::make_shared< ttb::PacketBridge >();
+        m_socket = ttb::TCPSocket::create( m_ip, m_port );
+
+        m_packetBridge = std::make_shared< ttb::PacketBridge >( *m_socket );
 
         m_packetBridge->eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
             [&]( auto& e ) { this->onEvent( e ); } ) );
-
-        m_socket = ttb::TCPSocket::create( m_ip, m_port );
-
-        m_socket->eventOutput().input( m_packetBridge->eventInput() );
-
-        m_packetBridge->dataOutput().input( m_socket->dataInput() );
 
         m_selector->add( m_socket );
 
