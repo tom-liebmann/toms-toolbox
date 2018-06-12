@@ -180,13 +180,17 @@ namespace ttb
                     {
                         fragmentHeader.resize( 4, 0 );
                         fragmentHeader[ 1 ] = 126;
-                        *reinterpret_cast< uint16_t* >( &fragmentHeader[ 2 ] ) = fragmentSize;
+
+                        for( size_t i = 0; i < 2; ++i )
+                            fragmentHeader[ 2 + i ] = ( fragmentSize >> ( 8 * ( 1 - i ) ) ) & 0xFF;
                     }
                     else
                     {
                         fragmentHeader.resize( 10, 0 );
                         fragmentHeader[ 1 ] = 127;
-                        *reinterpret_cast< uint64_t* >( &fragmentHeader[ 2 ] ) = fragmentSize;
+
+                        for( size_t i = 0; i < 8; ++i )
+                            fragmentHeader[ 2 + i ] = ( fragmentSize >> ( 8 * ( 7 - i ) ) ) & 0xFF;
                     }
 
                     // Set FIN bit for last fragment
