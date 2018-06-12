@@ -179,24 +179,26 @@ namespace ttb
                     else if( fragmentSize < 65526 )
                     {
                         fragmentHeader.resize( 4, 0 );
+                        fragmentHeader[ 1 ] = 126;
                         *reinterpret_cast< uint16_t* >( &fragmentHeader[ 2 ] ) = fragmentSize;
                     }
                     else
                     {
                         fragmentHeader.resize( 10, 0 );
+                        fragmentHeader[ 1 ] = 127;
                         *reinterpret_cast< uint64_t* >( &fragmentHeader[ 2 ] ) = fragmentSize;
                     }
 
                     // Set FIN bit for last fragment
                     if( remaining <= FRAGMENT_SIZE )
                     {
-                        fragmentHeader[ 0 ] |= 0x80;
+                        fragmentHeader[ 0 ] |= 0b10000000;
                     }
 
                     // Set fragment's opcode (2=binary, 0=continuation)
                     if( offset == 0 )
                     {
-                        fragmentHeader[ 0 ] |= 0x2;
+                        fragmentHeader[ 0 ] |= 0b00000010;
                     }
                 }
 
