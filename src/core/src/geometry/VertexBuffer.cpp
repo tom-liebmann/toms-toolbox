@@ -90,7 +90,7 @@ namespace ttb
         return *this;
     }
 
-    void VertexBuffer::Modifier::finish()
+    std::shared_ptr< VertexBuffer > VertexBuffer::Modifier::finish()
     {
         glBindBuffer( GL_ARRAY_BUFFER, m_buffer->m_bufferObject );
 
@@ -111,6 +111,8 @@ namespace ttb
         }
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
+
+        return m_buffer;
     }
 
 

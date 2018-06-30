@@ -64,7 +64,7 @@ namespace ttb
         // Cuts the buffer after the current position
         Modifier& trim();
 
-        void finish();
+        std::shared_ptr< VertexBuffer > finish();
 
     private:
         Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start );
