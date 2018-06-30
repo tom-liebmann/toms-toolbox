@@ -1,4 +1,5 @@
 #include "Selectable.hpp"
+#include "SocketDataReader.hpp"
 #include <ttb/net/TCPSocket.hpp>
 
 #include <ttb/net/packets/IPacket.hpp>
@@ -43,6 +44,8 @@ namespace ttb
 
             std::queue< std::vector< uint8_t > > m_writeBuffer;
             size_t m_writeOffset;
+
+            SocketDataReader m_dataReader;
 
             int m_handle;
         };

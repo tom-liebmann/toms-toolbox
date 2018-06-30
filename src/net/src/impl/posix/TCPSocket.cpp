@@ -1,5 +1,4 @@
 #include "TCPSocket.hpp"
-#include "SocketDataReader.hpp"
 
 #include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
@@ -36,7 +35,10 @@ namespace ttb
     namespace posix
     {
         TCPSocket::TCPSocket( std::string const& address, uint16_t port )
-            : m_connectionState( ConnectionState::DISCONNECTED ), m_writeOffset( 0 ), m_handle( -1 )
+            : m_connectionState( ConnectionState::DISCONNECTED )
+            , m_writeOffset( 0 )
+            , m_handle( -1 )
+            , m_dataReader( *this )
         {
             connect( address, port );
         }
@@ -45,6 +47,7 @@ namespace ttb
             : m_connectionState( ConnectionState::CONNECTED )
             , m_writeOffset( 0 )
             , m_handle( handle )
+            , m_dataReader( *this )
         {
             int flags = fcntl( m_handle, F_GETFL, 0 );
             fcntl( m_handle, F_SETFL, flags | O_NONBLOCK );
@@ -166,14 +169,20 @@ namespace ttb
 
             if( m_connectionState != ConnectionState::DISCONNECTED )
             {
-                SocketDataReader reader( *this );
-
                 try
                 {
                     lock.unlock();
 
-                    ttb::events::Data event( reader );
-                    eventOutput().push( event );
+                    while( true )
+                    {
+                        m_dataReader.doRead();
+
+                        if( !m_dataReader.available() )
+                            break;
+
+                        ttb::events::Data event( m_dataReader );
+                        eventOutput().push( event );
+                    }
                 }
                 catch( std::runtime_error& e )
                 {
