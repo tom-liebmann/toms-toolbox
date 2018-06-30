@@ -228,7 +228,8 @@ namespace ttb
 
             if( m_connectionState == ConnectionState::CONNECTED )
             {
-                if( !m_writeBuffer.empty() )
+                // Send out data as long as there is some available
+                while( !m_writeBuffer.empty() )
                 {
                     auto& buffer = m_writeBuffer.front();
 
@@ -249,6 +250,12 @@ namespace ttb
 
                             ttb::events::BrokenConnection event;
                             eventOutput().push( event );
+                            return;
+                        }
+                        else
+                        {
+                            // If we got EAGAIN or EWOULDBLOCK, proceed to sending the rest on the
+                            // next tick
                             return;
                         }
                     }
