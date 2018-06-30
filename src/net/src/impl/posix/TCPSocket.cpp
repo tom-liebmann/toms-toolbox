@@ -46,6 +46,8 @@ namespace ttb
             , m_writeOffset( 0 )
             , m_handle( handle )
         {
+            int flags = fcntl( m_handle, F_GETFL, 0 );
+            fcntl( m_handle, F_SETFL, flags | O_NONBLOCK );
         }
 
         TCPSocket::~TCPSocket()
