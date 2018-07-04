@@ -23,8 +23,6 @@ namespace ttb
                                       m_buffer.size() - m_end,
                                       MSG_NOSIGNAL );
 
-                std::cout << "Done reading" << std::endl;
-
                 if( result < 0 )
                 {
                     if( errno != EAGAIN && errno != EWOULDBLOCK )
