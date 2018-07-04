@@ -167,7 +167,7 @@ namespace ttb
         NetSelector::Change::Change( std::shared_ptr< ttb::posix::Selectable > data )
             : m_type( Type::ADD )
         {
-            m_data.add = std::move( data );
+            new( &m_data.add ) std::shared_ptr< ttb::posix::Selectable >( std::move( data ) );
         }
 
         NetSelector::Change::Change( Selectable const& remove ) : m_type( Type::REMOVE )
