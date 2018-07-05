@@ -30,6 +30,13 @@ namespace ttb
 
     namespace posix
     {
+        NetSelector::NetSelector()
+        {
+            m_interruptor = Interruptor::create();
+            m_selectables.push_back(
+                std::static_pointer_cast< ttb::posix::Interruptor >( m_interruptor ) );
+        }
+
         void NetSelector::add( std::shared_ptr< ttb::Selectable > const& selectable )
         {
             auto sel = std::dynamic_pointer_cast< posix::Selectable >( selectable );
@@ -37,7 +44,10 @@ namespace ttb
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
+
                 m_changes.emplace( sel );
+
+                m_interruptor->interrupt();
             }
             else
             {
@@ -52,7 +62,10 @@ namespace ttb
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
+
                 m_changes.emplace( *sel );
+
+                m_interruptor->interrupt();
             }
             else
             {
@@ -132,7 +145,7 @@ namespace ttb
                 }
             }
 
-            timeval timeout = block ? timeval{ 5, 0 } : timeval{ 0, 0 };
+            timeval timeout = block ? timeval{ 10, 0 } : timeval{ 0, 0 };
 
             auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 

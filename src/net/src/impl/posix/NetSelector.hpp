@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Interruptor.hpp"
 #include "TCPSocket.hpp"
 #include <ttb/net/NetSelector.hpp>
 
@@ -22,6 +23,8 @@ namespace ttb
         class NetSelector : public ttb::NetSelector
         {
         public:
+            NetSelector();
+
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
 
             virtual void remove( ttb::Selectable const& selectable ) override;
@@ -64,6 +67,8 @@ namespace ttb
             };
 
             std::queue< Change > m_changes;
+
+            std::shared_ptr< ttb::Interruptor > m_interruptor;
 
             std::vector< std::shared_ptr< ttb::posix::Selectable > > m_selectables;
 
