@@ -10,6 +10,7 @@ set(
     src/impl/posix/Selectable.cpp
     src/impl/posix/TCPSocket.cpp
     src/impl/posix/SocketDataReader.cpp
+    src/impl/posix/Interruptor.cpp
     src/TCPSocket.cpp
 
     src/packets/DataIPacket.cpp
