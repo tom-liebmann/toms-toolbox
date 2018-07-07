@@ -37,6 +37,11 @@ namespace ttb
                 std::static_pointer_cast< ttb::posix::Interruptor >( m_interruptor ) );
         }
 
+        void NetSelector::interrupt()
+        {
+            m_interruptor->interrupt();
+        }
+
         void NetSelector::add( std::shared_ptr< ttb::Selectable > const& selectable )
         {
             auto sel = std::dynamic_pointer_cast< posix::Selectable >( selectable );
@@ -44,6 +49,8 @@ namespace ttb
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
+
+                sel->selector( this );
 
                 m_changes.emplace( sel );
 
@@ -55,13 +62,15 @@ namespace ttb
             }
         }
 
-        void NetSelector::remove( ttb::Selectable const& selectable )
+        void NetSelector::remove( ttb::Selectable& selectable )
         {
-            auto sel = dynamic_cast< posix::Selectable const* >( &selectable );
+            auto sel = dynamic_cast< posix::Selectable* >( &selectable );
 
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
+
+                sel->selector( nullptr );
 
                 m_changes.emplace( *sel );
 

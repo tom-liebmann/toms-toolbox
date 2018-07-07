@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Selectable.hpp"
 #include "SocketDataReader.hpp"
 #include <ttb/net/TCPSocket.hpp>
@@ -24,6 +26,7 @@ namespace ttb
             ~TCPSocket();
 
             // Override: Selectable
+            virtual void selector( ttb::posix::NetSelector* selector ) override;
             virtual int handle() const override;
             virtual bool isReadable() const override;
             virtual void doRead() override;
@@ -41,6 +44,7 @@ namespace ttb
             mutable std::mutex m_mutex;
 
             ConnectionState m_connectionState;
+            ttb::posix::NetSelector* m_selector;
 
             std::queue< std::vector< uint8_t > > m_writeBuffer;
             size_t m_writeOffset;

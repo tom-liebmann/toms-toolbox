@@ -1,5 +1,6 @@
 #include "TCPSocket.hpp"
 
+#include "NetSelector.hpp"
 #include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
 
@@ -49,8 +50,7 @@ namespace ttb
             , m_handle( handle )
             , m_dataReader( *this )
         {
-            int flags = fcntl( m_handle, F_GETFL, 0 );
-            fcntl( m_handle, F_SETFL, flags | O_NONBLOCK );
+            fcntl( m_handle, F_SETFL, O_NONBLOCK );
         }
 
         TCPSocket::~TCPSocket()
@@ -282,11 +282,21 @@ namespace ttb
             }
         }
 
+        void TCPSocket::selector( ttb::posix::NetSelector* selector )
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            m_selector = selector;
+        }
+
         void TCPSocket::onData( std::vector< uint8_t > data )
         {
             std::lock_guard< std::mutex > lock( m_mutex );
 
             m_writeBuffer.push( std::move( data ) );
+
+            if( m_selector )
+                m_selector->interrupt();
         }
 
         void TCPSocket::clearWriteBuffer()
