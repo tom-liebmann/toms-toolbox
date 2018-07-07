@@ -17,7 +17,7 @@ public:
     ~World();
 
     void addClient( std::shared_ptr< Client > client );
-    void removeClient( Client const& client );
+    void removeClient( Client& client );
 
     void update( float time, float timeDiff );
 

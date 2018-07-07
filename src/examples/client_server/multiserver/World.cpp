@@ -17,7 +17,7 @@ void World::addClient( std::shared_ptr< Client > client )
     m_clients.push_back( std::move( client ) );
 }
 
-void World::removeClient( Client const& client )
+void World::removeClient( Client& client )
 {
     auto iter = std::find_if( std::begin( m_clients ), std::end( m_clients ), [&]( auto const& v ) {
         return v.get() == &client;
