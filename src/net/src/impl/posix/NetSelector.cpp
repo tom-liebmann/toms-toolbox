@@ -50,8 +50,6 @@ namespace ttb
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
 
-                sel->selector( this );
-
                 m_changes.emplace( sel );
 
                 m_interruptor->interrupt();
@@ -69,8 +67,6 @@ namespace ttb
             if( sel )
             {
                 std::lock_guard< std::mutex > lock( m_mutex );
-
-                sel->selector( nullptr );
 
                 m_changes.emplace( *sel );
 

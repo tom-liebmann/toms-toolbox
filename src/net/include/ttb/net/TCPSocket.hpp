@@ -35,8 +35,6 @@ namespace ttb
 
         virtual void disconnect() = 0;
 
-        virtual void clearWriteBuffer() = 0;
-
         EventOutput& eventOutput();
 
         std::shared_ptr< DataInput > const& dataInput();

@@ -15,7 +15,7 @@ namespace ttb
         public:
             SocketDataReader( ttb::posix::Selectable& selectable );
 
-            void doRead();
+            bool doRead();
 
             bool available() const;
 

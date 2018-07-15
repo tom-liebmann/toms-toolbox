@@ -14,31 +14,33 @@ namespace ttb
         {
         }
 
-        void SocketDataReader::doRead()
+        bool SocketDataReader::doRead()
         {
+            auto handle = m_selectable.handle();
+
             if( m_end < m_buffer.size() )
             {
-                auto result = ::recv( m_selectable.handle(),
-                                      m_buffer.data() + m_end,
-                                      m_buffer.size() - m_end,
-                                      MSG_NOSIGNAL );
+                auto result = ::recv(
+                    handle, m_buffer.data() + m_end, m_buffer.size() - m_end, MSG_NOSIGNAL );
 
                 if( result < 0 )
                 {
                     if( errno != EAGAIN && errno != EWOULDBLOCK )
                     {
-                        throw std::runtime_error( "Connection broken" );
+                        return false;
                     }
                 }
                 else if( result == 0 )
                 {
-                    throw std::runtime_error( "Connection closed" );
+                    return false;
                 }
                 else
                 {
                     m_end += result;
                 }
             }
+
+            return true;
         }
 
         bool SocketDataReader::available() const

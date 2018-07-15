@@ -25,8 +25,6 @@ namespace ttb
         public:
             virtual ~Selectable();
 
-            virtual void selector( ttb::posix::NetSelector* selector );
-
             virtual int handle() const = 0;
 
             virtual bool isReadable() const = 0;
