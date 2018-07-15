@@ -6,3 +6,4 @@
 
 #include <ttb/net/packets/DataOPacket.hpp>
 #include <ttb/net/packets/OPacket.hpp>
+#include <ttb/net/packets/PrefixOPacket.hpp>
