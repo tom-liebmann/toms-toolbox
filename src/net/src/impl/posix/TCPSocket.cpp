@@ -218,6 +218,22 @@ namespace ttb
 
             if( m_connectionState == ConnectionState::CONNECTING )
             {
+                int result;
+                socklen_t result_len = sizeof( result );
+                if( getsockopt( m_handle, SOL_SOCKET, SO_ERROR, &result, &result_len ) < 0 )
+                {
+                    lock.unlock();
+                    disconnect();
+                    return;
+                }
+
+                if( result != 0 )
+                {
+                    lock.unlock();
+                    disconnect();
+                    return;
+                }
+
                 m_connectionState = ConnectionState::CONNECTED;
                 lock.unlock();
 
