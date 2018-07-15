@@ -39,7 +39,8 @@ namespace ttb
 
         m_condition.notify_all();
 
-        m_thread.join();
+        if( m_thread.joinable() )
+            m_thread.join();
     }
 
     std::shared_ptr< TimeoutWrapper::PacketInput > const& TimeoutWrapper::packetInput()
@@ -99,7 +100,14 @@ namespace ttb
 
             if( m_running && !m_ack )
             {
+                auto socket = m_socket;
+                lock.unlock();
+
+                m_thread.detach();
+
                 m_socket->disconnect();
+
+                return;
             }
         }
     }
