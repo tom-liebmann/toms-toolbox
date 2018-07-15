@@ -20,8 +20,12 @@ namespace ttb
     std::shared_ptr< TimeoutWrapper > TimeoutWrapper::create( std::shared_ptr< TCPSocket > socket,
                                                               Duration timeout )
     {
-        return std::shared_ptr< TimeoutWrapper >(
+        std::shared_ptr< TimeoutWrapper > result(
             new TimeoutWrapper( std::move( socket ), timeout ) );
+
+        std::thread( [&result] { result->checkLoop(); } ).detach();
+
+        return result;
     }
 
     TimeoutWrapper::TimeoutWrapper( std::shared_ptr< TCPSocket > socket, Duration timeout )
@@ -30,7 +34,6 @@ namespace ttb
         , m_socket( std::move( socket ) )
         , m_timeout( timeout )
         , m_packetBridge( *m_socket )
-        , m_thread( [this] { this->checkLoop(); } )
     {
         m_packetBridge.eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
             [this]( auto& e ) { this->onEventInput( e ); } ) );

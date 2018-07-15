@@ -46,6 +46,5 @@ namespace ttb
 
         std::mutex m_mutex;
         std::condition_variable m_condition;
-        std::thread m_thread;
     };
 }
