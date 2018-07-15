@@ -23,7 +23,7 @@ namespace ttb
         std::shared_ptr< TimeoutWrapper > result(
             new TimeoutWrapper( std::move( socket ), timeout ) );
 
-        std::thread( [&result] { result->checkLoop(); } ).detach();
+        std::thread( [result] { result->checkLoop(); } ).detach();
 
         return result;
     }
