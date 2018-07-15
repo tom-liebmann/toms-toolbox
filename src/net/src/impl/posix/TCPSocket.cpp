@@ -68,6 +68,7 @@ namespace ttb
 
             while( m_connectionState != ConnectionState::DISCONNECTED )
             {
+                std::cout << "State not disconnected" << std::endl;
                 lock.unlock();
                 disconnect();
                 lock.lock();
@@ -135,11 +136,13 @@ namespace ttb
             switch( m_connectionState )
             {
                 case ConnectionState::DISCONNECTED:
+                    std::cout << "Keeping disconnection" << std::endl;
                     // We are already disconnected. Nothing to do here
                     break;
 
                 case ConnectionState::CONNECTING:
                 {
+                    std::cout << "Interrupting connection" << std::endl;
                     m_connectionState = ConnectionState::DISCONNECTED;
                     lock.unlock();
 
@@ -150,6 +153,7 @@ namespace ttb
 
                 case ConnectionState::CONNECTED:
                 {
+                    std::cout << "Closing connection" << std::endl;
                     shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
