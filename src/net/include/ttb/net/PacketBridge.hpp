@@ -31,7 +31,6 @@ namespace ttb
         std::shared_ptr< PacketInput > m_packetInput;
         EventOutput m_eventOutput;
 
-        std::shared_ptr< EventInput > m_eventInput;
         DataOutput m_dataOutput;
 
         enum class ReadState
@@ -54,12 +53,12 @@ namespace ttb
     PacketBridge::PacketBridge( TChild& child )
         : m_packetInput( std::make_shared< PacketInput >(
               [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
-        , m_eventInput( std::make_shared< EventInput >(
-              [this]( auto& event ) { this->onEventInput( event ); } ) )
         , m_readState( ReadState::SIZE )
         , m_readOffset( 0 )
     {
-        child.eventOutput().input( m_eventInput );
+        child.eventOutput().input( std::make_shared< EventInput >(
+            [this]( auto& event ) { this->onEventInput( event ); } ) );
+
         m_dataOutput.input( child.dataInput() );
     }
 }
