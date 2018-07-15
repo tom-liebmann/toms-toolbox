@@ -1,6 +1,7 @@
 set(
     SOURCE_FILES
     src/DataReader.cpp
+    src/DataWriter.cpp
     src/Listener.cpp
     src/NetSelector.cpp
     src/Selectable.cpp
@@ -18,7 +19,6 @@ set(
     src/packets/IPacket.cpp
     src/packets/OPacket.cpp
     src/packets/SizedIPacket.cpp
-    src/packets/SizedOPacket.cpp
 
     src/PacketBridge.cpp
 

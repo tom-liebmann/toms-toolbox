@@ -6,6 +6,3 @@
 
 #include <ttb/net/packets/DataOPacket.hpp>
 #include <ttb/net/packets/OPacket.hpp>
-#include <ttb/net/packets/SizedOPacket.hpp>
-#include <ttb/net/packets/TypedIPacket.hpp>
-#include <ttb/net/packets/TypedOPacket.hpp>

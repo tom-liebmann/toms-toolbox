@@ -1,8 +1,26 @@
 #include <ttb/net/PacketBridge.hpp>
 
+#include <ttb/net/DataWriter.hpp>
 #include <ttb/net/events.hpp>
 
 #include <iostream>
+
+
+namespace
+{
+    class PacketDataWriter : public ttb::DataWriter
+    {
+    public:
+        PacketDataWriter( size_t size );
+
+        virtual void write( void const* data, size_t size ) override;
+
+        std::vector< uint8_t >& data();
+
+    private:
+        std::vector< uint8_t > m_data;
+    };
+}
 
 
 namespace ttb
@@ -74,11 +92,36 @@ namespace ttb
 
     void PacketBridge::onPacketInput( std::shared_ptr< ttb::OPacket const > packet )
     {
-        uint32_t packetSize = packet->size();
-        m_dataOutput.push( std::vector< uint8_t >( reinterpret_cast< uint8_t* >( &packetSize ),
-                                                   reinterpret_cast< uint8_t* >( &packetSize ) +
-                                                       sizeof( uint32_t ) ) );
+        PacketDataWriter dataWriter( sizeof( uint32_t ) + packet->size() );
 
-        packet->send( m_dataOutput );
+        // Write packet size
+        uint32_t packetSize = packet->size();
+        dataWriter.write( &packetSize, sizeof( uint32_t ) );
+
+        // Write packet payload
+        packet->write( dataWriter );
+
+        m_dataOutput.push( std::move( dataWriter.data() ) );
+    }
+}
+
+
+namespace
+{
+    PacketDataWriter::PacketDataWriter( size_t size )
+    {
+        m_data.reserve( size );
+    }
+
+    void PacketDataWriter::write( void const* data, size_t size )
+    {
+        m_data.insert( std::end( m_data ),
+                       reinterpret_cast< uint8_t const* >( data ),
+                       reinterpret_cast< uint8_t const* >( data ) + size );
+    }
+
+    std::vector< uint8_t >& PacketDataWriter::data()
+    {
+        return m_data;
     }
 }

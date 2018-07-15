@@ -1,5 +1,7 @@
 #include <ttb/net/packets/DataOPacket.hpp>
 
+#include <ttb/net/DataWriter.hpp>
+
 #include <cstring>
 #include <sstream>
 
@@ -20,9 +22,9 @@ namespace ttb
         return m_data.size();
     }
 
-    void DataOPacket::send( ttb::PushOutput< std::vector< uint8_t > >& output ) const
+    void DataOPacket::write( DataWriter& writer ) const
     {
-        output.push( m_data );
+        writer.write( m_data.data(), m_data.size() );
     }
 
 

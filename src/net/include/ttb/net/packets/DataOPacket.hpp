@@ -20,7 +20,7 @@ namespace ttb
 
         // OPacket
         virtual size_t size() const override;
-        virtual void send( ttb::PushOutput< std::vector< uint8_t > >& output ) const override;
+        virtual void write( DataWriter& writer ) const override;
 
     private:
         DataOPacket( Endianness endianness, std::vector< uint8_t > data );
