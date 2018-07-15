@@ -23,7 +23,11 @@ namespace ttb
         class Selectable : public ttb::Selectable
         {
         public:
+            Selectable();
+
             virtual ~Selectable();
+
+            void selector( NetSelector* selector );
 
             virtual int handle() const = 0;
 
@@ -32,6 +36,12 @@ namespace ttb
 
             virtual bool isWritable() const = 0;
             virtual void doWrite() = 0;
+
+        protected:
+            NetSelector* selector();
+
+        private:
+            NetSelector* m_selector;
         };
     }
 }

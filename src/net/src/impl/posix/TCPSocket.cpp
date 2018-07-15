@@ -1,5 +1,7 @@
 #include "TCPSocket.hpp"
 
+#include "NetSelector.hpp"
+
 #include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
 
@@ -127,6 +129,10 @@ namespace ttb
             }
 
             m_connectionState = ConnectionState::CONNECTING;
+
+            auto sel = selector();
+            if( sel )
+                sel->interrupt();
         }
 
         void TCPSocket::disconnect()

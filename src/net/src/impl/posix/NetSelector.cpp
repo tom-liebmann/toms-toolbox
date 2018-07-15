@@ -48,6 +48,8 @@ namespace ttb
 
             if( sel )
             {
+                sel->selector( this );
+
                 std::lock_guard< std::mutex > lock( m_mutex );
 
                 m_changes.emplace( sel );
@@ -60,12 +62,14 @@ namespace ttb
             }
         }
 
-        void NetSelector::remove( ttb::Selectable const& selectable )
+        void NetSelector::remove( ttb::Selectable& selectable )
         {
-            auto sel = dynamic_cast< posix::Selectable const* >( &selectable );
+            auto sel = dynamic_cast< posix::Selectable* >( &selectable );
 
             if( sel )
             {
+                sel->selector( nullptr );
+
                 std::lock_guard< std::mutex > lock( m_mutex );
 
                 m_changes.emplace( *sel );
