@@ -102,6 +102,8 @@ namespace ttb
                 lock.unlock();
 
                 m_socket->disconnect();
+
+                lock.lock();
             }
         }
     }
