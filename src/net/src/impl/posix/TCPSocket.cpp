@@ -63,6 +63,7 @@ namespace ttb
 
         void TCPSocket::connect( std::string const& address, uint16_t port )
         {
+            std::cout << "Socket: Connecting" << std::endl;
             std::unique_lock< std::mutex > lock( m_mutex );
 
             while( m_connectionState != ConnectionState::DISCONNECTED )
@@ -74,6 +75,7 @@ namespace ttb
 
             if( ( m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == -1 )
             {
+                std::cout << "Socket: Creation error" << std::endl;
                 lock.unlock();
 
                 ttb::events::ConnectionFailed event;
@@ -92,6 +94,7 @@ namespace ttb
             }
             catch( std::runtime_error& e )
             {
+                std::cout << "Socket: Address error" << std::endl;
                 close( m_handle );
                 m_handle = -1;
 
@@ -109,6 +112,7 @@ namespace ttb
             {
                 if( errno != EINPROGRESS )
                 {
+                    std::cout << "Socket: Connect error" << std::endl;
                     close( m_handle );
                     m_handle = -1;
 
@@ -183,6 +187,7 @@ namespace ttb
 
                 if( !m_dataReader.doRead() )
                 {
+                    std::cout << "Socket: Read disconnect" << std::endl;
                     disconnect();
                     break;
                 }
@@ -222,6 +227,7 @@ namespace ttb
                 socklen_t result_len = sizeof( result );
                 if( getsockopt( m_handle, SOL_SOCKET, SO_ERROR, &result, &result_len ) < 0 )
                 {
+                    std::cout << "Socket: Option disconnect" << std::endl;
                     lock.unlock();
                     disconnect();
                     return;
@@ -229,6 +235,7 @@ namespace ttb
 
                 if( result != 0 )
                 {
+                    std::cout << "Socket: Failed disconnect" << std::endl;
                     lock.unlock();
                     disconnect();
                     return;
@@ -267,6 +274,7 @@ namespace ttb
                     }
                     else
                     {
+                        std::cout << "Socket: Write disconnect" << std::endl;
                         disconnect();
                         break;
                     }

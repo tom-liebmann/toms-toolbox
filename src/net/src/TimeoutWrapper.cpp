@@ -101,7 +101,7 @@ namespace ttb
                 auto socket = m_socket;
                 lock.unlock();
 
-                m_socket->disconnect();
+                socket->disconnect();
 
                 lock.lock();
             }
