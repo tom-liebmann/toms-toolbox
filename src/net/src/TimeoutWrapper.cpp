@@ -17,30 +17,23 @@ namespace
 
 namespace ttb
 {
+    std::shared_ptr< TimeoutWrapper > TimeoutWrapper::create( std::shared_ptr< TCPSocket > socket,
+                                                              Duration timeout )
+    {
+        return std::shared_ptr< TimeoutWrapper >(
+            new TimeoutWrapper( std::move( socket ), timeout ) );
+    }
+
     TimeoutWrapper::TimeoutWrapper( std::shared_ptr< TCPSocket > socket, Duration timeout )
         : m_packetInput( std::make_shared< PacketInput >(
               [&]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
         , m_socket( std::move( socket ) )
         , m_timeout( timeout )
         , m_packetBridge( *m_socket )
-        , m_running( true )
         , m_thread( [this] { this->checkLoop(); } )
     {
         m_packetBridge.eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
             [this]( auto& e ) { this->onEventInput( e ); } ) );
-    }
-
-    TimeoutWrapper::~TimeoutWrapper()
-    {
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
-            m_running = false;
-        }
-
-        m_condition.notify_all();
-
-        if( m_thread.joinable() )
-            m_thread.join();
     }
 
     std::shared_ptr< TimeoutWrapper::PacketInput > const& TimeoutWrapper::packetInput()
@@ -67,7 +60,9 @@ namespace ttb
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
-        while( m_running )
+        auto self = shared_from_this();
+
+        while( self.use_count() > 1 )
         {
             switch( m_socket->connected() )
             {
@@ -98,12 +93,10 @@ namespace ttb
 
             m_condition.wait_for( lock, m_timeout );
 
-            if( m_running && !m_ack )
+            if( self.use_count() > 1 && !m_ack )
             {
                 auto socket = m_socket;
                 lock.unlock();
-
-                m_thread.detach();
 
                 m_socket->disconnect();
 

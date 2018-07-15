@@ -10,16 +10,15 @@
 
 namespace ttb
 {
-    class TimeoutWrapper
+    class TimeoutWrapper : public std::enable_shared_from_this< TimeoutWrapper >
     {
     public:
         using Duration = std::chrono::steady_clock::duration;
         using PacketInput = PacketBridge::PacketInput;
         using EventOutput = PacketBridge::EventOutput;
 
-        TimeoutWrapper( std::shared_ptr< TCPSocket > socket, Duration timeout );
-
-        ~TimeoutWrapper();
+        static std::shared_ptr< TimeoutWrapper > create( std::shared_ptr< TCPSocket > socket,
+                                                         Duration timeout );
 
         std::shared_ptr< PacketInput > const& packetInput();
         EventOutput& eventOutput();
@@ -29,6 +28,8 @@ namespace ttb
         std::shared_ptr< TCPSocket const > socket() const;
 
     private:
+        TimeoutWrapper( std::shared_ptr< TCPSocket > socket, Duration timeout );
+
         void checkLoop();
 
         void onEventInput( ttb::Event& event );
@@ -43,7 +44,6 @@ namespace ttb
 
         bool m_ack;
 
-        bool m_running;
         std::mutex m_mutex;
         std::condition_variable m_condition;
         std::thread m_thread;
