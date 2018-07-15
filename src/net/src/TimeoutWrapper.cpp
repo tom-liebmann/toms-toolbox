@@ -23,6 +23,7 @@ namespace ttb
         , m_socket( std::move( socket ) )
         , m_timeout( timeout )
         , m_packetBridge( *m_socket )
+        , m_running( true )
         , m_thread( [this] { this->checkLoop(); } )
     {
         m_packetBridge.eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
