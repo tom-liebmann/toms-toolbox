@@ -21,6 +21,7 @@ set(
     src/packets/SizedIPacket.cpp
 
     src/PacketBridge.cpp
+    src/TimeoutWrapper.cpp
 
     src/WebSocket.cpp
     src/webSocket/SocketState.cpp
