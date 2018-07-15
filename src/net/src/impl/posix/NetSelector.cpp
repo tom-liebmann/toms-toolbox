@@ -60,9 +60,9 @@ namespace ttb
             }
         }
 
-        void NetSelector::remove( ttb::Selectable& selectable )
+        void NetSelector::remove( ttb::Selectable const& selectable )
         {
-            auto sel = dynamic_cast< posix::Selectable* >( &selectable );
+            auto sel = dynamic_cast< posix::Selectable const* >( &selectable );
 
             if( sel )
             {
