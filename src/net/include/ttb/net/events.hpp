@@ -9,7 +9,7 @@ namespace ttb
     namespace events
     {
         constexpr Event::Type PACKET = 6;
-        constexpr Event::Type BROKEN_CONNECTION = 7;
+        constexpr Event::Type CONNECTION_FAILED = 7;
         constexpr Event::Type DISCONNECT = 8;
         constexpr Event::Type CLIENT_CONNECTION = 9;
         constexpr Event::Type SERVER_CONNECTION = 10;
@@ -18,9 +18,9 @@ namespace ttb
 }
 
 
-#include <ttb/net/events/BrokenConnection.hpp>
-#include <ttb/net/events/ClientConnection.hpp>
-#include <ttb/net/events/Data.hpp>
-#include <ttb/net/events/Disconnect.hpp>
-#include <ttb/net/events/Packet.hpp>
-#include <ttb/net/events/ServerConnection.hpp>
+#include "events/ClientConnection.hpp"
+#include "events/ConnectionFailed.hpp"
+#include "events/Data.hpp"
+#include "events/Disconnect.hpp"
+#include "events/Packet.hpp"
+#include "events/ServerConnection.hpp"

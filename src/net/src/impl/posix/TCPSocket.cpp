@@ -76,7 +76,7 @@ namespace ttb
             {
                 lock.unlock();
 
-                ttb::events::BrokenConnection event;
+                ttb::events::ConnectionFailed event;
                 eventOutput().push( event );
 
                 return;
@@ -97,7 +97,7 @@ namespace ttb
 
                 lock.unlock();
 
-                ttb::events::BrokenConnection event;
+                ttb::events::ConnectionFailed event;
                 eventOutput().push( event );
 
                 return;
@@ -114,7 +114,7 @@ namespace ttb
 
                     lock.unlock();
 
-                    ttb::events::BrokenConnection event;
+                    ttb::events::ConnectionFailed event;
                     eventOutput().push( event );
 
                     return;
@@ -128,21 +128,35 @@ namespace ttb
         {
             std::unique_lock< std::mutex > lock( m_mutex );
 
-            if( m_connectionState != ConnectionState::DISCONNECTED )
+            switch( m_connectionState )
             {
-                m_connectionState = ConnectionState::DISCONNECTED;
+                case ConnectionState::DISCONNECTED:
+                    // We are already disconnected. Nothing to do here
+                    break;
 
-                if( m_handle != -1 )
+                case ConnectionState::CONNECTING:
+                {
+                    m_connectionState = ConnectionState::DISCONNECTED;
+                    lock.unlock();
+
+                    ttb::events::ConnectionFailed event;
+                    eventOutput().push( event );
+                    break;
+                }
+
+                case ConnectionState::CONNECTED:
                 {
                     shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
+                    m_connectionState = ConnectionState::DISCONNECTED;
+                    lock.unlock();
+
+                    // TODO: Signal a broken disconnect
+                    ttb::events::Disconnect event( ttb::events::Disconnect::Reason::NORMAL );
+                    eventOutput().push( event );
+                    break;
                 }
-
-                lock.unlock();
-
-                ttb::events::Disconnect event;
-                eventOutput().push( event );
             }
         }
 
@@ -162,13 +176,11 @@ namespace ttb
         {
             std::unique_lock< std::mutex > lock( m_mutex );
 
-            if( m_connectionState == ConnectionState::DISCONNECTED )
-                return;
-
-            lock.unlock();
-
-            while( true )
+            // Only perform a read if we are connected
+            while( m_connectionState == ConnectionState::CONNECTED )
             {
+                lock.unlock();
+
                 if( !m_dataReader.doRead() )
                 {
                     disconnect();
@@ -183,6 +195,8 @@ namespace ttb
                     ttb::events::Data event( m_dataReader );
                     eventOutput().push( event );
                 }
+
+                lock.lock();
             }
         }
 
@@ -193,9 +207,7 @@ namespace ttb
             // If the socket isn't connected yet, we use the writability as an indicator for
             // successful connection
             if( m_connectionState == ConnectionState::CONNECTING )
-            {
                 return true;
-            }
 
             return false;
         }
@@ -207,7 +219,6 @@ namespace ttb
             if( m_connectionState == ConnectionState::CONNECTING )
             {
                 m_connectionState = ConnectionState::CONNECTED;
-
                 lock.unlock();
 
                 ttb::events::ServerConnection event;

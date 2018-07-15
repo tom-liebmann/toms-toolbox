@@ -66,7 +66,7 @@ namespace ttb
         switch( event.type() )
         {
             case ttb::events::DISCONNECT:
-            case ttb::events::BROKEN_CONNECTION:
+            case ttb::events::CONNECTION_FAILED:
             {
                 m_state.reset();
 
