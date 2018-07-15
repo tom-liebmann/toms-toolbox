@@ -143,6 +143,9 @@ namespace ttb
                 case ConnectionState::CONNECTING:
                 {
                     std::cout << "Interrupting connection" << std::endl;
+                    shutdown( m_handle, SHUT_RDWR );
+                    close( m_handle );
+                    m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;
                     lock.unlock();
 
