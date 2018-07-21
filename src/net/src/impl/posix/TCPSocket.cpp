@@ -272,6 +272,8 @@ namespace ttb
                 {
                     if( errno == EAGAIN || errno == EWOULDBLOCK )
                     {
+                        std::cout << "Writing: " << ( errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK" )
+                                  << std::endl;
                         lock.lock();
                     }
                     else
@@ -282,6 +284,7 @@ namespace ttb
                 }
                 else
                 {
+                    std::cout << "Writing: " << result << std::endl;
                     offset += result;
                     lock.lock();
                 }
