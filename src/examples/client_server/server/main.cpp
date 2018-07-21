@@ -111,7 +111,7 @@ namespace
                 break;
             }
 
-            case ttb::events::BROKEN_CONNECTION:
+            case ttb::events::CONNECTION_FAILED:
             case ttb::events::DISCONNECT:
             {
                 std::cout << "Client disconnected..." << std::endl;

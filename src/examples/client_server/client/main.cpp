@@ -72,7 +72,7 @@ namespace
                 break;
             }
 
-            case ttb::events::BROKEN_CONNECTION:
+            case ttb::events::CONNECTION_FAILURE:
             case ttb::events::DISCONNECT:
             {
                 std::cout << "Disconnected...\n";
