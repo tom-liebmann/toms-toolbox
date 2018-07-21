@@ -7,7 +7,7 @@ file(
 
 add_library(
     ttbUtils
-    STATIC
+    SHARED
     ${SOURCE_FILES} )
 
 target_compile_options(

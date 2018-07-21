@@ -40,7 +40,7 @@ set(
 
 add_library(
     ttbNet
-    STATIC
+    SHARED
     ${SOURCE_FILES}
     )
 

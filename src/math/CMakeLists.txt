@@ -8,7 +8,7 @@ file(
 
 add_library(
     ttbMath
-    STATIC
+    SHARED
     ${SOURCE_FILES} )
 
 target_include_directories(
