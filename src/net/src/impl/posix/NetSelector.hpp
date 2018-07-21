@@ -25,9 +25,8 @@ namespace ttb
         public:
             NetSelector();
 
-            void interrupt();
-
             // Override: NetSelector
+            virtual void interrupt() override;
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
             virtual void remove( ttb::Selectable& selectable ) override;
             virtual void update( bool block ) override;

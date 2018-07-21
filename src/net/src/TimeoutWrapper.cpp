@@ -3,6 +3,8 @@
 #include <ttb/net/events.hpp>
 #include <ttb/net/packets.hpp>
 
+#include <iostream>
+
 
 namespace
 {
