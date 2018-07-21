@@ -20,7 +20,7 @@ namespace ttb
         class TCPSocket : public ttb::TCPSocket, public posix::Selectable
         {
         public:
-            TCPSocket( std::string const& address, uint16_t port );
+            TCPSocket();
 
             TCPSocket( int handle );
 
@@ -32,7 +32,7 @@ namespace ttb
             virtual bool checkWrite() const override;
             virtual void doRead() override;
             virtual void doWrite() override;
-            virtual void writeData() override;
+            virtual bool writeData() override;
 
         private:
             // Override: ttb::TCPSocket

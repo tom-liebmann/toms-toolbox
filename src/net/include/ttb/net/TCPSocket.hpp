@@ -23,9 +23,7 @@ namespace ttb
             CONNECTING
         };
 
-        static std::shared_ptr< TCPSocket > create( std::string const& address, uint16_t port );
-
-        TCPSocket();
+        static std::shared_ptr< TCPSocket > create();
 
         virtual ~TCPSocket();
 
@@ -38,6 +36,9 @@ namespace ttb
         EventOutput& eventOutput();
 
         std::shared_ptr< DataInput > const& dataInput();
+
+    protected:
+        TCPSocket();
 
     private:
         virtual void onData( std::vector< uint8_t > data ) = 0;

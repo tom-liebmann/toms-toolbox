@@ -31,11 +31,12 @@ namespace ttb
 
     namespace posix
     {
-        NetSelector::NetSelector()
+        NetSelector::NetSelector() : m_running( true )
         {
             std::lock_guard< std::mutex > mainLock( m_mainMutex );
 
             m_interruptor = Interruptor::create();
+
             m_selectables.push_back(
                 std::static_pointer_cast< ttb::posix::Interruptor >( m_interruptor ) );
 
@@ -48,6 +49,8 @@ namespace ttb
             {
                 std::lock_guard< std::mutex > mainLock( m_mainMutex );
                 m_running = false;
+                m_interruptor->interrupt();
+                m_writeCondition.notify_all();
             }
 
             m_writeThread.join();
@@ -119,11 +122,19 @@ namespace ttb
                     // blocks in the writing call can block the entire net selector.
                     std::lock_guard< std::mutex > selectableLock( m_selectableMutex );
 
-                    for( auto& selectable : m_selectables )
+                    bool loop = false;
+                    do
                     {
-                        selectable->writeData();
-                    }
+                        loop = false;
+                        for( auto& selectable : m_selectables )
+                        {
+                            if( !selectable->writeData() )
+                                loop = true;
+                        }
+                    } while( loop );
                 }
+
+                mainLock.lock();
 
                 m_writeCondition.wait( mainLock );
             }
@@ -156,6 +167,7 @@ namespace ttb
                                 if( iter == std::end( m_selectables ) )
                                 {
                                     m_selectables.push_back( selectable );
+                                    m_writeCondition.notify_all();
                                 }
                                 break;
                             }
@@ -207,7 +219,7 @@ namespace ttb
                     }
                 }
 
-                timeval timeout = block ? timeval{ 10, 0 } : timeval{ 0, 0 };
+                timeval timeout = timeval{ 10, 0 };
 
                 auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 

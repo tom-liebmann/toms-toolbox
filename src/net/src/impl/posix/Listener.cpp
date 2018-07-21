@@ -104,8 +104,9 @@ namespace ttb
         {
         }
 
-        void Listener::writeData()
+        bool Listener::writeData()
         {
+            return true;
         }
     }
 }

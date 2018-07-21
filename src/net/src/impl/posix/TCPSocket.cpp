@@ -28,20 +28,19 @@ namespace
 
 namespace ttb
 {
-    std::shared_ptr< TCPSocket > TCPSocket::create( std::string const& address, uint16_t port )
+    std::shared_ptr< TCPSocket > TCPSocket::create()
     {
-        return std::make_shared< posix::TCPSocket >( address, port );
+        return std::make_shared< posix::TCPSocket >();
     }
 
 
     namespace posix
     {
-        TCPSocket::TCPSocket( std::string const& address, uint16_t port )
+        TCPSocket::TCPSocket()
             : m_handle( -1 )
             , m_connectionState( ConnectionState::DISCONNECTED )
             , m_dataReader( *this )
         {
-            connect( address, port );
         }
 
         TCPSocket::TCPSocket( int handle )
@@ -259,13 +258,17 @@ namespace ttb
 
             auto sel = selector();
             if( sel )
-                sel->notifyChange();
+                sel->notifyWrite();
         }
 
         bool TCPSocket::writeData()
         {
+            std::unique_lock< std::mutex > lock( m_mutex );
             while( !m_writeBuffer.empty() )
             {
+                auto data = std::move( m_writeBuffer.front() );
+                m_writeBuffer.pop();
+
                 size_t offset = 0;
                 while( offset < data.size() )
                 {
@@ -282,25 +285,24 @@ namespace ttb
                     {
                         if( errno == EAGAIN || errno == EWOULDBLOCK )
                         {
-                            std::cout
-                                << "Writing: " << ( errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK" )
-                                << std::endl;
-                            lock.lock();
+                            return false;
                         }
                         else
                         {
+                            std::cout << "Writing disconnect" << std::endl;
                             disconnect();
                             break;
                         }
                     }
                     else
                     {
-                        std::cout << "Writing: " << result << std::endl;
                         offset += result;
                         lock.lock();
                     }
                 }
             }
+
+            return true;
         }
     }
 }

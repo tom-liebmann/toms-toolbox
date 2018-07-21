@@ -24,7 +24,7 @@ namespace ttb
             virtual bool checkWrite() const override;
             virtual void doRead() override;
             virtual void doWrite() override;
-            virtual void writeData() override;
+            virtual bool writeData() override;
 
         private:
             int m_handle;

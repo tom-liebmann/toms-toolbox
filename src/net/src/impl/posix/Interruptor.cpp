@@ -54,8 +54,9 @@ namespace ttb
         {
         }
 
-        void Interruptor::writeData()
+        bool Interruptor::writeData()
         {
+            return true;
         }
     }
 }

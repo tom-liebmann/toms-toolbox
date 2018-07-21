@@ -151,12 +151,14 @@ namespace ttb
                 case TCPSocket::ConnectionState::CONNECTING:
                 {
                     m_ack = false;
+                    std::cout << "WAITING FOR CONNECTION" << std::endl;
                     break;
                 }
 
                 case TCPSocket::ConnectionState::DISCONNECTED:
                 {
                     m_ack = true;
+                    std::cout << "DISCONNECTED" << std::endl;
                     break;
                 }
             }
@@ -165,7 +167,7 @@ namespace ttb
             m_condition.wait_for( lock, m_timeout );
             std::cout << "Time wrapper: done waiting" << std::endl;
 
-            if( self.use_count() > 1 && !m_ack )
+            if( m_running && !m_ack )
             {
                 std::cout << "Time wrapper: didn't get ack" << std::endl;
 

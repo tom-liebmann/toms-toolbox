@@ -4,7 +4,9 @@
 #include "TCPSocket.hpp"
 #include <ttb/net/NetSelector.hpp>
 
+#include <condition_variable>
 #include <mutex>
+#include <thread>
 
 
 namespace ttb
