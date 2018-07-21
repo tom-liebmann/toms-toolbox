@@ -74,6 +74,7 @@ namespace ttb
                     m_ack = false;
                     lock.unlock();
 
+                    std::cout << "Time wrapper: Sending ping" << std::endl;
                     m_packetBridge.packetInput()->push(
                         ttb::DataOPacket::create().write( MessageType::PING ).finish() );
 
@@ -94,10 +95,14 @@ namespace ttb
                 }
             }
 
+            std::cout << "Time wrapper: waiting" << std::endl;
             m_condition.wait_for( lock, m_timeout );
+            std::cout << "Time wrapper: done waiting" << std::endl;
 
             if( self.use_count() > 1 && !m_ack )
             {
+                std::cout << "Time wrapper: didn't get ack" << std::endl;
+
                 auto socket = m_socket;
                 lock.unlock();
 
