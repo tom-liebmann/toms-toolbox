@@ -34,9 +34,14 @@ namespace ttb
             return m_handles[ 0 ];
         }
 
-        bool Interruptor::isReadable() const
+        bool Interruptor::checkRead() const
         {
             return true;
+        }
+
+        bool Interruptor::checkWrite() const
+        {
+            return false;
         }
 
         void Interruptor::doRead()
@@ -45,12 +50,11 @@ namespace ttb
             read( m_handles[ 0 ], &message, sizeof( message ) );
         }
 
-        bool Interruptor::isWritable() const
+        void Interruptor::doWrite()
         {
-            return false;
         }
 
-        void Interruptor::doWrite()
+        void Interruptor::writeData()
         {
         }
     }

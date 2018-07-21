@@ -20,10 +20,11 @@ namespace ttb
 
             // Override: Selectable
             virtual int handle() const override;
-            virtual bool isReadable() const override;
+            virtual bool checkRead() const override;
+            virtual bool checkWrite() const override;
             virtual void doRead() override;
-            virtual bool isWritable() const override;
             virtual void doWrite() override;
+            virtual void writeData() override;
 
         private:
             int m_handle;

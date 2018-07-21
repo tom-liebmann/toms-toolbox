@@ -28,10 +28,11 @@ namespace ttb
 
             // Override: Selectable
             virtual int handle() const override;
-            virtual bool isReadable() const override;
+            virtual bool checkRead() const override;
+            virtual bool checkWrite() const override;
             virtual void doRead() override;
-            virtual bool isWritable() const override;
             virtual void doWrite() override;
+            virtual void writeData() override;
 
         private:
             // Override: ttb::TCPSocket
@@ -40,11 +41,12 @@ namespace ttb
             virtual void connect( std::string const& address, uint16_t port ) override;
             virtual void disconnect() override;
 
+            std::queue< std::vector< uint8_t > > m_writeBuffer;
+
             int m_handle;
             ConnectionState m_connectionState;
 
             mutable std::mutex m_mutex;
-            std::mutex m_writeMutex;
 
             SocketDataReader m_dataReader;
         };

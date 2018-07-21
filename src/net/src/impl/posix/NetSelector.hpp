@@ -25,11 +25,17 @@ namespace ttb
         public:
             NetSelector();
 
+            ~NetSelector();
+
+            // Notifies the selector to perform a write sweep
+            void notifyWrite();
+
+            // Notifies the selector to reset the selection process
+            void notifyChange();
+
             // Override: NetSelector
-            virtual void interrupt() override;
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
             virtual void remove( ttb::Selectable& selectable ) override;
-            virtual void update( bool block ) override;
 
         private:
             struct Change
@@ -66,13 +72,23 @@ namespace ttb
                 } m_data;
             };
 
+            void writeLoop();
+
+            void selectLoop();
+
+            std::mutex m_changeMutex;
             std::queue< Change > m_changes;
 
             std::shared_ptr< ttb::Interruptor > m_interruptor;
 
+            std::mutex m_selectableMutex;
             std::vector< std::shared_ptr< ttb::posix::Selectable > > m_selectables;
 
-            mutable std::mutex m_mutex;
+            std::mutex m_mainMutex;
+            bool m_running;
+            std::condition_variable m_writeCondition;
+            std::thread m_writeThread;
+            std::thread m_selectThread;
         };
     }
 }

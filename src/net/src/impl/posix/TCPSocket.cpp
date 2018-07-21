@@ -127,7 +127,7 @@ namespace ttb
 
             auto sel = selector();
             if( sel )
-                sel->interrupt();
+                sel->notifyChange();
         }
 
         void TCPSocket::disconnect()
@@ -175,10 +175,22 @@ namespace ttb
             return m_handle;
         }
 
-        bool TCPSocket::isReadable() const
+        bool TCPSocket::checkRead() const
         {
             std::unique_lock< std::mutex > lock( m_mutex );
             return m_connectionState != ConnectionState::DISCONNECTED;
+        }
+
+        bool TCPSocket::checkWrite() const
+        {
+            std::lock_guard< std::mutex > lock( m_mutex );
+
+            // If the socket isn't connected yet, we use the writability as an indicator for
+            // successful connection
+            if( m_connectionState == ConnectionState::CONNECTING )
+                return true;
+
+            return false;
         }
 
         void TCPSocket::doRead()
@@ -207,18 +219,6 @@ namespace ttb
 
                 lock.lock();
             }
-        }
-
-        bool TCPSocket::isWritable() const
-        {
-            std::lock_guard< std::mutex > lock( m_mutex );
-
-            // If the socket isn't connected yet, we use the writability as an indicator for
-            // successful connection
-            if( m_connectionState == ConnectionState::CONNECTING )
-                return true;
-
-            return false;
         }
 
         void TCPSocket::doWrite()
@@ -253,40 +253,52 @@ namespace ttb
 
         void TCPSocket::onData( std::vector< uint8_t > data )
         {
-            std::lock_guard< std::mutex > writeLock( m_writeMutex );
             std::unique_lock< std::mutex > lock( m_mutex );
 
-            size_t offset = 0;
-            while( offset < data.size() )
+            m_writeBuffer.push( std::move( data ) );
+
+            auto sel = selector();
+            if( sel )
+                sel->notifyChange();
+        }
+
+        bool TCPSocket::writeData()
+        {
+            while( !m_writeBuffer.empty() )
             {
-                if( m_connectionState != ConnectionState::CONNECTED )
-                    break;
-
-                auto handle = m_handle;
-                lock.unlock();
-
-                auto result =
-                    ::send( handle, data.data() + offset, data.size() - offset, MSG_NOSIGNAL );
-
-                if( result < 0 )
+                size_t offset = 0;
+                while( offset < data.size() )
                 {
-                    if( errno == EAGAIN || errno == EWOULDBLOCK )
+                    if( m_connectionState != ConnectionState::CONNECTED )
+                        break;
+
+                    auto handle = m_handle;
+                    lock.unlock();
+
+                    auto result =
+                        ::send( handle, data.data() + offset, data.size() - offset, MSG_NOSIGNAL );
+
+                    if( result < 0 )
                     {
-                        std::cout << "Writing: " << ( errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK" )
-                                  << std::endl;
-                        lock.lock();
+                        if( errno == EAGAIN || errno == EWOULDBLOCK )
+                        {
+                            std::cout
+                                << "Writing: " << ( errno == EAGAIN ? "EAGAIN" : "EWOULDBLOCK" )
+                                << std::endl;
+                            lock.lock();
+                        }
+                        else
+                        {
+                            disconnect();
+                            break;
+                        }
                     }
                     else
                     {
-                        disconnect();
-                        break;
+                        std::cout << "Writing: " << result << std::endl;
+                        offset += result;
+                        lock.lock();
                     }
-                }
-                else
-                {
-                    std::cout << "Writing: " << result << std::endl;
-                    offset += result;
-                    lock.lock();
                 }
             }
         }

@@ -75,9 +75,14 @@ namespace ttb
             return m_handle;
         }
 
-        bool Listener::isReadable() const
+        bool Listener::checkRead() const
         {
             return true;
+        }
+
+        bool Listener::checkWrite() const
+        {
+            return false;
         }
 
         void Listener::doRead()
@@ -95,12 +100,11 @@ namespace ttb
             eventOutput().push( event );
         }
 
-        bool Listener::isWritable() const
+        void Listener::doWrite()
         {
-            return false;
         }
 
-        void Listener::doWrite()
+        void Listener::writeData()
         {
         }
     }
