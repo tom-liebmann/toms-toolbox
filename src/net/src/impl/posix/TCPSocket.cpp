@@ -145,6 +145,7 @@ namespace ttb
                     close( m_handle );
                     m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;
+                    m_writeBuffer = std::queue< std::vector< uint8_t > >();
                     lock.unlock();
 
                     ttb::events::ConnectionFailed event;
@@ -158,6 +159,7 @@ namespace ttb
                     close( m_handle );
                     m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;
+                    m_writeBuffer = std::queue< std::vector< uint8_t > >();
                     lock.unlock();
 
                     // TODO: Signal a broken disconnect
@@ -254,11 +256,14 @@ namespace ttb
         {
             std::unique_lock< std::mutex > lock( m_mutex );
 
-            m_writeBuffer.push( std::move( data ) );
+            if( m_connectionState == ConnectionState::CONNECTED )
+            {
+                m_writeBuffer.push( std::move( data ) );
 
-            auto sel = selector();
-            if( sel )
-                sel->notifyWrite();
+                auto sel = selector();
+                if( sel )
+                    sel->notifyWrite();
+            }
         }
 
         bool TCPSocket::writeData()
