@@ -22,7 +22,10 @@ namespace ttb
         template < typename TType2 >
         void input( std::shared_ptr< PushInput< TType2 > > const& input );
 
-        void push( TType data );
+        /**
+         * \return true if the data was successfully pushed
+         */
+        bool push( TType data );
 
     private:
         std::mutex m_mutex;
@@ -50,7 +53,7 @@ namespace ttb
     }
 
     template < typename TType >
-    void PushOutput< TType >::push( TType data )
+    bool PushOutput< TType >::push( TType data )
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
@@ -58,7 +61,11 @@ namespace ttb
         {
             auto slot = m_slot;
             lock.unlock();
-            slot->push( std::forward< TType >( data ) );
+            return slot->push( std::forward< TType >( data ) );
+        }
+        else
+        {
+            return false;
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ttb
         public:
             virtual ~PushOutputSlot();
 
-            virtual void push( TType data ) = 0;
+            virtual bool push( TType data ) = 0;
         };
 
 
@@ -31,7 +31,7 @@ namespace ttb
         public:
             PushOutputSlotImpl( std::shared_ptr< PushInput< TType2 > > const& input );
 
-            virtual void push( TType data ) override;
+            virtual bool push( TType data ) override;
 
         private:
             std::weak_ptr< PushInput< TType2 > > m_input;
@@ -58,13 +58,18 @@ namespace ttb
         }
 
         template < typename TType, typename TType2 >
-        void PushOutputSlotImpl< TType, TType2 >::push( TType data )
+        bool PushOutputSlotImpl< TType, TType2 >::push( TType data )
         {
             auto input = m_input.lock();
 
             if( input )
             {
                 input->push( std::forward< TType >( data ) );
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
     }
