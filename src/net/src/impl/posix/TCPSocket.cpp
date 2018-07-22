@@ -219,6 +219,11 @@ namespace ttb
                     eventOutput().push( event );
                 }
 
+                if( prevAvailable != 0 )
+                {
+                    break;
+                }
+
                 lock.lock();
             }
         }
