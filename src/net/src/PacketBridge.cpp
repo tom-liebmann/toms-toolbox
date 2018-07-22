@@ -91,7 +91,6 @@ namespace ttb
         }
         else
         {
-            std::cout << "PacketBridge: Forwarding event" << std::endl;
             lock.unlock();
 
             m_eventOutput.push( event );

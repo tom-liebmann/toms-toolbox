@@ -136,13 +136,11 @@ namespace ttb
             switch( m_connectionState )
             {
                 case ConnectionState::DISCONNECTED:
-                    std::cout << "Socket: disconnect (DISCONNECTED)" << std::endl;
                     // We are already disconnected. Nothing to do here
                     break;
 
                 case ConnectionState::CONNECTING:
                 {
-                    std::cout << "Socket: disconnect (CONNECTING)" << std::endl;
                     shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
@@ -157,7 +155,6 @@ namespace ttb
 
                 case ConnectionState::CONNECTED:
                 {
-                    std::cout << "Socket: disconnect (CONNECTED)" << std::endl;
                     shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
@@ -297,7 +294,6 @@ namespace ttb
                         }
                         else
                         {
-                            std::cout << "Writing disconnect" << std::endl;
                             disconnect();
                             break;
                         }
