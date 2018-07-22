@@ -13,9 +13,6 @@ namespace ttb
         using PacketInput = ttb::PushInput< std::shared_ptr< ttb::OPacket const > >;
         using EventOutput = ttb::PushOutput< ttb::Event& >;
 
-        using EventInput = ttb::PushInput< ttb::Event& >;
-        using DataOutput = ttb::PushOutput< std::vector< uint8_t > >;
-
         template < typename TChild >
         PacketBridge( TChild& child );
 
@@ -28,9 +25,14 @@ namespace ttb
         void onEventInput( ttb::Event& event );
         void onPacketInput( std::shared_ptr< ttb::OPacket const > packet );
 
+        // External connections
         std::shared_ptr< PacketInput > m_packetInput;
         EventOutput m_eventOutput;
 
+        // Internal connections
+        using EventInput = ttb::PushInput< ttb::Event& >;
+        using DataOutput = ttb::PushOutput< std::vector< uint8_t > >;
+        std::shared_ptr< EventInput > m_eventInput;
         DataOutput m_dataOutput;
 
         enum class ReadState
@@ -43,6 +45,8 @@ namespace ttb
         size_t m_readOffset;
         uint32_t m_size;
         std::vector< uint8_t > m_data;
+
+        std::mutex m_mutex;
     };
 }
 
@@ -53,12 +57,12 @@ namespace ttb
     PacketBridge::PacketBridge( TChild& child )
         : m_packetInput( std::make_shared< PacketInput >(
               [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
+        , m_eventInput( std::make_shared< EventInput >(
+              [this]( auto& event ) { this->onEventInput( event ); } ) )
         , m_readState( ReadState::SIZE )
         , m_readOffset( 0 )
     {
-        child.eventOutput().input( std::make_shared< EventInput >(
-            [this]( auto& event ) { this->onEventInput( event ); } ) );
-
+        child.eventOutput().input( m_eventInput );
         m_dataOutput.input( child.dataInput() );
     }
 }

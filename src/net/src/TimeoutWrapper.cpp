@@ -39,8 +39,13 @@ namespace ttb
         void onEventInput( ttb::Event& event );
         void onPacketInput( std::shared_ptr< ttb::OPacket const > packet );
 
+        // External connections
         std::shared_ptr< PacketInput > m_packetInput;
         EventOutput m_eventOutput;
+
+        // Internal connections
+        using EventInput = ttb::PushInput< ttb::Event& >;
+        std::shared_ptr< EventInput > m_eventInput;
 
         std::shared_ptr< TCPSocket > m_socket;
         Duration m_timeout;
@@ -100,13 +105,14 @@ namespace ttb
     TimeoutWrapper::Thread::Thread( std::shared_ptr< TCPSocket > socket, Duration timeout )
         : m_packetInput( std::make_shared< PacketInput >(
               [&]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
+        , m_eventInput(
+              std::make_shared< EventInput >( [this]( auto& e ) { this->onEventInput( e ); } ) )
         , m_socket( std::move( socket ) )
         , m_timeout( timeout )
         , m_packetBridge( *m_socket )
         , m_running( true )
     {
-        m_packetBridge.eventOutput().input( std::make_shared< ttb::PushInput< ttb::Event& > >(
-            [this]( auto& e ) { this->onEventInput( e ); } ) );
+        m_packetBridge.eventOutput().input( m_eventInput );
     }
 
     std::shared_ptr< TimeoutWrapper::PacketInput > const& TimeoutWrapper::Thread::packetInput()
@@ -192,6 +198,13 @@ namespace ttb
                     std::lock_guard< std::mutex > lock( m_mutex );
                     m_ack = true;
                 }
+                m_eventOutput.push( event );
+                break;
+            }
+
+            case ttb::events::DISCONNECT:
+            {
+                m_packetBridge.reset();
                 m_eventOutput.push( event );
                 break;
             }

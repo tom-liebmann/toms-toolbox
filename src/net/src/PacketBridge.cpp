@@ -37,12 +37,15 @@ namespace ttb
 
     void PacketBridge::reset()
     {
+        std::lock_guard< std::mutex > lock( m_mutex );
         m_readState = ReadState::SIZE;
         m_readOffset = 0;
     }
 
     void PacketBridge::onEventInput( ttb::Event& event )
     {
+        std::unique_lock< std::mutex > lock( m_mutex );
+
         if( event.type() == ttb::events::DATA )
         {
             auto& e = static_cast< ttb::events::Data& >( event );
@@ -74,6 +77,8 @@ namespace ttb
                         m_readOffset = 0;
                         m_readState = ReadState::SIZE;
 
+                        lock.unlock();
+
                         ttb::events::Packet event(
                             std::make_unique< ttb::SizedIPacket >( std::move( m_data ) ) );
 
@@ -86,6 +91,9 @@ namespace ttb
         }
         else
         {
+            std::cout << "PacketBridge: Forwarding event" << std::endl;
+            lock.unlock();
+
             m_eventOutput.push( event );
         }
     }
