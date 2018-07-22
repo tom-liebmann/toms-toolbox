@@ -209,11 +209,12 @@ namespace ttb
                     break;
                 }
 
-                if( !m_dataReader.available() )
-                    break;
+                size_t prevAvailable = 0;
 
-                while( m_dataReader.available() )
+                while( m_dataReader.available() != prevAvailable )
                 {
+                    prevAvailable = m_dataReader.available();
+
                     ttb::events::Data event( m_dataReader );
                     eventOutput().push( event );
                 }

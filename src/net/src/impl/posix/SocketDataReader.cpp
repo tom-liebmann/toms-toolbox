@@ -43,9 +43,9 @@ namespace ttb
             return true;
         }
 
-        bool SocketDataReader::available() const
+        size_t SocketDataReader::available() const
         {
-            return m_end - m_begin > 0;
+            return m_end - m_begin;
         }
 
         size_t SocketDataReader::read( void* data, size_t size )
