@@ -20,7 +20,7 @@ namespace ttb
     {
     public:
         template < typename TType2 >
-        void input( std::shared_ptr< PushInput< TType2 > > input );
+        void input( std::shared_ptr< PushInput< TType2 > > const& input );
 
         void push( TType data );
 
@@ -35,15 +35,18 @@ namespace ttb
 {
     template < typename TType >
     template < typename TType2 >
-    void PushOutput< TType >::input( std::shared_ptr< PushInput< TType2 > > input )
+    void PushOutput< TType >::input( std::shared_ptr< PushInput< TType2 > > const& input )
     {
         std::lock_guard< std::mutex > lock( m_mutex );
 
         if( input )
-            m_slot =
-                std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( std::move( input ) );
+        {
+            m_slot = std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( input );
+        }
         else
+        {
             m_slot.reset();
+        }
     }
 
     template < typename TType >
@@ -51,13 +54,11 @@ namespace ttb
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
-        if( !m_slot )
-            throw std::runtime_error( "Push to disconnected output" );
-
-        auto slot = m_slot;
-
-        lock.unlock();
-
-        slot->push( std::forward< TType >( data ) );
+        if( m_slot )
+        {
+            auto slot = m_slot;
+            lock.unlock();
+            slot->push( std::forward< TType >( data ) );
+        }
     }
 }
