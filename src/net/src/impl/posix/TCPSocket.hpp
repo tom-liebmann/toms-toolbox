@@ -41,14 +41,15 @@ namespace ttb
             virtual void connect( std::string const& address, uint16_t port ) override;
             virtual void disconnect() override;
 
-            std::queue< std::vector< uint8_t > > m_writeBuffer;
-
             int m_handle;
             ConnectionState m_connectionState;
 
-            mutable std::mutex m_mutex;
-
             SocketDataReader m_dataReader;
+
+            size_t m_writeOffset;
+            std::queue< std::vector< uint8_t > > m_writeBuffer;
+
+            mutable std::mutex m_mutex;
         };
     }
 }

@@ -40,6 +40,7 @@ namespace ttb
             : m_handle( -1 )
             , m_connectionState( ConnectionState::DISCONNECTED )
             , m_dataReader( *this )
+            , m_writeOffset( 0 )
         {
         }
 
@@ -47,6 +48,7 @@ namespace ttb
             : m_handle( handle )
             , m_connectionState( ConnectionState::CONNECTED )
             , m_dataReader( *this )
+            , m_writeOffset( 0 )
         {
             fcntl( m_handle, F_SETFL, O_NONBLOCK );
         }
@@ -279,10 +281,8 @@ namespace ttb
             while( !m_writeBuffer.empty() )
             {
                 auto data = std::move( m_writeBuffer.front() );
-                m_writeBuffer.pop();
 
-                size_t offset = 0;
-                while( offset < data.size() )
+                while( m_writeOffset < data.size() )
                 {
                     if( m_connectionState != ConnectionState::CONNECTED )
                         break;
@@ -290,8 +290,10 @@ namespace ttb
                     auto handle = m_handle;
                     lock.unlock();
 
-                    auto result =
-                        ::send( handle, data.data() + offset, data.size() - offset, MSG_NOSIGNAL );
+                    auto result = ::send( handle,
+                                          data.data() + m_writeOffset,
+                                          data.size() - m_writeOffset,
+                                          MSG_NOSIGNAL );
 
                     if( result < 0 )
                     {
@@ -307,10 +309,13 @@ namespace ttb
                     }
                     else
                     {
-                        offset += result;
+                        m_writeOffset += result;
                         lock.lock();
                     }
                 }
+
+                m_writeBuffer.pop();
+                m_writeOffset = 0;
             }
 
             return true;
