@@ -14,6 +14,7 @@ namespace ttb
 
             size_t read( void* data, size_t size );
 
+            // Override: Event
             virtual Type type() const override;
 
         private:

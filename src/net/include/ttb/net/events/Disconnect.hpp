@@ -23,6 +23,8 @@ namespace ttb
 
             // Override: Event
             virtual Type type() const override;
+            virtual std::unique_ptr< Event > clone() const override;
+            virtual std::unique_ptr< Event > move() override;
 
         private:
             Reason m_reason;
@@ -47,6 +49,16 @@ namespace ttb
         inline Event::Type Disconnect::type() const
         {
             return DISCONNECT;
+        }
+
+        inline std::unique_ptr< Event > Disconnect::clone() const
+        {
+            return std::unique_ptr< Event >( new Disconnect( m_reason ) );
+        }
+
+        inline std::unique_ptr< Event > Disconnect::move()
+        {
+            return std::unique_ptr< Event >( new Disconnect( m_reason ) );
         }
     }
 }

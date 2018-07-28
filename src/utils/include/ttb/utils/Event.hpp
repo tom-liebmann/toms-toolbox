@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
+
 
 // declarations
 //=============================================================================
@@ -16,6 +18,8 @@ namespace ttb
         virtual ~Event();
 
         virtual Type type() const = 0;
+        virtual std::unique_ptr< Event > clone() const;
+        virtual std::unique_ptr< Event > move();
     };
 
 
@@ -54,6 +58,15 @@ namespace ttb
     {
     }
 
+    inline std::unique_ptr< Event > Event::clone() const
+    {
+        throw std::runtime_error( "Event not clonable" );
+    }
+
+    inline std::unique_ptr< Event > Event::move()
+    {
+        throw std::runtime_error( "Event not movable" );
+    }
 
 
     inline constexpr Event::Type::Type( uint32_t value ) : m_value( value )
