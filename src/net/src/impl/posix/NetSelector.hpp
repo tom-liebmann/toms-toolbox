@@ -36,6 +36,8 @@ namespace ttb
             void notifyChange();
 
             // Override: NetSelector
+            virtual void interrupt() override;
+            virtual void process( bool blocking ) override;
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
             virtual void remove( ttb::Selectable& selectable ) override;
 
@@ -76,8 +78,6 @@ namespace ttb
 
             void writeLoop();
 
-            void selectLoop();
-
             std::mutex m_changeMutex;
             std::queue< Change > m_changes;
 
@@ -90,7 +90,6 @@ namespace ttb
             bool m_running;
             std::condition_variable m_writeCondition;
             std::thread m_writeThread;
-            std::thread m_selectThread;
         };
     }
 }

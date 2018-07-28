@@ -41,7 +41,6 @@ namespace ttb
                 std::static_pointer_cast< ttb::posix::Interruptor >( m_interruptor ) );
 
             m_writeThread = std::thread( [&] { this->writeLoop(); } );
-            m_selectThread = std::thread( [&] { this->selectLoop(); } );
         }
 
         NetSelector::~NetSelector()
@@ -54,7 +53,6 @@ namespace ttb
             }
 
             m_writeThread.join();
-            m_selectThread.join();
         }
 
         void NetSelector::notifyWrite()
@@ -140,116 +138,122 @@ namespace ttb
             }
         }
 
-        void NetSelector::selectLoop()
+        void NetSelector::interrupt()
         {
-            std::unique_lock< std::mutex > mainLock( m_mainMutex );
-            while( m_running )
+            m_interruptor->interrupt();
+        }
+
+        void NetSelector::process( bool blocking )
+        {
+            // process changes
             {
-                mainLock.unlock();
-
-                // process changes
+                std::lock_guard< std::mutex > changeLock( m_changeMutex );
+                std::lock_guard< std::mutex > selectableLock( m_selectableMutex );
+                while( !m_changes.empty() )
                 {
-                    std::lock_guard< std::mutex > changeLock( m_changeMutex );
-                    std::lock_guard< std::mutex > selectableLock( m_selectableMutex );
-                    while( !m_changes.empty() )
+                    auto& change = m_changes.front();
+
+                    switch( change.type() )
                     {
-                        auto& change = m_changes.front();
-
-                        switch( change.type() )
+                        case Change::Type::ADD:
                         {
-                            case Change::Type::ADD:
+                            auto selectable = change.dataAdd();
+                            auto iter = std::find( std::begin( m_selectables ),
+                                                   std::end( m_selectables ),
+                                                   selectable );
+
+                            if( iter == std::end( m_selectables ) )
                             {
-                                auto selectable = change.dataAdd();
-                                auto iter = std::find( std::begin( m_selectables ),
-                                                       std::end( m_selectables ),
-                                                       selectable );
-
-                                if( iter == std::end( m_selectables ) )
-                                {
-                                    m_selectables.push_back( selectable );
-                                    m_writeCondition.notify_all();
-                                }
-                                break;
+                                m_selectables.push_back( selectable );
+                                m_writeCondition.notify_all();
                             }
-
-                            case Change::Type::REMOVE:
-                            {
-                                auto const& selectable = change.dataRemove();
-                                auto iter = std::find_if(
-                                    std::begin( m_selectables ),
-                                    std::end( m_selectables ),
-                                    [&]( auto const& v ) { return v.get() == &selectable; } );
-
-                                if( iter != std::end( m_selectables ) )
-                                {
-                                    m_selectables.erase( iter );
-                                }
-                                break;
-                            }
+                            break;
                         }
 
-                        m_changes.pop();
+                        case Change::Type::REMOVE:
+                        {
+                            auto const& selectable = change.dataRemove();
+                            auto iter = std::find_if(
+                                std::begin( m_selectables ),
+                                std::end( m_selectables ),
+                                [&]( auto const& v ) { return v.get() == &selectable; } );
+
+                            if( iter != std::end( m_selectables ) )
+                            {
+                                m_selectables.erase( iter );
+                            }
+                            break;
+                        }
+                    }
+
+                    m_changes.pop();
+                }
+            }
+
+            fd_set readSockets;
+            fd_set writeSockets;
+
+            FD_ZERO( &readSockets );
+            FD_ZERO( &writeSockets );
+
+            int maxFD = 0;
+            for( auto const& selectable : m_selectables )
+            {
+                auto handle = selectable->handle();
+
+                if( handle >= 0 )
+                {
+                    maxFD = std::max( maxFD, handle );
+
+                    if( selectable->checkRead() )
+                    {
+                        FD_SET( handle, &readSockets );
+                    }
+
+                    if( selectable->checkWrite() )
+                    {
+                        FD_SET( handle, &writeSockets );
                     }
                 }
+            }
 
-                fd_set readSockets;
-                fd_set writeSockets;
+            timeval timeout = blocking ? timeval{ 10, 0 } : timeval{ 0, 0 };
 
-                FD_ZERO( &readSockets );
-                FD_ZERO( &writeSockets );
+            auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
 
-                int maxFD = 0;
-                for( auto const& selectable : m_selectables )
+            // Check that if we got interrupted by the destructor
+            {
+                std::lock_guard< std::mutex > mainLock( m_mainMutex );
+                if( !m_running )
+                {
+                    return;
+                }
+            }
+
+            if( result == -1 )
+            {
+                throw std::runtime_error( "Error during select: " + std::to_string( errno ) );
+            }
+
+            if( result > 0 )
+            {
+                for( auto& selectable : m_selectables )
                 {
                     auto handle = selectable->handle();
 
                     if( handle >= 0 )
                     {
-                        maxFD = std::max( maxFD, handle );
-
-                        if( selectable->checkRead() )
+                        if( FD_ISSET( handle, &readSockets ) )
                         {
-                            FD_SET( handle, &readSockets );
+                            selectable->doRead();
                         }
 
-                        if( selectable->checkWrite() )
+                        if( FD_ISSET( handle, &writeSockets ) )
                         {
-                            FD_SET( handle, &writeSockets );
+                            selectable->doWrite();
                         }
                     }
                 }
-
-                timeval timeout = timeval{ 10, 0 };
-
-                auto result = select( maxFD + 1, &readSockets, &writeSockets, nullptr, &timeout );
-
-                if( result == -1 )
-                {
-                    throw std::runtime_error( "Error during select: " + std::to_string( errno ) );
-                }
-
-                if( result > 0 )
-                {
-                    for( auto& selectable : m_selectables )
-                    {
-                        auto handle = selectable->handle();
-
-                        if( handle >= 0 )
-                        {
-                            if( FD_ISSET( handle, &readSockets ) )
-                            {
-                                selectable->doRead();
-                            }
-
-                            if( FD_ISSET( handle, &writeSockets ) )
-                            {
-                                selectable->doWrite();
-                            }
-                        }
-                    }
-                }
-
-                mainLock.lock();
             }
         }
 

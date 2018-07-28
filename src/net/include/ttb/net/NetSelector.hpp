@@ -21,6 +21,10 @@ namespace ttb
 
         virtual ~NetSelector();
 
+        virtual void interrupt() = 0;
+
+        virtual void process( bool blocking = true ) = 0;
+
         virtual void add( std::shared_ptr< Selectable > const& socket ) = 0;
 
         virtual void remove( Selectable& socket ) = 0;

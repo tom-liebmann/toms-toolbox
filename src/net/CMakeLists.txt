@@ -4,6 +4,7 @@ set(
     src/DataWriter.cpp
     src/Listener.cpp
     src/NetSelector.cpp
+    src/SelectorThread.cpp
     src/Selectable.cpp
     src/Socket.cpp
     src/impl/posix/Listener.cpp
