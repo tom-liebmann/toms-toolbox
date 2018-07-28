@@ -16,9 +16,8 @@ namespace
     public:
         VectorDataReader( std::vector< uint8_t > const& data );
 
-        bool hasRemaining() const;
-
         // Override: DataReader
+        virtual size_t available() const override;
         virtual size_t read( void* data, size_t size ) override;
 
     private:
@@ -140,7 +139,7 @@ namespace ttb
                         {
                             VectorDataReader reader( m_packetData );
 
-                            while( reader.hasRemaining() )
+                            while( reader.available() )
                             {
                                 ttb::events::Data event( reader );
                                 socket().eventOutput().push( event );
@@ -225,9 +224,9 @@ namespace
     {
     }
 
-    bool VectorDataReader::hasRemaining() const
+    size_t VectorDataReader::available() const
     {
-        return m_offset < m_data.size();
+        return m_data.size() - m_offset;
     }
 
     size_t VectorDataReader::read( void* data, size_t size )

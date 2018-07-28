@@ -17,8 +17,8 @@ namespace ttb
 
             bool doRead();
 
-            size_t available() const;
-
+            // Override: DataReader
+            virtual size_t available() const override;
             virtual size_t read( void* data, size_t size ) override;
 
         private:
