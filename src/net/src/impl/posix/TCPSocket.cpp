@@ -282,7 +282,7 @@ namespace ttb
             {
                 auto const& data = m_writeBuffer.front();
 
-                while( m_writeOffset < data.size() )
+                while( !m_writeBuffer.empty() && m_writeOffset < data.size() )
                 {
                     if( m_connectionState != ConnectionState::CONNECTED )
                         break;
