@@ -280,7 +280,7 @@ namespace ttb
             std::unique_lock< std::mutex > lock( m_mutex );
             while( !m_writeBuffer.empty() )
             {
-                auto data = std::move( m_writeBuffer.front() );
+                auto data = m_writeBuffer.front();
 
                 while( m_writeOffset < data.size() )
                 {
