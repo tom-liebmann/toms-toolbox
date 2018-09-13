@@ -28,22 +28,21 @@ set(
     src/webSocket/SocketState.cpp
     src/webSocket/ServerHandshakeState.cpp
     src/webSocket/ConnectedState.cpp
-
-    #src/WebSocket.cpp
-    #src/impl/posix/webSocket/WebSocket.cpp
-    #src/impl/posix/webSocket/states/SocketState.cpp
-    #src/impl/posix/webSocket/states/ReceivingHandshakeState.cpp
-    #src/impl/posix/webSocket/states/SendingHandshakeState.cpp
-    #src/impl/posix/webSocket/states/ConnectedState.cpp
-    #src/packets/WebSocketOPacket.cpp
-
     )
 
-add_library(
-    ttbNet
-    SHARED
-    ${SOURCE_FILES}
-    )
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
+    add_library(
+        ttbNet
+        SHARED
+        ${SOURCE_FILES}
+        )
+elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+    add_library(
+        ttbNet
+        STATIC
+        ${SOURCE_FILES}
+        )
+endif()
 
 target_include_directories(
     ttbNet

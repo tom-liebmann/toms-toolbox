@@ -38,6 +38,7 @@ namespace ttb
             // Override: NetSelector
             virtual void interrupt() override;
             virtual void process( bool blocking ) override;
+            virtual void processWrites( bool blocking ) override;
             virtual void add( std::shared_ptr< ttb::Selectable > const& selectable ) override;
             virtual void remove( ttb::Selectable& selectable ) override;
 
@@ -85,6 +86,9 @@ namespace ttb
 
             std::mutex m_selectableMutex;
             std::vector< std::shared_ptr< ttb::posix::Selectable > > m_selectables;
+
+            // Flag that indicates whether a selectable requested a writing operation
+            bool m_writePending;
 
             std::mutex m_mainMutex;
             bool m_running;

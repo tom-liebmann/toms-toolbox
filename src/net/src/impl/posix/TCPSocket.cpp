@@ -211,6 +211,11 @@ namespace ttb
                     break;
                 }
 
+                if( !m_dataReader.available() )
+                {
+                    break;
+                }
+
                 bool stop = false;
                 while( m_dataReader.available() )
                 {
@@ -271,7 +276,9 @@ namespace ttb
 
                 auto sel = selector();
                 if( sel )
+                {
                     sel->notifyWrite();
+                }
             }
         }
 

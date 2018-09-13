@@ -25,6 +25,8 @@ namespace ttb
 
         virtual void process( bool blocking = true ) = 0;
 
+        virtual void processWrites( bool blocking = true ) = 0;
+
         virtual void add( std::shared_ptr< Selectable > const& socket ) = 0;
 
         virtual void remove( Selectable& socket ) = 0;

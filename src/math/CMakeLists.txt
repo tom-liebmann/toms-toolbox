@@ -6,10 +6,18 @@ file(
     src/*.cpp
 )
 
-add_library(
-    ttbMath
-    SHARED
-    ${SOURCE_FILES} )
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
+    add_library(
+        ttbMath
+        SHARED
+        ${SOURCE_FILES} )
+elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+    add_library(
+        ttbMath
+        STATIC
+        ${SOURCE_FILES}
+        )
+endif()
 
 target_include_directories(
     ttbMath

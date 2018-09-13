@@ -5,10 +5,18 @@ file(
     ABSOLUTE ${CMAKE_CURRENT_SOURCE_DIR}
     *.cpp )
 
-add_library(
-    ttbUtils
-    SHARED
-    ${SOURCE_FILES} )
+if( ${COMPILATION_MODE} STREQUAL "GCC" )
+    add_library(
+        ttbUtils
+        SHARED
+        ${SOURCE_FILES} )
+elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+    add_library(
+        ttbUtils
+        STATIC
+        ${SOURCE_FILES}
+        )
+endif()
 
 target_compile_options(
     ttbUtils

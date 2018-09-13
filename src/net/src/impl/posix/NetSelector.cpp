@@ -31,7 +31,7 @@ namespace ttb
 
     namespace posix
     {
-        NetSelector::NetSelector() : m_running( true )
+        NetSelector::NetSelector() : m_running( true ), m_writePending( false )
         {
             std::lock_guard< std::mutex > mainLock( m_mainMutex );
 
@@ -39,8 +39,6 @@ namespace ttb
 
             m_selectables.push_back(
                 std::static_pointer_cast< ttb::posix::Interruptor >( m_interruptor ) );
-
-            m_writeThread = std::thread( [&] { this->writeLoop(); } );
         }
 
         NetSelector::~NetSelector()
@@ -57,6 +55,11 @@ namespace ttb
 
         void NetSelector::notifyWrite()
         {
+            {
+                std::lock_guard< std::mutex > mainLock( m_mainMutex );
+                m_writePending = true;
+            }
+
             m_writeCondition.notify_all();
         }
 
@@ -107,34 +110,44 @@ namespace ttb
             }
         }
 
-        void NetSelector::writeLoop()
+        void NetSelector::processWrites( bool blocking )
         {
             std::unique_lock< std::mutex > mainLock( m_mainMutex );
-            while( m_running )
+
+            if( m_writePending )
             {
+                m_writePending = false;
+
                 mainLock.unlock();
 
-                // Perform a write call for every selectable
+                bool repeat = false;
                 {
                     // NOTE: We hold the lock for the whole writing process. A selectable that
                     // blocks in the writing call can block the entire net selector.
                     std::lock_guard< std::mutex > selectableLock( m_selectableMutex );
 
-                    bool loop = false;
-                    do
+                    for( auto& selectable : m_selectables )
                     {
-                        loop = false;
-                        for( auto& selectable : m_selectables )
+                        if( !selectable->writeData() )
                         {
-                            if( !selectable->writeData() )
-                                loop = true;
+                            repeat = true;
                         }
-                    } while( loop );
+                    }
                 }
 
                 mainLock.lock();
 
-                m_writeCondition.wait( mainLock );
+                if( repeat )
+                {
+                    m_writePending = true;
+                }
+            }
+            else
+            {
+                if( blocking )
+                {
+                    m_writeCondition.wait( mainLock );
+                }
             }
         }
 
