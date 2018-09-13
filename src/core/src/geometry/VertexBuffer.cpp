@@ -54,13 +54,13 @@ namespace ttb
                 break;
 
             case GL_BYTE:
-            case GL_UNSIGNED_INT:
-                glVertexAttribIPointer( location,
-                                        attribute.size(),
-                                        attribute.type(),
-                                        m_blockSize,
-                                        reinterpret_cast< const GLvoid* >( offset ) );
-                break;
+                // case GL_UNSIGNED_INT:
+                //     glVertexAttribIPointer( location,
+                //                             attribute.size(),
+                //                             attribute.type(),
+                //                             m_blockSize,
+                //                             reinterpret_cast< const GLvoid* >( offset ) );
+                //     break;
 
             default:
                 throw std::runtime_error( "Unhandled attribute type" );
