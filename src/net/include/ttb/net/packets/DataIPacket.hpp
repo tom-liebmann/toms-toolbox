@@ -42,8 +42,12 @@ namespace ttb
     template < typename T >
     inline T DataIPacket::read()
     {
-        T result = *reinterpret_cast< T const* >(
-            reinterpret_cast< uint8_t const* >( m_parent->data() ) + m_offset );
+        T result;
+
+        auto currentData = reinterpret_cast< uint8_t const* >( m_parent->data() ) + m_offset;
+
+        std::copy(
+            currentData, currentData + sizeof( T ), reinterpret_cast< uint8_t* >( &result ) );
 
         if( m_endianness != nativeEndianness() )
         {
