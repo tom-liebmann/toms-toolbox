@@ -12,7 +12,9 @@ namespace ttb
         std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
         if( !stream.is_open() )
+        {
             throw std::runtime_error( "Unable to open file " + filename );
+        }
 
         // determine length of file
         stream.seekg( 0, std::ios::end );
@@ -27,10 +29,17 @@ namespace ttb
 
         buffer[ size ] = '\0';
 
-        auto shader = std::unique_ptr< Shader >(
-            new Shader( type, std::string( std::begin( buffer ), std::end( buffer ) ) ) );
+        try
+        {
+            auto shader = std::unique_ptr< Shader >(
+                new Shader( type, std::string( std::begin( buffer ), std::end( buffer ) ) ) );
 
-        return shader;
+            return shader;
+        }
+        catch( std::runtime_error& e )
+        {
+            throw std::runtime_error( "Error compiling shader (" + filename + "): " + e.what() );
+        }
     }
 
     Shader::Shader( Type type, std::string const& source )
