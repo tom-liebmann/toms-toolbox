@@ -241,5 +241,7 @@ namespace ttb
     {
         stream << "( " << quat.w() << ", " << quat.x() << ", " << quat.y() << ", " << quat.z()
                << " )";
+
+        return stream;
     }
 }
