@@ -177,7 +177,7 @@ namespace ttb
     inline TType norm( Quaternion< TType > const& quat )
     {
         using std::sqrt;
-        return sqrt( norm( quat ) );
+        return sqrt( norm2( quat ) );
     }
 
     template < typename TType >
