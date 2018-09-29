@@ -5,6 +5,17 @@
 #include <cmath>
 #include <utility>
 
+
+namespace ttb
+{
+    namespace impl
+    {
+        template < typename TType >
+        constexpr TType HOMOGENIZE_THRESHOLD = static_cast< TType >( 1e-8 );
+    }
+}
+
+
 // declarations
 //=============================================================================
 
@@ -27,6 +38,12 @@ namespace ttb
 
     template < typename TType1, typename TType2, size_t TDimension >
     auto dot( Vector< TType1, TDimension > const& lhs, Vector< TType2, TDimension > const& rhs );
+
+    template < typename TType >
+    Vector< TType, 4 > homogenize( Vector< TType, 3 > const& vec );
+
+    template < typename TType >
+    Vector< TType, 3 > homogenize( Vector< TType, 4 > const& vec );
 }
 
 
@@ -84,5 +101,22 @@ namespace ttb
         }
 
         return result;
+    }
+
+    template < typename TType >
+    Vector< TType, 4 > homogenize( Vector< TType, 3 > const& vec )
+    {
+        return { vec( 0 ), vec( 1 ), vec( 2 ), 1 };
+    }
+
+    template < typename TType >
+    Vector< TType, 3 > homogenize( Vector< TType, 4 > const& vec )
+    {
+        using std::abs;
+
+        return Vector< TType, 3 >{ vec( 0 ), vec( 1 ), vec( 2 ) } /
+               ( abs( vec( 3 ) ) > impl::HOMOGENIZE_THRESHOLD< TType >
+                     ? vec( 3 )
+                     : static_cast< TType >( 1 ) );
     }
 }
