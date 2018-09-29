@@ -5,6 +5,17 @@
 #include <cmath>
 #include <ostream>
 
+
+namespace ttb
+{
+    namespace impl
+    {
+        template < typename TType >
+        constexpr TType LENGTH_THRESHOLD = static_cast< TType >( 1e-8 );
+    }
+}
+
+
 // declarations
 //=============================================================================
 
@@ -46,10 +57,26 @@ namespace ttb
     TType norm2( Quaternion< TType > const& quat );
 
     template < typename TType >
+    TType dot( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs );
+
+    template < typename TType >
     Quaternion< TType > invert( Quaternion< TType > const& quat );
 
     template < typename TType >
     Quaternion< TType > normalize( Quaternion< TType > const& quat );
+
+    template < typename TType >
+    Quaternion< TType > exp( Quaternion< TType > const& quat );
+
+    template < typename TType >
+    Quaternion< TType > ln( Quaternion< TType > const& quat );
+
+    template < typename TType >
+    Quaternion< TType > pow( Quaternion< TType > const& quat, TType exponent );
+
+    template < typename TType >
+    Quaternion< TType >
+        slerp( Quaternion< TType > const& q1, Quaternion< TType > const& q2, TType factor );
 
     template < typename TType >
     Quaternion< TType > operator*( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs );
@@ -65,6 +92,9 @@ namespace ttb
 
     template < typename TType >
     Vector< TType, 3 > operator*( Quaternion< TType > const& lhs, Vector< TType, 3 > const& rhs );
+
+    template < typename TType >
+    Quaternion< TType > operator-( Quaternion< TType > const& q );
 
     template < typename TType >
     std::ostream& operator<<( std::ostream& stream, Quaternion< TType > const& quat );
@@ -188,6 +218,12 @@ namespace ttb
     }
 
     template < typename TType >
+    inline TType dot( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs )
+    {
+        return lhs.w() * rhs.w() + lhs.x() * rhs.x() + lhs.y() * rhs.y() + lhs.z() * rhs.z();
+    }
+
+    template < typename TType >
     inline Quaternion< TType > invert( Quaternion< TType > const& quat )
     {
         return { quat.w(), -quat.x(), -quat.y(), -quat.z() };
@@ -201,7 +237,64 @@ namespace ttb
     }
 
     template < typename TType >
-    Quaternion< TType > operator*( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs )
+    Quaternion< TType > exp( Quaternion< TType > const& quat )
+    {
+        using std::abs;
+        using std::cos;
+        using std::exp;
+        using std::sin;
+        using std::sqrt;
+
+        TType expW = exp( quat.w() );
+        TType len = sqrt( quat.x() * quat.x() + quat.y() * quat.y() + quat.z() * quat.z() );
+        TType f = abs( len ) > impl::LENGTH_THRESHOLD< TType > ? expW * sin( len ) / len
+                                                               : static_cast< TType >( 0 );
+
+        return { expW * cos( len ), quat.x() * f, quat.y() * f, quat.z() * f };
+    }
+
+    template < typename TType >
+    Quaternion< TType > ln( Quaternion< TType > const& quat )
+    {
+        using std::abs;
+        using std::atan2;
+        using std::log;
+        using std::sqrt;
+
+        TType len = sqrt( quat.x() * quat.x() + quat.y() * quat.y() + quat.z() * quat.z() );
+        TType f = abs( len ) > impl::LENGTH_THRESHOLD< TType > ? atan2( len, quat.w() ) / len
+                                                               : static_cast< TType >( 0 );
+
+        return { static_cast< TType >( 0.5 ) * log( quat.w() * quat.w() + quat.x() * quat.x() +
+                                                    quat.y() * quat.y() + quat.z() * quat.z() ),
+                 quat.x() * f,
+                 quat.y() * f,
+                 quat.z() * f };
+    }
+
+    template < typename TType >
+    inline Quaternion< TType > pow( Quaternion< TType > const& quat, TType exponent )
+    {
+        return exp( exponent * ln( quat ) );
+    }
+
+    template < typename TType >
+    inline Quaternion< TType >
+        slerp( Quaternion< TType > const& q1, Quaternion< TType > const& q2, TType factor )
+    {
+        if( dot( q1, q2 ) < 0.0 )
+        {
+            return q1 * pow( invert( q1 ) * -q2, factor );
+        }
+        else
+        {
+            return q1 * pow( invert( q1 ) * q2, factor );
+        }
+    }
+
+    template < typename TType >
+    inline Quaternion< TType > operator*( Quaternion< TType > const& lhs,
+                                          Quaternion< TType > const& rhs )
     {
         return { lhs.w() * rhs.w() - lhs.x() * rhs.x() - lhs.y() * rhs.y() - lhs.z() * rhs.z(),
                  lhs.w() * rhs.x() + lhs.x() * rhs.w() + lhs.y() * rhs.z() - lhs.z() * rhs.y(),
@@ -210,19 +303,20 @@ namespace ttb
     }
 
     template < typename TType >
-    Quaternion< TType > operator*( TType scalar, Quaternion< TType > const& quat )
+    inline Quaternion< TType > operator*( TType scalar, Quaternion< TType > const& quat )
     {
         return { quat.w() * scalar, quat.x() * scalar, quat.y() * scalar, quat.z() * scalar };
     }
 
     template < typename TType >
-    Quaternion< TType > operator*( Quaternion< TType > const& quat, TType scalar )
+    inline Quaternion< TType > operator*( Quaternion< TType > const& quat, TType scalar )
     {
         return { quat.w() * scalar, quat.x() * scalar, quat.y() * scalar, quat.z() * scalar };
     }
 
     template < typename TType >
-    Quaternion< TType > operator+( Quaternion< TType > const& lhs, Quaternion< TType > const& rhs )
+    inline Quaternion< TType > operator+( Quaternion< TType > const& lhs,
+                                          Quaternion< TType > const& rhs )
     {
         return { lhs.w() + rhs.w(), lhs.x() + rhs.x(), lhs.y() + rhs.y(), lhs.z() + rhs.z() };
     }
@@ -234,6 +328,12 @@ namespace ttb
         Quaternion< TType > x( 0, rhs.x(), rhs.y(), rhs.z() );
         inv = lhs * x * inv;
         return { inv.x(), inv.y(), inv.z() };
+    }
+
+    template < typename TType >
+    inline Quaternion< TType > operator-( Quaternion< TType > const& q )
+    {
+        return { -q.w(), -q.x(), -q.y(), -q.z() };
     }
 
     template < typename TType >
