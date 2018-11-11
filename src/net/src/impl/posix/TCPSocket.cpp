@@ -70,22 +70,17 @@ namespace ttb
 
             while( m_connectionState != ConnectionState::DISCONNECTED )
             {
-                lock.unlock();
-                disconnect();
-                lock.lock();
+                disconnect( lock );
             }
 
-            if( ( m_handle = ::socket( PF_INET, SOCK_STREAM, IPPROTO_TCP ) ) == -1 )
+            if( ( m_handle = ::socket( PF_INET, SOCK_STREAM | SOCK_NONBLOCK, IPPROTO_TCP ) ) == -1 )
             {
                 lock.unlock();
 
                 ttb::events::ConnectionFailed event;
                 eventOutput().push( event );
-
                 return;
             }
-
-            fcntl( m_handle, F_SETFL, O_NONBLOCK );
 
             sockaddr_in sockAddr;
 
@@ -97,12 +92,10 @@ namespace ttb
             {
                 close( m_handle );
                 m_handle = -1;
-
                 lock.unlock();
 
                 ttb::events::ConnectionFailed event;
                 eventOutput().push( event );
-
                 return;
             }
 
@@ -114,27 +107,30 @@ namespace ttb
                 {
                     close( m_handle );
                     m_handle = -1;
-
                     lock.unlock();
 
                     ttb::events::ConnectionFailed event;
                     eventOutput().push( event );
-
                     return;
                 }
             }
 
             m_connectionState = ConnectionState::CONNECTING;
 
-            auto sel = selector();
-            if( sel )
-                sel->notifyChange();
+            if( m_selector )
+            {
+                m_selector->notifyRead( *this );
+            }
         }
 
         void TCPSocket::disconnect()
         {
             std::unique_lock< std::mutex > lock( m_mutex );
+            disconnect( lock );
+        }
 
+        void TCPSocket::disconnect( std::unique_lock< std::mutex >& lock )
+        {
             switch( m_connectionState )
             {
                 case ConnectionState::DISCONNECTED:
@@ -143,39 +139,165 @@ namespace ttb
 
                 case ConnectionState::CONNECTING:
                 {
-                    shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;
+                    m_writeOffset = 0;
                     m_writeBuffer = std::queue< std::vector< uint8_t > >();
                     lock.unlock();
 
                     ttb::events::ConnectionFailed event;
                     eventOutput().push( event );
+
+                    lock.lock();
                     break;
                 }
 
                 case ConnectionState::CONNECTED:
                 {
-                    shutdown( m_handle, SHUT_RDWR );
                     close( m_handle );
                     m_handle = -1;
                     m_connectionState = ConnectionState::DISCONNECTED;
+                    m_writeOffset = 0;
                     m_writeBuffer = std::queue< std::vector< uint8_t > >();
                     lock.unlock();
 
                     // TODO: Signal a broken disconnect
                     ttb::events::Disconnect event( ttb::events::Disconnect::Reason::NORMAL );
                     eventOutput().push( event );
+
+                    lock.lock();
                     break;
                 }
             }
         }
 
+        void TCPSocket::startPolling( int pollDescriptor, std::unique_lock< std::mutex >& lock )
+        {
+            switch( m_connectionState )
+            {
+                case ConnectionState::DISCONNECTED:
+                    break;
+
+                case ConnectionState::CONNECTED:
+                case ConnectionState::CONNECTING:
+                {
+                    struct epoll_event event;
+                    event.events = EPOLLIN | EPOLLOUT | EPOLLET;
+                    event.data.ptr = static_cast< posix::Selectable* >( this );
+                    if( epoll_ctl( pollDescriptor, EPOLL_CTL_ADD, m_handle, &event ) == -1 )
+                    {
+                        throw std::runtime_error( "Unable to add socket to polling (" +
+                                                  std::to_string( errno ) + ")" );
+                    }
+                    break;
+                }
+            }
+        }
+
+        void TCPSocket::stopPolling( int pollDescriptor, std::unique_lock< std::mutex >& lock )
+        {
+            if( epoll_ctl( pollDescriptor, EPOLL_CTL_DEL, m_handle, nullptr ) == -1 )
+            {
+                throw std::runtime_error( "Unable to remove socket from polling (" +
+                                          std::to_string( errno ) + ")" );
+            }
+        }
+
+        void TCPSocket::process( int pollDescriptor )
+        {
+            switch( m_connectionState )
+            {
+                case ConnectionState::DISCONNECTED:
+                    break;
+
+                case ConnectionState::CONNECTING:
+                {
+                    std::unique_lock< std::mutex > lock( m_mutex );
+
+                    int result;
+                    socklen_t result_len = sizeof( result );
+                    if( getsockopt( m_handle, SOL_SOCKET, SO_ERROR, &result, &result_len ) < 0 )
+                    {
+                        disconnect( lock );
+                        return;
+                    }
+
+                    if( result != 0 )
+                    {
+                        disconnect( lock );
+                        return;
+                    }
+
+                    m_connectionState = ConnectionState::CONNECTED;
+                    lock.unlock();
+
+                    ttb::events::ServerConnection event;
+                    eventOutput().push( event );
+                    break;
+                }
+
+                case ConnectionState::CONNECTED:
+                {
+                    std::unique_lock< std::mutex > lock( m_mutex );
+
+                    // Only perform a read if we are connected
+                    while( m_connectionState != ConnectionState::DISCONNECTED )
+                    {
+                        lock.unlock();
+
+                        if( !m_dataReader.doRead() )
+                        {
+                            disconnect();
+                            break;
+                        }
+
+                        if( !m_dataReader.available() )
+                        {
+                            break;
+                        }
+
+                        bool stop = false;
+                        while( m_dataReader.available() )
+                        {
+                            ttb::events::Data event( m_dataReader );
+                            if( !eventOutput().push( event ) )
+                            {
+                                stop = true;
+                                break;
+                            }
+                        }
+
+                        if( stop )
+                        {
+                            break;
+                        }
+
+                        lock.lock();
+                    }
+                    break;
+                }
+            }
+        }
+
+        void TCPSocket::processWrite()
+        {
+        }
+
+
+
         int TCPSocket::handle() const
         {
             std::unique_lock< std::mutex > lock( m_mutex );
             return m_handle;
+        }
+
+        void TCPSocket::setSelector( int pollDescriptor, std::unique_lock< std::mutex >& lock )
+        {
+        }
+
+        void TCPSocket::removeSelector( int pollDescriptor, std::unique_lock< std::mutex >& lock )
+        {
         }
 
         bool TCPSocket::checkRead() const
@@ -191,7 +313,9 @@ namespace ttb
             // If the socket isn't connected yet, we use the writability as an indicator for
             // successful connection
             if( m_connectionState == ConnectionState::CONNECTING )
+            {
                 return true;
+            }
 
             return false;
         }
@@ -201,7 +325,7 @@ namespace ttb
             std::unique_lock< std::mutex > lock( m_mutex );
 
             // Only perform a read if we are connected
-            while( m_connectionState == ConnectionState::CONNECTED )
+            while( m_connectionState != ConnectionState::DISCONNECTED )
             {
                 lock.unlock();
 
@@ -246,15 +370,13 @@ namespace ttb
                 socklen_t result_len = sizeof( result );
                 if( getsockopt( m_handle, SOL_SOCKET, SO_ERROR, &result, &result_len ) < 0 )
                 {
-                    lock.unlock();
-                    disconnect();
+                    disconnect( lock );
                     return;
                 }
 
                 if( result != 0 )
                 {
-                    lock.unlock();
-                    disconnect();
+                    disconnect( lock );
                     return;
                 }
 
@@ -275,6 +397,9 @@ namespace ttb
                 m_writeBuffer.push( std::move( data ) );
 
                 auto sel = selector();
+
+                lock.unlock();
+
                 if( sel )
                 {
                     sel->notifyWrite();
@@ -320,6 +445,13 @@ namespace ttb
                         lock.lock();
                     }
                 }
+
+                std::cout << "Packet sent: ";
+                for( auto value : data )
+                {
+                    std::cout << static_cast< int >( value );
+                }
+                std::cout << '\n';
 
                 m_writeBuffer.pop();
                 m_writeOffset = 0;

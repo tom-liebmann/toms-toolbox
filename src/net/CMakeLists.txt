@@ -5,6 +5,7 @@ set(
     src/Listener.cpp
     src/NetSelector.cpp
     src/SelectorThread.cpp
+    src/WriterThread.cpp
     src/Selectable.cpp
     src/Socket.cpp
     src/impl/posix/Listener.cpp

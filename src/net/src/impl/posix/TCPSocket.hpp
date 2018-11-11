@@ -26,20 +26,22 @@ namespace ttb
 
             ~TCPSocket();
 
-            // Override: Selectable
-            virtual int handle() const override;
-            virtual bool checkRead() const override;
-            virtual bool checkWrite() const override;
-            virtual void doRead() override;
-            virtual void doWrite() override;
-            virtual bool writeData() override;
-
-        private:
             // Override: ttb::TCPSocket
             virtual void onData( std::vector< uint8_t > data ) override;
             virtual ConnectionState connected() const override;
             virtual void connect( std::string const& address, uint16_t port ) override;
             virtual void disconnect() override;
+
+            // Override: ttb::posix::Selectable
+            virtual void startPolling( int pollDescriptor,
+                                       std::unique_lock< std::mutex >& lock ) override;
+            virtual void stopPolling( int pollDescriptor,
+                                      std::unique_lock< std::mutex >& lock ) override;
+            virtual void processRead( int pollDescriptor ) override;
+            virtual void processWrite() override;
+
+        private:
+            void disconnect( std::unique_lock< std::mutex >& lock );
 
             int m_handle;
             ConnectionState m_connectionState;

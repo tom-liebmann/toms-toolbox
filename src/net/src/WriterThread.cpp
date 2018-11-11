@@ -1,14 +1,14 @@
-#include <ttb/net/SelectorThread.hpp>
+#include <ttb/net/WriterThread.hpp>
 
 
 namespace ttb
 {
-    SelectorThread::SelectorThread( Selector& selector )
+    WriterThread::WriterThread( Selector& selector )
         : m_selector( selector ), m_running( true ), m_thread( [this] { this->threadLoop(); } )
     {
     }
 
-    SelectorThread::~SelectorThread()
+    WriterThread::~WriterThread()
     {
         {
             std::lock_guard< std::mutex > lock( m_mutex );
@@ -19,7 +19,7 @@ namespace ttb
         m_thread.join();
     }
 
-    void SelectorThread::threadLoop()
+    void WriterThread::threadLoop()
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
@@ -27,7 +27,7 @@ namespace ttb
         {
             lock.unlock();
 
-            m_selector.process( true );
+            m_selector.processWrites( true );
 
             lock.lock();
         }

@@ -27,29 +27,19 @@ namespace ttb
 
             virtual ~Selectable();
 
-            void selector( NetSelector* selector );
+            virtual void process( int pollDescriptor ) = 0;
 
-            virtual int handle() const = 0;
+            virtual void processWrite() = 0;
 
-            // Indicate whether the selectable should be checked for readability/writability or not
-            virtual bool checkRead() const = 0;
-            virtual bool checkWrite() const = 0;
+            // Selectables are managed only in the selector thread. Since this is implementation
+            // area, the user has no access to these attributes, which is why we can make them
+            // public.
 
-            // Are called by the passive selector to signal handle availability
-            virtual void doRead() = 0;
-            virtual void doWrite() = 0;
+            // All changes to these attributes should be protected by the mutex
+            std::mutex m_mutex;
 
-            // Is called by the writer thread to perform writing operations
-            /**
-             * \return Whether the writing process is done
-             */
-            virtual bool writeData() = 0;
-
-        protected:
-            NetSelector* selector();
-
-        private:
-            NetSelector* m_selector;
+            size_t m_slot;
+            Selector* m_selector;     // The selector the selectable is currently assigned to
         };
     }
 }

@@ -14,12 +14,12 @@ namespace ttb
 
 namespace ttb
 {
-    class NetSelector
+    class Selector
     {
     public:
-        static std::unique_ptr< NetSelector > create();
+        static std::unique_ptr< Selector > create();
 
-        virtual ~NetSelector();
+        virtual ~Selector();
 
         virtual void interrupt() = 0;
 

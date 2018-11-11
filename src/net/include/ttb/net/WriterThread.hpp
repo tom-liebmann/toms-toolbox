@@ -8,12 +8,12 @@
 
 namespace ttb
 {
-    class SelectorThread
+    class WriterThread
     {
     public:
-        SelectorThread( Selector& selector );
+        WriterThread( Selector& selector );
 
-        ~SelectorThread();
+        ~WriterThread();
 
     private:
         void threadLoop();
