@@ -22,6 +22,10 @@ target_compile_options(
     ttbUtils
     PUBLIC
     -std=c++14
+    -Wall
+    -Wextra
+    -Wpedantic
+    -Wconversion
     )
 
 target_include_directories(
