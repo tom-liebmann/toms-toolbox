@@ -8,7 +8,7 @@ namespace ttb
 {
     namespace events
     {
-        class ConnectionFailed : public Event
+        class ConnectionLost : public Event
         {
         public:
             // Override: Event
@@ -23,14 +23,14 @@ namespace ttb
 {
     namespace events
     {
-        inline Event::Type ConnectionFailed::type() const
+        inline Event::Type ConnectionLost::type() const
         {
-            return CONNECTION_FAILED;
+            return CONNECTION_LOST;
         }
 
-        inline std::unique_ptr< Event > ConnectionFailed::move()
+        inline std::unique_ptr< Event > ConnectionLost::move()
         {
-            return std::unique_ptr< Event >( new ConnectionFailed( std::move( *this ) ) );
+            return std::unique_ptr< Event >( new ConnectionLost( std::move( *this ) ) );
         }
     }
 }

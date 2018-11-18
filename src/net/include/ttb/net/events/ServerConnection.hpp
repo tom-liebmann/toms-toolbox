@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/net/events.hpp>
+#include <ttb/net/packets.hpp>
 
 
 namespace ttb
@@ -12,7 +13,6 @@ namespace ttb
         public:
             // Override: Event
             virtual Type type() const override;
-            virtual std::unique_ptr< Event > clone() const override;
             virtual std::unique_ptr< Event > move() override;
         };
     }
@@ -28,14 +28,9 @@ namespace ttb
             return SERVER_CONNECTION;
         }
 
-        inline std::unique_ptr< Event > ServerConnection::clone() const
-        {
-            return std::unique_ptr< Event >( new ServerConnection() );
-        }
-
         inline std::unique_ptr< Event > ServerConnection::move()
         {
-            return std::unique_ptr< Event >( new ServerConnection() );
+            return std::unique_ptr< Event >( new ServerConnection( std::move( *this ) ) );
         }
     }
 }

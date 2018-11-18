@@ -2,19 +2,6 @@ set(
     SOURCE_FILES
     src/DataReader.cpp
     src/DataWriter.cpp
-    src/Listener.cpp
-    src/NetSelector.cpp
-    src/SelectorThread.cpp
-    src/WriterThread.cpp
-    src/Selectable.cpp
-    src/Socket.cpp
-    src/impl/posix/Listener.cpp
-    src/impl/posix/NetSelector.cpp
-    src/impl/posix/Selectable.cpp
-    src/impl/posix/TCPSocket.cpp
-    src/impl/posix/SocketDataReader.cpp
-    src/impl/posix/Interruptor.cpp
-    src/TCPSocket.cpp
 
     src/packets/DataIPacket.cpp
     src/packets/DataOPacket.cpp
@@ -23,12 +10,6 @@ set(
     src/packets/SizedIPacket.cpp
 
     src/PacketBridge.cpp
-    src/TimeoutWrapper.cpp
-
-    src/WebSocket.cpp
-    src/webSocket/SocketState.cpp
-    src/webSocket/ServerHandshakeState.cpp
-    src/webSocket/ConnectedState.cpp
     )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
