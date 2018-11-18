@@ -29,12 +29,12 @@ namespace ttb
         class PushOutputSlotImpl : public PushOutputSlot< TType >
         {
         public:
-            PushOutputSlotImpl( std::shared_ptr< PushInput< TType2 > > const& input );
+            PushOutputSlotImpl( std::shared_ptr< PushInputSlot< TType2 > > const& inputSlot );
 
             virtual bool push( TType data ) override;
 
         private:
-            std::weak_ptr< PushInput< TType2 > > m_input;
+            std::shared_ptr< PushInputSlot< TType2 > > m_inputSlot;
         };
     }
 }
@@ -52,19 +52,17 @@ namespace ttb
 
         template < typename TType, typename TType2 >
         PushOutputSlotImpl< TType, TType2 >::PushOutputSlotImpl(
-            std::shared_ptr< PushInput< TType2 > > const& input )
-            : m_input( input )
+            std::shared_ptr< PushInputSlot< TType2 > > const& inputSlot )
+            : m_inputSlot( inputSlot )
         {
         }
 
         template < typename TType, typename TType2 >
         bool PushOutputSlotImpl< TType, TType2 >::push( TType data )
         {
-            auto input = m_input.lock();
-
-            if( input )
+            if( m_inputSlot )
             {
-                input->push( std::forward< TType >( data ) );
+                m_inputSlot->push( std::forward< TType >( data ) );
                 return true;
             }
             else

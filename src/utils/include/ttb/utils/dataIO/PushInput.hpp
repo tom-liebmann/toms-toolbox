@@ -1,6 +1,16 @@
 #pragma once
 
+#include "priv/PushInputSlot.hpp"
+
 #include <functional>
+#include <memory>
+
+
+namespace ttb
+{
+    template < typename TType >
+    class PushOutput;
+}
 
 
 namespace ttb
@@ -17,7 +27,12 @@ namespace ttb
         void push( TType2&& data );
 
     private:
+        std::shared_ptr< priv::PushInputSlot< TType > > m_slot;
+
         Callback m_callback;
+
+        template < typename TOutputType, typename TInputType >
+        friend void connect( PushOutput< TOutputType >&, PushInput< TInputType >& );
     };
 }
 
@@ -25,7 +40,9 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    PushInput< TType >::PushInput( Callback callback ) : m_callback( std::move( callback ) )
+    PushInput< TType >::PushInput( Callback callback )
+        : m_slot( std::make_shared< priv::PushInputSlot< TType > >( *this ) )
+        , m_callback( std::move( callback ) )
     {
     }
 

@@ -1,7 +1,8 @@
 #pragma once
 
-#include "helper/pushOutputHelper.hpp"
+#include "priv/PushOutputSlot.hpp"
 
+#include <iostream>
 #include <memory>
 #include <mutex>
 
@@ -19,17 +20,23 @@ namespace ttb
     class PushOutput
     {
     public:
-        template < typename TType2 >
-        void input( std::shared_ptr< PushInput< TType2 > > const& input );
+        void disconnect();
 
         /**
          * \return true if the data was successfully pushed
          */
-        bool push( TType data );
+        template < typename TType2 >
+        bool push( TType2&& data );
 
     private:
+        template < typename TType2 >
+        void inputSlot( std::shared_ptr< priv::PushInputSlot< TType2 > > slot );
+
         std::mutex m_mutex;
         std::shared_ptr< priv::PushOutputSlot< TType > > m_slot;
+
+        template < typename TOutputType, typename TInputType >
+        friend void connect( PushOutput< TOutputType >&, PushInput< TInputType >& );
     };
 }
 
@@ -37,23 +44,15 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    template < typename TType2 >
-    void PushOutput< TType >::input( std::shared_ptr< PushInput< TType2 > > const& input )
+    void PushOutput< TType >::disconnect()
     {
         std::lock_guard< std::mutex > lock( m_mutex );
-
-        if( input )
-        {
-            m_slot = std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( input );
-        }
-        else
-        {
-            m_slot.reset();
-        }
+        m_slot.reset();
     }
 
     template < typename TType >
-    bool PushOutput< TType >::push( TType data )
+    template < typename TType2 >
+    bool PushOutput< TType >::push( TType2&& data )
     {
         std::unique_lock< std::mutex > lock( m_mutex );
 
@@ -61,11 +60,37 @@ namespace ttb
         {
             auto slot = m_slot;
             lock.unlock();
-            return slot->push( std::forward< TType >( data ) );
+
+            if( slot->push( std::forward< TType2 >( data ) ) )
+            {
+                return true;
+            }
+            else
+            {
+                disconnect();
+                return false;
+            }
         }
         else
         {
             return false;
+        }
+    }
+
+    template < typename TType >
+    template < typename TType2 >
+    void PushOutput< TType >::inputSlot( std::shared_ptr< priv::PushInputSlot< TType2 > > slot )
+    {
+        std::lock_guard< std::mutex > lock( m_mutex );
+
+        if( slot )
+        {
+            m_slot =
+                std::make_shared< priv::PushOutputSlotImpl< TType, TType2 > >( std::move( slot ) );
+        }
+        else
+        {
+            m_slot.reset();
         }
     }
 }
