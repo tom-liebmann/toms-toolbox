@@ -86,11 +86,6 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
 endif()
 
-set_property(
-    TARGET ttbCore
-    PROPERTY POSITION_INDEPENDENT_CODE ON
-    )
-
 target_include_directories(
     ttbCore
     PUBLIC
@@ -131,6 +126,21 @@ target_link_libraries(
         ttbMath
         ttbUtils
         ${LINK_LIBRARIES}
+    )
+
+target_compile_options(
+    ttbCore
+    PUBLIC
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+    )
+
+set_target_properties(
+    ttbCore
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
     )
 
 list( APPEND VALID_TARGETS ttbCore )

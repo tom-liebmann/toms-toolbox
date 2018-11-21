@@ -39,7 +39,7 @@ namespace ttb
     {
         std::vector< uint8_t > decode( std::string const& value )
         {
-            int in_len = value.size();
+            int in_len = static_cast< int >( value.size() );
             int i = 0;
             int in_ = 0;
             unsigned char char_array_4[ 4 ], char_array_3[ 3 ];
@@ -53,14 +53,17 @@ namespace ttb
                 {
                     for( i = 0; i < 4; i++ )
                     {
-                        char_array_4[ i ] = characters.find( char_array_4[ i ] );
+                        char_array_4[ i ] =
+                            static_cast< unsigned char >( characters.find( char_array_4[ i ] ) );
                     }
 
-                    char_array_3[ 0 ] =
-                        ( char_array_4[ 0 ] << 2 ) + ( ( char_array_4[ 1 ] & 0x30 ) >> 4 );
-                    char_array_3[ 1 ] = ( ( char_array_4[ 1 ] & 0xf ) << 4 ) +
-                                        ( ( char_array_4[ 2 ] & 0x3c ) >> 2 );
-                    char_array_3[ 2 ] = ( ( char_array_4[ 2 ] & 0x3 ) << 6 ) + char_array_4[ 3 ];
+                    char_array_3[ 0 ] = static_cast< unsigned char >(
+                        ( char_array_4[ 0 ] << 2 ) + ( ( char_array_4[ 1 ] & 0x30 ) >> 4 ) );
+                    char_array_3[ 1 ] =
+                        static_cast< unsigned char >( ( ( char_array_4[ 1 ] & 0xf ) << 4 ) +
+                                                      ( ( char_array_4[ 2 ] & 0x3c ) >> 2 ) );
+                    char_array_3[ 2 ] = static_cast< unsigned char >(
+                        ( ( char_array_4[ 2 ] & 0x3 ) << 6 ) + char_array_4[ 3 ] );
 
                     for( i = 0; ( i < 3 ); i++ )
                     {
@@ -79,14 +82,16 @@ namespace ttb
 
                 for( int j = 0; j < 4; ++j )
                 {
-                    char_array_4[ j ] = characters.find( char_array_4[ j ] );
+                    char_array_4[ j ] =
+                        static_cast< unsigned char >( characters.find( char_array_4[ j ] ) );
                 }
 
-                char_array_3[ 0 ] =
-                    ( char_array_4[ 0 ] << 2 ) + ( ( char_array_4[ 1 ] & 0x30 ) >> 4 );
-                char_array_3[ 1 ] =
-                    ( ( char_array_4[ 1 ] & 0xf ) << 4 ) + ( ( char_array_4[ 2 ] & 0x3c ) >> 2 );
-                char_array_3[ 2 ] = ( ( char_array_4[ 2 ] & 0x3 ) << 6 ) + char_array_4[ 3 ];
+                char_array_3[ 0 ] = static_cast< unsigned char >(
+                    ( char_array_4[ 0 ] << 2 ) + ( ( char_array_4[ 1 ] & 0x30 ) >> 4 ) );
+                char_array_3[ 1 ] = static_cast< unsigned char >(
+                    ( ( char_array_4[ 1 ] & 0xf ) << 4 ) + ( ( char_array_4[ 2 ] & 0x3c ) >> 2 ) );
+                char_array_3[ 2 ] = static_cast< unsigned char >(
+                    ( ( char_array_4[ 2 ] & 0x3 ) << 6 ) + char_array_4[ 3 ] );
 
                 for( int j = 0; j < i - 1; ++j )
                 {

@@ -18,20 +18,32 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         )
 endif()
 
-target_compile_options(
-    ttbUtils
-    PUBLIC
-    -std=c++17
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Wconversion
-    )
-
 target_include_directories(
     ttbUtils
     PUBLIC
-    include )
+        include
+    )
+
+target_compile_options(
+    ttbUtils
+    PUBLIC
+        -Wall
+        -Wextra
+        -Wpedantic
+        -Wconversion
+    )
+
+set_target_properties(
+    ttbUtils
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+    )
+
+target_compile_features(
+    ttbUtils
+    PUBLIC
+        cxx_std_17
+    )
 
 list( APPEND VALID_TARGETS ttbUtils )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

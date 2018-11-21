@@ -201,13 +201,13 @@ namespace
         std::cout << "GLFW error (" << error << "): " << description << std::endl;
     }
 
-    STDCALL void callbackErrorOpenGL( GLenum source,
+    STDCALL void callbackErrorOpenGL( GLenum /* source */,
                                       GLenum type,
-                                      GLuint id,
+                                      GLuint /* id */,
                                       GLenum severity,
-                                      GLsizei length,
+                                      GLsizei /* length */,
                                       GLchar const* message,
-                                      void const* userParam )
+                                      void const* /* userParam */ )
     {
         std::cout << "OpenGL error:" << std::endl;
         std::cout << "    Type: " << convertErrorType( type ) << std::endl;
@@ -222,7 +222,7 @@ namespace
         pushEvent( window, ttb::events::WindowClose( *wnd ) );
     }
 
-    void callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
+    void callbackKey( GLFWwindow* window, int key, int /* scancode */, int action, int /* mods */ )
     {
         switch( action )
         {
@@ -236,7 +236,7 @@ namespace
         }
     }
 
-    void callbackMouseButton( GLFWwindow* window, int button, int action, int mods )
+    void callbackMouseButton( GLFWwindow* window, int button, int action, int /* mods */ )
     {
         ttb::events::MouseButton::Button mouseButton;
         switch( button )
@@ -278,7 +278,9 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->mode( ttb::Window::Mode( width, height, wnd->mode().flags() ) );
+        wnd->mode( ttb::Window::Mode( static_cast< uint16_t >( width ),
+                                      static_cast< uint16_t >( height ),
+                                      wnd->mode().flags() ) );
 
         pushEvent( window, ttb::events::WindowResize( *wnd ) );
     }

@@ -37,7 +37,7 @@ namespace ttb
     template <>
     DataOPacket::Creator& DataOPacket::Creator::write< std::string >( std::string const& value )
     {
-        uint32_t len = value.length();
+        auto len = static_cast< uint32_t >( value.length() );
         append( &len, sizeof( uint32_t ) );
         append( value.c_str(), len, false );
 

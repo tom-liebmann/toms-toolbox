@@ -31,7 +31,8 @@ namespace ttb
     {
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, access->m_buffer.m_bufferObject );
 
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER, access->m_buffer.m_data.size() * sizeof( GLuint ),
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                      access->m_buffer.m_data.size() * sizeof( GLuint ),
                       reinterpret_cast< GLvoid const* >( access->m_buffer.m_data.data() ),
                       GL_STATIC_DRAW );
 
@@ -43,7 +44,7 @@ namespace ttb
 
     void IndexBuffer::Access::push( size_t index )
     {
-        m_buffer.m_data.push_back( index );
+        m_buffer.m_data.push_back( static_cast< GLuint >( index ) );
     }
 
     void IndexBuffer::Access::clear()
