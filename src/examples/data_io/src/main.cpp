@@ -1,22 +1,22 @@
-#include <ttb/utils/dataIO.hpp>
+#include <ttb/utils/signal.hpp>
 
 #include <iostream>
 
 
 int main()
 {
-    auto valueCallback = []( int value ) { std::cout << "Pushed value: " << value << '\n'; };
+    auto add = []( int lhs, int rhs ) { return lhs + rhs; };
 
-    using Signature = void( int );
+    using Signature = int( int, int );
 
-    ttb::PushOutput< Signature > output1;
-    ttb::PushInput< Signature > input1( valueCallback );
+    ttb::Signal< Signature > signal;
+    ttb::Slot< Signature > slot( add );
 
-    ttb::connect( output1, input1 );
+    ttb::connect( signal, slot );
 
     for( int i = 0; i < 5; ++i )
     {
-        output1.push( i );
+        std::cout << "Result: " << signal.call( i, 2 * i ) << '\n';
     }
 
     return EXIT_SUCCESS;

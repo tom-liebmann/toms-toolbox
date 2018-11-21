@@ -21,7 +21,7 @@ endif()
 target_compile_options(
     ttbUtils
     PUBLIC
-    -std=c++14
+    -std=c++17
     -Wall
     -Wextra
     -Wpedantic
