@@ -2,7 +2,7 @@
 
 #include <ttb/net/packets.hpp>
 #include <ttb/utils/Event.hpp>
-#include <ttb/utils/dataIO.hpp>
+#include <ttb/utils/signal.hpp>
 
 
 namespace ttb
@@ -10,29 +10,29 @@ namespace ttb
     class PacketBridge
     {
     public:
-        using PacketInput = ttb::PushInput< std::shared_ptr< ttb::OPacket const > >;
-        using EventOutput = ttb::PushOutput< ttb::Event& >;
+        using PacketInput = ttb::Slot< void( std::shared_ptr< ttb::OPacket const > ) >;
+        using EventOutput = ttb::Signal< void( ttb::Event& ) >;
 
         template < typename TChild >
         PacketBridge( TChild& child );
 
-        std::shared_ptr< PacketInput > const& packetInput();
+        PacketInput const& packetInput();
         EventOutput& eventOutput();
 
         void reset();
 
     private:
-        void onEventInput( ttb::Event& event );
         void onPacketInput( std::shared_ptr< ttb::OPacket const > packet );
+        void onEventInput( ttb::Event& event );
 
         // External connections
-        std::shared_ptr< PacketInput > m_packetInput;
+        PacketInput m_packetInput;
         EventOutput m_eventOutput;
 
         // Internal connections
-        using EventInput = ttb::PushInput< ttb::Event& >;
-        using DataOutput = ttb::PushOutput< std::vector< uint8_t > >;
-        std::shared_ptr< EventInput > m_eventInput;
+        using EventInput = ttb::Slot< void( ttb::Event& ) >;
+        using DataOutput = ttb::Signal< void( std::vector< uint8_t > ) >;
+        EventInput m_eventInput;
         DataOutput m_dataOutput;
 
         enum class ReadState
@@ -55,14 +55,12 @@ namespace ttb
 {
     template < typename TChild >
     PacketBridge::PacketBridge( TChild& child )
-        : m_packetInput( std::make_shared< PacketInput >(
-              [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } ) )
-        , m_eventInput( std::make_shared< EventInput >(
-              [this]( auto& event ) { this->onEventInput( event ); } ) )
+        : m_packetInput( [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } )
+        , m_eventInput( [this]( auto& event ) { this->onEventInput( event ); } )
         , m_readState( ReadState::SIZE )
         , m_readOffset( 0 )
     {
-        child.eventOutput().input( m_eventInput );
-        m_dataOutput.input( child.dataInput() );
+        connect( child.eventOutput(), m_eventInput );
+        connect( m_dataOutput, child.dataInput() );
     }
 }

@@ -25,7 +25,7 @@ namespace
 
 namespace ttb
 {
-    std::shared_ptr< PacketBridge::PacketInput > const& PacketBridge::packetInput()
+    PacketBridge::PacketInput const& PacketBridge::packetInput()
     {
         return m_packetInput;
     }
@@ -40,6 +40,20 @@ namespace ttb
         std::lock_guard< std::mutex > lock( m_mutex );
         m_readState = ReadState::SIZE;
         m_readOffset = 0;
+    }
+
+    void PacketBridge::onPacketInput( std::shared_ptr< ttb::OPacket const > packet )
+    {
+        PacketDataWriter dataWriter( sizeof( uint32_t ) + packet->size() );
+
+        // Write packet size
+        auto packetSize = static_cast< uint32_t >( packet->size() );
+        dataWriter.write( &packetSize, sizeof( uint32_t ) );
+
+        // Write packet payload
+        packet->write( dataWriter );
+
+        m_dataOutput.call( std::move( dataWriter.data() ) );
     }
 
     void PacketBridge::onEventInput( ttb::Event& event )
@@ -82,7 +96,7 @@ namespace ttb
                         ttb::events::Packet event(
                             std::make_unique< ttb::SizedIPacket >( std::move( m_data ) ) );
 
-                        m_eventOutput.push( event );
+                        m_eventOutput.call( event );
                     }
 
                     break;
@@ -93,22 +107,8 @@ namespace ttb
         {
             lock.unlock();
 
-            m_eventOutput.push( event );
+            m_eventOutput.call( event );
         }
-    }
-
-    void PacketBridge::onPacketInput( std::shared_ptr< ttb::OPacket const > packet )
-    {
-        PacketDataWriter dataWriter( sizeof( uint32_t ) + packet->size() );
-
-        // Write packet size
-        uint32_t packetSize = packet->size();
-        dataWriter.write( &packetSize, sizeof( uint32_t ) );
-
-        // Write packet payload
-        packet->write( dataWriter );
-
-        m_dataOutput.push( std::move( dataWriter.data() ) );
     }
 }
 
