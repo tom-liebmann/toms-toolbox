@@ -34,7 +34,7 @@ namespace ttb
         std::shared_ptr< priv::SlotConnector< TReturn( TArgs... ) > > m_connector;
 
         template < typename TInSignature, typename TOutSignature >
-        friend void connect( Signal< TInSignature >& signal, Slot< TOutSignature >& slot );
+        friend void connect( Signal< TInSignature >& signal, Slot< TOutSignature > const& slot );
 
         friend class priv::SlotConnector< TReturn( TArgs... ) >;
     };
