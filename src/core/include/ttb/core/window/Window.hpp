@@ -2,7 +2,7 @@
 
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/utils/Event.hpp>
-#include <ttb/utils/dataIO.hpp>
+#include <ttb/utils/signal.hpp>
 
 #include <memory>
 #include <string>
@@ -54,7 +54,7 @@ namespace ttb
         std::string const& title() const;
 
         // Event handling
-        virtual PushOutput< Event const& >& eventOutput() = 0;
+        virtual Signal< void( Event const& ) >& eventOutput() = 0;
         virtual void update() = 0;
         virtual void resize( uint16_t width, uint16_t height ) = 0;
 

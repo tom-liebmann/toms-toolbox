@@ -149,8 +149,6 @@ namespace ttb
             glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
             glfwSetScrollCallback( m_handle, callbackScroll );
 
-            m_eventOutput = std::make_shared< PushOutput< Event const& > >();
-
             ++s_windowCount;
         }
 
@@ -166,9 +164,9 @@ namespace ttb
             }
         }
 
-        PushOutput< Event const& >& Window::eventOutput()
+        Signal< void( Event const& ) >& Window::eventOutput()
         {
-            return *m_eventOutput;
+            return m_eventOutput;
         }
 
         void Window::update()
@@ -183,7 +181,7 @@ namespace ttb
 
             mode( ttb::Window::Mode( width, height, mode().flags() ) );
 
-            m_eventOutput->push( ttb::events::WindowResize( *this ) );
+            m_eventOutput.call( ttb::events::WindowResize( *this ) );
         }
     }
 }
@@ -195,7 +193,7 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->eventOutput().push( event );
+        wnd->eventOutput().call( event );
     }
 
     void callbackErrorGLFW( int error, char const* description )
