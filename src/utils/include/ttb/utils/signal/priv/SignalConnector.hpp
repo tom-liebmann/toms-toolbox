@@ -2,6 +2,8 @@
 
 #include "SlotConnector.hpp"
 
+#include <ttb/utils/type_conversion.hpp>
+
 #include <memory>
 
 
@@ -70,7 +72,26 @@ namespace ttb
         TInReturn SignalConnectorImpl< TInReturn( TInArgs... ), TOutReturn( TOutArgs... ) >::call(
             TInArgs... args )
         {
-            return m_slotConnector->call( std::forward< TInArgs >( args )... );
+            std::tuple< TInArgs... > argsTuple{ args... };
+
+            if constexpr( std::is_same_v< void, TInReturn > )
+            {
+                call_converted< TOutArgs... >::call(
+                    [this]( auto&&... innerArgs ) -> TOutReturn {
+                        return m_slotConnector->call(
+                            std::forward< decltype( innerArgs ) >( innerArgs )... );
+                    },
+                    argsTuple );
+            }
+            else
+            {
+                return call_converted< TOutArgs... >::call(
+                    [this]( auto&&... innerArgs ) -> TOutReturn {
+                        return m_slotConnector->call(
+                            std::forward< decltype( innerArgs ) >( innerArgs )... );
+                    },
+                    argsTuple );
+            }
         }
     }
 }
