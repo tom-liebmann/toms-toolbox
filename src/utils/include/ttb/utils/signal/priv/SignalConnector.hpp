@@ -72,7 +72,7 @@ namespace ttb
         TInReturn SignalConnectorImpl< TInReturn( TInArgs... ), TOutReturn( TOutArgs... ) >::call(
             TInArgs... args )
         {
-            std::tuple< TInArgs... > argsTuple{ args... };
+            std::tuple< TInArgs... > argsTuple{ std::forward< TInArgs >( args )... };
 
             if constexpr( std::is_same_v< void, TInReturn > )
             {
