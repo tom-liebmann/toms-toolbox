@@ -1,7 +1,9 @@
 set(
     SOURCE_FILES
+
     src/DataReader.cpp
     src/DataWriter.cpp
+    src/BufferedWriter.cpp
 
     src/packets/DataIPacket.cpp
     src/packets/DataOPacket.cpp
