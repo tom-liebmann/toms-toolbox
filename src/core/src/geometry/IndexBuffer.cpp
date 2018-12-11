@@ -2,9 +2,28 @@
 
 namespace ttb
 {
-    IndexBuffer::IndexBuffer() : m_access( nullptr )
+    std::shared_ptr< IndexBuffer > IndexBuffer::create()
+    {
+        return std::shared_ptr< IndexBuffer >( new IndexBuffer() );
+    }
+
+    IndexBuffer::IndexBuffer()
     {
         glGenBuffers( 1, &m_bufferObject );
+    }
+
+    IndexBuffer::IndexBuffer( IndexBuffer const& copy ) : m_data( copy.m_data )
+    {
+        glGenBuffers( 1, &m_bufferObject );
+
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_bufferObject );
+
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                      m_data.size() * sizeof( GLuint ),
+                      reinterpret_cast< GLvoid const* >( m_data.data() ),
+                      GL_STATIC_DRAW );
+
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     }
 
     IndexBuffer::~IndexBuffer()
@@ -12,43 +31,77 @@ namespace ttb
         glDeleteBuffers( 1, &m_bufferObject );
     }
 
-    std::shared_ptr< IndexBuffer::Access > IndexBuffer::access()
+    std::shared_ptr< IndexBuffer > IndexBuffer::clone() const
     {
-        if( m_access )
-            throw std::runtime_error( "IndexBuffer access failed" );
-
-        return std::shared_ptr< Access >( new Access( *this ), Access::finish );
+        return std::shared_ptr< IndexBuffer >( new IndexBuffer( *this ) );
     }
 
 
-
-    IndexBuffer::Access::Access( IndexBuffer& buffer ) : m_buffer( buffer )
+    IndexBuffer::Modifier::Modifier( std::shared_ptr< IndexBuffer > buffer, size_t start )
+        : m_buffer( std::move( buffer ) ), m_begin( start ), m_end( start ), m_clear( false )
     {
-        m_buffer.m_access = this;
     }
 
-    void IndexBuffer::Access::finish( Access* access )
+    IndexBuffer::Modifier& IndexBuffer::Modifier::reserve( size_t indexCount )
     {
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, access->m_buffer.m_bufferObject );
+        m_buffer->m_data.reserve( m_end + indexCount );
+        return *this;
+    }
 
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                      access->m_buffer.m_data.size() * sizeof( GLuint ),
-                      reinterpret_cast< GLvoid const* >( access->m_buffer.m_data.data() ),
-                      GL_STATIC_DRAW );
+    IndexBuffer::Modifier& IndexBuffer::Modifier::push( size_t index )
+    {
+        if( m_buffer->m_data.size() < m_end + 1 )
+        {
+            m_clear = true;
+        }
+
+        m_buffer->m_data.push_back( static_cast< GLuint >( index ) );
+        ++m_end;
+
+        return *this;
+    }
+
+    IndexBuffer::Modifier& IndexBuffer::Modifier::trim()
+    {
+        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ), m_end ),
+                                std::end( m_buffer->m_data ) );
+        m_clear = true;
+        return *this;
+    }
+
+    std::shared_ptr< IndexBuffer > IndexBuffer::Modifier::finish()
+    {
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
+
+        if( m_clear )
+        {
+            glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                          m_buffer->m_data.size() * sizeof( GLuint ),
+                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                          GL_STATIC_DRAW );
+        }
+        else
+        {
+            glBufferSubData(
+                GL_ELEMENT_ARRAY_BUFFER,
+                m_begin * sizeof( GLuint ),
+                ( m_end - m_begin ) * sizeof( GLuint ),
+                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+        }
 
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 
-        access->m_buffer.m_access = nullptr;
-        delete access;
+        return m_buffer;
     }
 
-    void IndexBuffer::Access::push( size_t index )
+
+    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start )
     {
-        m_buffer.m_data.push_back( static_cast< GLuint >( index ) );
+        return { buffer, start };
     }
 
-    void IndexBuffer::Access::clear()
+    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer )
     {
-        m_buffer.m_data.clear();
+        return { buffer, buffer->m_data.size() };
     }
 }

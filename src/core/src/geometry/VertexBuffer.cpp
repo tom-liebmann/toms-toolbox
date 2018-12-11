@@ -25,9 +25,29 @@ namespace ttb
             []( size_t size, Attribute const& attr ) { return size + attr.byteSize(); } );
     }
 
+    VertexBuffer::VertexBuffer( VertexBuffer const& copy )
+        : m_data( copy.m_data ), m_attributes( copy.m_attributes ), m_blockSize( copy.m_blockSize )
+    {
+        glGenBuffers( 1, &m_bufferObject );
+
+        glBindBuffer( GL_ARRAY_BUFFER, m_bufferObject );
+
+        glBufferData( GL_ARRAY_BUFFER,
+                      m_data.size(),
+                      reinterpret_cast< GLvoid const* >( m_data.data() ),
+                      GL_STATIC_DRAW );
+
+        glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    }
+
     VertexBuffer::~VertexBuffer()
     {
         glDeleteBuffers( 1, &m_bufferObject );
+    }
+
+    std::shared_ptr< VertexBuffer > VertexBuffer::clone() const
+    {
+        return std::shared_ptr< VertexBuffer >( new VertexBuffer( *this ) );
     }
 
     void VertexBuffer::bind( size_t index, GLint location ) const
@@ -38,7 +58,9 @@ namespace ttb
 
         GLsizei offset = 0;
         for( GLuint i = 0; i < index; ++i )
-            offset += m_attributes[ i ].byteSize();
+        {
+            offset += static_cast< GLsizei >( m_attributes[ i ].byteSize() );
+        }
 
         auto const& attribute = m_attributes[ index ];
 
@@ -46,10 +68,10 @@ namespace ttb
         {
             case GL_FLOAT:
                 glVertexAttribPointer( location,
-                                       attribute.size(),
+                                       static_cast< GLint >( attribute.size() ),
                                        attribute.type(),
                                        GL_FALSE,
-                                       m_blockSize,
+                                       static_cast< GLsizei >( m_blockSize ),
                                        reinterpret_cast< const GLvoid* >( offset ) );
                 break;
 
