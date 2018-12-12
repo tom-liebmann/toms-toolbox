@@ -142,9 +142,10 @@ namespace ttb
         return m_buffer;
     }
 
-    void Geometry::Attribute::buffer( std::shared_ptr< VertexBuffer > buffer )
+    void Geometry::Attribute::buffer( std::shared_ptr< VertexBuffer > buffer, size_t index )
     {
         m_buffer = std::move( buffer );
+        m_index = index;
     }
 
     size_t Geometry::Attribute::index() const

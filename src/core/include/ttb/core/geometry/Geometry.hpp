@@ -67,9 +67,9 @@ namespace ttb
 
         std::shared_ptr< VertexBuffer > const& buffer() const;
 
-        void buffer( std::shared_ptr< VertexBuffer > buffer );
-
         size_t index() const;
+
+        void buffer( std::shared_ptr< VertexBuffer > buffer, size_t index );
 
     private:
         std::string m_name;
