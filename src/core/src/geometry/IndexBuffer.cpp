@@ -1,5 +1,8 @@
 #include <ttb/core/geometry/IndexBuffer.hpp>
 
+#include <iostream>
+
+
 namespace ttb
 {
     std::shared_ptr< IndexBuffer > IndexBuffer::create()
@@ -50,12 +53,15 @@ namespace ttb
 
     IndexBuffer::Modifier& IndexBuffer::Modifier::push( size_t index )
     {
-        if( m_buffer->m_data.size() < m_end + 1 )
+        auto& data = m_buffer->m_data;
+
+        if( data.size() < m_end + 1 )
         {
+            data.resize( m_end + 1 );
             m_clear = true;
         }
 
-        m_buffer->m_data.push_back( static_cast< GLuint >( index ) );
+        data[ m_end ] = static_cast< GLuint >( index );
         ++m_end;
 
         return *this;

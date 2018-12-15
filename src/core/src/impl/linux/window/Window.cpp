@@ -213,6 +213,11 @@ namespace
         std::cout << "    Type: " << convertErrorType( type ) << std::endl;
         std::cout << "    Severity: " << convertErrorSeverity( severity ) << std::endl;
         std::cout << "    Message: " << message << std::endl;
+
+        if( severity == GL_DEBUG_SEVERITY_HIGH )
+        {
+            throw std::runtime_error( "OpenGL error" );
+        }
     }
 
     void callbackWindowClose( GLFWwindow* window )

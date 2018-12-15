@@ -38,6 +38,8 @@ namespace ttb
 
         Attribute const& attribute( size_t index ) const;
 
+        Attribute& attribute( size_t index );
+
         GLuint arrayObject() const;
 
     private:
@@ -66,6 +68,8 @@ namespace ttb
         std::shared_ptr< VertexBuffer > const& buffer() const;
 
         size_t index() const;
+
+        void buffer( std::shared_ptr< VertexBuffer > buffer, size_t index );
 
     private:
         std::string m_name;

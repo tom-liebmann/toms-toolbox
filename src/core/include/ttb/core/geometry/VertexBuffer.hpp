@@ -157,17 +157,15 @@ namespace ttb
     {
         using GLType = typename priv::gl_type< TType >::type;
 
-        auto& dat = m_buffer->m_data;
+        auto& data = m_buffer->m_data;
 
-        if( dat.size() < m_end + sizeof( GLType ) )
+        if( data.size() < m_end + sizeof( GLType ) )
         {
+            data.resize( m_end + sizeof( GLType ) );
             m_clear = true;
         }
 
-        GLType castedValue = value;
-        auto valuePtr = reinterpret_cast< uint8_t const* >( &castedValue );
-
-        dat.insert( std::end( dat ), valuePtr, valuePtr + sizeof( GLType ) );
+        *reinterpret_cast< GLType* >( data.data() + m_end ) = value;
 
         m_end += sizeof( GLType );
 

@@ -86,6 +86,11 @@ namespace ttb
         return m_attributes[ index ];
     }
 
+    Geometry::Attribute& Geometry::attribute( size_t index )
+    {
+        return m_attributes[ index ];
+    }
+
     GLuint Geometry::arrayObject() const
     {
         return m_arrayObject;
@@ -135,6 +140,12 @@ namespace ttb
     std::shared_ptr< VertexBuffer > const& Geometry::Attribute::buffer() const
     {
         return m_buffer;
+    }
+
+    void Geometry::Attribute::buffer( std::shared_ptr< VertexBuffer > buffer, size_t index )
+    {
+        m_buffer = std::move( buffer );
+        m_index = index;
     }
 
     size_t Geometry::Attribute::index() const
