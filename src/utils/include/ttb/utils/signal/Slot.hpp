@@ -26,7 +26,7 @@ namespace ttb
         Slot( Callback callback );
 
         template < typename... TArgs2 >
-        TReturn call( TArgs2&&... args );
+        TReturn call( TArgs2&&... args ) const;
 
     private:
         Callback m_callback;
@@ -52,7 +52,7 @@ namespace ttb
 
     template < typename TReturn, typename... TArgs >
     template < typename... TArgs2 >
-    TReturn Slot< TReturn( TArgs... ) >::call( TArgs2&&... args )
+    TReturn Slot< TReturn( TArgs... ) >::call( TArgs2&&... args ) const
     {
         return m_callback( std::forward< TArgs2 >( args )... );
     }
