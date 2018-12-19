@@ -38,7 +38,7 @@ namespace ttb
         uint8_t bitDepth() const;
 
         // Override: Texture
-        virtual void bind( uint8_t slot ) override;
+        virtual void bind( uint8_t slot ) const override;
 
     private:
         Texture2D();

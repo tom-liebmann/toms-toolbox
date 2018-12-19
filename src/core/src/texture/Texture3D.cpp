@@ -26,7 +26,7 @@ namespace ttb
         return m_depth;
     }
 
-    void Texture3D::bind( uint8_t slot )
+    void Texture3D::bind( uint8_t slot ) const
     {
         glActiveTexture( GL_TEXTURE0 + slot );
         glBindTexture( GL_TEXTURE_3D, object() );

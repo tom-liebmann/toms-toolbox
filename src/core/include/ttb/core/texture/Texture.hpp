@@ -15,7 +15,7 @@ namespace ttb
 
         GLuint object() const;
 
-        virtual void bind( uint8_t slot ) = 0;
+        virtual void bind( uint8_t slot ) const = 0;
 
     protected:
         GLuint m_object;
