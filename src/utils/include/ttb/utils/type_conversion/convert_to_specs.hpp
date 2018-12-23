@@ -8,9 +8,14 @@
 namespace ttb
 {
     template < typename TSource, typename TTarget >
-    struct convert_to< std::shared_ptr< TSource >, TTarget >
+    struct convert_to< std::shared_ptr< TSource >,
+                       TTarget,
+                       std::enable_if_t< std::is_convertible_v< TSource, TTarget > > >
     {
-        static TTarget call( std::shared_ptr< TSource > const& source );
+        static TTarget call( std::shared_ptr< TSource > const& source )
+        {
+            return convert_to< TSource&, TTarget >::call( *source );
+        }
     };
 
     template < typename TSource, typename TTarget >
@@ -29,13 +34,6 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename TSource, typename TTarget >
-    inline TTarget convert_to< std::shared_ptr< TSource >, TTarget >::call(
-        std::shared_ptr< TSource > const& source )
-    {
-        return convert_to< TSource&, TTarget >::call( *source );
-    }
-
     template < typename TSource, typename TTarget >
     inline TTarget
         convert_to< std::unique_ptr< TSource >, TTarget >::call( std::unique_ptr< TSource > source )
