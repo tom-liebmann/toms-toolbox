@@ -6,7 +6,7 @@ namespace ttb
     class IPacketReader
     {
     public:
-        IPacketReader( IPacket& packet, Endianness endianness = Endianness::LITTLE );
+        IPacketReader( IPacket const& packet, Endianness endianness = Endianness::LITTLE );
 
         template < typename T >
         T read();
@@ -15,8 +15,10 @@ namespace ttb
 
         size_t remaining() const;
 
+        SubIPacket restPacket() const;
+
     private:
-        IPacket& m_packet;
+        IPacket const& m_packet;
 
         Endianness m_endianness;
 
@@ -27,7 +29,7 @@ namespace ttb
 
 namespace ttb
 {
-    inline IPacketReader::IPacketReader( IPacket& packet, Endianness endianness )
+    inline IPacketReader::IPacketReader( IPacket const& packet, Endianness endianness )
         : m_packet( packet ), m_endianness( endianness ), m_offset( 0 )
     {
     }
@@ -66,7 +68,7 @@ namespace ttb
         return result;
     }
 
-    void IPacketReader::read( void* dst, size_t size )
+    inline void IPacketReader::read( void* dst, size_t size )
     {
         auto currentData = reinterpret_cast< uint8_t const* >( m_packet.data() ) + m_offset;
 
@@ -75,8 +77,13 @@ namespace ttb
         m_offset += size;
     }
 
-    size_t IPacketReader::remaining() const
+    inline size_t IPacketReader::remaining() const
     {
         return m_packet.size() - m_offset;
+    }
+
+    inline SubIPacket IPacketReader::restPacket() const
+    {
+        return { m_offset, m_packet };
     }
 }

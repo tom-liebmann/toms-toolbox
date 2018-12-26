@@ -10,6 +10,7 @@ set(
     src/packets/IPacket.cpp
     src/packets/OPacket.cpp
     src/packets/SizedIPacket.cpp
+    src/packets/SubIPacket.cpp
 
     src/PacketBridge.cpp
     )
