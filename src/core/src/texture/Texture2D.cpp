@@ -64,11 +64,18 @@ namespace ttb
         }
     }
 
-    void Texture2D::bind( uint8_t slot )
+    void Texture2D::bind( uint8_t slot ) const
     {
         glActiveTexture( GL_TEXTURE0 + slot );
         glBindTexture( GL_TEXTURE_2D, object() );
     }
+
+    void Texture2D::unbind( uint8_t slot ) const
+    {
+        glActiveTexture( GL_TEXTURE0 + slot );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+    }
+
 
     Texture2D::Texture2D() : m_width( 0 ), m_height( 0 )
     {
