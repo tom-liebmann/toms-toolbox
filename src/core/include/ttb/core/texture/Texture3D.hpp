@@ -28,6 +28,7 @@ namespace ttb
 
         // Override: Texture
         virtual void bind( uint8_t slot ) const override;
+
         virtual void unbind( uint8_t slot ) const override;
 
     private:
