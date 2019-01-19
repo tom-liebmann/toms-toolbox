@@ -43,6 +43,16 @@ namespace ttb
         return m_eventOutput;
     }
 
+    PacketBridge::EventInput const& PacketBridge::eventInput() const
+    {
+        return m_eventInput;
+    }
+
+    PacketBridge::DataOutput& PacketBridge::dataOutput()
+    {
+        return m_dataOutput;
+    }
+
     void PacketBridge::reset()
     {
         std::lock_guard< std::mutex > lock( m_mutex );

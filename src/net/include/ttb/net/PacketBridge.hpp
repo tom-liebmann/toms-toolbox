@@ -12,14 +12,16 @@ namespace ttb
     public:
         using PacketInput = ttb::Slot< void( std::shared_ptr< ttb::OPacket const > ) >;
         using EventOutput = ttb::Signal< void( ttb::Event& ) >;
-
-        template < typename TChild >
-        PacketBridge( TChild& child );
+        using EventInput = ttb::Slot< void( ttb::Event& ) >;
+        using DataOutput = ttb::Signal< void( std::vector< uint8_t > ) >;
 
         PacketBridge();
 
         PacketInput const& packetInput();
         EventOutput& eventOutput();
+
+        EventInput const& eventInput() const;
+        DataOutput& dataOutput();
 
         void reset();
 
@@ -30,10 +32,6 @@ namespace ttb
         // External connections
         PacketInput m_packetInput;
         EventOutput m_eventOutput;
-
-        // Internal connections
-        using EventInput = ttb::Slot< void( ttb::Event& ) >;
-        using DataOutput = ttb::Signal< void( std::vector< uint8_t > ) >;
         EventInput m_eventInput;
         DataOutput m_dataOutput;
 
@@ -50,19 +48,4 @@ namespace ttb
 
         std::mutex m_mutex;
     };
-}
-
-
-namespace ttb
-{
-    template < typename TChild >
-    PacketBridge::PacketBridge( TChild& child )
-        : m_packetInput( [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } )
-        , m_eventInput( [this]( auto& event ) { this->onEventInput( event ); } )
-        , m_readState( ReadState::SIZE )
-        , m_readOffset( 0 )
-    {
-        connect( child.eventOutput(), m_eventInput );
-        connect( m_dataOutput, child.dataInput() );
-    }
 }
