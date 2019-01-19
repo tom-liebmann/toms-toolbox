@@ -16,6 +16,8 @@ namespace ttb
         template < typename TChild >
         PacketBridge( TChild& child );
 
+        PacketBridge();
+
         PacketInput const& packetInput();
         EventOutput& eventOutput();
 

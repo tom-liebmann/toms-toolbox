@@ -25,6 +25,14 @@ namespace
 
 namespace ttb
 {
+    PacketBridge::PacketBridge()
+        : m_packetInput( [this]( auto packet ) { this->onPacketInput( std::move( packet ) ); } )
+        , m_eventInput( [this]( auto& event ) { this->onEventInput( event ); } )
+        , m_readState( ReadState::SIZE )
+        , m_readOffset( 0 )
+    {
+    }
+
     PacketBridge::PacketInput const& PacketBridge::packetInput()
     {
         return m_packetInput;
