@@ -12,6 +12,8 @@ namespace ttb
         public:
             Data( DataReader& reader );
 
+            size_t available() const;
+
             size_t read( void* data, size_t size );
 
             // Override: Event
@@ -30,6 +32,11 @@ namespace ttb
     {
         inline Data::Data( DataReader& reader ) : m_reader( reader )
         {
+        }
+
+        inline size_t Data::available() const
+        {
+            return m_reader.available();
         }
 
         inline size_t Data::read( void* data, size_t size )
