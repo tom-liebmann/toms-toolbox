@@ -10,7 +10,7 @@ namespace ttb
     template < typename TSource, typename TTarget >
     struct convert_to< std::shared_ptr< TSource >,
                        TTarget,
-                       std::enable_if_t< std::is_convertible_v< TSource, TTarget > > >
+                       std::enable_if_t< std::is_convertible_v< TSource&, TTarget > > >
     {
         static TTarget call( std::shared_ptr< TSource > const& source )
         {
