@@ -141,6 +141,7 @@ set_target_properties(
     ttbCore
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
     )
 
 list( APPEND VALID_TARGETS ttbCore )

@@ -56,6 +56,7 @@ set_target_properties(
     ttbNet
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
     )
 
 list( APPEND VALID_TARGETS ttbNet )

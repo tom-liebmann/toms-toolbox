@@ -37,12 +37,7 @@ set_target_properties(
     ttbUtils
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-    )
-
-target_compile_features(
-    ttbUtils
-    PUBLIC
-        cxx_std_17
+        CXX_STANDARD 17
     )
 
 list( APPEND VALID_TARGETS ttbUtils )
