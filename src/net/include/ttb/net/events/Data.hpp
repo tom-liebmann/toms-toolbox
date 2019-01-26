@@ -7,6 +7,7 @@ namespace ttb
 {
     namespace events
     {
+        template < typename TEventDefinition >
         class Data : public Event
         {
         public:
@@ -30,23 +31,27 @@ namespace ttb
 {
     namespace events
     {
-        inline Data::Data( DataReader& reader ) : m_reader( reader )
+        template < typename TEventDefinition >
+        inline Data< TEventDefinition >::Data( DataReader& reader ) : m_reader( reader )
         {
         }
 
-        inline size_t Data::available() const
+        template < typename TEventDefinition >
+        inline size_t Data< TEventDefinition >::available() const
         {
             return m_reader.available();
         }
 
-        inline size_t Data::read( void* data, size_t size )
+        template < typename TEventDefinition >
+        inline size_t Data< TEventDefinition >::read( void* data, size_t size )
         {
             return m_reader.read( data, size );
         }
 
-        inline Event::Type Data::type() const
+        template < typename TEventDefinition >
+        inline Event::Type Data< TEventDefinition >::type() const
         {
-            return DATA;
+            return TEventDefinition::DATA;
         }
     }
 }
