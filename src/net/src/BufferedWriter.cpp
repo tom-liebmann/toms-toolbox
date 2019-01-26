@@ -28,6 +28,11 @@ namespace ttb
         m_data.clear();
     }
 
+    std::vector< uint8_t > BufferedWriter::release()
+    {
+        return std::move( m_data );
+    }
+
     void BufferedWriter::write( void const* data, size_t size )
     {
         auto ptr = reinterpret_cast< uint8_t const* >( data );

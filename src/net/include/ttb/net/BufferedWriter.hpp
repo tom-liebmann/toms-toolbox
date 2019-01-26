@@ -21,6 +21,8 @@ namespace ttb
 
         void clear();
 
+        std::vector< uint8_t > release();
+
         // Override: DataWriter
         virtual void write( void const* data, size_t size ) override;
 
