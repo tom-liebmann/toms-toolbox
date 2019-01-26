@@ -11,8 +11,6 @@ set(
     src/packets/OPacket.cpp
     src/packets/SizedIPacket.cpp
     src/packets/SubIPacket.cpp
-
-    src/PacketBridge.cpp
     )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
@@ -57,6 +55,12 @@ set_target_properties(
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
         CXX_STANDARD 17
+    )
+
+target_compile_features(
+    ttbNet
+    PUBLIC
+        cxx_std_17
     )
 
 list( APPEND VALID_TARGETS ttbNet )

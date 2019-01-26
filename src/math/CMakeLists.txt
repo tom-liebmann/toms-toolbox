@@ -35,7 +35,15 @@ target_compile_features(
 set_property(
     TARGET
     ttbMath
-    PROPERTY POSITION_INDEPENDENT_CODE ON)
+    PROPERTY POSITION_INDEPENDENT_CODE ON
+    )
+
+target_compile_features(
+    ttbMath
+    PUBLIC
+        cxx_std_17
+    )
+
 
 list( APPEND VALID_TARGETS ttbMath )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
