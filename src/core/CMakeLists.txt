@@ -76,6 +76,9 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/window/Window.cpp
         src/uniform/Uniform.cpp
         src/uniform/uniformHelper.cpp
+        src/GBuffer.cpp
+        src/texture/Texture2D.cpp
+        src/texture/Texture.cpp
         )
 
     add_library(
