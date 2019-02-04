@@ -37,10 +37,12 @@ namespace ttb
                 return 3;
 
             case GL_RGBA:
+            case GL_RGBA8:
                 return 4;
 
             default:
-                throw std::runtime_error( "Unknown pixel format" );
+                throw std::runtime_error( "Unknown pixel format (" +
+                                          std::to_string( m_internalFormat ) + ")" );
         }
     }
 
