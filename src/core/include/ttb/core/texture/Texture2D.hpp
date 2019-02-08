@@ -20,6 +20,7 @@ namespace ttb
     {
     public:
         class Modifier;
+        class ConstModifier;
 
         static Modifier create();
 
@@ -105,5 +106,27 @@ namespace ttb
     };
 
 
+    class Texture2D::ConstModifier
+    {
+    public:
+        ~ConstModifier();
+
+        ConstModifier& download( size_t level, std::vector< uint8_t >& buffer );
+
+        ConstModifier& anisotropicFiltering( bool enabled );
+
+        void finish();
+
+    private:
+        ConstModifier( ttb::Texture2D const& texture );
+
+        Texture2D const* m_texture;
+
+        friend ConstModifier modify( Texture2D const& texture );
+    };
+
+
     Texture2D::Modifier modify( std::shared_ptr< Texture2D > texture );
+
+    Texture2D::ConstModifier modify( Texture2D const& texture );
 }
