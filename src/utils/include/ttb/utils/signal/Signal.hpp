@@ -2,6 +2,7 @@
 
 #include "priv/SignalConnector.hpp"
 
+#include <functional>
 #include <iostream>
 #include <memory>
 #include <mutex>
@@ -23,6 +24,13 @@ namespace ttb
     class Signal< TReturn( TArgs... ) >
     {
     public:
+        using ReturnType = TReturn;
+        using ConnectCallback = std::function< void() >;
+
+        Signal();
+
+        Signal( ConnectCallback connectCallback );
+
         void disconnect();
 
         template < typename... TArgs2 >
@@ -32,6 +40,8 @@ namespace ttb
         template < typename TReturn2, typename... TArgs2 >
         void slotConnector(
             std::shared_ptr< priv::SlotConnector< TReturn2( TArgs2... ) > > connector );
+
+        ConnectCallback m_connectCallback;
 
         std::mutex m_mutex;
         std::shared_ptr< priv::SignalConnector< TReturn( TArgs... ) > > m_connector;
@@ -44,6 +54,15 @@ namespace ttb
 
 namespace ttb
 {
+    template < typename TReturn, typename... TArgs >
+    inline Signal< TReturn( TArgs... ) >::Signal() = default;
+
+    template < typename TReturn, typename... TArgs >
+    inline Signal< TReturn( TArgs... ) >::Signal( ConnectCallback connectCallback )
+        : m_connectCallback( std::move( connectCallback ) )
+    {
+    }
+
     template < typename TReturn, typename... TArgs >
     void Signal< TReturn( TArgs... ) >::disconnect()
     {
@@ -78,7 +97,7 @@ namespace ttb
     void Signal< TReturn( TArgs... ) >::slotConnector(
         std::shared_ptr< priv::SlotConnector< TReturn2( TArgs2... ) > > connector )
     {
-        std::lock_guard< std::mutex > lock( m_mutex );
+        auto lock = std::unique_lock{ m_mutex };
 
         if( connector )
         {
@@ -89,6 +108,15 @@ namespace ttb
         else
         {
             m_connector.reset();
+        }
+
+        auto callback = m_connectCallback;
+
+        lock.unlock();
+
+        if( callback )
+        {
+            callback();
         }
     }
 }
