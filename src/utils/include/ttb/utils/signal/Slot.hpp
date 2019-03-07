@@ -21,6 +21,7 @@ namespace ttb
     class Slot< TReturn( TArgs... ) >
     {
     public:
+        using ReturnType = TReturn;
         using Callback = std::function< TReturn( TArgs... ) >;
 
         Slot( Callback callback );
