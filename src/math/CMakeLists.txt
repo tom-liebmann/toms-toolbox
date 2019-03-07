@@ -22,20 +22,24 @@ endif()
 target_include_directories(
     ttbMath
     PUBLIC
-    include
+        include
     PRIVATE
-    src )
-
-target_compile_features(
-    ttbMath
-    PUBLIC
-    cxx_return_type_deduction
+        src
     )
 
-set_property(
-    TARGET
+target_compile_options(
     ttbMath
-    PROPERTY POSITION_INDEPENDENT_CODE ON
+    PUBLIC
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+
+set_target_properties(
+    ttbMath
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
     )
 
 target_compile_features(
@@ -43,7 +47,6 @@ target_compile_features(
     PUBLIC
         cxx_std_17
     )
-
 
 list( APPEND VALID_TARGETS ttbMath )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

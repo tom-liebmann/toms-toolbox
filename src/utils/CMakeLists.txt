@@ -30,13 +30,13 @@ target_compile_options(
         -Wall
         -Wextra
         -Wpedantic
-        -Wconversion
     )
 
 set_target_properties(
     ttbUtils
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
     )
 
 target_compile_features(

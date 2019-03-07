@@ -47,7 +47,6 @@ target_compile_options(
         -Wall
         -Wextra
         -Wpedantic
-        -Wconversion
     )
 
 set_target_properties(
