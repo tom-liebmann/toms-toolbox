@@ -55,7 +55,7 @@ namespace ttb
                                     reinterpret_cast< GLchar const* >( name.c_str() ) );
     }
 
-    void Program::applyUniform( std::string const& name, UniformBase const& uniform )
+    void Program::applyUniform( std::string const& name, UniformBase const& uniform ) const
     {
         auto location = glGetUniformLocation( m_programObject,
                                               reinterpret_cast< const GLchar* >( name.c_str() ) );

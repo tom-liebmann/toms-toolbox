@@ -44,7 +44,7 @@ namespace ttb
         return *m_renderTargetStack.top();
     }
 
-    void State::pushProgram( std::shared_ptr< Program > const& program )
+    void State::pushProgram( std::shared_ptr< Program const > const& program )
     {
         if( m_programStack.empty() )
         {
@@ -69,7 +69,7 @@ namespace ttb
         }
     }
 
-    Program& State::program()
+    Program const& State::program()
     {
         return *m_programStack.top();
     }
@@ -103,10 +103,10 @@ namespace ttb
     {
         if( m_framebufferObjectStack.empty() )
         {
-            glGetIntegerv( GL_DRAW_FRAMEBUFFER_BINDING, &m_parentFramebufferObject );
+            glGetIntegerv( GL_FRAMEBUFFER_BINDING, &m_parentFramebufferObject );
         }
 
-        glBindFramebuffer( GL_DRAW_FRAMEBUFFER, framebufferObject );
+        glBindFramebuffer( GL_FRAMEBUFFER, framebufferObject );
         m_framebufferObjectStack.push( framebufferObject );
     }
 
@@ -116,11 +116,11 @@ namespace ttb
 
         if( m_framebufferObjectStack.empty() )
         {
-            glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_parentFramebufferObject );
+            glBindFramebuffer( GL_FRAMEBUFFER, m_parentFramebufferObject );
         }
         else
         {
-            glBindFramebuffer( GL_DRAW_FRAMEBUFFER, m_framebufferObjectStack.top() );
+            glBindFramebuffer( GL_FRAMEBUFFER, m_framebufferObjectStack.top() );
         }
     }
 

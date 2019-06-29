@@ -79,6 +79,8 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/GBuffer.cpp
         src/texture/Texture2D.cpp
         src/texture/Texture.cpp
+        src/texture/TextureFactory.cpp
+        src/PNGLoader.cpp
         )
 
     add_library(

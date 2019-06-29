@@ -18,10 +18,11 @@ namespace ttb
     public:
         enum class Flag : uint32_t
         {
-            NONE,
-            FULLSCREEN,
-            FLOATING,
-            RESIZABLE
+            NONE = 0,
+            FULLSCREEN = 1,
+            FLOATING = 2,
+            RESIZABLE = 4,
+            VSYNC = 8,
         };
 
         class Mode

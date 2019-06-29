@@ -43,10 +43,10 @@ namespace ttb
         RenderTarget const& renderTarget() const;
 
         // shader
-        void pushProgram( std::shared_ptr< Program > const& program );
+        void pushProgram( std::shared_ptr< Program const > const& program );
         void popProgram();
 
-        Program& program();
+        Program const& program();
 
         // geometry
         void pushArrayObject( GLuint arrayObject );
@@ -78,7 +78,7 @@ namespace ttb
 
         // shader
         GLint m_parentProgram;
-        std::stack< std::shared_ptr< Program > > m_programStack;
+        std::stack< std::shared_ptr< Program const > > m_programStack;
 
         // geometry
         GLint m_parentArrayObject;
