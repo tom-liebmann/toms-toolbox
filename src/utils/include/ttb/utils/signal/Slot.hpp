@@ -26,6 +26,8 @@ namespace ttb
 
         Slot( Callback callback );
 
+        ~Slot();
+
         template < typename... TArgs2 >
         TReturn call( TArgs2&&... args ) const;
 
@@ -49,6 +51,12 @@ namespace ttb
         : m_callback( std::move( callback ) )
         , m_connector( std::make_shared< priv::SlotConnector< TReturn( TArgs... ) > >( *this ) )
     {
+    }
+
+    template < typename TReturn, typename... TArgs >
+    Slot< TReturn( TArgs... ) >::~Slot()
+    {
+        m_connector->disable();
     }
 
     template < typename TReturn, typename... TArgs >
