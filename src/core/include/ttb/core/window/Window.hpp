@@ -19,10 +19,11 @@ namespace ttb
         enum class Flag : uint32_t
         {
             NONE = 0,
-            FULLSCREEN = 1,
-            FLOATING = 2,
-            RESIZABLE = 4,
-            VSYNC = 8,
+            FULLSCREEN = 1 << 0,
+            FLOATING = 1 << 1,
+            RESIZABLE = 1 << 2,
+            VSYNC = 1 << 3,
+            HIDDEN = 1 << 4,
         };
 
         class Mode

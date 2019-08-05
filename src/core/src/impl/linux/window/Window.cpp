@@ -86,8 +86,16 @@ namespace ttb
             glfwWindowHint( GLFW_FLOATING, mode.flag( Window::Flag::FLOATING ) ? 1 : 0 );
             glfwWindowHint( GLFW_RESIZABLE, mode.flag( Window::Flag::RESIZABLE ) ? 1 : 0 );
 
-            m_handle =
-                glfwCreateWindow( mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+            if( mode.flag( Window::Flag::HIDDEN ) )
+            {
+                glfwWindowHint( GLFW_VISIBLE, mode.flag( Window::Flag::HIDDEN ) ? 0 : 1 );
+                m_handle = glfwCreateWindow( mode.width(), mode.height(), "", nullptr, nullptr );
+            }
+            else
+            {
+                m_handle = glfwCreateWindow(
+                    mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+            }
 
             glfwMakeContextCurrent( m_handle );
 
