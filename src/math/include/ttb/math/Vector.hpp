@@ -106,7 +106,7 @@ namespace ttb
     template < typename TType >
     Vector< TType, 4 > homogenize( Vector< TType, 3 > const& vec )
     {
-        return { vec( 0 ), vec( 1 ), vec( 2 ), 1 };
+        return { vec( 0 ), vec( 1 ), vec( 2 ), static_cast< TType >( 1 ) };
     }
 
     template < typename TType >
