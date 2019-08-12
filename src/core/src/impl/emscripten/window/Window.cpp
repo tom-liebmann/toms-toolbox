@@ -1,9 +1,11 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/window/Window.hpp>
 #include <ttb/core/window/WindowEvents.hpp>
-#include <ttb/utils/dataIO.hpp>
+#include <ttb/utils/signal.hpp>
 
 #include "Window.hpp"
+
+#include <emscripten.h>
 
 
 namespace ttb
@@ -20,6 +22,8 @@ namespace ttb
 
         Window::Window( std::string const& title, Mode const& mode ) : ttb::Window( title, mode )
         {
+            SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 0 );  // disable antialiasing
+
             if( s_windowCount == 0 )
             {
                 SDL_Init( SDL_INIT_VIDEO );
@@ -34,18 +38,22 @@ namespace ttb
                 mode.height(),
                 SDL_WINDOW_OPENGL | ( mode.flag( Flag::FULLSCREEN ) ? SDL_WINDOW_RESIZABLE : 0 ) );
 
+            SDL_EventState( SDL_TEXTINPUT, SDL_DISABLE );
+            SDL_EventState( SDL_KEYDOWN, SDL_DISABLE );
+            SDL_EventState( SDL_KEYUP, SDL_DISABLE );
+
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
             SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
 
             m_context = SDL_GL_CreateContext( m_handle );
 
+            SDL_GL_SetSwapInterval( 1 );
+
             if( !m_context )
             {
                 throw std::runtime_error( "Unable to create context" );
             }
-
-            m_eventOutput = std::make_unique< PushOutput< Event const& > >();
 
             ++s_windowCount;
         }
@@ -63,9 +71,9 @@ namespace ttb
             }
         }
 
-        PushOutput< Event const& >& Window::eventOutput()
+        Signal< void( Event const& ) >& Window::eventOutput()
         {
-            return *m_eventOutput;
+            return m_eventOutput;
         }
 
         void Window::update()
@@ -86,7 +94,7 @@ namespace ttb
                                 mode( Mode(
                                     event.window.data1, event.window.data2, mode().flags() ) );
 
-                                m_eventOutput->push( ttb::events::WindowResize( *this ) );
+                                m_eventOutput.call( ttb::events::WindowResize( *this ) );
                                 break;
                             }
                         }
@@ -94,15 +102,15 @@ namespace ttb
 
                     case SDL_KEYDOWN:
                     {
-                        m_eventOutput->push( ttb::events::Key( event.key.keysym.sym,
-                                                               ttb::events::Key::Action::DOWN ) );
+                        m_eventOutput.call( ttb::events::Key( event.key.keysym.sym,
+                                                              ttb::events::Key::Action::DOWN ) );
                         break;
                     }
 
                     case SDL_KEYUP:
                     {
-                        m_eventOutput->push( ttb::events::Key( event.key.keysym.sym,
-                                                               ttb::events::Key::Action::UP ) );
+                        m_eventOutput.call( ttb::events::Key( event.key.keysym.sym,
+                                                              ttb::events::Key::Action::UP ) );
                         break;
                     }
 
@@ -127,14 +135,14 @@ namespace ttb
                                           ? ttb::events::MouseButton::Action::DOWN
                                           : ttb::events::MouseButton::Action::UP;
 
-                        m_eventOutput->push( ttb::events::MouseButton(
+                        m_eventOutput.call( ttb::events::MouseButton(
                             button, action, event.button.x, event.button.y ) );
                         break;
                     }
 
                     case SDL_MOUSEMOTION:
                     {
-                        m_eventOutput->push(
+                        m_eventOutput.call(
                             ttb::events::MouseMove( event.motion.x, event.motion.y ) );
                         break;
                     }

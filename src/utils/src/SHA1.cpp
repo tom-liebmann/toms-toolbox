@@ -128,7 +128,7 @@ namespace ttb
         uint64_t total_bits = ( transforms * BLOCK_BYTES + buffer.size() ) * 8;
 
         /* Padding */
-        buffer += 0x80;
+        buffer += static_cast< char >( 0x80 );
         size_t orig_size = buffer.size();
         while( buffer.size() < BLOCK_BYTES )
         {
@@ -148,17 +148,17 @@ namespace ttb
         }
 
         /* Append total_bits, split this uint64_t into two uint32_t */
-        block[ BLOCK_INTS - 1 ] = total_bits;
-        block[ BLOCK_INTS - 2 ] = ( total_bits >> 32 );
+        block[ BLOCK_INTS - 1 ] = static_cast< uint32_t >( total_bits );
+        block[ BLOCK_INTS - 2 ] = static_cast< uint32_t >( total_bits >> 32 );
         transform( digest, block, transforms );
 
         std::array< uint8_t, 20 > result;
         for( size_t i = 0; i < 5; ++i )
         {
-            result[ i * 4 + 0 ] = digest[ i ] >> 24;
-            result[ i * 4 + 1 ] = digest[ i ] >> 16;
-            result[ i * 4 + 2 ] = digest[ i ] >> 8;
-            result[ i * 4 + 3 ] = digest[ i ];
+            result[ i * 4 + 0 ] = static_cast< uint8_t >( digest[ i ] >> 24 );
+            result[ i * 4 + 1 ] = static_cast< uint8_t >( digest[ i ] >> 16 );
+            result[ i * 4 + 2 ] = static_cast< uint8_t >( digest[ i ] >> 8 );
+            result[ i * 4 + 3 ] = static_cast< uint8_t >( digest[ i ] );
         }
 
         /* Reset for next run */

@@ -76,6 +76,11 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         src/window/Window.cpp
         src/uniform/Uniform.cpp
         src/uniform/uniformHelper.cpp
+        src/GBuffer.cpp
+        src/texture/Texture2D.cpp
+        src/texture/Texture.cpp
+        src/texture/TextureFactory.cpp
+        src/PNGLoader.cpp
         )
 
     add_library(
@@ -85,11 +90,6 @@ elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
         )
 
 endif()
-
-set_property(
-    TARGET ttbCore
-    PROPERTY POSITION_INDEPENDENT_CODE ON
-    )
 
 target_include_directories(
     ttbCore
@@ -131,6 +131,27 @@ target_link_libraries(
         ttbMath
         ttbUtils
         ${LINK_LIBRARIES}
+    )
+
+target_compile_options(
+    ttbCore
+    PUBLIC
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+
+set_target_properties(
+    ttbCore
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
+    )
+
+target_compile_features(
+    ttbCore
+    PUBLIC
+        cxx_std_17
     )
 
 list( APPEND VALID_TARGETS ttbCore )

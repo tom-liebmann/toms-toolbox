@@ -2,7 +2,7 @@
 
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/utils/Event.hpp>
-#include <ttb/utils/dataIO.hpp>
+#include <ttb/utils/signal.hpp>
 
 #include <memory>
 #include <string>
@@ -18,10 +18,12 @@ namespace ttb
     public:
         enum class Flag : uint32_t
         {
-            NONE,
-            FULLSCREEN,
-            FLOATING,
-            RESIZABLE
+            NONE = 0,
+            FULLSCREEN = 1 << 0,
+            FLOATING = 1 << 1,
+            RESIZABLE = 1 << 2,
+            VSYNC = 1 << 3,
+            HIDDEN = 1 << 4,
         };
 
         class Mode
@@ -54,7 +56,7 @@ namespace ttb
         std::string const& title() const;
 
         // Event handling
-        virtual PushOutput< Event const& >& eventOutput() = 0;
+        virtual Signal< void( Event const& ) >& eventOutput() = 0;
         virtual void update() = 0;
         virtual void resize( uint16_t width, uint16_t height ) = 0;
 

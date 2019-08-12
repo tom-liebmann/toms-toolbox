@@ -1,6 +1,5 @@
 #include <ttb/net/packets/SizedIPacket.hpp>
 
-#include <ttb/net/TCPSocket.hpp>
 
 namespace ttb
 {

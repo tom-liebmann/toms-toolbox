@@ -6,6 +6,7 @@
 #include <memory>
 #include <vector>
 
+
 // forward declarations
 //=============================================================================
 
@@ -13,7 +14,6 @@ namespace ttb
 {
     class State;
 }
-
 
 
 // declarations
@@ -33,10 +33,12 @@ namespace ttb
 
         ~VertexBuffer();
 
-        void render( State& state ) const;
+        std::shared_ptr< VertexBuffer > clone() const;
 
     private:
         VertexBuffer( std::vector< Attribute > attributes );
+
+        VertexBuffer( VertexBuffer const& copy );
 
         void bind( size_t index, GLint location ) const;
 
@@ -47,9 +49,8 @@ namespace ttb
         size_t m_blockSize;
 
         friend class Geometry;
-        friend VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer,
-                                              size_t start );
-        friend VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer );
+        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
+        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer );
     };
 
 
@@ -58,8 +59,11 @@ namespace ttb
     public:
         Modifier& reserve( size_t elementCount );
 
-        template < typename... TType >
-        Modifier& push( TType... data );
+        template < typename TType >
+        Modifier& push( TType value );
+
+        template < typename TType, typename... TTypes >
+        Modifier& push( TType value, TTypes... rest );
 
         // Cuts the buffer after the current position
         Modifier& trim();
@@ -69,21 +73,14 @@ namespace ttb
     private:
         Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start );
 
-        template < typename TType >
-        void privPush( TType value );
-
-        template < typename TType, typename... TTypes >
-        void privPush( TType value, TTypes... rest );
-
         std::shared_ptr< VertexBuffer > m_buffer;
         size_t m_begin;
         size_t m_end;
         bool m_clear;
 
         friend class VertexBuffer;
-        friend VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer,
-                                              size_t start );
-        friend VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer );
+        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
+        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer );
     };
 
 
@@ -153,35 +150,32 @@ namespace ttb
 }
 
 
-
 namespace ttb
 {
-    template < typename... TType >
-    VertexBuffer::Modifier& VertexBuffer::Modifier::push( TType... data )
-    {
-        privPush( data... );
-        return *this;
-    }
-
     template < typename TType >
-    void VertexBuffer::Modifier::privPush( TType value )
+    VertexBuffer::Modifier& VertexBuffer::Modifier::push( TType value )
     {
         using GLType = typename priv::gl_type< TType >::type;
 
-        if( m_buffer->m_data.size() < m_end + sizeof( GLType ) )
+        auto& data = m_buffer->m_data;
+
+        if( data.size() < m_end + sizeof( GLType ) )
         {
-            m_buffer->m_data.resize( m_end + sizeof( GLType ) );
+            data.resize( m_end + sizeof( GLType ) );
             m_clear = true;
         }
 
-        *reinterpret_cast< GLType* >( m_buffer->m_data.data() + m_end ) = value;
+        *reinterpret_cast< GLType* >( data.data() + m_end ) = value;
+
         m_end += sizeof( GLType );
+
+        return *this;
     }
 
     template < typename TType, typename... TTypes >
-    void VertexBuffer::Modifier::privPush( TType value, TTypes... rest )
+    VertexBuffer::Modifier& VertexBuffer::Modifier::push( TType value, TTypes... rest )
     {
-        privPush( value );
-        privPush( rest... );
+        push( value );
+        return push( rest... );
     }
 }

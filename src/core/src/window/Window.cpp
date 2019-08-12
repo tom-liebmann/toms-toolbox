@@ -5,7 +5,7 @@
 namespace ttb
 {
     Window::Window( std::string const& title, Window::Mode const& mode )
-        : m_title( title ), m_mode( mode )
+        : m_mode( mode ), m_title( title )
     {
     }
 
@@ -38,7 +38,8 @@ namespace ttb
 
     void Window::begin( State& state ) const
     {
-        state.pushViewport( Viewport( 0, 0, width(), height() ) );
+        state.pushViewport( Viewport(
+            0, 0, static_cast< GLsizei >( width() ), static_cast< GLsizei >( height() ) ) );
     }
 
     void Window::end( State& state ) const

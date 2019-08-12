@@ -1,33 +1,16 @@
 set(
     SOURCE_FILES
+
     src/DataReader.cpp
     src/DataWriter.cpp
-    src/Listener.cpp
-    src/NetSelector.cpp
-    src/SelectorThread.cpp
-    src/Selectable.cpp
-    src/Socket.cpp
-    src/impl/posix/Listener.cpp
-    src/impl/posix/NetSelector.cpp
-    src/impl/posix/Selectable.cpp
-    src/impl/posix/TCPSocket.cpp
-    src/impl/posix/SocketDataReader.cpp
-    src/impl/posix/Interruptor.cpp
-    src/TCPSocket.cpp
+    src/BufferedWriter.cpp
 
     src/packets/DataIPacket.cpp
     src/packets/DataOPacket.cpp
     src/packets/IPacket.cpp
     src/packets/OPacket.cpp
     src/packets/SizedIPacket.cpp
-
-    src/PacketBridge.cpp
-    src/TimeoutWrapper.cpp
-
-    src/WebSocket.cpp
-    src/webSocket/SocketState.cpp
-    src/webSocket/ServerHandshakeState.cpp
-    src/webSocket/ConnectedState.cpp
+    src/packets/SubIPacket.cpp
     )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
@@ -58,10 +41,26 @@ target_link_libraries(
     ttbUtils
     )
 
-set_property(
-    TARGET
+target_compile_options(
     ttbNet
-    PROPERTY POSITION_INDEPENDENT_CODE ON)
+    PUBLIC
+        -Wall
+        -Wextra
+        -Wpedantic
+    )
+
+set_target_properties(
+    ttbNet
+    PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        CXX_STANDARD 17
+    )
+
+target_compile_features(
+    ttbNet
+    PUBLIC
+        cxx_std_17
+    )
 
 list( APPEND VALID_TARGETS ttbNet )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

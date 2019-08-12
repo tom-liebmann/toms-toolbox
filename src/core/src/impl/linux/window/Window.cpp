@@ -86,8 +86,16 @@ namespace ttb
             glfwWindowHint( GLFW_FLOATING, mode.flag( Window::Flag::FLOATING ) ? 1 : 0 );
             glfwWindowHint( GLFW_RESIZABLE, mode.flag( Window::Flag::RESIZABLE ) ? 1 : 0 );
 
-            m_handle =
-                glfwCreateWindow( mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+            if( mode.flag( Window::Flag::HIDDEN ) )
+            {
+                glfwWindowHint( GLFW_VISIBLE, mode.flag( Window::Flag::HIDDEN ) ? 0 : 1 );
+                m_handle = glfwCreateWindow( mode.width(), mode.height(), "", nullptr, nullptr );
+            }
+            else
+            {
+                m_handle = glfwCreateWindow(
+                    mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+            }
 
             glfwMakeContextCurrent( m_handle );
 
@@ -149,8 +157,6 @@ namespace ttb
             glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
             glfwSetScrollCallback( m_handle, callbackScroll );
 
-            m_eventOutput = std::make_shared< PushOutput< Event const& > >();
-
             ++s_windowCount;
         }
 
@@ -166,9 +172,9 @@ namespace ttb
             }
         }
 
-        PushOutput< Event const& >& Window::eventOutput()
+        Signal< void( Event const& ) >& Window::eventOutput()
         {
-            return *m_eventOutput;
+            return m_eventOutput;
         }
 
         void Window::update()
@@ -183,7 +189,7 @@ namespace ttb
 
             mode( ttb::Window::Mode( width, height, mode().flags() ) );
 
-            m_eventOutput->push( ttb::events::WindowResize( *this ) );
+            m_eventOutput.call( ttb::events::WindowResize( *this ) );
         }
     }
 }
@@ -195,7 +201,7 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->eventOutput().push( event );
+        wnd->eventOutput().call( event );
     }
 
     void callbackErrorGLFW( int error, char const* description )
@@ -203,18 +209,23 @@ namespace
         std::cout << "GLFW error (" << error << "): " << description << std::endl;
     }
 
-    STDCALL void callbackErrorOpenGL( GLenum source,
+    STDCALL void callbackErrorOpenGL( GLenum /* source */,
                                       GLenum type,
-                                      GLuint id,
+                                      GLuint /* id */,
                                       GLenum severity,
-                                      GLsizei length,
+                                      GLsizei /* length */,
                                       GLchar const* message,
-                                      void const* userParam )
+                                      void const* /* userParam */ )
     {
         std::cout << "OpenGL error:" << std::endl;
         std::cout << "    Type: " << convertErrorType( type ) << std::endl;
         std::cout << "    Severity: " << convertErrorSeverity( severity ) << std::endl;
         std::cout << "    Message: " << message << std::endl;
+
+        if( severity == GL_DEBUG_SEVERITY_HIGH )
+        {
+            throw std::runtime_error( "OpenGL error" );
+        }
     }
 
     void callbackWindowClose( GLFWwindow* window )
@@ -224,7 +235,7 @@ namespace
         pushEvent( window, ttb::events::WindowClose( *wnd ) );
     }
 
-    void callbackKey( GLFWwindow* window, int key, int scancode, int action, int mods )
+    void callbackKey( GLFWwindow* window, int key, int /* scancode */, int action, int /* mods */ )
     {
         switch( action )
         {
@@ -238,7 +249,7 @@ namespace
         }
     }
 
-    void callbackMouseButton( GLFWwindow* window, int button, int action, int mods )
+    void callbackMouseButton( GLFWwindow* window, int button, int action, int /* mods */ )
     {
         ttb::events::MouseButton::Button mouseButton;
         switch( button )
@@ -280,7 +291,9 @@ namespace
     {
         auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
 
-        wnd->mode( ttb::Window::Mode( width, height, wnd->mode().flags() ) );
+        wnd->mode( ttb::Window::Mode( static_cast< uint16_t >( width ),
+                                      static_cast< uint16_t >( height ),
+                                      wnd->mode().flags() ) );
 
         pushEvent( window, ttb::events::WindowResize( *wnd ) );
     }

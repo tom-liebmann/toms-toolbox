@@ -41,7 +41,7 @@ namespace ttb
 
         GLint attributeLocation( std::string const& name ) const;
 
-        void applyUniform( std::string const& name, UniformBase const& uniform );
+        void applyUniform( std::string const& name, UniformBase const& uniform ) const;
 
     private:
         Program( std::vector< std::unique_ptr< Shader > > const& shaders );

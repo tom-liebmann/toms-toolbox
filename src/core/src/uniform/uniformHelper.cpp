@@ -15,6 +15,12 @@ namespace ttb
             glUniform1i( location, value );
         }
 
+        void set_uniform< Vector< float, 4 > >::apply( GLint location,
+                                                       Vector< float, 4 > const& value )
+        {
+            glUniform4f( location, value( 0 ), value( 1 ), value( 2 ), value( 3 ) );
+        }
+
         void set_uniform< Vector< float, 3 > >::apply( GLint location,
                                                        Vector< float, 3 > const& value )
         {

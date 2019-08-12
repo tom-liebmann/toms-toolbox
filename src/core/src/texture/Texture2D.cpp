@@ -37,10 +37,12 @@ namespace ttb
                 return 3;
 
             case GL_RGBA:
+            case GL_RGBA8:
                 return 4;
 
             default:
-                throw std::runtime_error( "Unknown pixel format" );
+                throw std::runtime_error( "Unknown pixel format (" +
+                                          std::to_string( m_internalFormat ) + ")" );
         }
     }
 
@@ -64,11 +66,18 @@ namespace ttb
         }
     }
 
-    void Texture2D::bind( uint8_t slot )
+    void Texture2D::bind( uint8_t slot ) const
     {
         glActiveTexture( GL_TEXTURE0 + slot );
         glBindTexture( GL_TEXTURE_2D, object() );
     }
+
+    void Texture2D::unbind( uint8_t slot ) const
+    {
+        glActiveTexture( GL_TEXTURE0 + slot );
+        glBindTexture( GL_TEXTURE_2D, 0 );
+    }
+
 
     Texture2D::Texture2D() : m_width( 0 ), m_height( 0 )
     {
@@ -248,8 +257,64 @@ namespace ttb
     }
 
 
+    Texture2D::ConstModifier::~ConstModifier()
+    {
+        if( m_texture )
+        {
+            std::cerr << "Texture still in modification state" << std::endl;
+        }
+    }
+
+    Texture2D::ConstModifier& Texture2D::ConstModifier::download( size_t level,
+                                                                  std::vector< uint8_t >& buffer )
+    {
+        GLint width, height;
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+
+        buffer.resize( width * height * m_texture->bytesPerPixel() );
+
+        glGetTexImage(
+            GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
+
+        return *this;
+    }
+
+    Texture2D::ConstModifier& Texture2D::ConstModifier::anisotropicFiltering( bool enabled )
+    {
+#ifdef GL_TEXTURE_MAX_ANISOTROPY
+        if( enabled )
+        {
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
+        }
+        else
+        {
+            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
+        }
+#endif
+
+        return *this;
+    }
+
+    void Texture2D::ConstModifier::finish()
+    {
+        glBindTexture( GL_TEXTURE_2D, 0 );
+        m_texture = nullptr;
+    }
+
+    Texture2D::ConstModifier::ConstModifier( ttb::Texture2D const& texture ) : m_texture( &texture )
+    {
+        glBindTexture( GL_TEXTURE_2D, m_texture->object() );
+    }
+
+
     Texture2D::Modifier modify( std::shared_ptr< Texture2D > texture )
     {
         return { std::move( texture ) };
+    }
+
+    Texture2D::ConstModifier modify( Texture2D const& texture )
+    {
+        return { texture };
     }
 }

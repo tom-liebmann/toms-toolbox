@@ -54,7 +54,10 @@ namespace ttb
         if( m_indexBuffer )
         {
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer->m_bufferObject );
-            glDrawElements( m_mode, m_indexBuffer->m_data.size(), GL_UNSIGNED_INT, 0 );
+            glDrawElements( m_mode,
+                            static_cast< GLsizei >( m_indexBuffer->m_data.size() ),
+                            GL_UNSIGNED_INT,
+                            0 );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
         }
         else
@@ -72,13 +75,18 @@ namespace ttb
                 }
             }
 
-            glDrawArrays( m_mode, 0, minAttrSize );
+            glDrawArrays( m_mode, 0, static_cast< GLsizei >( minAttrSize ) );
         }
 
         state.popArrayObject();
     }
 
     Geometry::Attribute const& Geometry::attribute( size_t index ) const
+    {
+        return m_attributes[ index ];
+    }
+
+    Geometry::Attribute& Geometry::attribute( size_t index )
     {
         return m_attributes[ index ];
     }
@@ -132,6 +140,12 @@ namespace ttb
     std::shared_ptr< VertexBuffer > const& Geometry::Attribute::buffer() const
     {
         return m_buffer;
+    }
+
+    void Geometry::Attribute::buffer( std::shared_ptr< VertexBuffer > buffer, size_t index )
+    {
+        m_buffer = std::move( buffer );
+        m_index = index;
     }
 
     size_t Geometry::Attribute::index() const

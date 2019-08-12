@@ -8,12 +8,13 @@ namespace ttb
 {
     namespace events
     {
+        template < typename TEventDefinition >
         class Packet : public Event
         {
         public:
             Packet( std::unique_ptr< IPacket > packet );
 
-            Packet( Packet const& copy );
+            Packet( Packet const& copy ) = delete;
 
             Packet( Packet&& copy );
 
@@ -34,25 +35,29 @@ namespace ttb
 {
     namespace events
     {
-        inline Packet::Packet( std::unique_ptr< IPacket > packet ) : m_packet( std::move( packet ) )
+        template < typename TEventDefinition >
+        inline Packet< TEventDefinition >::Packet( std::unique_ptr< IPacket > packet )
+            : m_packet( std::move( packet ) )
         {
         }
 
-        inline Packet::Packet( Packet&& copy ) : m_packet( std::move( copy.m_packet ) )
-        {
-        }
+        template < typename TEventDefinition >
+        inline Packet< TEventDefinition >::Packet( Packet&& copy ) = default;
 
-        inline std::unique_ptr< IPacket >& Packet::packet()
+        template < typename TEventDefinition >
+        inline std::unique_ptr< IPacket >& Packet< TEventDefinition >::packet()
         {
             return m_packet;
         }
 
-        inline Event::Type Packet::type() const
+        template < typename TEventDefinition >
+        inline Event::Type Packet< TEventDefinition >::type() const
         {
-            return PACKET;
+            return TEventDefinition::PACKET;
         }
 
-        inline std::unique_ptr< Event > Packet::move()
+        template < typename TEventDefinition >
+        inline std::unique_ptr< Event > Packet< TEventDefinition >::move()
         {
             return std::unique_ptr< Event >( new Packet( std::move( *this ) ) );
         }

@@ -12,11 +12,10 @@ namespace ttb
             unsigned int width, height;
             lodepng_decode_file( &pngData, &width, &height, filename.c_str(), LCT_RGBA, 8 );
 
-            auto texture =
-                Texture2D::create()
-                    .upload( width, height, GL_RGBA8, GL_RGBA, GL_UNSIGNED_BYTE, pngData )
-                    .minMagFilter( GL_LINEAR, GL_LINEAR )
-                    .finish();
+            auto texture = Texture2D::create()
+                               .upload( width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pngData )
+                               .minMagFilter( GL_LINEAR, GL_LINEAR )
+                               .finish();
 
             free( pngData );
 
