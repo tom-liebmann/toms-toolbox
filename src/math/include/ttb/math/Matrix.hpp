@@ -46,16 +46,16 @@ namespace ttb
 
         static Matrix< T, 4, 4 > ortho( T right, T top, T left, T bottom, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > perspective( T fovy, T aspect, T zNear, T zFar );
+        static Matrix< T, 4, 4 > perspective( T fovx, T aspect, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > perspectiveInv( T fovy, T aspect, T zNear, T zFar );
+        static Matrix< T, 4, 4 > perspectiveInv( T fovx, T aspect, T zNear, T zFar );
 
-        static Matrix< T, 4, 4 > lookAt( Vector< T, 3 > const& eye,
-                                         Vector< T, 3 > const& center,
+        static Matrix< T, 4, 4 > lookAt( Vector< T, 3 > const& from,
+                                         Vector< T, 3 > const& to,
                                          Vector< T, 3 > const& up );
 
-        static Matrix< T, 4, 4 > lookAtInv( Vector< T, 3 > const& eye,
-                                            Vector< T, 3 > const& center,
+        static Matrix< T, 4, 4 > lookAtInv( Vector< T, 3 > const& from,
+                                            Vector< T, 3 > const& to,
                                             Vector< T, 3 > const& up );
 
         static Matrix< T, 4, 4 > rotation( Quaternion< T > const& quat );
@@ -237,10 +237,17 @@ namespace ttb
 
 
 
-    template < typename T >
-    Matrix< T, 4, 4 > MatrixFactory< T >::identity()
+    template < typename TType >
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::identity()
     {
-        return { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        // clang-format off
+        return {
+            TType( 1 ), TType( 0 ), TType( 0 ), TType( 0 ),
+            TType( 0 ), TType( 1 ), TType( 0 ), TType( 0 ),
+            TType( 0 ), TType( 0 ), TType( 1 ), TType( 0 ),
+            TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 )
+        };
+        // clang-format on
     }
 
     template < typename TType >
@@ -267,82 +274,74 @@ namespace ttb
 
     template < typename TType >
     Matrix< TType, 4, 4 >
-        MatrixFactory< TType >::perspective( TType fovy, TType aspect, TType zNear, TType zFar )
+        MatrixFactory< TType >::perspective( TType fovx, TType aspect, TType zNear, TType zFar )
     {
         using std::tan;
-        fovy = TType( 1 ) / tan( fovy );
+        fovx = TType( 1 ) / tan( fovx / TType( 2 ) );
 
-        return { fovy / aspect,
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 fovy,
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 ( zFar + zNear ) / ( zNear - zFar ),
-                 TType( 2 ) * zFar * zNear / ( zNear - zFar ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( -1 ),
-                 TType( 0 ) };
+        // clang-format off
+        return {
+                  fovx,    TType( 0 ),                          TType( 0 ),                                   TType( 0 ),
+            TType( 0 ), fovx * aspect,                          TType( 0 ),                                   TType( 0 ),
+            TType( 0 ),    TType( 0 ), ( zFar + zNear ) / ( zNear - zFar ), TType( 2 ) * zFar * zNear / ( zNear - zFar ),
+            TType( 0 ),    TType( 0 ),                         TType( -1 ),                                   TType( 0 )
+        };
+        // clang-format on
     }
 
     template < typename TType >
     Matrix< TType, 4, 4 >
-        MatrixFactory< TType >::perspectiveInv( TType fovy, TType aspect, TType zNear, TType zFar )
+        MatrixFactory< TType >::perspectiveInv( TType fovx, TType aspect, TType zNear, TType zFar )
     {
         using std::tan;
+        fovx = TType( 1 ) / tan( fovx / TType( 2 ) );
 
-        fovy = TType( 1 ) / tan( fovy );
-
-        return { aspect / fovy,
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 1 ) / fovy,
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( -1 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 ( zNear - zFar ) / TType( 2 ) / zNear / zFar,
-                 ( zNear + zFar ) / TType( 2 ) / zNear / zFar };
+        // clang-format off
+        return {
+            TType( 1 ) / fovx,    TType( 0 ),                                   TType( 0 ),                                   TType( 0 ),
+                   TType( 0 ), aspect / fovx,                                   TType( 0 ),                                   TType( 0 ),
+                   TType( 0 ),    TType( 0 ),                                   TType( 0 ),                                  TType( -1 ),
+                   TType( 0 ),    TType( 0 ), ( zNear - zFar ) / TType( 2 ) / zNear / zFar, ( zNear + zFar ) / TType( 2 ) / zNear / zFar
+        };
+        // clang-format on
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAt( Vector< TType, 3 > const& eye,
-                                                          Vector< TType, 3 > const& center,
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAt( Vector< TType, 3 > const& from,
+                                                          Vector< TType, 3 > const& to,
                                                           Vector< TType, 3 > const& up )
     {
-        auto F = normalize( center - eye );
-        auto s = normalize( cross( F, up ) );
-        auto u = cross( s, F );
+        auto z = normalize( from - to );
+        auto x = normalize( cross( up, z ) );
+        auto y = cross( z, x );
 
-        return { s( 0 ),     s( 1 ),         s( 2 ),     -dot( eye, s ), u( 0 ),  u( 1 ),
-                 u( 2 ),     -dot( eye, u ), -F( 0 ),    -F( 1 ),        -F( 2 ), dot( eye, F ),
-                 TType( 0 ), TType( 0 ),     TType( 0 ), TType( 1 ) };
+        // clang-format off
+        return {
+                x( 0 ),     x( 1 ),     x( 2 ), -dot( from, x ),
+                y( 0 ),     y( 1 ),     y( 2 ), -dot( from, y ),
+                z( 0 ),     z( 1 ),     z( 2 ), -dot( from, z ),
+            TType( 0 ), TType( 0 ), TType( 0 ),      TType( 1 )
+        };
+        // clang-format on
     }
 
     template < typename TType >
-    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAtInv( Vector< TType, 3 > const& eye,
-                                                             Vector< TType, 3 > const& center,
+    Matrix< TType, 4, 4 > MatrixFactory< TType >::lookAtInv( Vector< TType, 3 > const& from,
+                                                             Vector< TType, 3 > const& to,
                                                              Vector< TType, 3 > const& up )
     {
-        auto F = normalize( center - eye );
-        auto s = normalize( cross( F, up ) );
-        auto u = cross( s, F );
+        auto z = normalize( from - to );
+        auto x = normalize( cross( up, z ) );
+        auto y = cross( z, x );
 
+        // clang-format off
         return {
-            s( 0 ), u( 0 ), -F( 0 ), eye( 0 ), s( 1 ),     u( 1 ),     -F( 1 ),    eye( 1 ),
-            s( 2 ), u( 2 ), -F( 2 ), eye( 2 ), TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 )
+                     x( 0 ),          y( 0 ),          z( 0 ), TType( 0 ),
+                     x( 1 ),          y( 1 ),          z( 1 ), TType( 0 ),
+                     x( 2 ),          y( 2 ),          z( 2 ), TType( 0 ),
+            -dot( from, x ), -dot( from, y ), -dot( from, z ), TType( 1 )
         };
+        // clang-format on
     }
 
     template < typename TType >
@@ -358,22 +357,14 @@ namespace ttb
         TType wy = quat.w() * quat.y();
         TType wz = quat.w() * quat.z();
 
-        return { TType( 1 ) - TType( 2 ) * ( y2 + z2 ),
-                 TType( 2 ) * ( xy - wz ),
-                 TType( 2 ) * ( xz + wy ),
-                 TType( 0 ),
-                 TType( 2 ) * ( xy + wz ),
-                 TType( 1 ) - TType( 2 ) * ( x2 + z2 ),
-                 TType( 2 ) * ( yz - wx ),
-                 TType( 0 ),
-                 TType( 2 ) * ( xz - wy ),
-                 TType( 2 ) * ( yz + wx ),
-                 TType( 1 ) - TType( 2 ) * ( x2 + y2 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 0 ),
-                 TType( 1 ) };
+        // clang-format off
+        return {
+            TType( 1 ) - TType( 2 ) * ( y2 + z2 ),              TType( 2 ) * ( xy - wz ),              TType( 2 ) * ( xz + wy ), TType( 0 ),
+                         TType( 2 ) * ( xy + wz ), TType( 1 ) - TType( 2 ) * ( x2 + z2 ),              TType( 2 ) * ( yz - wx ), TType( 0 ),
+                         TType( 2 ) * ( xz - wy ),              TType( 2 ) * ( yz + wx ), TType( 1 ) - TType( 2 ) * ( x2 + y2 ), TType( 0 ),
+                                       TType( 0 ),                            TType( 0 ),                            TType( 0 ), TType( 1 )
+        };
+        // clang-format on
     }
 
     template < typename TType >
