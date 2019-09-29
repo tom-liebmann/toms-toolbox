@@ -56,11 +56,11 @@ set_target_properties(
         CXX_STANDARD 17
     )
 
-target_compile_features(
-    ttbNet
-    PUBLIC
-        cxx_std_17
-    )
+# target_compile_features(
+#     ttbNet
+#     PUBLIC
+#         cxx_std_17
+#     )
 
 list( APPEND VALID_TARGETS ttbNet )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
