@@ -148,11 +148,11 @@ set_target_properties(
         CXX_STANDARD 17
     )
 
-# target_compile_features(
-#     ttbCore
-#     PUBLIC
-#         cxx_std_17
-#     )
+target_compile_features(
+    ttbCore
+    PUBLIC
+        cxx_std_17
+    )
 
 list( APPEND VALID_TARGETS ttbCore )
 set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )

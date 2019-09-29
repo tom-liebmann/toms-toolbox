@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.2 )
+cmake_minimum_required( VERSION 3.15 )
 
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
@@ -7,13 +7,11 @@ set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG )
 
 if( ${COMPILATION_MODE} STREQUAL "GCC" )
 
-    message( "Using gcc" )
     set( CMAKE_C_COMPILER "gcc" )
     set( CMAKE_CXX_COMPILER "g++" )
 
 elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
-    message( "Using clang" )
     set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake CACHE PATH "Emscripten toolchain file" )
 
 else()
@@ -23,6 +21,14 @@ else()
 endif()
 
 project( toms_toolbox )
+
+if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+    set( REQUIRED_GCC_VERSION "9.0.0" )
+    if( CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${REQUIRED_GCC_VERSION})
+        message(FATAL_ERROR "Insufficient gcc version (found ${CMAKE_CXX_COMPILER_VERSION}, need ${REQUIRED_GCC_VERSION})")
+    endif()
+    message( "Using GCC version ${CMAKE_CXX_COMPILER_VERSION}" )
+endif()
 
 # Generate documentation
 find_package( Doxygen )
