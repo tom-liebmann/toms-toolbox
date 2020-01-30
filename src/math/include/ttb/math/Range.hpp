@@ -23,6 +23,9 @@ namespace ttb
         Vector< T, D > const& getMin() const;
         Vector< T, D > const& getMax() const;
 
+        void min( size_t index, T const& value );
+        void max( size_t index, T const& value );
+
         T getBound( size_t index ) const;
 
         bool empty() const;
@@ -84,6 +87,18 @@ namespace ttb
     inline Vector< T, D > const& Range< T, D >::getMax() const
     {
         return m_max;
+    }
+
+    template < typename T, size_t D >
+    void Range< T, D >::min( size_t index, T const& value )
+    {
+        m_min[ index ] = value;
+    }
+
+    template < typename T, size_t D >
+    void Range< T, D >::max( size_t index, T const& value )
+    {
+        m_max[ index ] = value;
     }
 
     template < typename T, size_t D >

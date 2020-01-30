@@ -21,7 +21,7 @@ namespace ttb
         std::smatch match;
         if( !std::regex_match( line, match, charReg ) )
         {
-            throw std::runtime_error( "Invalid file format" );
+            throw std::runtime_error( "Invalid file format (missing char match)" );
         }
 
         m_id = std::stof( match[ 1 ].str() );
@@ -88,17 +88,17 @@ namespace ttb
         std::regex lineHeightReg( "^common lineHeight=(\\d+).*$" );
         if( !std::regex_match( line, match, lineHeightReg ) )
         {
-            throw std::runtime_error( "Invalid file format" );
+            throw std::runtime_error( "Invalid file format (missing common match)" );
         }
 
         m_lineHeight = std::stof( match[ 1 ].str() );
 
         std::getline( stream, line );
 
-        std::regex fileReg( "^page id=(\\d+) file=\"(\\w+\\.png)\"\\s*$" );
+        std::regex fileReg( "^page id=(\\d+) file=\"([^\"]+\\.png)\"\\s*$" );
         if( !std::regex_match( line, match, fileReg ) )
         {
-            throw std::runtime_error( "Invalid file format" );
+            throw std::runtime_error( "Invalid file format (missing page id)" );
         }
 
         std::string textureFile = match[ 2 ].str();
@@ -108,7 +108,7 @@ namespace ttb
         std::regex countReg( "^chars count=(\\d+)\\s*$" );
         if( !std::regex_match( line, match, countReg ) )
         {
-            throw std::runtime_error( "Invalid file format" );
+            throw std::runtime_error( "Invalid file format (missing chars)" );
         }
 
         size_t charCount = std::stoi( match[ 1 ].str() );
@@ -124,7 +124,7 @@ namespace ttb
         std::regex dirReg( "^(.*\\/).*\\.fnt$" );
         if( !std::regex_match( filename, match, dirReg ) )
         {
-            throw std::runtime_error( "Invalid file directory" );
+            throw std::runtime_error( "Invalid file directory (missing fnt)" );
         }
 
         m_texture = TextureFactory::loadPNG( match[ 1 ].str() + textureFile );
@@ -145,6 +145,40 @@ namespace ttb
     float Font::lineHeight() const
     {
         return m_lineHeight;
+    }
+
+    ttb::Range< float, 2 > Font::textDimensions( float size, std::string const& text ) const
+    {
+        ttb::Range< float, 2 > dimensions{ { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+
+        float scaleFactor = size / lineHeight();
+
+        float x = 0.0f;
+        float y = 0.0f;
+        for( size_t i = 0; i < text.size(); ++i )
+        {
+            char cId = text[ i ];
+
+            if( cId != '\n' )
+            {
+                auto const& c = character( text[ i ] );
+
+                auto charRightX = ( x + c.xOffset() + c.width() ) * scaleFactor;
+                auto charBottomY = ( y + c.yOffset() + c.height() ) * scaleFactor;
+
+                dimensions.max( 0, std::max( dimensions.getMax( 0 ), charRightX ) );
+                dimensions.max( 1, std::max( dimensions.getMax( 1 ), charBottomY ) );
+
+                x += c.xAdvance();
+            }
+            else
+            {
+                x = 0.0f;
+                y += lineHeight();
+            }
+        }
+
+        return dimensions;
     }
 
     std::shared_ptr< ttb::Texture2D > const& Font::texture() const

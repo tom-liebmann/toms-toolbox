@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/core/texture.hpp>
+#include <ttb/math/Range.hpp>
 
 #include <iostream>
 #include <map>
@@ -49,6 +50,15 @@ namespace ttb
         Character const& character( char index ) const;
 
         float lineHeight() const;
+
+        /**
+         * Computes the dimensions of the geometry for the given text.
+         *
+         * @param size Size of the text to compute width for
+         * @param text Text to compute width for
+         * @return Dimensions of the given text
+         */
+        ttb::Range< float, 2 > textDimensions( float size, std::string const& text ) const;
 
         std::shared_ptr< ttb::Texture2D > const& texture() const;
 
