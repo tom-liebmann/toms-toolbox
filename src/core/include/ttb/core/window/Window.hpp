@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ttb/core/Context.hpp>
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/signal.hpp>
@@ -13,7 +14,7 @@
 
 namespace ttb
 {
-    class Window : public RenderTarget
+    class Window : public Context, public RenderTarget
     {
     public:
         enum class Flag : uint32_t
@@ -47,6 +48,9 @@ namespace ttb
 
         static std::shared_ptr< Window > create( std::string const& title, Mode const& mode );
 
+        static std::shared_ptr< Window >
+            create( std::string const& title, Mode const& mode, Window const& sharedWindow );
+
         virtual ~Window();
 
         void mode( Mode const& mode );
@@ -65,6 +69,10 @@ namespace ttb
         virtual size_t height() const override;
         virtual void begin( State& state ) const override;
         virtual void end( State& state ) const override;
+
+        // Override: Context
+        virtual bool use() = 0;
+        virtual bool unuse() = 0;
 
     protected:
         Window( std::string const& title, Mode const& mode );

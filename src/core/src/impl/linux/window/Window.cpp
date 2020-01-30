@@ -52,12 +52,31 @@ namespace ttb
         return std::make_shared< linux::Window >( title, mode );
     }
 
+    std::shared_ptr< Window > Window::create( std::string const& title,
+                                              Window::Mode const& mode,
+                                              ttb::Window const& sharedWindow )
+    {
+        return std::make_shared< linux::Window >( title, mode, sharedWindow );
+    }
+
 
     namespace linux
     {
         size_t Window::s_windowCount = 0;
 
-        Window::Window( std::string const& title, Window::Mode const& mode )
+        Window::Window( std::string const& title, Mode const& mode )
+            : Window( title, mode, nullptr )
+        {
+        }
+
+        Window::Window( std::string const& title,
+                        Mode const& mode,
+                        ttb::Window const& sharedWindow )
+            : Window( title, mode, static_cast< Window const& >( sharedWindow ).m_handle )
+        {
+        }
+
+        Window::Window( std::string const& title, Mode const& mode, GLFWwindow* sharedWindow )
             : ttb::Window( title, mode )
         {
             if( s_windowCount == 0 )
@@ -68,67 +87,83 @@ namespace ttb
             glfwSetErrorCallback( callbackErrorGLFW );
 
             // prevent glfw to create a context < 3.3
-            glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-            glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-            glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-            glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+            // glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+            // glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+            // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+            // glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
 #ifndef NDEBUG
             std::cout << "glfw version: " << glfwGetVersionString() << std::endl;
             std::cout << "glew version: " << glewGetString( GLEW_VERSION ) << std::endl;
 
-            glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, 1 );
+            glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 #endif
 
             GLFWmonitor* monitor =
                 mode.flag( Window::Flag::FULLSCREEN ) ? glfwGetPrimaryMonitor() : nullptr;
 
-            glfwWindowHint( GLFW_FLOATING, mode.flag( Window::Flag::FLOATING ) ? 1 : 0 );
-            glfwWindowHint( GLFW_RESIZABLE, mode.flag( Window::Flag::RESIZABLE ) ? 1 : 0 );
+            glfwWindowHint( GLFW_FLOATING,
+                            mode.flag( Window::Flag::FLOATING ) ? GL_TRUE : GL_FALSE );
+            glfwWindowHint( GLFW_RESIZABLE,
+                            mode.flag( Window::Flag::RESIZABLE ) ? GL_TRUE : GL_FALSE );
 
             if( mode.flag( Window::Flag::HIDDEN ) )
             {
-                glfwWindowHint( GLFW_VISIBLE, mode.flag( Window::Flag::HIDDEN ) ? 0 : 1 );
-                m_handle = glfwCreateWindow( mode.width(), mode.height(), "", nullptr, nullptr );
+                glfwWindowHint( GLFW_VISIBLE,
+                                mode.flag( Window::Flag::HIDDEN ) ? GL_FALSE : GL_TRUE );
+                m_handle =
+                    glfwCreateWindow( mode.width(), mode.height(), "", nullptr, sharedWindow );
             }
             else
             {
                 m_handle = glfwCreateWindow(
-                    mode.width(), mode.height(), title.c_str(), monitor, nullptr );
+                    mode.width(), mode.height(), title.c_str(), monitor, sharedWindow );
             }
 
             glfwMakeContextCurrent( m_handle );
 
+#ifndef NDEBUG
+            std::cout << "Context: " << reinterpret_cast< intptr_t >( m_handle ) << '\n';
+#endif
+
             glfwSwapInterval( 0 );
 
-#ifdef GLEW_STATIC
             if( s_windowCount == 0 )
             {
                 // workaround for glew <= 1.13
                 // see https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library
                 glewExperimental = GL_TRUE;
 
-                glewInit();
+                if( auto error = glewInit(); error != GLEW_OK )
+                {
+                    throw std::runtime_error( "GLEW error: " +
+                                              std::string( reinterpret_cast< char const* >(
+                                                  glewGetErrorString( error ) ) ) );
+                }
             }
-#endif
 
 #ifndef NDEBUG
             std::cout << "context major version: "
                       << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MAJOR ) << std::endl;
             std::cout << "context minor version: "
                       << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MINOR ) << std::endl;
-            std::cout << "is core profile: "
-                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
-                           GLFW_OPENGL_CORE_PROFILE )
-                      << std::endl;
-            std::cout << "is compat profile: "
-                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
-                           GLFW_OPENGL_COMPAT_PROFILE )
-                      << std::endl;
-            std::cout << "is any profile: "
-                      << ( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) ==
-                           GLFW_OPENGL_ANY_PROFILE )
-                      << std::endl;
+
+            std::cout << "Profile: ";
+
+            switch( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) )
+            {
+                case GLFW_OPENGL_CORE_PROFILE:
+                    std::cout << "core\n";
+                    break;
+
+                case GLFW_OPENGL_COMPAT_PROFILE:
+                    std::cout << "compat\n";
+                    break;
+
+                case GLFW_OPENGL_ANY_PROFILE:
+                    std::cout << "any\n";
+                    break;
+            }
 
             if( !glfwExtensionSupported( "GL_ARB_debug_output" ) )
             {
@@ -158,6 +193,8 @@ namespace ttb
             glfwSetScrollCallback( m_handle, callbackScroll );
 
             ++s_windowCount;
+
+            glfwMakeContextCurrent( nullptr );
         }
 
         Window::~Window()
@@ -190,6 +227,18 @@ namespace ttb
             mode( ttb::Window::Mode( width, height, mode().flags() ) );
 
             m_eventOutput.call( ttb::events::WindowResize( *this ) );
+        }
+
+        bool Window::use()
+        {
+            glfwMakeContextCurrent( m_handle );
+            return true;
+        }
+
+        bool Window::unuse()
+        {
+            glfwMakeContextCurrent( nullptr );
+            return true;
         }
     }
 }

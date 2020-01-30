@@ -25,6 +25,7 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
     set(
         SOURCE_FILES
 
+        src/Context.cpp
         src/window/Window.cpp
         src/impl/linux/window/Window.cpp
         src/State.cpp
