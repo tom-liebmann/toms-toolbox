@@ -44,34 +44,60 @@ namespace ttb
 
     Shader::Shader( Type type, std::string const& source )
     {
-        switch( type )
+        // create shader object
         {
-            case Type::VERTEX:
-                m_shaderObject = glCreateShader( GL_VERTEX_SHADER );
-                break;
-            case Type::FRAGMENT:
-                m_shaderObject = glCreateShader( GL_FRAGMENT_SHADER );
-                break;
-            case Type::GEOMETRY:
-                m_shaderObject = glCreateShader( GL_GEOMETRY_SHADER );
-                break;
+            switch( type )
+            {
+                case Type::VERTEX:
+                    m_shaderObject = glCreateShader( GL_VERTEX_SHADER );
+                    break;
+                case Type::FRAGMENT:
+                    m_shaderObject = glCreateShader( GL_FRAGMENT_SHADER );
+                    break;
+                case Type::GEOMETRY:
+                    m_shaderObject = glCreateShader( GL_GEOMETRY_SHADER );
+                    break;
+            }
         }
 
-        auto sourcePtr = source.c_str();  // We need to provide an l-value
-        glShaderSource( m_shaderObject, 1, reinterpret_cast< GLchar const** >( &sourcePtr ), NULL );
-
-        glCompileShader( m_shaderObject );
-
-        // check error log for info
-        GLint compileStatus;
-        glGetShaderiv( m_shaderObject, GL_COMPILE_STATUS, &compileStatus );
-
-        if( !compileStatus )
+        if( 0 == m_shaderObject )
         {
-            GLchar buffer[ 256 ];
-            glGetShaderInfoLog( m_shaderObject, 256, NULL, buffer );
+            throw std::runtime_error( "Unable to create shader object" );
+        }
 
-            throw std::runtime_error( "Shader error: " + std::string( buffer ) );
+        // load source into shader
+        {
+            std::array< GLchar const*, 1 > sources = { { source.c_str() } };
+            glShaderSource( m_shaderObject, 1, sources.data(), nullptr );
+        }
+
+        // compile shader
+        {
+            glCompileShader( m_shaderObject );
+
+            // check error log for info
+            GLint compileStatus = GL_FALSE;
+            glGetShaderiv( m_shaderObject, GL_COMPILE_STATUS, &compileStatus );
+
+            if( compileStatus != GL_TRUE )
+            {
+                auto const errorMsg = [&]() -> std::string {
+                    std::array< GLchar, 256 > buffer;
+                    GLsizei strLength = 0;
+                    glGetShaderInfoLog( m_shaderObject, buffer.size(), &strLength, buffer.data() );
+
+                    if( strLength > 0 )
+                    {
+                        return "Shader error: " + std::string( buffer.data() );
+                    }
+                    else
+                    {
+                        return "No error message";
+                    }
+                }();
+
+                throw std::runtime_error( errorMsg );
+            }
         }
     }
 

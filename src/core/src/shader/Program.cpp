@@ -27,10 +27,22 @@ namespace ttb
 
         if( !linkStatus )
         {
-            GLchar buffer[ 256 ];
-            glGetProgramInfoLog( m_programObject, 256, NULL, buffer );
+            auto const errorMsg = [&]() -> std::string {
+                std::array< char, 256 > buffer;
+                GLsizei strLength = 0;
+                glGetProgramInfoLog( m_programObject, buffer.size(), &strLength, buffer.data() );
 
-            throw std::runtime_error( "Program error: " + std::string( buffer ) );
+                if( strLength > 0 )
+                {
+                    return "Program error: " + std::string( buffer.data() );
+                }
+                else
+                {
+                    return "No error message";
+                }
+            }();
+
+            throw std::runtime_error( errorMsg );
         }
     }
 
