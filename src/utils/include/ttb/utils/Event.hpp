@@ -23,6 +23,14 @@ namespace ttb
     };
 
 
+    template < uint32_t TType >
+    class TypedEvent : public Event
+    {
+    public:
+        virtual Type type() const override;
+    };
+
+
 
     class Event::Type
     {
@@ -66,6 +74,13 @@ namespace ttb
     inline std::unique_ptr< Event > Event::move()
     {
         throw std::runtime_error( "Event not movable" );
+    }
+
+
+    template < uint32_t TType >
+    inline Event::Type TypedEvent< TType >::type() const
+    {
+        return { TType };
     }
 
 
