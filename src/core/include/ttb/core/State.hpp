@@ -65,7 +65,7 @@ namespace ttb
 
         // uniforms
         template < typename TType >
-        void pushUniform( std::string const& name, TType&& value );
+        void pushUniform( std::string const& name, TType const& value );
 
         void popUniform( std::string const& name );
 
@@ -100,7 +100,7 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    void State::pushUniform( std::string const& name, TType&& value )
+    void State::pushUniform( std::string const& name, TType const& value )
     {
         auto iter = m_uniforms.find( name );
 
