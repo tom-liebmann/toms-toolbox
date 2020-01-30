@@ -2,6 +2,8 @@ if( TARGET opengl )
     return()
 endif()
 
+set( OpenGL_GL_PREFERENCE "GLVND" )
+
 find_package( OpenGL )
 
 if( NOT ${OPENGL_FOUND} )
