@@ -28,6 +28,7 @@ namespace ttb
 
     public:
         class Modifier;
+        class AttributeHandle;
 
         static Creator create();
 
@@ -54,6 +55,22 @@ namespace ttb
     };
 
 
+    class VertexBuffer::AttributeHandle
+    {
+    public:
+        template < typename TType >
+        TType& get( size_t attribIndex, size_t compIndex );
+
+    private:
+        AttributeHandle( VertexBuffer& buffer, size_t index );
+
+        VertexBuffer& m_buffer;
+        size_t m_index;
+
+        friend class VertexBuffer;
+    };
+
+
     class VertexBuffer::Modifier
     {
     public:
@@ -67,6 +84,10 @@ namespace ttb
 
         // Cuts the buffer after the current position
         Modifier& trim();
+
+        AttributeHandle operator[]( size_t index );
+
+        void pop_back();
 
         std::shared_ptr< VertexBuffer > finish();
 
@@ -177,5 +198,39 @@ namespace ttb
     {
         push( value );
         return push( rest... );
+    }
+
+    inline VertexBuffer::AttributeHandle VertexBuffer::Modifier::operator[]( size_t index )
+    {
+        return { *m_buffer, index };
+    }
+
+    inline void VertexBuffer::Modifier::pop_back()
+    {
+        m_clear = true;
+        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ),
+                                           m_buffer->m_data.size() - m_buffer->m_blockSize ),
+                                std::end( m_buffer->m_data ) );
+    }
+
+
+    template < typename TType >
+    inline TType& VertexBuffer::AttributeHandle::get( size_t attribIndex, size_t compIndex )
+    {
+        size_t offset = 0;
+
+        for( size_t i = 0; i < attribIndex; ++i )
+        {
+            offset += m_buffer.m_attributes[ i ].byteSize();
+        }
+
+        return reinterpret_cast< TType& >(
+            m_buffer
+                .m_data[ m_index * m_buffer.m_blockSize + offset + compIndex * sizeof( TType ) ] );
+    }
+
+    inline VertexBuffer::AttributeHandle::AttributeHandle( VertexBuffer& buffer, size_t index )
+        : m_buffer( buffer ), m_index( index )
+    {
     }
 }
