@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/math/Quaternion.hpp>
+#include <ttb/math/Range.hpp>
 #include <ttb/math/Tensor.hpp>
 #include <ttb/math/Vector.hpp>
 
@@ -33,9 +34,23 @@ namespace ttb
     template < typename T, size_t D1, size_t D2 >
     Vector< T, D1 > operator*( Matrix< T, D1, D2 > const& matrix, Vector< T, D2 > const& vector );
 
-    template < typename T >
-    Vector< T, 3 > operator*( Matrix< T, 4, 4 > const& matrix, Vector< T, 3 > const& vector );
+    template < typename T, size_t TDim >
+    Vector< T, TDim > operator*( Matrix< T, TDim + 1, TDim + 1 > const& matrix,
+                                 Vector< T, TDim > const& vector );
 
+
+    namespace mat
+    {
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim, TDim > identity();
+
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > translation( Vector< TType, TDim > const& vec );
+
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > transform( Range< TType, TDim > const& from,
+                                                       Range< TType, TDim > const& to );
+    }
 
 
     template < typename T >
@@ -227,12 +242,29 @@ namespace ttb
         return result;
     }
 
-    template < typename T >
-    Vector< T, 3 > operator*( Matrix< T, 4, 4 > const& matrix, Vector< T, 3 > const& vector )
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim > operator*( Matrix< TType, TDim + 1, TDim + 1 > const& matrix,
+                                     Vector< TType, TDim > const& vector )
     {
-        auto vec = matrix *
-                   Vector< T, 4 >{ vector( 0 ), vector( 1 ), vector( 2 ), static_cast< T >( 1.0 ) };
-        return { vec( 0 ) / vec( 3 ), vec( 1 ) / vec( 3 ), vec( 2 ) / vec( 3 ) };
+        Vector< TType, TDim + 1 > tmp;
+
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            tmp( d ) = vector( d );
+        }
+
+        tmp( TDim ) = 1;
+
+        tmp = matrix * tmp;
+
+        Vector< TType, TDim > result;
+
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            result( d ) = tmp( d ) / tmp( TDim );
+        }
+
+        return result;
     }
 
 
@@ -381,5 +413,54 @@ namespace ttb
         return { vec( 0 ),   TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 1 ),
                  TType( 0 ), TType( 0 ), TType( 0 ), TType( 0 ), vec( 2 ),   TType( 0 ),
                  TType( 0 ), TType( 0 ), TType( 0 ), TType( 1 ) };
+    }
+
+
+    namespace mat
+    {
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim, TDim > identity()
+        {
+            Matrix< TType, TDim, TDim > result;
+
+            for( size_t r = 0; r < TDim; ++r )
+            {
+                for( size_t c = 0; c < TDim; ++c )
+                {
+                    result( r, c ) = ( r == c ) ? 1 : 0;
+                }
+            }
+
+            return result;
+        }
+
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > translation( Vector< TType, TDim > const& vec )
+        {
+            auto result = mat::identity< TType, TDim + 1 >();
+
+            for( size_t d = 0; d < TDim; ++d )
+            {
+                result( d, TDim ) = vec( d );
+            }
+
+            return result;
+        }
+
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > transform( Range< TType, TDim > const& from,
+                                                       Range< TType, TDim > const& to )
+        {
+            auto result = mat::identity< TType, TDim + 1 >();
+
+            for( size_t d = 0; d < TDim; ++d )
+            {
+                auto const factor = to.extent( d ) / from.extent( d );
+                result( d, d ) = factor;
+                result( d, TDim ) = to.min( d ) - factor * from.min( d );
+            }
+
+            return result;
+        }
     }
 }
