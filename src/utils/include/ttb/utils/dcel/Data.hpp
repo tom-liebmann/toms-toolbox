@@ -5,14 +5,6 @@
 
 namespace ttb::dcel
 {
-    class EdgeData;
-    class VertexData;
-    class FaceData;
-}
-
-
-namespace ttb::dcel
-{
     class Data
     {
     public:
