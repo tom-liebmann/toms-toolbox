@@ -15,9 +15,9 @@ namespace ttb::dcel
         return { *m_dcel, m_dcel->m_data->vertexEdge( m_id ) };
     }
 
-    VertexHandle const& VertexHandle::edge( EdgeId const& edgeId ) const
+    VertexHandle const& VertexHandle::edge( EdgeHandle const& edge ) const
     {
-        m_dcel->m_data->vertexEdge( m_id, edgeId );
+        m_dcel->m_data->vertexEdge( m_id, edge.id() );
         return *this;
     }
 

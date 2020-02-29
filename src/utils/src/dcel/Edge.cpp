@@ -36,33 +36,33 @@ namespace ttb::dcel
         return { *m_dcel, m_dcel->m_data->edgePrev( m_id ) };
     }
 
-    EdgeHandle const& EdgeHandle::vertex( VertexId const& vertexId ) const
+    EdgeHandle const& EdgeHandle::vertex( VertexHandle const& vertex ) const
     {
-        m_dcel->m_data->edgeVertex( m_id, vertexId );
+        m_dcel->m_data->edgeVertex( m_id, vertex.id() );
         return *this;
     }
 
-    EdgeHandle const& EdgeHandle::face( FaceId const& faceId ) const
+    EdgeHandle const& EdgeHandle::face( FaceHandle const& face ) const
     {
-        m_dcel->m_data->edgeFace( m_id, faceId );
+        m_dcel->m_data->edgeFace( m_id, face.id() );
         return *this;
     }
 
-    EdgeHandle const& EdgeHandle::twin( EdgeId const& edgeId ) const
+    EdgeHandle const& EdgeHandle::twin( EdgeHandle const& edge ) const
     {
-        m_dcel->m_data->edgeTwin( m_id, edgeId );
+        m_dcel->m_data->edgeTwin( m_id, edge.id() );
         return *this;
     }
 
-    EdgeHandle const& EdgeHandle::next( EdgeId const& edgeId ) const
+    EdgeHandle const& EdgeHandle::next( EdgeHandle const& edge ) const
     {
-        m_dcel->m_data->edgeNext( m_id, edgeId );
+        m_dcel->m_data->edgeNext( m_id, edge.id() );
         return *this;
     }
 
-    EdgeHandle const& EdgeHandle::prev( EdgeId const& edgeId ) const
+    EdgeHandle const& EdgeHandle::prev( EdgeHandle const& edge ) const
     {
-        m_dcel->m_data->edgePrev( m_id, edgeId );
+        m_dcel->m_data->edgePrev( m_id, edge.id() );
         return *this;
     }
 

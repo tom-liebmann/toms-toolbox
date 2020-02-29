@@ -43,4 +43,24 @@ namespace ttb::dcel
     {
         return { *this, id };
     }
+
+    VertexHandle DCEL::addVertex()
+    {
+        return { *this, m_data->addVertex() };
+    }
+
+    EdgeHandle DCEL::addEdge()
+    {
+        return { *this, m_data->addEdge() };
+    }
+
+    FaceHandle DCEL::addFace()
+    {
+        return { *this, m_data->addFace() };
+    }
+
+    std::unique_ptr< Data > DCEL::release()
+    {
+        return std::move( m_data );
+    }
 }

@@ -36,17 +36,19 @@ namespace ttb::dcel
         DCEL& dcel() const;
         EdgeId const& id() const;
 
+        void remove() const;
+
         VertexHandle vertex() const;
         FaceHandle face() const;
         EdgeHandle twin() const;
         EdgeHandle next() const;
         EdgeHandle prev() const;
 
-        EdgeHandle const& vertex( VertexId const& vertexId ) const;
-        EdgeHandle const& face( FaceId const& faceId ) const;
-        EdgeHandle const& twin( EdgeId const& edgeId ) const;
-        EdgeHandle const& next( EdgeId const& edgeId ) const;
-        EdgeHandle const& prev( EdgeId const& edgeId ) const;
+        EdgeHandle const& vertex( VertexHandle const& vertex ) const;
+        EdgeHandle const& face( FaceHandle const& face ) const;
+        EdgeHandle const& twin( EdgeHandle const& edge ) const;
+        EdgeHandle const& next( EdgeHandle const& edge ) const;
+        EdgeHandle const& prev( EdgeHandle const& edge ) const;
 
     private:
         DCEL* m_dcel;

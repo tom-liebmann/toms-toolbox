@@ -10,6 +10,14 @@ namespace ttb::dcel
     public:
         virtual ~Data();
 
+        virtual VertexId addVertex();
+        virtual EdgeId addEdge();
+        virtual FaceId addFace();
+
+        virtual void removeVertex( VertexId const& vertexId );
+        virtual void removeEdge( EdgeId const& edgeId );
+        virtual void removeFace( FaceId const& faceId );
+
         virtual VertexId edgeVertex( EdgeId const& id ) const = 0;
         virtual FaceId edgeFace( EdgeId const& id ) const = 0;
         virtual EdgeId edgeTwin( EdgeId const& id ) const = 0;

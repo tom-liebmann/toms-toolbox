@@ -35,11 +35,19 @@ namespace ttb::dcel
         FaceHandle face( FaceId id );
         ConstFaceHandle face( FaceId id ) const;
 
+        VertexHandle addVertex();
+
+        EdgeHandle addEdge();
+
+        FaceHandle addFace();
+
         template < typename TType >
         TType& data();
 
         template < typename TType >
         TType const& data() const;
+
+        std::unique_ptr< Data > release();
 
     private:
         std::unique_ptr< Data > m_data;
@@ -51,8 +59,11 @@ namespace ttb::dcel
         friend class FaceHandle;
         friend class ConstFaceHandle;
     };
+}
 
 
+namespace ttb::dcel
+{
     template < typename TType >
     TType& DCEL::data()
     {

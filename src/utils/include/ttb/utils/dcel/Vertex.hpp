@@ -33,9 +33,11 @@ namespace ttb::dcel
         DCEL& dcel() const;
         VertexId const& id() const;
 
+        void remove() const;
+
         EdgeHandle edge() const;
 
-        VertexHandle const& edge( EdgeId const& edgeId ) const;
+        VertexHandle const& edge( EdgeHandle const& edge ) const;
 
     private:
         DCEL* m_dcel;
