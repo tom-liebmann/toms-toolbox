@@ -47,6 +47,11 @@ namespace ttb::dcel
     };
 
 
+    bool operator==( VertexHandle const& lhs, VertexHandle const& rhs );
+
+    bool operator!=( VertexHandle const& lhs, VertexHandle const& rhs );
+
+
     class ConstVertexHandle
     {
     public:
@@ -113,6 +118,17 @@ namespace ttb::dcel
     inline VertexId const& VertexHandle::id() const
     {
         return m_id;
+    }
+
+
+    inline bool operator==( VertexHandle const& lhs, VertexHandle const& rhs )
+    {
+        return lhs.id() == rhs.id();
+    }
+
+    inline bool operator!=( VertexHandle const& lhs, VertexHandle const& rhs )
+    {
+        return lhs.id() != rhs.id();
     }
 
 

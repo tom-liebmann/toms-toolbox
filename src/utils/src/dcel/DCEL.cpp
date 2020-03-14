@@ -8,7 +8,7 @@
 
 namespace ttb::dcel
 {
-    DCEL::DCEL( std::unique_ptr< Data > data ) : m_data( std::move( data ) )
+    DCEL::DCEL( Data& data ) : m_data( data )
     {
     }
 
@@ -46,21 +46,16 @@ namespace ttb::dcel
 
     VertexHandle DCEL::addVertex()
     {
-        return { *this, m_data->addVertex() };
+        return { *this, m_data.addVertex() };
     }
 
     EdgeHandle DCEL::addEdge()
     {
-        return { *this, m_data->addEdge() };
+        return { *this, m_data.addEdge() };
     }
 
     FaceHandle DCEL::addFace()
     {
-        return { *this, m_data->addFace() };
-    }
-
-    std::unique_ptr< Data > DCEL::release()
-    {
-        return std::move( m_data );
+        return { *this, m_data.addFace() };
     }
 }

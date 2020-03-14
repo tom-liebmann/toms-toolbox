@@ -22,7 +22,7 @@ namespace ttb::dcel
     class DCEL
     {
     public:
-        DCEL( std::unique_ptr< Data > data );
+        DCEL( Data& data );
 
         ~DCEL();
 
@@ -47,10 +47,8 @@ namespace ttb::dcel
         template < typename TType >
         TType const& data() const;
 
-        std::unique_ptr< Data > release();
-
     private:
-        std::unique_ptr< Data > m_data;
+        Data& m_data;
 
         friend class VertexHandle;
         friend class ConstVertexHandle;
@@ -67,12 +65,12 @@ namespace ttb::dcel
     template < typename TType >
     TType& DCEL::data()
     {
-        return dynamic_cast< TType& >( *m_data );
+        return static_cast< TType& >( m_data );
     }
 
     template < typename TType >
     TType const& DCEL::data() const
     {
-        return dynamic_cast< TType const& >( *m_data );
+        return static_cast< TType const& >( m_data );
     }
 }

@@ -12,12 +12,12 @@ namespace ttb::dcel
 
     EdgeHandle VertexHandle::edge() const
     {
-        return { *m_dcel, m_dcel->m_data->vertexEdge( m_id ) };
+        return { *m_dcel, m_dcel->m_data.vertexEdge( m_id ) };
     }
 
     VertexHandle const& VertexHandle::edge( EdgeHandle const& edge ) const
     {
-        m_dcel->m_data->vertexEdge( m_id, edge.id() );
+        m_dcel->m_data.vertexEdge( m_id, edge.id() );
         return *this;
     }
 
@@ -27,6 +27,6 @@ namespace ttb::dcel
 
     ConstEdgeHandle ConstVertexHandle::edge() const
     {
-        return { *m_dcel, m_dcel->m_data->vertexEdge( m_id ) };
+        return { *m_dcel, m_dcel->m_data.vertexEdge( m_id ) };
     }
 }

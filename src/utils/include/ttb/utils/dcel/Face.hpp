@@ -47,6 +47,11 @@ namespace ttb::dcel
     };
 
 
+    bool operator==( FaceHandle const& lhs, FaceHandle const& rhs );
+
+    bool operator!=( FaceHandle const& lhs, FaceHandle const& rhs );
+
+
     class ConstFaceHandle
     {
     public:
@@ -112,6 +117,17 @@ namespace ttb::dcel
     inline FaceId const& FaceHandle::id() const
     {
         return m_id;
+    }
+
+
+    inline bool operator==( FaceHandle const& lhs, FaceHandle const& rhs )
+    {
+        return lhs.id() == rhs.id();
+    }
+
+    inline bool operator!=( FaceHandle const& lhs, FaceHandle const& rhs )
+    {
+        return lhs.id() != rhs.id();
     }
 
 
