@@ -33,8 +33,9 @@ namespace ttb
     template < typename T, size_t D1, size_t D2 >
     Vector< T, D1 > operator*( Matrix< T, D1, D2 > const& matrix, Vector< T, D2 > const& vector );
 
-    template < typename T >
-    Vector< T, 3 > operator*( Matrix< T, 4, 4 > const& matrix, Vector< T, 3 > const& vector );
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim > operator*( Matrix< TType, TDim + 1, TDim + 1 > const& matrix,
+                                     Vector< TType, TDim > const& vector );
 
 
 
@@ -227,11 +228,18 @@ namespace ttb
         return result;
     }
 
-    template < typename T >
-    Vector< T, 3 > operator*( Matrix< T, 4, 4 > const& matrix, Vector< T, 3 > const& vector )
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim > operator*( Matrix< TType, TDim + 1, TDim + 1 > const& matrix,
+                                     Vector< TType, TDim > const& vector )
     {
-        auto vec = matrix *
-                   Vector< T, 4 >{ vector( 0 ), vector( 1 ), vector( 2 ), static_cast< T >( 1.0 ) };
+        Vector< TType, TDim + 1 > v;
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            v( d ) = vector( d );
+        }
+        v( TDim ) = 1;
+
+        auto const vec = matrix * v;
         return { vec( 0 ) / vec( 3 ), vec( 1 ) / vec( 3 ), vec( 2 ) / vec( 3 ) };
     }
 
