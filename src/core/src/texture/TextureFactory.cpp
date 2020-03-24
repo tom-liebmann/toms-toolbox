@@ -22,6 +22,7 @@ namespace ttb
             return texture;
         }
 
+#ifndef MODE_ANDROID
         std::unique_ptr< Texture3D > loadPNGArray( std::vector< std::string > const& filenames )
         {
             unsigned int width, height;
@@ -81,6 +82,7 @@ namespace ttb
 
             return texture;
         }
+#endif
 
         void savePNG( std::shared_ptr< Texture2D > texture, std::string const& filename )
         {

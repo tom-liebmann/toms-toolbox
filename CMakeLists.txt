@@ -3,20 +3,22 @@ cmake_minimum_required( VERSION 3.15 )
 set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
 set( COMPILATION_MODE "UNKNOWN" CACHE STRING "Mode to compile the libraries in" )
-set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG )
+set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG ANDROID UNKNOWN )
 
-if( ${COMPILATION_MODE} STREQUAL "GCC" )
+if( "${COMPILATION_MODE}" STREQUAL "GCC" )
 
     set( CMAKE_C_COMPILER "gcc" )
     set( CMAKE_CXX_COMPILER "g++" )
 
-elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
+elseif( "${COMPILATION_MODE}" STREQUAL "CLANG" )
 
     set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake CACHE PATH "Emscripten toolchain file" )
 
+elseif( "${COMPILATION_MODE}" STREQUAL "ANDROID" )
+
 else()
 
-    message( FATAL_ERROR "Unknown compilation mode" )
+    message( FATAL_ERROR "Unknown compilation mode: ${COMPILATION_MODE}" )
 
 endif()
 

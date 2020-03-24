@@ -1,18 +1,46 @@
-set( LINK_LIBRARIES )
+add_library(
+    ttbCore
+    SHARED
+    src/Context.cpp
+    src/window/Window.cpp
+    src/State.cpp
+    src/geometry/Geometry.cpp
+    src/geometry/IndexBuffer.cpp
+    src/geometry/VertexBuffer.cpp
+    src/shader/Program.cpp
+    src/shader/Shader.cpp
+    src/RenderTarget.cpp
+    src/texture/Texture2D.cpp
+    src/texture/Texture.cpp
+    src/texture/TextureFactory.cpp
+    src/uniform/Uniform.cpp
+    src/uniform/uniformHelper.cpp
+    src/GBuffer.cpp
+    src/PNGLoader.cpp
+    src/font/Font.cpp
+    src/font/TextFactory.cpp
+)
 
-include( glew )
-if( NOT TARGET glew )
-    message( "Missing library: glew" )
-    return()
-endif()
+target_compile_definitions(
+    ttbCore
+    PRIVATE
+        MODE_${COMPILATION_MODE}
+)
 
-include( opengl )
-if( NOT TARGET opengl )
-    message( "Missing library: opengl" )
-    return()
-endif()
 
-if( ${COMPILATION_MODE} STREQUAL "GCC" )
+if( "${COMPILATION_MODE}" STREQUAL "GCC" )
+
+    include( glew )
+    if( NOT TARGET glew )
+        message( "Missing library: glew" )
+        return()
+    endif()
+
+    include( opengl )
+    if( NOT TARGET opengl )
+        message( "Missing library: opengl" )
+        return()
+    endif()
 
     include( glfw )
     if( NOT TARGET glfw )
@@ -20,74 +48,36 @@ if( ${COMPILATION_MODE} STREQUAL "GCC" )
         return()
     endif()
 
-    set( LINK_LIBRARIES glew glfw opengl )
+    target_link_libraries(
+        ttbCore
+        PRIVATE
+        glew
+        glfw
+        opengl
+    )
 
-    set(
-        SOURCE_FILES
+    target_compile_definitions(
+        ttbCore
+        PRIVATE
+            GLEW_STATIC
+            GL_EXT_PROTOTYPES
+    )
 
-        src/Context.cpp
-        src/window/Window.cpp
-        src/impl/linux/window/Window.cpp
-        src/State.cpp
-        src/geometry/Geometry.cpp
-        src/geometry/IndexBuffer.cpp
-        src/geometry/VertexBuffer.cpp
-        src/shader/Program.cpp
-        src/shader/Shader.cpp
-        src/RenderTarget.cpp
-        src/texture/Texture2D.cpp
+    target_sources(
+        ttbCore
         src/texture/Texture3D.cpp
-        src/texture/Texture.cpp
-        src/texture/TextureFactory.cpp
-        src/uniform/Uniform.cpp
-        src/uniform/uniformHelper.cpp
-        src/GBuffer.cpp
-        src/PNGLoader.cpp
-        src/font/Font.cpp
-        src/font/TextFactory.cpp
-        )
+        src/impl/linux/window/Window.cpp
+    )
 
-    add_library(
+elseif( "${COMPILATION_MODE}" STREQUAL "ANDROID" )
+
+    target_link_libraries(
         ttbCore
-        SHARED
-        ${SOURCE_FILES}
-        )
-
-elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
-
-    include( sdl )
-    if( NOT TARGET sdl )
-        message( "Missing library: sdl" )
-        return()
-    endif()
-
-    set( LINK_LIBRARIES glew sdl opengl )
-
-    set(
-        SOURCE_FILES
-
-        src/RenderTarget.cpp
-        src/State.cpp
-        src/geometry/Geometry.cpp
-        src/geometry/IndexBuffer.cpp
-        src/geometry/VertexBuffer.cpp
-        src/impl/emscripten/window/Window.cpp
-        src/shader/Program.cpp
-        src/shader/Shader.cpp
-        src/window/Window.cpp
-        src/uniform/Uniform.cpp
-        src/uniform/uniformHelper.cpp
-        src/GBuffer.cpp
-        src/texture/Texture2D.cpp
-        src/texture/Texture.cpp
-        src/texture/TextureFactory.cpp
-        src/PNGLoader.cpp
-        )
-
-    add_library(
-        ttbCore
-        STATIC
-        ${SOURCE_FILES}
+        PRIVATE
+        android
+        log
+        EGL
+        GLESv3
         )
 
 endif()
@@ -119,19 +109,11 @@ if( ${COMPILATION_MODE} STREQUAL "CLANG" )
 
 endif()
 
-target_compile_definitions(
-    ttbCore
-    PRIVATE
-        GLEW_STATIC
-        GL_EXT_PROTOTYPES
-    )
-
 target_link_libraries(
     ttbCore
     PUBLIC
         ttbMath
         ttbUtils
-        ${LINK_LIBRARIES}
     )
 
 target_compile_options(

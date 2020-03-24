@@ -168,9 +168,11 @@ namespace ttb
         return *this;
     }
 
-    Texture2D::Modifier& Texture2D::Modifier::download( size_t level,
-                                                        std::vector< uint8_t >& buffer )
+    Texture2D::Modifier&
+        Texture2D::Modifier::download( [[maybe_unused]] size_t level,
+                                       [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
+#ifndef MODE_ANDROID
         GLint width, height;
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
@@ -179,6 +181,7 @@ namespace ttb
 
         glGetTexImage(
             GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
+#endif
 
         return *this;
     }
@@ -191,9 +194,13 @@ namespace ttb
         return *this;
     }
 
-    Texture2D::Modifier& Texture2D::Modifier::depthMode( GLint mode )
+    Texture2D::Modifier& Texture2D::Modifier::depthMode( [[maybe_unused]] GLint mode )
     {
+#ifndef MODE_ANDROID
+
         glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, mode );
+
+#endif
 
         return *this;
     }
@@ -220,7 +227,7 @@ namespace ttb
         return *this;
     }
 
-    Texture2D::Modifier& Texture2D::Modifier::anisotropicFiltering( bool enabled )
+    Texture2D::Modifier& Texture2D::Modifier::anisotropicFiltering( [[maybe_unused]] bool enabled )
     {
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
@@ -265,9 +272,12 @@ namespace ttb
         }
     }
 
-    Texture2D::ConstModifier& Texture2D::ConstModifier::download( size_t level,
-                                                                  std::vector< uint8_t >& buffer )
+    Texture2D::ConstModifier&
+        Texture2D::ConstModifier::download( [[maybe_unused]] size_t level,
+                                            [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
+#ifndef MODE_ANDROID
+
         GLint width, height;
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
@@ -277,10 +287,13 @@ namespace ttb
         glGetTexImage(
             GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
 
+#endif
+
         return *this;
     }
 
-    Texture2D::ConstModifier& Texture2D::ConstModifier::anisotropicFiltering( bool enabled )
+    Texture2D::ConstModifier& Texture2D::ConstModifier::anisotropicFiltering( [
+        [maybe_unused]] bool enabled )
     {
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )

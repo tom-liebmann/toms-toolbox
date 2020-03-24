@@ -1,5 +1,8 @@
 #include <ttb/core/shader/Shader.hpp>
 
+#include <ttb/core/gl.hpp>
+
+#include <array>
 #include <cstring>
 #include <fstream>
 #include <iostream>

@@ -15,6 +15,8 @@ namespace ttb
 
         void savePNG( std::shared_ptr< Texture2D > texture, std::string const& filename );
 
+#ifndef MODE_ANDROID
         std::unique_ptr< Texture3D > loadPNGArray( std::vector< std::string > const& filenames );
+#endif
     }
 }

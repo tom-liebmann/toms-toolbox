@@ -11,35 +11,27 @@ set(
     src/packets/OPacket.cpp
     src/packets/SizedIPacket.cpp
     src/packets/SubIPacket.cpp
-    )
+)
 
-if( ${COMPILATION_MODE} STREQUAL "GCC" )
-    add_library(
-        ttbNet
-        SHARED
-        ${SOURCE_FILES}
-        )
-elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
-    add_library(
-        ttbNet
-        STATIC
-        ${SOURCE_FILES}
-        )
-endif()
+add_library(
+    ttbNet
+    SHARED
+    ${SOURCE_FILES}
+)
 
 target_include_directories(
     ttbNet
     PUBLIC
-    include
+        include
     PRIVATE
-    src
-    )
+        src
+)
 
 target_link_libraries(
     ttbNet
     PUBLIC
-    ttbUtils
-    )
+        ttbUtils
+)
 
 target_compile_options(
     ttbNet

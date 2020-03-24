@@ -70,10 +70,6 @@ namespace ttb
         virtual void begin( State& state ) const override;
         virtual void end( State& state ) const override;
 
-        // Override: Context
-        virtual bool use() = 0;
-        virtual bool unuse() = 0;
-
     protected:
         Window( std::string const& title, Mode const& mode );
 
