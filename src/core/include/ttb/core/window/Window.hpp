@@ -46,10 +46,14 @@ namespace ttb
             Flag m_flags;
         };
 
+#ifndef MODE_ANDROID
+
         static std::shared_ptr< Window > create( std::string const& title, Mode const& mode );
 
         static std::shared_ptr< Window >
             create( std::string const& title, Mode const& mode, Window const& sharedWindow );
+
+#endif
 
         virtual ~Window();
 

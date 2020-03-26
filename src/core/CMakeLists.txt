@@ -23,7 +23,7 @@ add_library(
 
 target_compile_definitions(
     ttbCore
-    PRIVATE
+    PUBLIC
         MODE_${COMPILATION_MODE}
 )
 
@@ -65,8 +65,9 @@ if( "${COMPILATION_MODE}" STREQUAL "GCC" )
 
     target_sources(
         ttbCore
-        src/texture/Texture3D.cpp
-        src/impl/linux/window/Window.cpp
+        PRIVATE
+            src/texture/Texture3D.cpp
+            src/impl/linux/window/Window.cpp
     )
 
 elseif( "${COMPILATION_MODE}" STREQUAL "ANDROID" )
