@@ -17,6 +17,8 @@ namespace ttb
     class Window : public Context, public RenderTarget
     {
     public:
+        class Impl;
+
         enum class Flag : uint32_t
         {
             NONE = 0,
@@ -48,11 +50,13 @@ namespace ttb
 
         using EventOutput = Signal< void( Event const& ) >;
 
-        void mode( Mode const& mode );
-
         Mode const& mode() const;
 
         std::string const& title() const;
+
+        Impl& impl();
+
+        Impl const& impl() const;
 
         // Event handling
         EventOutput& eventOutput();
@@ -74,7 +78,7 @@ namespace ttb
 
         static std::shared_ptr< Window > instance();
 
-#elif defined( MODE_DESKTOP )
+#elif defined( MODE_GCC )
 
     public:
         static std::shared_ptr< Window > create( std::string const& title, Mode const& mode );
@@ -89,17 +93,9 @@ namespace ttb
 #endif
 
     private:
-        class Impl;
-
-        Window( std::string const& title, Mode const& mode, std::unique_ptr< Impl > impl );
+        Window( std::unique_ptr< Impl > impl );
 
         std::unique_ptr< Impl > m_impl;
-
-        EventOutput m_eventOutput;
-
-        Mode m_mode;
-
-        std::string m_title;
     };
 
 
@@ -109,6 +105,17 @@ namespace ttb
 
 namespace ttb
 {
+    inline Window::Impl& Window::impl()
+    {
+        return *m_impl;
+    }
+
+    inline Window::Impl const& Window::impl() const
+    {
+        return *m_impl;
+    }
+
+
     inline Window::Mode::Mode( uint16_t width, uint16_t height, Flag flags )
         : m_width{ width }, m_height{ height }, m_flags{ flags }
     {
