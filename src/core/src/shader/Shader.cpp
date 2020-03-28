@@ -45,6 +45,11 @@ namespace ttb
         }
     }
 
+    std::unique_ptr< Shader > Shader::fromSource( Type type, std::string const& source )
+    {
+        return std::unique_ptr< Shader >( new Shader( type, source ) );
+    }
+
     Shader::Shader( Type type, std::string const& source )
     {
         // create shader object

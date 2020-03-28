@@ -2,7 +2,6 @@ add_library(
     ttbCore
     SHARED
     src/Context.cpp
-    src/window/Window.cpp
     src/State.cpp
     src/geometry/Geometry.cpp
     src/geometry/IndexBuffer.cpp
@@ -80,6 +79,12 @@ elseif( "${COMPILATION_MODE}" STREQUAL "ANDROID" )
         EGL
         GLESv3
         )
+
+    target_sources(
+        ttbCore
+        PRIVATE
+            src/impl/android/window/Window.cpp
+    )
 
 endif()
 

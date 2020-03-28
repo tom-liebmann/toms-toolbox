@@ -46,16 +46,7 @@ namespace ttb
             Flag m_flags;
         };
 
-#ifndef MODE_ANDROID
-
-        static std::shared_ptr< Window > create( std::string const& title, Mode const& mode );
-
-        static std::shared_ptr< Window >
-            create( std::string const& title, Mode const& mode, Window const& sharedWindow );
-
-#endif
-
-        virtual ~Window();
+        using EventOutput = Signal< void( Event const& ) >;
 
         void mode( Mode const& mode );
 
@@ -64,9 +55,7 @@ namespace ttb
         std::string const& title() const;
 
         // Event handling
-        virtual Signal< void( Event const& ) >& eventOutput() = 0;
-        virtual void update() = 0;
-        virtual void resize( uint16_t width, uint16_t height ) = 0;
+        EventOutput& eventOutput();
 
         // Override: RenderTarget
         virtual size_t width() const override;
@@ -74,10 +63,40 @@ namespace ttb
         virtual void begin( State& state ) const override;
         virtual void end( State& state ) const override;
 
-    protected:
-        Window( std::string const& title, Mode const& mode );
+        // Override: Context
+        virtual bool use() override;
+        virtual bool unuse() override;
+
+#if defined( MODE_ANDROID )
+
+    public:
+        static void init( std::string const& title, uint16_t width, uint16_t height );
+
+        static std::shared_ptr< Window > instance();
+
+#elif defined( MODE_DESKTOP )
+
+    public:
+        static std::shared_ptr< Window > create( std::string const& title, Mode const& mode );
+
+        static std::shared_ptr< Window >
+            create( std::string const& title, Mode const& mode, Window const& sharedWindow );
+
+        void resize( uint16_t width, uint16_t height );
+
+        void update();
+
+#endif
 
     private:
+        class Impl;
+
+        Window( std::string const& title, Mode const& mode, std::unique_ptr< Impl > impl );
+
+        std::unique_ptr< Impl > m_impl;
+
+        EventOutput m_eventOutput;
+
         Mode m_mode;
 
         std::string m_title;
@@ -85,4 +104,40 @@ namespace ttb
 
 
     Window::Flag operator|( Window::Flag lhs, Window::Flag rhs );
+}
+
+
+namespace ttb
+{
+    inline Window::Mode::Mode( uint16_t width, uint16_t height, Flag flags )
+        : m_width{ width }, m_height{ height }, m_flags{ flags }
+    {
+    }
+
+    inline uint16_t Window::Mode::width() const
+    {
+        return m_width;
+    }
+
+    inline uint16_t Window::Mode::height() const
+    {
+        return m_height;
+    }
+
+    inline bool Window::Mode::flag( Flag value ) const
+    {
+        return static_cast< uint32_t >( m_flags ) & static_cast< uint32_t >( value );
+    }
+
+    inline Window::Flag Window::Mode::flags() const
+    {
+        return m_flags;
+    }
+
+
+    inline Window::Flag operator|( Window::Flag lhs, Window::Flag rhs )
+    {
+        return static_cast< Window::Flag >( static_cast< uint32_t >( lhs ) |
+                                            static_cast< uint32_t >( rhs ) );
+    }
 }

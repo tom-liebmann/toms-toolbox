@@ -6,6 +6,28 @@ namespace ttb
 {
     namespace TextureFactory
     {
+        std::shared_ptr< Texture2D > loadData( void const* data, size_t dataSize )
+        {
+            uint8_t* pngData;
+            unsigned int width, height;
+            lodepng_decode_memory( &pngData,
+                                   &width,
+                                   &height,
+                                   static_cast< unsigned char const* >( data ),
+                                   dataSize,
+                                   LCT_RGBA,
+                                   8 );
+
+            auto texture = Texture2D::create()
+                               .upload( width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pngData )
+                               .minMagFilter( GL_LINEAR, GL_LINEAR )
+                               .finish();
+
+            free( pngData );
+
+            return texture;
+        }
+
         std::shared_ptr< Texture2D > loadPNG( std::string const& filename )
         {
             uint8_t* pngData;
@@ -23,6 +45,7 @@ namespace ttb
         }
 
 #ifndef MODE_ANDROID
+
         std::unique_ptr< Texture3D > loadPNGArray( std::vector< std::string > const& filenames )
         {
             unsigned int width, height;
