@@ -252,8 +252,15 @@ namespace ttb
         }
         v( TDim ) = 1;
 
-        auto const vec = matrix * v;
-        return { vec( 0 ) / vec( 3 ), vec( 1 ) / vec( 3 ), vec( 2 ) / vec( 3 ) };
+        v = matrix * v;
+
+        Vector< TType, TDim > result;
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            result( d ) = v( d ) / v( TDim );
+        }
+
+        return result;
     }
 
 
