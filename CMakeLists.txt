@@ -1,6 +1,27 @@
 cmake_minimum_required( VERSION 3.15 )
 
-set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+
+set( BUILD_PLATFORM "" CACHE STRING "Platform the project is built for" )
+set_property(
+    CACHE BUILD_PLATFORM PROPERTY STRINGS
+    "Linux"   # GLFW-based project using native OpenGL
+    "Browser" # emscripten project using Weblog
+    "Android" # NDK library to be used in an android application
+)
+
+if( NOT BUILD_PLATFORM )
+    message( FATAL_ERROR "Build platform must be specified" )
+endif()
+
+if( NOT CMAKE_BUILD_TYPE )
+    set( CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build" FORCE )
+    set_property(
+        CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+        "Release"
+        "Debug"
+    )
+endif()
 
 if( ${BUILD_SUBMODULE} )
 
@@ -8,27 +29,7 @@ if( ${BUILD_SUBMODULE} )
 
 else()
 
-    set( BUILD_PLATFORM "" CACHE STRING "Platform the project is built for" )
-    set_property(
-        CACHE BUILD_PLATFORM PROPERTY STRINGS
-        "Desktop" # LWJGL-based project using native OpenGL
-        "Browser" # emscripten project using Weblog
-    )
-
-    if( NOT BUILD_PLATFORM )
-        message( FATAL_ERROR "Build platform must be specified" )
-    endif()
-
-    if( NOT CMAKE_BUILD_TYPE )
-        set( CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build" FORCE )
-        set_property(
-            CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-            "Release"
-            "Debug"
-        )
-    endif()
-
-    if( "${BUILD_PLATFORM}" STREQUAL "Desktop" )
+    if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
 
         project( toms_toolbox )
 
@@ -68,38 +69,33 @@ if( DOXYGEN_FOUND )
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
         ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-        @ONLY )
+        @ONLY
+    )
 
     add_custom_target(
         doc
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-        COMMENT "Generating API documentation with Doxygen" VERBATIM )
+        COMMENT "Generating API documentation with Doxygen" VERBATIM
+    )
 
 endif( DOXYGEN_FOUND )
 
-set( VALID_TARGETS )
+set( LIBRARY_TYPE "" CACHE STRING "Type of library that is built" )
+set_property(
+    CACHE LIBRARY_TYPE PROPERTY STRINGS
+    "SHARED"
+    "STATIC"
+    "OBJECT"
+)
+
+if( NOT LIBRARY_TYPE )
+    message( FATAL_ERROR "Library type must be specified" )
+endif()
+
+add_library( ttb ${LIBRARY_TYPE} )
 
 add_subdirectory( src/math )
 add_subdirectory( src/core )
-#add_subdirectory( src/net )
 add_subdirectory( src/utils )
-
-if( ${BUILD_SUBMODULE} )
-
-    set( TTB_LIBRARIES ${VALID_TARGETS} PARENT_SCOPE )
-
-else()
-
-    # Export build tree to Targets.cmake file.
-    export(
-        TARGETS ${VALID_TARGETS}
-        FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake"
-    )
-
-    configure_file(
-        TTBConfig.cmake.in
-        "${CMAKE_CURRENT_BINARY_DIR}/TTBConfig.cmake"
-    )
-
-endif()
+#add_subdirectory( src/net )

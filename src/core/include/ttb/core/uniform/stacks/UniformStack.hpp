@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../uniformHelper.hpp"
 #include <ttb/core/shader/Program.hpp>
 
 #include <stack>
@@ -20,7 +21,7 @@ namespace ttb
         virtual ~UniformStackBase();
 
     private:
-        virtual void apply( GLuint location ) = 0;
+        virtual void apply( GLuint location ) const = 0;
 
         friend class Program;
     };
@@ -39,7 +40,7 @@ namespace ttb
         ValueType const& value() const;
 
     private:
-        virtual void apply( GLuint location ) override;
+        virtual void apply( GLuint location ) const override;
 
         std::stack< ValueType > m_valueStack;
     };
@@ -81,7 +82,7 @@ namespace ttb
     }
 
     template < typename TType >
-    void UniformStack< TType >::apply( GLuint location )
+    void UniformStack< TType >::apply( GLuint location ) const
     {
         helper::set_uniform< TType >::apply( location, value() );
     }

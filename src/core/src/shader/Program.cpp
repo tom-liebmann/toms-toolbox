@@ -1,7 +1,7 @@
 #include <ttb/core/shader/Program.hpp>
 
 #include <ttb/core/shader/Shader.hpp>
-#include <ttb/core/uniform/Uniform.hpp>
+#include <ttb/core/uniform/stacks/UniformStack.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <iostream>
@@ -67,7 +67,7 @@ namespace ttb
                                     reinterpret_cast< GLchar const* >( name.c_str() ) );
     }
 
-    void Program::applyUniform( std::string const& name, UniformBase const& uniform ) const
+    void Program::applyUniform( std::string const& name, UniformStackBase const& uniform ) const
     {
         auto location = glGetUniformLocation( m_programObject,
                                               reinterpret_cast< const GLchar* >( name.c_str() ) );

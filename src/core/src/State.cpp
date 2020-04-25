@@ -2,7 +2,6 @@
 
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/core/shader/Program.hpp>
-#include <ttb/core/uniform/Uniform.hpp>
 #include <ttb/core/window/Window.hpp>
 
 #include <iostream>
@@ -150,25 +149,7 @@ namespace ttb
 
             for( auto const& uniformPair : m_uniforms )
             {
-                program.applyUniform( uniformPair.first, *uniformPair.second.top() );
-            }
-        }
-    }
-
-    void State::popUniform( std::string const& name )
-    {
-        auto iter = m_uniforms.find( name );
-
-        if( iter == std::end( m_uniforms ) )
-        {
-            throw std::runtime_error( "Reducing unknown uniform" );
-        }
-        else
-        {
-            iter->second.pop();
-            if( iter->second.empty() )
-            {
-                m_uniforms.erase( iter );
+                program.applyUniform( uniformPair.first, *uniformPair.second );
             }
         }
     }

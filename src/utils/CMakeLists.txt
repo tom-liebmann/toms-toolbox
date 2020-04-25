@@ -1,33 +1,38 @@
 set( TARGET_NAME ttbUtils )
 
-add_library( ttbUtils SHARED )
+set( ACTIVATE_${TARGET_NAME} ON CACHE BOOL "Enable module ${TARGET_NAME}" )
+
+if( NOT ACTIVATE_${TARGET_NAME} )
+    return()
+endif()
+
+add_library( ${TARGET_NAME} OBJECT EXCLUDE_FROM_ALL )
 
 target_include_directories(
-    ttbUtils
+    ${TARGET_NAME}
 
     PUBLIC
         include
 )
 
 target_compile_options(
-    ttbUtils
+    ${TARGET_NAME}
 
-    PUBLIC
+    PRIVATE
         -Wall
         -Wextra
         -Wpedantic
 )
 
 set_target_properties(
-    ttbUtils
+    ${TARGET_NAME}
 
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 17
 )
 
 target_compile_features(
-    ttbUtils
+    ${TARGET_NAME}
 
     PUBLIC
         cxx_std_17
@@ -35,5 +40,18 @@ target_compile_features(
 
 add_subdirectory( src )
 
-list( APPEND VALID_TARGETS ttbUtils )
-set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+if( "${LIBRARY_TYPE}" STREQUAL "OBJECT" )
+    target_sources(
+        ttb
+
+        PUBLIC
+            $<TARGET_OBJECTS:${TARGET_NAME}>
+    )
+else()
+    target_link_libraries(
+        ttb
+
+        PUBLIC
+            ${TARGET_NAME}
+    )
+endif()

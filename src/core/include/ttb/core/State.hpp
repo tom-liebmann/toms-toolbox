@@ -93,33 +93,17 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    void State::pushUniform( std::string const& name, TType const& value )
-    {
-        auto iter = m_uniforms.find( name );
-
-        if( iter == std::end( m_uniforms ) )
-        {
-            m_uniforms[ name ].push(
-                std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
-        }
-        else
-        {
-            iter->second.push( std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
-        }
-    }
-
-    template < typename TType >
     UniformStack< TType >& State::uniform( std::string const& name )
     {
 #ifndef NDEBUG
-        return dynamic_cast< UniformStack< TType >& >( m_uniforms.at( name ) );
+        return dynamic_cast< UniformStack< TType >& >( m_uniforms[ name ] );
 #else
-        return static_cast< UniformStack< TType >& >( m_uniforms.at( name ) );
+        return static_cast< UniformStack< TType >& >( m_uniforms[ name ] );
 #endif
     }
 
     template < typename TType >
-    UniformStack< TType > const& uniform( std::string const& name ) const
+    UniformStack< TType > const& State::uniform( std::string const& name ) const
     {
 #ifndef NDEBUG
         return dynamic_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );

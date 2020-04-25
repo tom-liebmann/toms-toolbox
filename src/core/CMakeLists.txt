@@ -6,7 +6,7 @@ if( NOT ACTIVATE_${TARGET_NAME} )
     return()
 endif()
 
-add_library( ${TARGET_NAME} SHARED )
+add_library( ${TARGET_NAME} OBJECT EXCLUDE_FROM_ALL )
 
 string( TOUPPER ${BUILD_PLATFORM} BUILD_PLATFORM_UPPER )
 target_compile_definitions(
@@ -37,7 +37,7 @@ target_link_libraries(
 target_compile_options(
     ${TARGET_NAME}
 
-    PUBLIC
+    PRIVATE
         -Wall
         -Wextra
         -Wpedantic
@@ -48,7 +48,6 @@ set_target_properties(
 
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 17
 )
 
 target_compile_features(
@@ -116,5 +115,18 @@ elseif( "${BUILD_PLATFORM}" STREQUAL "Browser" )
 
 endif()
 
-list( APPEND VALID_TARGETS ${TARGET_NAME} )
-set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+if( "${LIBRARY_TYPE}" STREQUAL "OBJECT" )
+    target_sources(
+        ttb
+
+        PUBLIC
+            $<TARGET_OBJECTS:${TARGET_NAME}>
+    )
+else()
+    target_link_libraries(
+        ttb
+
+        PUBLIC
+            ${TARGET_NAME}
+    )
+endif()

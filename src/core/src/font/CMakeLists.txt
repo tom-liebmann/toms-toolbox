@@ -2,5 +2,6 @@ target_sources(
     ${TARGET_NAME}
 
     PRIVATE
-        dummy.cpp
+        Font.cpp
+        TextFactory.cpp
 )

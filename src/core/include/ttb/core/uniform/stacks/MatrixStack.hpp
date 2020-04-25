@@ -22,7 +22,7 @@ namespace ttb
         ValueType const& value() const;
 
     private:
-        virtual void apply( GLuint location ) override;
+        virtual void apply( GLuint location ) const override;
 
         std::stack< ValueType > m_valueStack;
     };
@@ -32,8 +32,8 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TRows, size_t TCols >
-        inline typename UniformStack< Matrix< TType, TRows, TCols > >::Handle UniformStack <
-        Matrix< TType, TRows, TCols >::push( ValueType const& value )
+    inline typename UniformStack< Matrix< TType, TRows, TCols > >::Handle
+        UniformStack< Matrix< TType, TRows, TCols > >::push( ValueType const& value )
     {
         m_valueStack.push( this->value() * value );
         return { *this };
@@ -47,8 +47,8 @@ namespace ttb
     }
 
     template < typename TType, size_t TRows, size_t TCols >
-    void UniformStack< Matrix< TType, TRows, TCols > >::apply( GLuint location )
+    void UniformStack< Matrix< TType, TRows, TCols > >::apply( GLuint location ) const
     {
-        helper::set_uniform< ValueType >::apply( location value() );
+        helper::set_uniform< ValueType >::apply( location, value() );
     }
 }
