@@ -8,17 +8,31 @@ if( ${BUILD_SUBMODULE} )
 
 else()
 
-    project( toms_toolbox )
+    set( BUILD_PLATFORM "" CACHE STRING "Platform the project is built for" )
+    set_property(
+        CACHE BUILD_PLATFORM PROPERTY STRINGS
+        "Desktop" # LWJGL-based project using native OpenGL
+        "Browser" # emscripten project using Weblog
+    )
 
-    set( COMPILATION_MODE "UNKNOWN" CACHE STRING "Mode to compile the libraries in" )
-    set_property( CACHE COMPILATION_MODE PROPERTY STRINGS GCC CLANG ANDROID UNKNOWN )
+    if( NOT BUILD_PLATFORM )
+        message( FATAL_ERROR "Build platform must be specified" )
+    endif()
 
-    if( "${COMPILATION_MODE}" STREQUAL "GCC" )
+    if( NOT CMAKE_BUILD_TYPE )
+        set( CMAKE_BUILD_TYPE "Debug" CACHE STRING "Type of build" FORCE )
+        set_property(
+            CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
+            "Release"
+            "Debug"
+        )
+    endif()
 
-        set( CMAKE_C_COMPILER "gcc" )
-        set( CMAKE_CXX_COMPILER "g++" )
+    if( "${BUILD_PLATFORM}" STREQUAL "Desktop" )
 
-        if( ${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+        project( toms_toolbox )
+
+        if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
             set( REQUIRED_GCC_VERSION "9.0.0" )
 
@@ -32,17 +46,18 @@ else()
 
         endif()
 
-    elseif( "${COMPILATION_MODE}" STREQUAL "CLANG" )
+    elseif( "${BUILD_PLATFORM}" STREQUAL "Browser" )
 
         set( CMAKE_TOOLCHAIN_FILE $ENV{EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake CACHE PATH "Emscripten toolchain file" )
 
-    elseif( "${COMPILATION_MODE}" STREQUAL "ANDROID" )
+        project( toms_toolbox )
 
-    else()
+    elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
 
-        message( FATAL_ERROR "Unknown compilation mode: ${COMPILATION_MODE}" )
+        project( toms_toolbox )
 
     endif()
+
 endif()
 
 # Generate documentation
@@ -67,14 +82,8 @@ set( VALID_TARGETS )
 
 add_subdirectory( src/math )
 add_subdirectory( src/core )
-add_subdirectory( src/net )
+#add_subdirectory( src/net )
 add_subdirectory( src/utils )
-
-set( BUILD_EXAMPLES FALSE CACHE BOOL "Builds all examples" )
-
-if( BUILD_EXAMPLES )
-    add_subdirectory( src/examples )
-endif( BUILD_EXAMPLES )
 
 if( ${BUILD_SUBMODULE} )
 
