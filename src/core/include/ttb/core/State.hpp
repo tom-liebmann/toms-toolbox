@@ -2,6 +2,7 @@
 
 #include "uniform.hpp"
 #include <ttb/core/Viewport.hpp>
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <memory>
@@ -16,11 +17,6 @@ namespace ttb
 {
     class Program;
     class RenderTarget;
-
-    class UniformBase;
-
-    template < typename TType >
-    class Uniform;
 }
 
 
@@ -63,14 +59,11 @@ namespace ttb
         // events
         void apply();
 
-        // uniforms
         template < typename TType >
-        void pushUniform( std::string const& name, TType const& value );
-
-        void popUniform( std::string const& name );
+        UniformStack< TType >& uniform( std::string const& name );
 
         template < typename TType >
-        TType const& uniform( std::string const& name ) const;
+        UniformStack< TType > const& uniform( std::string const& name ) const;
 
     private:
         // render target
@@ -92,7 +85,7 @@ namespace ttb
         std::stack< Viewport > m_viewportStack;
 
         // uniforms
-        std::unordered_map< std::string, std::stack< std::unique_ptr< UniformBase > > > m_uniforms;
+        std::unordered_map< std::string, std::unique_ptr< UniformStackBase > > m_uniforms;
     };
 }
 
@@ -116,19 +109,22 @@ namespace ttb
     }
 
     template < typename TType >
-    TType const& State::uniform( std::string const& name ) const
+    UniformStack< TType >& State::uniform( std::string const& name )
     {
-        auto iter = m_uniforms.find( name );
+#ifndef NDEBUG
+        return dynamic_cast< UniformStack< TType >& >( m_uniforms.at( name ) );
+#else
+        return static_cast< UniformStack< TType >& >( m_uniforms.at( name ) );
+#endif
+    }
 
-        if( iter == std::end( m_uniforms ) )
-        {
-            throw std::runtime_error( "Accessing unknown uniform" );
-        }
-        else
-        {
-            auto const& u = dynamic_cast< Uniform< TType > const& >( *iter->second.top() );
-
-            return u.value();
-        }
+    template < typename TType >
+    UniformStack< TType > const& uniform( std::string const& name ) const
+    {
+#ifndef NDEBUG
+        return dynamic_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+#else
+        return static_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+#endif
     }
 }

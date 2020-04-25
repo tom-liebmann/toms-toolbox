@@ -22,6 +22,8 @@ namespace ttb
         ValueType const& value() const;
 
     private:
+        virtual void apply( GLuint location ) override;
+
         std::stack< ValueType > m_valueStack;
     };
 }
@@ -42,5 +44,11 @@ namespace ttb
         UniformStack< Matrix< TType, TRows, TCols > >::value() const
     {
         return m_valueStack.top();
+    }
+
+    template < typename TType, size_t TRows, size_t TCols >
+    void UniformStack< Matrix< TType, TRows, TCols > >::apply( GLuint location )
+    {
+        helper::set_uniform< ValueType >::apply( location value() );
     }
 }
