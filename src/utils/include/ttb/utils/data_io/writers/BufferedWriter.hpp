@@ -8,23 +8,19 @@
 
 namespace ttb
 {
-    class BufferedWriter : public DataWriter
+    class BufferedWriter : public Writer
     {
     public:
         BufferedWriter( size_t capacity = 0 );
 
         size_t capacity() const;
 
-        size_t size() const;
-
-        uint8_t const* data() const;
-
         void clear();
 
-        std::vector< uint8_t > release();
+        RandomAccessPacket const& packet() const;
 
         // Override: DataWriter
-        virtual void write( void const* data, size_t size ) override;
+        virtual size_t write( void const* data, size_t size ) override;
 
     private:
         std::vector< uint8_t > m_data;
