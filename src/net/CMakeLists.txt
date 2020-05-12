@@ -1,58 +1,78 @@
-set(
-    SOURCE_FILES
+set( TARGET_NAME ttbNet )
 
-    src/DataReader.cpp
-    src/DataWriter.cpp
-    src/BufferedWriter.cpp
+set( ACTIVATE_${TARGET_NAME} ON CACHE BOOL "Enable module ${TARGET_NAME}" )
 
-    src/packets/DataIPacket.cpp
-    src/packets/DataOPacket.cpp
-    src/packets/IPacket.cpp
-    src/packets/OPacket.cpp
-    src/packets/SizedIPacket.cpp
-    src/packets/SubIPacket.cpp
-)
+if( NOT ACTIVATE_${TARGET_NAME} )
+    return()
+endif()
 
-add_library(
-    ttbNet
-    SHARED
-    ${SOURCE_FILES}
+add_library( ${TARGET_NAME} OBJECT EXCLUDE_FROM_ALL )
+
+string( TOUPPER ${BUILD_PLATFORM} BUILD_PLATFORM_UPPER )
+target_compile_definitions(
+    ${TARGET_NAME}
+
+    PUBLIC
+        PLATFORM_${BUILD_PLATFORM_UPPER}
 )
 
 target_include_directories(
-    ttbNet
+    ${TARGET_NAME}
+
     PUBLIC
         include
+
     PRIVATE
         src
 )
 
 target_link_libraries(
-    ttbNet
+    ${TARGET_NAME}
+
     PUBLIC
         ttbUtils
 )
 
 target_compile_options(
-    ttbNet
-    PUBLIC
+    ${TARGET_NAME}
+
+    PRIVATE
         -Wall
         -Wextra
         -Wpedantic
-    )
+)
 
 set_target_properties(
-    ttbNet
+    ${TARGET_NAME}
+
     PROPERTIES
         POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 17
-    )
+)
 
 target_compile_features(
-    ttbNet
+    ${TARGET_NAME}
+
     PUBLIC
         cxx_std_17
+)
+
+add_subdirectory( src )
+
+if( "${LIBRARY_TYPE}" STREQUAL "OBJECT" )
+    target_sources(
+        ttb
+
+        PUBLIC
+            $<TARGET_OBJECTS:${TARGET_NAME}>
+    )
+else()
+    target_link_libraries(
+        ttb
+
+        PUBLIC
+            ${TARGET_NAME}
     )
 
-list( APPEND VALID_TARGETS ttbNet )
-set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+    list( APPEND EXPORT_TARGETS ${TARGET_NAME} )
+    set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
+endif()

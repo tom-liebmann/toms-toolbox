@@ -1,5 +1,10 @@
 #pragma once
 
+#include "DataReader.hpp"
+
+#include <cstdint>
+#include <vector>
+
 
 namespace ttb
 {
