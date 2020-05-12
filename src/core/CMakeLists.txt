@@ -129,4 +129,7 @@ else()
         PUBLIC
             ${TARGET_NAME}
     )
+
+    list( APPEND EXPORT_TARGETS ${TARGET_NAME} )
+    set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
 endif()

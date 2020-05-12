@@ -95,7 +95,14 @@ endif()
 
 add_library( ttb ${LIBRARY_TYPE} )
 
+set(EXPORT_TARGETS "ttb")
+
 add_subdirectory( src/math )
 add_subdirectory( src/core )
 add_subdirectory( src/utils )
-#add_subdirectory( src/net )
+add_subdirectory( src/net )
+
+export(
+    TARGETS ${EXPORT_TARGETS}
+    FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake"
+)
