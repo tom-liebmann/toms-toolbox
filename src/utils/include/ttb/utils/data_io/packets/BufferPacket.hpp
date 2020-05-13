@@ -7,7 +7,7 @@
 
 namespace ttb
 {
-    class BufferPacket : RandomAccessPacket
+    class BufferPacket : public RandomAccessPacket
     {
     public:
         BufferPacket( void const* data, size_t dataSize );

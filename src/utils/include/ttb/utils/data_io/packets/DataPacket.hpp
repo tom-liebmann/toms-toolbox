@@ -2,6 +2,8 @@
 
 #include "StreamPacket.hpp"
 
+#include "../../Endianness.hpp"
+
 
 namespace ttb
 {
