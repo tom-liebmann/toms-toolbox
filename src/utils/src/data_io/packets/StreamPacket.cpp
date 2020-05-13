@@ -7,19 +7,17 @@ namespace ttb
     {
     }
 
-    bool StreamPacket::pop( void* dst, size_t dstSize )
+    uint8_t const* StreamPacket::pop( size_t dstSize )
     {
-        auto const written = m_packet.get().write( m_readHead, dstSize, dst, dstSize );
+        uint8_t const* result = nullptr;
 
-        if( written == dstSize )
+        if( m_packet.get().size() >= dstSize )
         {
+            result = data();
             m_readHead += dstSize;
-            return true;
         }
-        else
-        {
-            return false;
-        }
+
+        return result;
     }
 
     size_t StreamPacket::size() const
@@ -27,8 +25,8 @@ namespace ttb
         return m_packet.get().size() - m_readHead;
     }
 
-    size_t StreamPacket::write( size_t offset, size_t size, Writer& writer ) const
+    uint8_t const* StreamPacket::data() const
     {
-        return m_packet.get().write( m_readHead + offset, size, writer );
+        return m_packet.get().data() + m_readHead;
     }
 }

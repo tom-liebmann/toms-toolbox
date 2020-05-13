@@ -8,6 +8,7 @@
 namespace ttb
 {
     class RandomAccessPacket;
+    class BufferPacket;
 }
 
 
@@ -22,7 +23,7 @@ namespace ttb
 
         void clear();
 
-        RandomAccessPacket const& packet() const;
+        BufferPacket packet() const;
 
         // Override: Writer
         virtual size_t write( void const* data, size_t size ) override;
@@ -31,6 +32,6 @@ namespace ttb
         uint8_t* m_buffer;
         size_t m_bufferSize;
 
-        size_t m_writeHead;
+        size_t m_writeHead{ 0 };
     };
 }

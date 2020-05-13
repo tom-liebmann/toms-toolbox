@@ -8,6 +8,12 @@
 
 namespace ttb
 {
+    class BufferPacket;
+}
+
+
+namespace ttb
+{
     class BufferedWriter : public Writer
     {
     public:
@@ -17,7 +23,7 @@ namespace ttb
 
         void clear();
 
-        RandomAccessPacket const& packet() const;
+        BufferPacket packet() const;
 
         // Override: DataWriter
         virtual size_t write( void const* data, size_t size ) override;

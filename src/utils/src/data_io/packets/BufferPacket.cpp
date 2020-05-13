@@ -15,8 +15,8 @@ namespace ttb
         return m_dataSize;
     }
 
-    size_t BufferPacket::write( size_t offset, size_t size, Writer& writer ) const
+    uint8_t const* BufferPacket::data() const
     {
-        return writer.write( m_data + offset, size );
+        return m_data;
     }
 }

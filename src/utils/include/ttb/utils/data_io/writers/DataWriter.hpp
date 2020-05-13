@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../../Endianness.hpp"
+#include "../Writer.hpp"
+
 
 namespace ttb
 {

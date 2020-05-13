@@ -29,18 +29,13 @@ namespace ttb
     template < typename TType >
     TType DataPacket::read()
     {
-        std::array< uint8_t, sizeof( TType ) > buffer;
-
-        if( !pop( buffer.data(), buffer.size() ) )
+        if( auto const data = pop( sizeof( TType ) ); data )
+        {
+            return *reinterpret_cast< TType const* >( data );
+        }
+        else
         {
             throw std::runtime_error( "Not enough data available" );
         }
-
-        if( m_endianness != nativeEndianness() )
-        {
-            std::reverse( std::begin( buffer ), std::end( buffer ) );
-        }
-
-        return *reinterpret_cast< TType const* >( buffer.data() );
     }
 }

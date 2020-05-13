@@ -12,10 +12,16 @@ namespace ttb
     public:
         StreamPacket( RandomAccessPacket const& packet );
 
-        virtual bool pop( void* dst, size_t dstSize );
+        /**
+         * Advances the read head.
+         *
+         * \param dstSize Number of bytes to advance the read head by
+         * \return Pointer to previous data or nullptr if not enough data was left
+         */
+        virtual uint8_t const* pop( size_t dstSize );
 
         virtual size_t size() const override;
-        virtual size_t write( size_t offset, size_t size, Writer& writer ) const override;
+        virtual uint8_t const* data() const override;
 
     private:
         std::reference_wrapper< RandomAccessPacket const > m_packet;

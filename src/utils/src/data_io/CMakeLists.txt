@@ -8,3 +8,4 @@ target_sources(
 )
 
 add_subdirectory( packets )
+add_subdirectory( writers )
