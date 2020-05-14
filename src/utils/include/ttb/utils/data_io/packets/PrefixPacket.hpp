@@ -13,8 +13,7 @@ namespace ttb
     class PrefixPacket : public Packet
     {
     public:
-        template < typename TPrefixType2 >
-        PrefixPacket( TPrefixType2&& prefix, Packet const& packet );
+        PrefixPacket( TPrefixType prefix, Packet const& packet );
 
         // Override: ttb::Packet
         virtual size_t size() const override;
@@ -33,9 +32,8 @@ namespace ttb
 namespace ttb
 {
     template < typename TPrefixType >
-    template < typename TPrefixType2 >
-    PrefixPacket< TPrefixType >::PrefixPacket( TPrefixType2&& prefix, Packet const& packet )
-        : m_prefix{ std::forward< TPrefixType2 >( prefix ) }, m_packet{ packet }
+    PrefixPacket< TPrefixType >::PrefixPacket( TPrefixType prefix, Packet const& packet )
+        : m_prefix{ prefix }, m_packet{ packet }
     {
     }
 
