@@ -3,6 +3,8 @@
 #include "../Packet.hpp"
 #include "../Writer.hpp"
 
+#include <functional>
+
 
 // declarations
 //=================================================================================================
