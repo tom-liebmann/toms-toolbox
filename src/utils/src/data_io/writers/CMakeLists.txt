@@ -5,4 +5,5 @@ target_sources(
         BufferWriter.cpp
         BufferedWriter.cpp
         DataWriter.cpp
+        StreamWriter.cpp
 )
