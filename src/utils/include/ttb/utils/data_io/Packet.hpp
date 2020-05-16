@@ -21,8 +21,10 @@ namespace ttb
 
         virtual size_t size() const = 0;
 
-        virtual size_t write( Writer& writer ) const = 0;
+        virtual size_t write( size_t offset, Writer& writer ) const = 0;
 
         size_t write( void* dst, size_t dstSize ) const;
+
+        size_t write( Writer& writer ) const;
     };
 }

@@ -13,7 +13,7 @@ namespace ttb
     class RandomAccessPacket : public Packet
     {
     public:
-        virtual size_t write( Writer& writer ) const override;
+        virtual size_t write( size_t offset, Writer& writer ) const override;
 
         virtual size_t size() const = 0;
 

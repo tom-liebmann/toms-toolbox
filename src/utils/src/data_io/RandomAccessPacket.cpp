@@ -5,8 +5,17 @@
 
 namespace ttb
 {
-    size_t RandomAccessPacket::write( Writer& writer ) const
+    size_t RandomAccessPacket::write( size_t offset, Writer& writer ) const
     {
-        return writer.write( data(), size() );
+        auto const dataSize = size();
+
+        if( offset > dataSize )
+        {
+            return 0;
+        }
+        else
+        {
+            return writer.write( data() + offset, size() - offset );
+        }
     }
 }

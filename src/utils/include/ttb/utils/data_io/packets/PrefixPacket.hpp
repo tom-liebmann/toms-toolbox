@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Packet.hpp"
+#include "../PacketWriteHelper.hpp"
 #include "../Writer.hpp"
 
 #include <functional>
@@ -19,7 +20,8 @@ namespace ttb
 
         // Override: ttb::Packet
         virtual size_t size() const override;
-        virtual size_t write( Writer& writer ) const override;
+        virtual size_t write( size_t offset, Writer& writer ) const override;
+        using Packet::write;
 
     private:
         TPrefixType m_prefix;
@@ -46,16 +48,13 @@ namespace ttb
     }
 
     template < typename TPrefixType >
-    size_t PrefixPacket< TPrefixType >::write( Writer& writer ) const
+    size_t PrefixPacket< TPrefixType >::write( size_t offset, Writer& writer ) const
     {
-        if( auto const written = writer.write( &m_prefix, sizeof( m_prefix ) );
-            written < sizeof( m_prefix ) )
-        {
-            return written;
-        }
-        else
-        {
-            return sizeof( m_prefix ) + m_packet.get().write( writer );
-        }
+        auto writeHelper = PacketWriteHelper{ offset, writer };
+
+        writeHelper.write( &m_prefix, sizeof( m_prefix ) );
+        writeHelper.write( m_packet.get() );
+
+        return writeHelper.written();
     }
 }

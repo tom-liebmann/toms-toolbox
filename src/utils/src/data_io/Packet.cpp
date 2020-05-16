@@ -14,4 +14,9 @@ namespace ttb
         BufferWriter writer{ dst, dstSize };
         return write( writer );
     }
+
+    size_t Packet::write( Writer& writer ) const
+    {
+        return write( 0, writer );
+    }
 }
