@@ -72,7 +72,7 @@ namespace ttb
         UniformStack< TType >::push( ValueType const& value )
     {
         m_valueStack.push( value );
-        return { *this };
+        return Handle{ *this };
     }
 
     template < typename TType >

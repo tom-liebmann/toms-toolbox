@@ -95,11 +95,21 @@ namespace ttb
     template < typename TType >
     UniformStack< TType >& State::uniform( std::string const& name )
     {
+        auto iter = m_uniforms.find( name );
+
+        if( iter == std::end( m_uniforms ) )
+        {
+            m_uniforms[ name ] = std::make_unique< UniformStack< TType > >();
+            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
+        }
+        else
+        {
 #ifndef NDEBUG
-        return dynamic_cast< UniformStack< TType >& >( m_uniforms[ name ] );
+            return dynamic_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
 #else
-        return static_cast< UniformStack< TType >& >( m_uniforms[ name ] );
+            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
 #endif
+        }
     }
 
     template < typename TType >
