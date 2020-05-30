@@ -41,7 +41,8 @@ namespace ttb
         enum class Key::Action
         {
             DOWN,
-            UP
+            UP,
+            UNKNOWN
         };
 
 

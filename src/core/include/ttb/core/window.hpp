@@ -1,4 +1,5 @@
-#pragma once
-
-#include <ttb/core/window/Window.hpp>
-#include <ttb/core/window/WindowEvents.hpp>
+#include "window/Window.hpp"
+#include "window/WindowCreator.hpp"
+#include "window/WindowEvents.hpp"
+#include "window/WindowFlag.hpp"
+#include "window/WindowMode.hpp"

@@ -59,18 +59,16 @@ target_compile_features(
 
 add_subdirectory( src )
 
-if( "${BUILD_PLATFORM}" STREQUAL "Desktop" )
+if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
 
     include( glew )
     include( opengl )
-    include( glfw )
 
     target_link_libraries(
         ${TARGET_NAME}
 
         PRIVATE
             glew
-            glfw
             opengl
     )
 

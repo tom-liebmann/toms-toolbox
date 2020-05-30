@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef MODE_ANDROID
+#ifdef PLATFORM_ANDROID
 
 #include <GLES3/gl32.h>
 #include <GLES3/gl3ext.h>

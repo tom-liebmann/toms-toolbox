@@ -1,0 +1,5 @@
+if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
+    add_subdirectory( platform_linux )
+else()
+    message( FATAL_ERROR "Build platform ${BUILD_PLATFORM} currently not supported" )
+endif()
