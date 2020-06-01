@@ -105,3 +105,8 @@ export(
     TARGETS ${EXPORT_TARGETS}
     FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake"
 )
+
+configure_file(
+    TTBConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/TTBConfig.cmake"
+)
