@@ -6,20 +6,23 @@
 namespace ttb
 {
     template < typename TType, TType TValue >
-    class ValuePacket : ttb::RandomAccessPacket
+    class ValuePacket : public ttb::RandomAccessPacket
     {
     public:
         virtual size_t size() const override;
         virtual uint8_t const* data() const override;
 
     private:
-        static TType const s_value = TValue;
+        static TType const s_value;
     };
 }
 
 
 namespace ttb
 {
+    template < typename TType, TType TValue >
+    TType const ValuePacket< TType, TValue >::s_value = TValue;
+
     template < typename TType, TType TValue >
     size_t ValuePacket< TType, TValue >::size() const
     {
