@@ -32,7 +32,8 @@ namespace ttb
         auto const dataPtr = reinterpret_cast< uint8_t const* >( data );
         auto const copySize = std::min( size, m_bufferSize - m_writeHead );
 
-        std::copy( dataPtr, dataPtr + copySize, m_buffer );
+        std::copy( dataPtr, dataPtr + copySize, m_buffer + m_writeHead );
+        m_writeHead += copySize;
 
         return copySize;
     }

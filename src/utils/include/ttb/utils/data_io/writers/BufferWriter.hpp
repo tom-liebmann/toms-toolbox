@@ -29,8 +29,8 @@ namespace ttb
         virtual size_t write( void const* data, size_t size ) override;
 
     private:
-        uint8_t* m_buffer;
-        size_t m_bufferSize;
+        uint8_t* m_buffer{ nullptr };
+        size_t m_bufferSize{ 0 };
 
         size_t m_writeHead{ 0 };
     };
