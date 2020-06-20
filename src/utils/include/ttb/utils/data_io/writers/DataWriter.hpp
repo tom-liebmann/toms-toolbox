@@ -3,6 +3,8 @@
 #include "../../Endianness.hpp"
 #include "../Writer.hpp"
 
+#include <cstdint>
+
 
 namespace ttb
 {

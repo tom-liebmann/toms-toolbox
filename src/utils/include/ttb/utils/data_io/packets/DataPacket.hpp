@@ -4,6 +4,8 @@
 
 #include "../../Endianness.hpp"
 
+#include <stdexcept>
+
 
 namespace ttb
 {
