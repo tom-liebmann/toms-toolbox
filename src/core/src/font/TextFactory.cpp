@@ -14,6 +14,9 @@ namespace ttb
 
             auto v = modify( vertexBuffer );
 
+            auto const width = font.width();
+            auto const height = font.height();
+
             float x = 0.0f;
             float y = 0.0f;
             for( size_t i = 0; i < text.size(); ++i )
@@ -24,32 +27,27 @@ namespace ttb
                 {
                     auto const& c = font.character( text[ i ] );
                     // upper left triangle
-                    v.push( c.x() / font.texture()->width(), c.y() / font.texture()->height() );
+                    v.push( c.x() / width, c.y() / height );
                     v.push( ( x + c.xOffset() ) * scaleFactor, ( y + c.yOffset() ) * scaleFactor );
 
-                    v.push( c.x() / font.texture()->width(),
-                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( c.x() / width, ( c.y() + c.height() ) / height );
                     v.push( ( x + c.xOffset() ) * scaleFactor,
                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
-                            c.y() / font.texture()->height() );
+                    v.push( ( c.x() + c.width() ) / width, c.y() / height );
                     v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
                             ( y + c.yOffset() ) * scaleFactor );
 
                     // lower right triangle
-                    v.push( c.x() / font.texture()->width(),
-                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( c.x() / width, ( c.y() + c.height() ) / height );
                     v.push( ( x + c.xOffset() ) * scaleFactor,
                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
-                            ( c.y() + c.height() ) / font.texture()->height() );
+                    v.push( ( c.x() + c.width() ) / width, ( c.y() + c.height() ) / height );
                     v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
                             ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    v.push( ( c.x() + c.width() ) / font.texture()->width(),
-                            c.y() / font.texture()->height() );
+                    v.push( ( c.x() + c.width() ) / width, c.y() / height );
                     v.push( ( x + c.xOffset() + c.width() ) * scaleFactor,
                             ( y + c.yOffset() ) * scaleFactor );
 

@@ -16,7 +16,7 @@ namespace ttb
         class Character
         {
         public:
-            Character( std::istream& stream );
+            Character( std::string const& line );
 
             char id() const;
 
@@ -45,27 +45,29 @@ namespace ttb
             float m_xAdvance;
         };
 
-        Font( std::string const& filename );
+        Font( float lineHeight, uint16_t width, uint16_t height, std::string const& charFile );
 
         Character const& character( char index ) const;
 
         float lineHeight() const;
 
+        uint16_t width() const;
+
+        uint16_t height() const;
+
         /**
          * Computes the dimensions of the geometry for the given text.
          *
-         * @param size Size of the text to compute width for
-         * @param text Text to compute width for
-         * @return Dimensions of the given text
+         * @param  size Size of the text to compute width for
+         * @param  text Text to compute width for
+         * @return      Dimensions of the given text
          */
         ttb::Range< float, 2 > textDimensions( float size, std::string const& text ) const;
 
-        std::shared_ptr< ttb::Texture2D > const& texture() const;
-
     private:
         float m_lineHeight;
-
-        std::shared_ptr< ttb::Texture2D > m_texture;
+        uint16_t m_width;
+        uint16_t m_height;
         std::map< char, Character > m_characters;
     };
 }

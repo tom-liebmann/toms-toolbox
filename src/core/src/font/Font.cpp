@@ -6,7 +6,7 @@
 
 namespace ttb
 {
-    Font::Character::Character( std::istream& stream )
+    Font::Character::Character( std::string const& line )
     {
         static std::regex const charReg(
             "^char "
@@ -14,9 +14,6 @@ namespace ttb
             "(-?\\d+)"
             "\\s+"
             "yoffset=(-?\\d+)\\s+xadvance=(-?\\d+).*$" );
-
-        std::string line;
-        std::getline( stream, line );
 
         std::smatch match;
         if( !std::regex_match( line, match, charReg ) )
@@ -75,59 +72,25 @@ namespace ttb
     }
 
 
-    Font::Font( std::string const& filename )
+    Font::Font( float lineHeight, uint16_t width, uint16_t height, std::string const& charFile )
+        : m_lineHeight{ lineHeight }, m_width{ width }, m_height{ height }
     {
-        std::ifstream stream( filename );
+        std::ifstream stream{ charFile };
 
         std::string line;
-        std::smatch match;
 
-        std::getline( stream, line );
-        std::getline( stream, line );
-
-        std::regex lineHeightReg( "^common lineHeight=(\\d+).*$" );
-        if( !std::regex_match( line, match, lineHeightReg ) )
+        while( true )
         {
-            throw std::runtime_error( "Invalid file format (missing common match)" );
+            if( std::getline( stream, line ) )
+            {
+                auto const character = Character{ line };
+                m_characters.insert( { character.id(), character } );
+            }
+            else
+            {
+                break;
+            }
         }
-
-        m_lineHeight = std::stof( match[ 1 ].str() );
-
-        std::getline( stream, line );
-
-        std::regex fileReg( "^page id=(\\d+) file=\"([^\"]+\\.png)\"\\s*$" );
-        if( !std::regex_match( line, match, fileReg ) )
-        {
-            throw std::runtime_error( "Invalid file format (missing page id)" );
-        }
-
-        std::string textureFile = match[ 2 ].str();
-
-        std::getline( stream, line );
-
-        std::regex countReg( "^chars count=(\\d+)\\s*$" );
-        if( !std::regex_match( line, match, countReg ) )
-        {
-            throw std::runtime_error( "Invalid file format (missing chars)" );
-        }
-
-        size_t charCount = std::stoi( match[ 1 ].str() );
-
-        for( size_t lineNr = 0; lineNr < charCount; ++lineNr )
-        {
-            Character c( stream );
-
-            m_characters.insert( { c.id(), c } );
-        }
-
-        // Load texture file
-        std::regex dirReg( "^(.*\\/).*\\.fnt$" );
-        if( !std::regex_match( filename, match, dirReg ) )
-        {
-            throw std::runtime_error( "Invalid file directory (missing fnt)" );
-        }
-
-        m_texture = TextureFactory::loadPNG( match[ 1 ].str() + textureFile );
     }
 
     Font::Character const& Font::character( char index ) const
@@ -145,6 +108,16 @@ namespace ttb
     float Font::lineHeight() const
     {
         return m_lineHeight;
+    }
+
+    uint16_t Font::width() const
+    {
+        return m_width;
+    }
+
+    uint16_t Font::height() const
+    {
+        return m_height;
     }
 
     ttb::Range< float, 2 > Font::textDimensions( float size, std::string const& text ) const
@@ -179,10 +152,5 @@ namespace ttb
         }
 
         return dimensions;
-    }
-
-    std::shared_ptr< ttb::Texture2D > const& Font::texture() const
-    {
-        return m_texture;
     }
 }
