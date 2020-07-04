@@ -37,6 +37,8 @@ namespace ttb
 
         Handle push( ValueType const& value );
 
+        void pop();
+
         ValueType const& value() const;
 
     private:
@@ -73,6 +75,12 @@ namespace ttb
     {
         m_valueStack.push( value );
         return Handle{ *this };
+    }
+
+    template < typename TType >
+    inline void UniformStack< TType >::pop()
+    {
+        m_valueStack.pop();
     }
 
     template < typename TType >

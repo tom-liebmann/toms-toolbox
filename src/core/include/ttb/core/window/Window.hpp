@@ -30,6 +30,10 @@ namespace ttb
 
         void update();
 
+        // Override: Context
+        virtual bool use() override;
+        virtual bool unuse() override;
+
         class Impl;
 
     private:
@@ -45,10 +49,6 @@ namespace ttb
         virtual size_t height() const override;
         virtual void begin( State& state ) const override;
         virtual void end( State& state ) const override;
-
-        // Override: Context
-        virtual bool use() override;
-        virtual bool unuse() override;
 
         std::unique_ptr< Impl > m_impl;
 
