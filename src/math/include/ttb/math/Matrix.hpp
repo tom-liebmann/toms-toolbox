@@ -47,6 +47,9 @@ namespace ttb
         Matrix< TType, TDim + 1, TDim + 1 > translation( Vector< TType, TDim > const& vec );
 
         template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > scale( Vector< TType, TDim > const& vec );
+
+        template < typename TType, size_t TDim >
         Matrix< TType, TDim + 1, TDim + 1 > transform( Range< TType, TDim > const& from,
                                                        Range< TType, TDim > const& to );
     }
@@ -252,8 +255,15 @@ namespace ttb
         }
         v( TDim ) = 1;
 
-        auto const vec = matrix * v;
-        return { vec( 0 ) / vec( 3 ), vec( 1 ) / vec( 3 ), vec( 2 ) / vec( 3 ) };
+        v = matrix * v;
+
+        Vector< TType, TDim > result;
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            result( d ) = v( d ) / v( TDim );
+        }
+
+        return result;
     }
 
 
@@ -435,6 +445,20 @@ namespace ttb
 
             return result;
         }
+
+        template < typename TType, size_t TDim >
+        Matrix< TType, TDim + 1, TDim + 1 > scale( Vector< TType, TDim > const& vec )
+        {
+            auto result = mat::identity< TType, TDim + 1 >();
+
+            for( size_t d = 0; d < TDim; ++d )
+            {
+                result( d, d ) = vec( d );
+            }
+
+            return result;
+        }
+
 
         template < typename TType, size_t TDim >
         Matrix< TType, TDim + 1, TDim + 1 > transform( Range< TType, TDim > const& from,

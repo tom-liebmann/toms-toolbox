@@ -1,0 +1,17 @@
+target_sources(
+    ${TARGET_NAME}
+
+    PRIVATE
+        State.cpp
+        Context.cpp
+        GBuffer.cpp
+        PNGLoader.cpp
+        RenderTarget.cpp
+)
+
+add_subdirectory( uniform )
+add_subdirectory( geometry )
+add_subdirectory( font )
+add_subdirectory( shader )
+add_subdirectory( texture )
+add_subdirectory( window )

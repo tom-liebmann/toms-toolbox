@@ -1,52 +1,33 @@
-# find source files
-file(
-    GLOB_RECURSE
-    SOURCE_FILES
-    ABSOLUTE "${CMAKE_CURRENT_SOURCE_DIR}"
-    src/*.cpp
-)
+set( TARGET_NAME ttbMath )
 
-if( ${COMPILATION_MODE} STREQUAL "GCC" )
-    add_library(
-        ttbMath
-        SHARED
-        ${SOURCE_FILES} )
-elseif( ${COMPILATION_MODE} STREQUAL "CLANG" )
-    add_library(
-        ttbMath
-        STATIC
-        ${SOURCE_FILES}
-        )
+set( ACTIVATE_${TARGET_NAME} ON CACHE BOOL "Enable module ${TARGET_NAME}" )
+
+if( NOT ACTIVATE_${TARGET_NAME} )
+    return()
 endif()
 
+add_library( ${TARGET_NAME} INTERFACE )
+
 target_include_directories(
-    ttbMath
-    PUBLIC
+    ${TARGET_NAME}
+
+    INTERFACE
         include
-    PRIVATE
-        src
-    )
-
-target_compile_options(
-    ttbMath
-    PUBLIC
-        -Wall
-        -Wextra
-        -Wpedantic
-    )
-
-set_target_properties(
-    ttbMath
-    PROPERTIES
-        POSITION_INDEPENDENT_CODE ON
-        CXX_STANDARD 17
-    )
+)
 
 target_compile_features(
-    ttbMath
-    PUBLIC
-        cxx_std_17
-    )
+    ${TARGET_NAME}
 
-list( APPEND VALID_TARGETS ttbMath )
-set( VALID_TARGETS ${VALID_TARGETS} PARENT_SCOPE )
+    INTERFACE
+        cxx_std_17
+)
+
+target_link_libraries(
+    ttb
+
+    INTERFACE
+        ${TARGET_NAME}
+)
+
+list( APPEND EXPORT_TARGETS ${TARGET_NAME} )
+set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )

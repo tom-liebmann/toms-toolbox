@@ -1,5 +1,8 @@
 #include <ttb/core/shader/Shader.hpp>
 
+#include <ttb/core/gl.hpp>
+
+#include <array>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -40,6 +43,11 @@ namespace ttb
         {
             throw std::runtime_error( "Error compiling shader (" + filename + "): " + e.what() );
         }
+    }
+
+    std::unique_ptr< Shader > Shader::fromSource( Type type, std::string const& source )
+    {
+        return std::unique_ptr< Shader >( new Shader( type, source ) );
     }
 
     Shader::Shader( Type type, std::string const& source )

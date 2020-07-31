@@ -1,4 +1,3 @@
-#include "Window.hpp"
 #include <ttb/core/window/Window.hpp>
 #include <ttb/core/window/WindowEvents.hpp>
 
@@ -47,199 +46,277 @@ namespace
 
 namespace ttb
 {
+    class Window::Impl
+    {
+    public:
+        Impl( std::string title, Mode const& mode, GLFWwindow* sharedWindow );
+
+        ~Impl();
+
+        void window( Window& wnd );
+
+        Window& window();
+
+        EventOutput& eventOutput();
+
+        void mode( Mode const& mode );
+
+        Mode const& mode() const;
+
+        std::string const& title() const;
+
+        GLFWwindow* handle() const;
+
+        void update();
+
+        void resize( uint16_t width, uint16_t height );
+
+    private:
+        static size_t& windowCount();
+
+        Window* m_window;
+
+        EventOutput m_eventOutput;
+
+        Mode m_mode;
+
+        std::string m_title;
+
+        GLFWwindow* m_handle;
+    };
+
+
     std::shared_ptr< Window > Window::create( std::string const& title, Window::Mode const& mode )
     {
-        return std::make_shared< linux::Window >( title, mode );
+        return std::shared_ptr< Window >(
+            new Window( std::make_unique< Window::Impl >( title, mode, nullptr ) ) );
     }
 
     std::shared_ptr< Window > Window::create( std::string const& title,
                                               Window::Mode const& mode,
                                               ttb::Window const& sharedWindow )
     {
-        return std::make_shared< linux::Window >( title, mode, sharedWindow );
+        return std::shared_ptr< Window >( new Window(
+            std::make_unique< Window::Impl >( title, mode, sharedWindow.impl().handle() ) ) );
+    }
+
+    void Window::resize( uint16_t width, uint16_t height )
+    {
+        m_impl->resize( width, height );
+    }
+
+    void Window::update()
+    {
+        m_impl->update();
+    }
+
+    size_t Window::width() const
+    {
+        return mode().width();
+    }
+
+    size_t Window::height() const
+    {
+        return mode().height();
+    }
+
+    void Window::begin( State& state ) const
+    {
+        state.pushViewport( Viewport(
+            0, 0, static_cast< GLsizei >( width() ), static_cast< GLsizei >( height() ) ) );
+    }
+
+    void Window::end( State& state ) const
+    {
+        state.popViewport();
+    }
+
+    bool Window::use()
+    {
+        glfwMakeContextCurrent( m_impl->handle() );
+        return true;
+    }
+
+    bool Window::unuse()
+    {
+        glfwMakeContextCurrent( nullptr );
+        return true;
+    }
+
+    Window::Mode const& Window::mode() const
+    {
+        return m_impl->mode();
+    }
+
+    std::string const& Window::title() const
+    {
+        return m_impl->title();
+    }
+
+    Window::EventOutput& Window::eventOutput()
+    {
+        return m_impl->eventOutput();
+    }
+
+    Window::Window( std::unique_ptr< Impl > impl ) : m_impl{ std::move( impl ) }
+    {
+        m_impl->window( *this );
     }
 
 
-    namespace linux
+    Window::Impl::Impl( std::string title, Mode const& mode, GLFWwindow* sharedWindow )
+        : m_mode{ mode }, m_title{ std::move( title ) }
     {
-        size_t Window::s_windowCount = 0;
-
-        Window::Window( std::string const& title, Mode const& mode )
-            : Window( title, mode, nullptr )
+        if( windowCount() == 0 )
         {
+            glfwInit();
         }
 
-        Window::Window( std::string const& title,
-                        Mode const& mode,
-                        ttb::Window const& sharedWindow )
-            : Window( title, mode, static_cast< Window const& >( sharedWindow ).m_handle )
-        {
-        }
+        glfwSetErrorCallback( callbackErrorGLFW );
 
-        Window::Window( std::string const& title, Mode const& mode, GLFWwindow* sharedWindow )
-            : ttb::Window( title, mode )
-        {
-            if( s_windowCount == 0 )
-            {
-                glfwInit();
-            }
-
-            glfwSetErrorCallback( callbackErrorGLFW );
-
-            // prevent glfw to create a context < 3.3
-            glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-            glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-            // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
-            glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+        // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+        glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
 #ifndef NDEBUG
-            std::cout << "glfw version: " << glfwGetVersionString() << std::endl;
-            std::cout << "glew version: " << glewGetString( GLEW_VERSION ) << std::endl;
+        std::cout << "glfw version: " << glfwGetVersionString() << std::endl;
+        std::cout << "glew version: " << glewGetString( GLEW_VERSION ) << std::endl;
 
-            glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
+        glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
 #endif
 
-            GLFWmonitor* monitor =
-                mode.flag( Window::Flag::FULLSCREEN ) ? glfwGetPrimaryMonitor() : nullptr;
+        GLFWmonitor* monitor =
+            mode.flag( Window::Flag::FULLSCREEN ) ? glfwGetPrimaryMonitor() : nullptr;
 
-            glfwWindowHint( GLFW_FLOATING,
-                            mode.flag( Window::Flag::FLOATING ) ? GL_TRUE : GL_FALSE );
-            glfwWindowHint( GLFW_RESIZABLE,
-                            mode.flag( Window::Flag::RESIZABLE ) ? GL_TRUE : GL_FALSE );
+        glfwWindowHint( GLFW_FLOATING, mode.flag( Window::Flag::FLOATING ) ? GL_TRUE : GL_FALSE );
+        glfwWindowHint( GLFW_RESIZABLE, mode.flag( Window::Flag::RESIZABLE ) ? GL_TRUE : GL_FALSE );
 
-            if( mode.flag( Window::Flag::HIDDEN ) )
+        if( mode.flag( Window::Flag::HIDDEN ) )
+        {
+            glfwWindowHint( GLFW_VISIBLE, GL_FALSE );
+            m_handle = glfwCreateWindow( mode.width(), mode.height(), "", nullptr, sharedWindow );
+        }
+        else
+        {
+            m_handle = glfwCreateWindow(
+                mode.width(), mode.height(), title.c_str(), monitor, sharedWindow );
+        }
+
+        glfwMakeContextCurrent( m_handle );
+
+        glfwSwapInterval( 0 );
+
+        if( windowCount() == 0 )
+        {
+            // workaround for glew <= 1.13
+            // see https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library
+            glewExperimental = GL_TRUE;
+
+            if( auto error = glewInit(); error != GLEW_OK )
             {
-                glfwWindowHint( GLFW_VISIBLE,
-                                mode.flag( Window::Flag::HIDDEN ) ? GL_FALSE : GL_TRUE );
-                m_handle =
-                    glfwCreateWindow( mode.width(), mode.height(), "", nullptr, sharedWindow );
+                throw std::runtime_error(
+                    "GLEW error: " +
+                    std::string( reinterpret_cast< char const* >( glewGetErrorString( error ) ) ) );
             }
-            else
-            {
-                m_handle = glfwCreateWindow(
-                    mode.width(), mode.height(), title.c_str(), monitor, sharedWindow );
-            }
-
-            glfwMakeContextCurrent( m_handle );
+        }
 
 #ifndef NDEBUG
-            std::cout << "Context: " << reinterpret_cast< intptr_t >( m_handle ) << '\n';
+
+        if( glDebugMessageCallback )
+        {
+            std::cout << "Debugging enabled" << std::endl;
+            glEnable( GL_DEBUG_OUTPUT );
+            glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+            glDebugMessageCallback( callbackErrorOpenGL, nullptr );
+        }
+        else
+        {
+            std::cout << "Debugging not available" << std::endl;
+        }
+
 #endif
 
-            glfwSwapInterval( 0 );
+        glfwSetWindowUserPointer( m_handle, this );
 
-            if( s_windowCount == 0 )
-            {
-                // workaround for glew <= 1.13
-                // see https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library
-                glewExperimental = GL_TRUE;
+        glfwSetWindowCloseCallback( m_handle, callbackWindowClose );
+        glfwSetKeyCallback( m_handle, callbackKey );
+        glfwSetMouseButtonCallback( m_handle, callbackMouseButton );
+        glfwSetCursorPosCallback( m_handle, callbackMouseMove );
+        glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
+        glfwSetScrollCallback( m_handle, callbackScroll );
 
-                if( auto error = glewInit(); error != GLEW_OK )
-                {
-                    throw std::runtime_error( "GLEW error: " +
-                                              std::string( reinterpret_cast< char const* >(
-                                                  glewGetErrorString( error ) ) ) );
-                }
-            }
+        ++windowCount();
 
-#ifndef NDEBUG
-            std::cout << "context major version: "
-                      << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MAJOR ) << std::endl;
-            std::cout << "context minor version: "
-                      << glfwGetWindowAttrib( m_handle, GLFW_CONTEXT_VERSION_MINOR ) << std::endl;
+        glfwMakeContextCurrent( nullptr );
+    }
 
-            std::cout << "Profile: ";
+    Window::Impl::~Impl()
+    {
+        glfwDestroyWindow( m_handle );
 
-            switch( glfwGetWindowAttrib( m_handle, GLFW_OPENGL_PROFILE ) )
-            {
-                case GLFW_OPENGL_CORE_PROFILE:
-                    std::cout << "core\n";
-                    break;
+        --windowCount();
 
-                case GLFW_OPENGL_COMPAT_PROFILE:
-                    std::cout << "compat\n";
-                    break;
-
-                case GLFW_OPENGL_ANY_PROFILE:
-                    std::cout << "any\n";
-                    break;
-            }
-
-            if( !glfwExtensionSupported( "GL_ARB_debug_output" ) )
-            {
-                std::cout << "Debugging extension not supported" << std::endl;
-            }
-
-            if( glDebugMessageCallback )
-            {
-                std::cout << "Debugging enabled" << std::endl;
-                glEnable( GL_DEBUG_OUTPUT );
-                glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
-                glDebugMessageCallback( callbackErrorOpenGL, nullptr );
-            }
-            else
-            {
-                std::cout << "Debugging not available" << std::endl;
-            }
-#endif
-
-            glfwSetWindowUserPointer( m_handle, this );
-
-            glfwSetWindowCloseCallback( m_handle, callbackWindowClose );
-            glfwSetKeyCallback( m_handle, callbackKey );
-            glfwSetMouseButtonCallback( m_handle, callbackMouseButton );
-            glfwSetCursorPosCallback( m_handle, callbackMouseMove );
-            glfwSetWindowSizeCallback( m_handle, callbackWindowSize );
-            glfwSetScrollCallback( m_handle, callbackScroll );
-
-            ++s_windowCount;
-
-            glfwMakeContextCurrent( nullptr );
-        }
-
-        Window::~Window()
+        if( windowCount() == 0 )
         {
-            glfwDestroyWindow( m_handle );
-
-            --s_windowCount;
-
-            if( s_windowCount == 0 )
-            {
-                glfwTerminate();
-            }
+            glfwTerminate();
         }
+    }
 
-        Signal< void( Event const& ) >& Window::eventOutput()
-        {
-            return m_eventOutput;
-        }
+    void Window::Impl::window( Window& wnd )
+    {
+        m_window = &wnd;
+    }
 
-        void Window::update()
-        {
-            glfwSwapBuffers( m_handle );
-            glfwPollEvents();
-        }
+    Window& Window::Impl::window()
+    {
+        return *m_window;
+    }
 
-        void Window::resize( uint16_t width, uint16_t height )
-        {
-            glfwSetWindowSize( m_handle, width, height );
+    Window::EventOutput& Window::Impl::eventOutput()
+    {
+        return m_eventOutput;
+    }
 
-            mode( ttb::Window::Mode( width, height, mode().flags() ) );
+    void Window::Impl::mode( Mode const& mode )
+    {
+        m_mode = mode;
+    }
 
-            m_eventOutput.call( ttb::events::WindowResize( *this ) );
-        }
+    Window::Mode const& Window::Impl::mode() const
+    {
+        return m_mode;
+    }
 
-        bool Window::use()
-        {
-            glfwMakeContextCurrent( m_handle );
-            return true;
-        }
+    std::string const& Window::Impl::title() const
+    {
+        return m_title;
+    }
 
-        bool Window::unuse()
-        {
-            glfwMakeContextCurrent( nullptr );
-            return true;
-        }
+    GLFWwindow* Window::Impl::handle() const
+    {
+        return m_handle;
+    }
+
+    void Window::Impl::update()
+    {
+        glfwSwapBuffers( m_handle );
+        glfwPollEvents();
+    }
+
+    void Window::Impl::resize( uint16_t width, uint16_t height )
+    {
+        glfwSetWindowSize( m_handle, width, height );
+
+        m_mode = Mode( width, height, mode().flags() );
+
+        m_eventOutput.call( ttb::events::WindowResize( *m_window ) );
+    }
+
+    size_t& Window::Impl::windowCount()
+    {
+        static size_t s_windowCount = 0;
+        return s_windowCount;
     }
 }
 
@@ -248,7 +325,7 @@ namespace
 {
     void pushEvent( GLFWwindow* window, ttb::Event const& event )
     {
-        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::Window::Impl* >( glfwGetWindowUserPointer( window ) );
 
         wnd->eventOutput().call( event );
     }
@@ -279,9 +356,9 @@ namespace
 
     void callbackWindowClose( GLFWwindow* window )
     {
-        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::Window::Impl* >( glfwGetWindowUserPointer( window ) );
 
-        pushEvent( window, ttb::events::WindowClose( *wnd ) );
+        pushEvent( window, ttb::events::WindowClose( wnd->window() ) );
     }
 
     void callbackKey( GLFWwindow* window, int key, int /* scancode */, int action, int /* mods */ )
@@ -338,13 +415,13 @@ namespace
 
     void callbackWindowSize( GLFWwindow* window, int width, int height )
     {
-        auto wnd = reinterpret_cast< ttb::linux::Window* >( glfwGetWindowUserPointer( window ) );
+        auto wnd = reinterpret_cast< ttb::Window::Impl* >( glfwGetWindowUserPointer( window ) );
 
         wnd->mode( ttb::Window::Mode( static_cast< uint16_t >( width ),
                                       static_cast< uint16_t >( height ),
                                       wnd->mode().flags() ) );
 
-        pushEvent( window, ttb::events::WindowResize( *wnd ) );
+        pushEvent( window, ttb::events::WindowResize( wnd->window() ) );
     }
 
     void callbackScroll( GLFWwindow* window, double xoffset, double yoffset )

@@ -21,7 +21,7 @@ namespace ttb
 
         Tensor();
 
-        Tensor( T value );
+        explicit Tensor( T value );
 
         template < typename TType2 >
         Tensor( std::initializer_list< TType2 > values );

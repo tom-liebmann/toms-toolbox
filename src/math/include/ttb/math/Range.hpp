@@ -29,7 +29,12 @@ namespace ttb
         T const& min( size_t index ) const;
         T const& max( size_t index ) const;
 
+        Vector< T, D > const& min() const;
+        Vector< T, D > const& max() const;
+
         T extent( size_t index ) const;
+
+        Vector< T, D > extent() const;
 
         T getBound( size_t index ) const;
 
@@ -119,9 +124,34 @@ namespace ttb
     }
 
     template < typename TType, size_t TDim >
+    Vector< TType, TDim > const& Range< TType, TDim >::min() const
+    {
+        return m_min;
+    }
+
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim > const& Range< TType, TDim >::max() const
+    {
+        return m_max;
+    }
+
+    template < typename TType, size_t TDim >
     TType Range< TType, TDim >::extent( size_t index ) const
     {
         return m_max[ index ] - m_min[ index ];
+    }
+
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim > Range< TType, TDim >::extent() const
+    {
+        Vector< TType, TDim > result;
+
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            result( d ) = m_max( d ) - m_min( d );
+        }
+
+        return result;
     }
 
     template < typename T, size_t D >

@@ -21,6 +21,8 @@ namespace ttb
 
         static std::unique_ptr< Shader > fromFile( Type type, std::string const& filename );
 
+        static std::unique_ptr< Shader > fromSource( Type type, std::string const& source );
+
         Shader( Type type, std::string const& source );
 
         ~Shader();

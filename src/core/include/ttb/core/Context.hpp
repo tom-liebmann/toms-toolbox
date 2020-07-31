@@ -12,7 +12,6 @@ namespace ttb
 
         ContextHandle makeCurrent();
 
-    private:
         virtual bool use() = 0;
 
         virtual bool unuse() = 0;

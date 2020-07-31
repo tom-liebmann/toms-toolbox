@@ -1,5 +1,7 @@
 #include <ttb/core/GBuffer.hpp>
 
+#include <ttb/core/gl.hpp>
+
 #include <ttb/core/State.hpp>
 #include <ttb/core/texture/Texture2D.hpp>
 
@@ -43,14 +45,7 @@ namespace ttb
     {
         state.pushFramebuffer( m_frameBufferObject );
 
-        if( m_drawBufferIDs.size() == 1 )
-        {
-            glDrawBuffer( m_drawBufferIDs[ 0 ] );
-        }
-        else
-        {
-            glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
-        }
+        glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
 
         state.pushViewport( Viewport( 0, 0, width(), height() ) );
     }

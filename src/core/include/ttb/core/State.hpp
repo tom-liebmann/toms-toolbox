@@ -2,6 +2,7 @@
 
 #include "uniform.hpp"
 #include <ttb/core/Viewport.hpp>
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <memory>
@@ -16,11 +17,6 @@ namespace ttb
 {
     class Program;
     class RenderTarget;
-
-    class UniformBase;
-
-    template < typename TType >
-    class Uniform;
 }
 
 
@@ -63,14 +59,11 @@ namespace ttb
         // events
         void apply();
 
-        // uniforms
         template < typename TType >
-        void pushUniform( std::string const& name, TType const& value );
-
-        void popUniform( std::string const& name );
+        UniformStack< TType >& uniform( std::string const& name );
 
         template < typename TType >
-        TType const& uniform( std::string const& name ) const;
+        UniformStack< TType > const& uniform( std::string const& name ) const;
 
     private:
         // render target
@@ -92,7 +85,7 @@ namespace ttb
         std::stack< Viewport > m_viewportStack;
 
         // uniforms
-        std::unordered_map< std::string, std::stack< std::unique_ptr< UniformBase > > > m_uniforms;
+        std::unordered_map< std::string, std::unique_ptr< UniformStackBase > > m_uniforms;
     };
 }
 
@@ -100,35 +93,32 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    void State::pushUniform( std::string const& name, TType const& value )
+    UniformStack< TType >& State::uniform( std::string const& name )
     {
         auto iter = m_uniforms.find( name );
 
         if( iter == std::end( m_uniforms ) )
         {
-            m_uniforms[ name ].push(
-                std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
+            m_uniforms[ name ] = std::make_unique< UniformStack< TType > >();
+            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
         }
         else
         {
-            iter->second.push( std::make_unique< Uniform< std::decay_t< TType > > >( value ) );
+#ifndef NDEBUG
+            return dynamic_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
+#else
+            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
+#endif
         }
     }
 
     template < typename TType >
-    TType const& State::uniform( std::string const& name ) const
+    UniformStack< TType > const& State::uniform( std::string const& name ) const
     {
-        auto iter = m_uniforms.find( name );
-
-        if( iter == std::end( m_uniforms ) )
-        {
-            throw std::runtime_error( "Accessing unknown uniform" );
-        }
-        else
-        {
-            auto const& u = dynamic_cast< Uniform< TType > const& >( *iter->second.top() );
-
-            return u.value();
-        }
+#ifndef NDEBUG
+        return dynamic_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+#else
+        return static_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+#endif
     }
 }
