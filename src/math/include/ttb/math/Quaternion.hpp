@@ -108,13 +108,13 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    inline Quaternion< TType >::Quaternion() : m_w( 1 ), m_x( 0 ), m_y( 0 ), m_z( 0 )
+    inline Quaternion< TType >::Quaternion() : m_w{ 1 }, m_x{ 0 }, m_y{ 0 }, m_z{ 0 }
     {
     }
 
     template < typename TType >
     inline Quaternion< TType >::Quaternion( TType w, TType x, TType y, TType z )
-        : m_w( w ), m_x( x ), m_y( y ), m_z( z )
+        : m_w{ w }, m_x{ x }, m_y{ y }, m_z{ z }
     {
     }
 
@@ -123,12 +123,11 @@ namespace ttb
     {
         using std::sin;
         rot /= 2.0;
-        auto s = sin( rot );
-        auto len = norm( axis );
+        auto const factor = sin( rot ) / norm( axis );
         m_w = std::cos( rot );
-        m_x = axis( 0 ) / len * s;
-        m_y = axis( 1 ) / len * s;
-        m_z = axis( 2 ) / len * s;
+        m_x = axis.x() * factor;
+        m_y = axis.y() * factor;
+        m_z = axis.z() * factor;
     }
 
     template < typename TType >
@@ -194,13 +193,13 @@ namespace ttb
     template < class Type >
     inline Type Quaternion< Type >::azimuth() const
     {
-        return atan2( m_y, m_x ) * 114.5915590262;
+        return static_cast< Type >( atan2( m_y, m_x ) * 2.0 );
     }
 
     template < class Type >
     inline Type Quaternion< Type >::polar() const
     {
-        return atan2( m_y, m_z ) * 114.5915590262;
+        return static_cast< Type >( atan2( m_y, m_z ) * 2.0 );
     }
 
     template < typename TType >
@@ -213,8 +212,7 @@ namespace ttb
     template < typename TType >
     inline TType norm2( Quaternion< TType > const& quat )
     {
-        return quat.w() * quat.w() + quat.x() * quat.x() + quat.y() * quat.y() +
-               quat.z() * quat.z();
+        return dot( quat, quat );
     }
 
     template < typename TType >
@@ -232,13 +230,14 @@ namespace ttb
     template < typename TType >
     inline Quaternion< TType > normalize( Quaternion< TType > const& quat )
     {
-        TType len = norm( quat );
+        TType const len = norm( quat );
         return { quat.w() / len, quat.x() / len, quat.y() / len, quat.z() / len };
     }
 
     template < typename TType >
     Quaternion< TType > exp( Quaternion< TType > const& quat )
     {
+        using namespace impl;
         using std::abs;
         using std::cos;
         using std::exp;
@@ -247,8 +246,8 @@ namespace ttb
 
         TType expW = exp( quat.w() );
         TType len = sqrt( quat.x() * quat.x() + quat.y() * quat.y() + quat.z() * quat.z() );
-        TType f = abs( len ) > impl::LENGTH_THRESHOLD< TType > ? expW * sin( len ) / len
-                                                               : static_cast< TType >( 0 );
+        TType f = abs( len ) > LENGTH_THRESHOLD< TType > ? expW * sin( len ) / len
+                                                         : static_cast< TType >( 0 );
 
         return { expW * cos( len ), quat.x() * f, quat.y() * f, quat.z() * f };
     }
@@ -256,17 +255,18 @@ namespace ttb
     template < typename TType >
     Quaternion< TType > ln( Quaternion< TType > const& quat )
     {
+        using namespace impl;
         using std::abs;
         using std::atan2;
         using std::log;
         using std::sqrt;
 
-        TType len = sqrt( quat.x() * quat.x() + quat.y() * quat.y() + quat.z() * quat.z() );
-        TType f = abs( len ) > impl::LENGTH_THRESHOLD< TType > ? atan2( len, quat.w() ) / len
-                                                               : static_cast< TType >( 0 );
+        auto const lenSq = quat.x() * quat.x() + quat.y() * quat.y() + quat.z() * quat.z();
+        auto const len = sqrt( lenSq );
+        auto const f = abs( len ) > LENGTH_THRESHOLD< TType > ? atan2( len, quat.w() ) / len
+                                                              : static_cast< TType >( 0 );
 
-        return { static_cast< TType >( 0.5 ) * log( quat.w() * quat.w() + quat.x() * quat.x() +
-                                                    quat.y() * quat.y() + quat.z() * quat.z() ),
+        return { static_cast< TType >( 0.5 ) * log( quat.w() * quat.w() + lenSq ),
                  quat.x() * f,
                  quat.y() * f,
                  quat.z() * f };
@@ -324,10 +324,9 @@ namespace ttb
     template < typename TType >
     Vector< TType, 3 > operator*( Quaternion< TType > const& lhs, Vector< TType, 3 > const& rhs )
     {
-        Quaternion< TType > inv = invert( lhs );
-        Quaternion< TType > x( 0, rhs.x(), rhs.y(), rhs.z() );
-        inv = lhs * x * inv;
-        return { inv.x(), inv.y(), inv.z() };
+        auto const v = Vector< TType, 3 >{ lhs.x(), lhs.y(), lhs.z() };
+        auto const c = static_cast< TType >( 2.0 ) * cross( v, rhs );
+        return rhs + lhs.w() * c + cross( v, c );
     }
 
     template < typename TType >
