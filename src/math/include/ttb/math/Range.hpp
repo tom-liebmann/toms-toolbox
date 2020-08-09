@@ -42,6 +42,13 @@ namespace ttb
 
         bool contains( const Vector< T, D >& position ) const;
 
+        /**
+         * Extends the range such that it contains the given range.
+         *
+         * @rhs Range to be contained in this one
+         */
+        void extend( Range const& rhs );
+
     private:
         Vector< T, D > m_min;
         Vector< T, D > m_max;
@@ -178,6 +185,15 @@ namespace ttb
         return true;
     }
 
+    template < typename TType, size_t TDim >
+    void Range< TType, TDim >::extend( Range const& rhs )
+    {
+        for( size_t i = 0; i < TDim; ++i )
+        {
+            m_min( i ) = std::min( m_min( i ), rhs.min( i ) );
+            m_max( i ) = std::max( m_max( i ), rhs.max( i ) );
+        }
+    }
 
 
     template < typename T, size_t D >
