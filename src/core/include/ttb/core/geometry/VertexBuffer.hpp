@@ -94,10 +94,12 @@ namespace ttb
     private:
         Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start );
 
+        void changed( size_t begin, size_t end );
+
         std::shared_ptr< VertexBuffer > m_buffer;
-        size_t m_begin;
-        size_t m_end;
-        bool m_clear;
+        size_t m_begin{ 0 };
+        size_t m_end{ 0 };
+        bool m_clear{ false };
 
         friend class VertexBuffer;
         friend Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
@@ -202,6 +204,7 @@ namespace ttb
 
     inline VertexBuffer::AttributeHandle VertexBuffer::Modifier::operator[]( size_t index )
     {
+        changed( index * m_buffer->m_blockSize, ( index + 1 ) * m_buffer->m_blockSize );
         return { *m_buffer, index };
     }
 
@@ -211,6 +214,20 @@ namespace ttb
         m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ),
                                            m_buffer->m_data.size() - m_buffer->m_blockSize ),
                                 std::end( m_buffer->m_data ) );
+    }
+
+    inline void VertexBuffer::Modifier::changed( size_t begin, size_t end )
+    {
+        if( m_begin == m_end )
+        {
+            m_begin = begin;
+            m_end = end;
+        }
+        else
+        {
+            m_begin = std::min( m_begin, begin );
+            m_end = std::max( m_end, end );
+        }
     }
 
 
