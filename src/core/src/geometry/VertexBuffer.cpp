@@ -35,7 +35,7 @@ namespace ttb
         glBufferData( GL_ARRAY_BUFFER,
                       m_data.size(),
                       reinterpret_cast< GLvoid const* >( m_data.data() ),
-                      GL_STATIC_DRAW );
+                      GL_DYNAMIC_DRAW );
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
     }
@@ -121,7 +121,7 @@ namespace ttb
             glBufferData( GL_ARRAY_BUFFER,
                           m_buffer->m_data.size(),
                           reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
-                          GL_STATIC_DRAW );
+                          GL_DYNAMIC_DRAW );
         }
         else
         {
