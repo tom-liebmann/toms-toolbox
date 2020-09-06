@@ -54,10 +54,8 @@ namespace ttb
         if( m_indexBuffer )
         {
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_indexBuffer->m_bufferObject );
-            glDrawElements( m_mode,
-                            static_cast< GLsizei >( m_indexBuffer->m_data.size() ),
-                            GL_UNSIGNED_INT,
-                            0 );
+            glDrawElements(
+                m_mode, static_cast< GLsizei >( m_indexBuffer->size() ), GL_UNSIGNED_INT, 0 );
             glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
         }
         else

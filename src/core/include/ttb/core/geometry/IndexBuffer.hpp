@@ -20,6 +20,8 @@ namespace ttb
 
         ~IndexBuffer();
 
+        size_t size() const;
+
         std::shared_ptr< IndexBuffer > clone() const;
 
     private:
@@ -39,32 +41,35 @@ namespace ttb
     class IndexBuffer::Modifier
     {
     public:
-        Modifier& reserve( size_t indexCount );
+        size_t size() const;
 
-        Modifier& push( size_t index );
+        void reserve( size_t size );
+
+        uint32_t& operator[]( size_t index );
+
+        void resize( size_t size );
+
+        void push_back( size_t value );
 
         template < typename... TType >
-        Modifier& push( size_t index, TType... rest );
-
-        Modifier& trim();
+        void push_back( size_t value, TType... rest );
 
         std::shared_ptr< IndexBuffer > finish();
 
     private:
-        Modifier( std::shared_ptr< IndexBuffer > buffer, size_t start );
+        Modifier( std::shared_ptr< IndexBuffer > buffer );
+
+        void changed( size_t begin, size_t end );
 
         std::shared_ptr< IndexBuffer > m_buffer;
-        size_t m_begin;
-        size_t m_end;
-        bool m_clear;
+        size_t m_begin{ 0 };
+        size_t m_end{ 0 };
+        bool m_clear{ false };
 
         friend class IndexBuffer;
-        friend Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start );
         friend Modifier modify( std::shared_ptr< IndexBuffer > buffer );
     };
 
-
-    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start );
 
     IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer );
 }
@@ -76,9 +81,9 @@ namespace ttb
 namespace ttb
 {
     template < typename... TType >
-    IndexBuffer::Modifier& IndexBuffer::Modifier::push( size_t index, TType... rest )
+    void IndexBuffer::Modifier::push_back( size_t value, TType... rest )
     {
-        push( index );
-        return push( rest... );
+        push_back( value );
+        push_back( rest... );
     }
 }

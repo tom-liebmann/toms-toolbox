@@ -24,7 +24,7 @@ namespace ttb
         glBufferData( GL_ELEMENT_ARRAY_BUFFER,
                       m_data.size() * sizeof( GLuint ),
                       reinterpret_cast< GLvoid const* >( m_data.data() ),
-                      GL_STATIC_DRAW );
+                      GL_DYNAMIC_DRAW );
 
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     }
@@ -34,80 +34,90 @@ namespace ttb
         glDeleteBuffers( 1, &m_bufferObject );
     }
 
+    size_t IndexBuffer::size() const
+    {
+        return m_data.size();
+    }
+
     std::shared_ptr< IndexBuffer > IndexBuffer::clone() const
     {
         return std::shared_ptr< IndexBuffer >( new IndexBuffer( *this ) );
     }
 
 
-    IndexBuffer::Modifier::Modifier( std::shared_ptr< IndexBuffer > buffer, size_t start )
-        : m_buffer( std::move( buffer ) ), m_begin( start ), m_end( start ), m_clear( false )
+    void IndexBuffer::Modifier::reserve( size_t size )
     {
+        m_buffer->m_data.reserve( size );
     }
 
-    IndexBuffer::Modifier& IndexBuffer::Modifier::reserve( size_t indexCount )
+    uint32_t& IndexBuffer::Modifier::operator[]( size_t index )
     {
-        m_buffer->m_data.reserve( m_end + indexCount );
-        return *this;
+        changed( index, index + 1 );
+        return *reinterpret_cast< uint32_t* >( m_buffer->m_data.data() + index );
     }
 
-    IndexBuffer::Modifier& IndexBuffer::Modifier::push( size_t index )
+    void IndexBuffer::Modifier::resize( size_t size )
     {
-        auto& data = m_buffer->m_data;
-
-        if( data.size() < m_end + 1 )
-        {
-            data.resize( m_end + 1 );
-            m_clear = true;
-        }
-
-        data[ m_end ] = static_cast< GLuint >( index );
-        ++m_end;
-
-        return *this;
-    }
-
-    IndexBuffer::Modifier& IndexBuffer::Modifier::trim()
-    {
-        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ), m_end ),
-                                std::end( m_buffer->m_data ) );
         m_clear = true;
-        return *this;
+        m_buffer->m_data.resize( size, 0 );
+    }
+
+    void IndexBuffer::Modifier::push_back( size_t value )
+    {
+        m_clear = true;
+        m_buffer->m_data.push_back( value );
     }
 
     std::shared_ptr< IndexBuffer > IndexBuffer::Modifier::finish()
     {
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
-
-        if( m_clear )
+        if( m_clear || m_begin != m_end )
         {
-            glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                          m_buffer->m_data.size() * sizeof( GLuint ),
-                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
-                          GL_STATIC_DRAW );
-        }
-        else
-        {
-            glBufferSubData(
-                GL_ELEMENT_ARRAY_BUFFER,
-                m_begin * sizeof( GLuint ),
-                ( m_end - m_begin ) * sizeof( GLuint ),
-                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
-        }
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
 
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            if( m_clear )
+            {
+                glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                              m_buffer->m_data.size() * sizeof( GLuint ),
+                              reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                              GL_DYNAMIC_DRAW );
+            }
+            else
+            {
+                glBufferSubData(
+                    GL_ELEMENT_ARRAY_BUFFER,
+                    m_begin * sizeof( GLuint ),
+                    ( m_end - m_begin ) * sizeof( GLuint ),
+                    reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+            }
+
+            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+        }
 
         return m_buffer;
     }
 
-
-    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start )
+    IndexBuffer::Modifier::Modifier( std::shared_ptr< IndexBuffer > buffer )
+        : m_buffer( std::move( buffer ) )
     {
-        return { buffer, start };
     }
+
+    void IndexBuffer::Modifier::changed( size_t begin, size_t end )
+    {
+        if( m_begin == m_end )
+        {
+            m_begin = begin;
+            m_end = end;
+        }
+        else
+        {
+            m_begin = std::min( m_begin, begin );
+            m_end = std::max( m_end, end );
+        }
+    }
+
 
     IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer )
     {
-        return { buffer, buffer->m_data.size() };
+        return { buffer };
     }
 }

@@ -45,6 +45,11 @@ namespace ttb
         glDeleteBuffers( 1, &m_bufferObject );
     }
 
+    size_t VertexBuffer::size() const
+    {
+        return m_data.size();
+    }
+
     std::shared_ptr< VertexBuffer > VertexBuffer::clone() const
     {
         return std::shared_ptr< VertexBuffer >( new VertexBuffer( *this ) );

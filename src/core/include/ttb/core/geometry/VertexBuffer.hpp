@@ -34,6 +34,8 @@ namespace ttb
 
         ~VertexBuffer();
 
+        size_t size() const;
+
         std::shared_ptr< VertexBuffer > clone() const;
 
     private:
