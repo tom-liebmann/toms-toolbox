@@ -50,7 +50,6 @@ namespace ttb
         GLenum m_mode;
         GLuint m_arrayObject;
         std::vector< Attribute > m_attributes;
-        size_t m_minAttributeSize;
         std::shared_ptr< IndexBuffer > m_indexBuffer;
     };
 
