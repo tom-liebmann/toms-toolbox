@@ -10,6 +10,11 @@ namespace ttb
     class Window::Impl
     {
     public:
+        static void onResize( uint16_t width, uint16_t height );
+        static void onPointerDown( int pointerId, float x, float y );
+        static void onPointerUp( int pointerId, float x, float y );
+        static void onPointerMove( int poitnerId, float x, float y );
+
         WindowMode const& mode() const;
 
         std::string const& title() const;

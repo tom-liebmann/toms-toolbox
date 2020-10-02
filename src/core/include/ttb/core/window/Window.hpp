@@ -16,6 +16,8 @@ namespace ttb
     class Window : public Context, public RenderTarget
     {
     public:
+        class Impl;
+
         using EventCallback = std::function< void( Event const& ) >;
 
         ~Window();
@@ -33,8 +35,6 @@ namespace ttb
         // Override: Context
         virtual bool use() override;
         virtual bool unuse() override;
-
-        class Impl;
 
     private:
         Window( std::unique_ptr< Impl > impl );
