@@ -10,11 +10,12 @@ namespace ttb
     namespace events
     {
         constexpr Event::Type KEY = 0;
-        constexpr Event::Type MOUSE_BUTTON = 1;
-        constexpr Event::Type MOUSE_MOVE = 2;
-        constexpr Event::Type WINDOW_CLOSE = 3;
-        constexpr Event::Type WINDOW_RESIZE = 4;
-        constexpr Event::Type SCROLL = 5;
+        constexpr Event::Type POINTER_DOWN = 1;
+        constexpr Event::Type POINTER_UP = 2;
+        constexpr Event::Type POINTER_MOVE = 3;
+        constexpr Event::Type WINDOW_CLOSE = 4;
+        constexpr Event::Type WINDOW_RESIZE = 5;
+        constexpr Event::Type SCROLL = 6;
 
 
 
@@ -46,67 +47,69 @@ namespace ttb
         };
 
 
+        enum class PointerType
+        {
+            UNKNOWN,
+            MOUSE,
+            FINGER,
+        };
 
-        class MouseButton : public Event
+
+        class PointerDown : public TypedEvent< POINTER_DOWN >
         {
         public:
-            enum class Button;
-            enum class Action;
+            PointerDown( PointerType pointerType, int pointerId, double x, double y );
 
-            MouseButton( Button button, Action action, double x, double y );
+            PointerType pointerType() const;
 
-            Button getButton() const;
-            Action getAction() const;
+            int pointerId() const;
 
-            double getX() const;
-            double getY() const;
+            double x() const;
 
-            // Event
-            virtual Type type() const override;
+            double y() const;
 
         private:
-            Button m_button;
-            Action m_action;
+            PointerType m_pointerType;
+            int m_pointerId;
             double m_x;
             double m_y;
         };
 
 
-
-        enum class MouseButton::Button
-        {
-            LEFT,
-            RIGHT,
-            MIDDLE,
-            UNKNOWN
-        };
-
-
-
-        enum class MouseButton::Action
-        {
-            UP,
-            DOWN
-        };
-
-
-
-        class MouseMove : public Event
+        class PointerUp : public TypedEvent< POINTER_UP >
         {
         public:
-            MouseMove( double x, double y );
+            PointerUp( int pointerId, double x, double y );
 
-            double getX() const;
-            double getY() const;
+            int pointerId() const;
 
-            // Event
-            virtual Type type() const override;
+            double x() const;
+
+            double y() const;
 
         private:
+            int m_pointerId;
             double m_x;
             double m_y;
         };
 
+
+        class PointerMove : public TypedEvent< POINTER_MOVE >
+        {
+        public:
+            PointerMove( int pointerId, double x, double y );
+
+            int pointerId() const;
+
+            double x() const;
+
+            double y() const;
+
+        private:
+            int m_pointerId;
+            double m_x;
+            double m_y;
+        };
 
 
         class WindowClose : public Event
@@ -188,58 +191,75 @@ namespace ttb
         }
 
 
-
-        inline MouseButton::MouseButton( Button button, Action action, double x, double y )
-            : m_button( button ), m_action( action ), m_x( x ), m_y( y )
+        inline PointerDown::PointerDown( PointerType pointerType,
+                                         int pointerId,
+                                         double x,
+                                         double y )
+            : m_pointerType{ pointerType }, m_pointerId{ pointerId }, m_x{ x }, m_y{ y }
         {
         }
 
-        inline MouseButton::Button MouseButton::getButton() const
+        inline PointerType PointerDown::pointerType() const
         {
-            return m_button;
+            return m_pointerType;
         }
 
-        inline MouseButton::Action MouseButton::getAction() const
+        inline int PointerDown::pointerId() const
         {
-            return m_action;
+            return m_pointerId;
         }
 
-        inline double MouseButton::getX() const
-        {
-            return m_x;
-        }
-
-        inline double MouseButton::getY() const
-        {
-            return m_y;
-        }
-
-        inline Event::Type MouseButton::type() const
-        {
-            return MOUSE_BUTTON;
-        }
-
-
-
-        inline MouseMove::MouseMove( double x, double y ) : m_x( x ), m_y( y )
-        {
-        }
-
-        inline double MouseMove::getX() const
+        inline double PointerDown::x() const
         {
             return m_x;
         }
 
-        inline double MouseMove::getY() const
+        inline double PointerDown::y() const
         {
             return m_y;
         }
 
-        inline Event::Type MouseMove::type() const
+
+        inline PointerUp::PointerUp( int pointerId, double x, double y )
+            : m_pointerId{ pointerId }, m_x{ x }, m_y{ y }
         {
-            return MOUSE_MOVE;
         }
 
+        inline int PointerUp::pointerId() const
+        {
+            return m_pointerId;
+        }
+
+        inline double PointerUp::x() const
+        {
+            return m_x;
+        }
+
+        inline double PointerUp::y() const
+        {
+            return m_y;
+        }
+
+
+        inline PointerMove::PointerMove( int pointerId, double x, double y )
+            : m_pointerId{ pointerId }, m_x{ x }, m_y{ y }
+        {
+        }
+
+        inline int PointerMove::pointerId() const
+        {
+            return m_pointerId;
+        }
+
+        inline double PointerMove::x() const
+        {
+            return m_x;
+        }
+
+        inline double PointerMove::y() const
+        {
+            return m_y;
+        }
 
 
         inline WindowClose::WindowClose( Window& window ) : m_window( window )

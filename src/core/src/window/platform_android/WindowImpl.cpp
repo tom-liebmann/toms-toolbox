@@ -17,25 +17,22 @@ namespace ttb
 
     void Window::Impl::onPointerDown( int pointerId, float x, float y )
     {
-        auto const event = ttb::events::MouseButton{
-            ttb::events::MouseButton::Button::LEFT, ttb::events::MouseButton::Action::DOWN, x, y
-        };
+        auto const event =
+            ttb::events::PointerDown{ ttb::events::PointerType::FINGER, pointerId, x, y };
 
         WindowCreator::instance()->m_impl->pushEvent( event );
     }
 
     void Window::Impl::onPointerUp( int pointerId, float x, float y )
     {
-        auto const event = ttb::events::MouseButton{
-            ttb::events::MouseButton::Button::LEFT, ttb::events::MouseButton::Action::UP, x, y
-        };
+        auto const event = ttb::events::PointerUp{ pointerId, x, y };
 
         WindowCreator::instance()->m_impl->pushEvent( event );
     }
 
-    void Window::Impl::onPointerMove( int poitnerId, float x, float y )
+    void Window::Impl::onPointerMove( int pointerId, float x, float y )
     {
-        auto const event = ttb::events::MouseMove{ x, y };
+        auto const event = ttb::events::PointerMove{ pointerId, x, y };
 
         WindowCreator::instance()->m_impl->pushEvent( event );
     }

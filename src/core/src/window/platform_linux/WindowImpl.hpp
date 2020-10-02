@@ -6,6 +6,8 @@
 
 #include <GLFW/glfw3.h>
 
+#include <set>
+
 
 namespace ttb
 {
@@ -51,6 +53,8 @@ namespace ttb
         EventCallback m_eventCallback;
         WindowMode m_mode;
         std::string m_title;
+
+        std::set< int > m_activePointers;
 
         Window* m_window;
         GLFWwindow* m_handle;

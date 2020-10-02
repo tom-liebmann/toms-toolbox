@@ -127,7 +127,7 @@ namespace ttb
         auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
         if( wnd->m_eventCallback )
         {
-            auto const keyAction = [&] {
+            auto const keyAction = [ & ] {
                 switch( action )
                 {
                     case GLFW_PRESS:
@@ -149,33 +149,45 @@ namespace ttb
     void Window::Impl::onMouseButton( GLFWwindow* window, int button, int action, int /* mods */ )
     {
         auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+
+        if( !wnd->m_eventCallback )
         {
-            auto const mouseButton = [&] {
-                switch( button )
-                {
-                    case GLFW_MOUSE_BUTTON_LEFT:
-                        return events::MouseButton::Button::LEFT;
+            return;
+        }
 
-                    case GLFW_MOUSE_BUTTON_RIGHT:
-                        return events::MouseButton::Button::RIGHT;
+        double x;
+        double y;
+        glfwGetCursorPos( window, &x, &y );
 
-                    case GLFW_MOUSE_BUTTON_MIDDLE:
-                        return events::MouseButton::Button::MIDDLE;
+        auto const pointerId = [ & ] {
+            switch( button )
+            {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    return 0;
 
-                    default:
-                        return events::MouseButton::Button::UNKNOWN;
-                }
-            }();
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    return 1;
 
-            auto const mouseAction = action == GLFW_PRESS ? events::MouseButton::Action::DOWN
-                                                          : ttb::events::MouseButton::Action::UP;
+                case GLFW_MOUSE_BUTTON_MIDDLE:
+                    return 2;
 
-            double mouseX;
-            double mouseY;
-            glfwGetCursorPos( window, &mouseX, &mouseY );
+                default:
+                    return 3;
+            }
+        }();
 
-            auto const event = events::MouseButton{ mouseButton, mouseAction, mouseX, mouseY };
+        if( GLFW_PRESS == action )
+        {
+            wnd->m_activePointers.insert( pointerId );
+
+            auto const event = events::PointerDown{ events::PointerType::MOUSE, pointerId, x, y };
+            wnd->m_eventCallback( event );
+        }
+        else
+        {
+            wnd->m_activePointers.erase( pointerId );
+
+            auto const event = events::PointerUp{ pointerId, x, y };
             wnd->m_eventCallback( event );
         }
     }
@@ -183,9 +195,14 @@ namespace ttb
     void Window::Impl::onMouseMove( GLFWwindow* window, double x, double y )
     {
         auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+        if( !wnd->m_eventCallback )
         {
-            auto const event = events::MouseMove{ x, y };
+            return;
+        }
+
+        for( auto const pointerId : wnd->m_activePointers )
+        {
+            auto const event = events::PointerMove{ pointerId, x, y };
             wnd->m_eventCallback( event );
         }
     }
