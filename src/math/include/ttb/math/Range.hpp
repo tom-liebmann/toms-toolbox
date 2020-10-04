@@ -13,7 +13,7 @@ namespace ttb
     class Range
     {
     public:
-        Range() = default;
+        Range();
 
         Range( const Vector< T, D >& min, const Vector< T, D >& max );
 
@@ -33,6 +33,8 @@ namespace ttb
         Vector< T, D > const& max() const;
 
         T extent( size_t index ) const;
+
+        void extent( size_t index, T const& value );
 
         Vector< T, D > extent() const;
 
@@ -76,6 +78,16 @@ std::ostream& operator<<( std::ostream& stream, const ttb::Range< T, D... >& ran
 
 namespace ttb
 {
+    template < typename TType, size_t TDim >
+    inline Range< TType, TDim >::Range()
+    {
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            m_min( d ) = std::numeric_limits< TType >::max();
+            m_max( d ) = std::numeric_limits< TType >::lowest();
+        }
+    }
+
     template < typename T, size_t D >
     inline Range< T, D >::Range( const Vector< T, D >& min, const Vector< T, D >& max )
         : m_min( min ), m_max( max )
@@ -146,6 +158,12 @@ namespace ttb
     TType Range< TType, TDim >::extent( size_t index ) const
     {
         return m_max[ index ] - m_min[ index ];
+    }
+
+    template < typename TType, size_t TDim >
+    void Range< TType, TDim >::extent( size_t index, TType const& value )
+    {
+        m_max[ index ] = m_min[ index ] + value;
     }
 
     template < typename TType, size_t TDim >
