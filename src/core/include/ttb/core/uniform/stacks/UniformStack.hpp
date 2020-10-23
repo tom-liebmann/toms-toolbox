@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../uniformHelper.hpp"
-#include <ttb/core/shader/Program.hpp>
 
 #include <stack>
 

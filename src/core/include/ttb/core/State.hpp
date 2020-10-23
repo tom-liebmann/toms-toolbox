@@ -29,6 +29,11 @@ namespace ttb
     class State
     {
     public:
+        struct Data
+        {
+            Program const* program{ nullptr };
+        };
+
         State();
         ~State();
 
@@ -39,8 +44,8 @@ namespace ttb
         RenderTarget const& renderTarget() const;
 
         // shader
-        void pushProgram( std::shared_ptr< Program const > const& program );
-        void popProgram();
+        template < typename TBindable, typename TFunc >
+        void with( TBindable const& bindable, TFunc const& func );
 
         Program const& program();
 
@@ -69,10 +74,6 @@ namespace ttb
         // render target
         std::stack< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
 
-        // shader
-        GLint m_parentProgram;
-        std::stack< std::shared_ptr< Program const > > m_programStack;
-
         // geometry
         GLint m_parentArrayObject;
         std::stack< GLuint > m_arrayObjectStack;
@@ -86,12 +87,21 @@ namespace ttb
 
         // uniforms
         std::unordered_map< std::string, std::unique_ptr< UniformStackBase > > m_uniforms;
+
+        Data m_data;
     };
 }
 
 
 namespace ttb
 {
+    template < typename TBindable, typename TFunc >
+    inline void State::with( TBindable const& bindable, TFunc const& func )
+    {
+        auto const binder = bindable.bind( m_data );
+        func();
+    }
+
     template < typename TType >
     UniformStack< TType >& State::uniform( std::string const& name )
     {
