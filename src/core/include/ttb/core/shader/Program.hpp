@@ -69,7 +69,7 @@ namespace ttb
 
 
     template <>
-    class Program::Binder
+    class Bindable< Program >::Binder
     {
     public:
         ~Binder();

@@ -2,6 +2,8 @@
 
 #include <ttb/core/gl.hpp>
 
+#include <iostream>
+
 
 // declarations
 //=============================================================================
@@ -24,6 +26,9 @@ namespace ttb
         GLsizei m_width;
         GLsizei m_height;
     };
+
+
+    std::ostream& operator<<( std::ostream& stream, Viewport const& viewport );
 }
 
 
