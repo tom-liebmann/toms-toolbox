@@ -8,9 +8,19 @@
 
 namespace ttb
 {
-    VertexBuffer::Creator VertexBuffer::create()
+    VertexBuffer::~VertexBuffer()
     {
-        return {};
+        glDeleteBuffers( 1, &m_bufferObject );
+    }
+
+    size_t VertexBuffer::size() const
+    {
+        return m_data.size() / m_blockSize;
+    }
+
+    std::unique_ptr< VertexBuffer > VertexBuffer::clone() const
+    {
+        return std::unique_ptr< VertexBuffer >{ new VertexBuffer{ *this } };
     }
 
     VertexBuffer::VertexBuffer( std::vector< Attribute > attributes )
@@ -26,7 +36,8 @@ namespace ttb
     }
 
     VertexBuffer::VertexBuffer( VertexBuffer const& copy )
-        : m_data( copy.m_data ), m_attributes( copy.m_attributes ), m_blockSize( copy.m_blockSize )
+        : m_data( copy.m_data ), m_attributes( copy.m_attributes ), m_blockSize{ copy.m_blockSize }
+
     {
         glGenBuffers( 1, &m_bufferObject );
 
@@ -38,21 +49,6 @@ namespace ttb
                       GL_DYNAMIC_DRAW );
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    }
-
-    VertexBuffer::~VertexBuffer()
-    {
-        glDeleteBuffers( 1, &m_bufferObject );
-    }
-
-    size_t VertexBuffer::size() const
-    {
-        return m_data.size();
-    }
-
-    std::shared_ptr< VertexBuffer > VertexBuffer::clone() const
-    {
-        return std::shared_ptr< VertexBuffer >( new VertexBuffer( *this ) );
     }
 
     void VertexBuffer::bind( size_t index, GLint location ) const
@@ -69,12 +65,12 @@ namespace ttb
 
         auto const& attribute = m_attributes[ index ];
 
-        switch( attribute.type() )
+        switch( attribute.type )
         {
             case GL_FLOAT:
                 glVertexAttribPointer( location,
-                                       static_cast< GLint >( attribute.size() ),
-                                       attribute.type(),
+                                       static_cast< GLint >( attribute.size ),
+                                       attribute.type,
                                        GL_FALSE,
                                        static_cast< GLsizei >( m_blockSize ),
                                        reinterpret_cast< const GLvoid* >( offset ) );
@@ -97,109 +93,152 @@ namespace ttb
     }
 
 
+    size_t VertexBuffer::Attribute::byteSize() const
+    {
+        switch( type )
+        {
+            case GL_FLOAT:
+                return sizeof( GLfloat ) * size;
 
-    VertexBuffer::Modifier::Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start )
-        : m_buffer( std::move( buffer ) ), m_begin( start ), m_end( start ), m_clear( false )
+            case GL_BYTE:
+                return sizeof( GLbyte ) * size;
+
+            case GL_UNSIGNED_INT:
+                return sizeof( GLuint ) * size;
+
+            default:
+                throw std::runtime_error( "Unhandled data type " + std::to_string( type ) );
+        }
+    }
+
+
+    void VertexBuffer::Modifier::reserve( size_t elementCount )
+    {
+        auto& data = m_buffer.m_data;
+        auto const newCapacity = elementCount * m_buffer.m_blockSize;
+
+        if( newCapacity > data.capacity() )
+        {
+            data.reserve( newCapacity );
+            m_clear = true;
+        }
+    }
+
+    void VertexBuffer::Modifier::resize( size_t elementCount )
+    {
+        auto& data = m_buffer.m_data;
+        auto const newSize = elementCount * m_buffer.m_blockSize;
+
+        if( newSize > data.capacity() )
+        {
+            m_clear = true;
+            data.resize( newSize );
+        }
+        else if( newSize > data.size() )
+        {
+            changed( data.size(), newSize );
+            data.resize( newSize );
+        }
+        else
+        {
+            m_begin = std::min( m_begin, newSize );
+            m_end = std::min( m_end, newSize );
+            data.resize( newSize );
+        }
+    }
+
+    size_t VertexBuffer::Modifier::size() const
+    {
+        return m_buffer.size();
+    }
+
+    void VertexBuffer::Modifier::pop_back()
+    {
+        auto& data = m_buffer.m_data;
+        data.resize( data.size() - m_buffer.m_blockSize );
+    }
+
+    void VertexBuffer::Modifier::clear()
+    {
+        m_buffer.m_data.clear();
+        m_begin = 0;
+        m_end = 0;
+    }
+
+    auto VertexBuffer::Modifier::push_back() -> AttributeHandle
+    {
+        auto const elementCount = m_buffer.size();
+        resize( elementCount + 1 );
+        return { m_buffer, elementCount };
+    }
+
+    auto VertexBuffer::Modifier::operator[]( size_t index ) -> AttributeHandle
+    {
+        changed( index * m_buffer.m_blockSize, ( index + 1 ) * m_buffer.m_blockSize );
+        return { m_buffer, index };
+    }
+
+    VertexBuffer::Modifier::Modifier( VertexBuffer& buffer ) : m_buffer{ buffer }
     {
     }
 
-    VertexBuffer::Modifier& VertexBuffer::Modifier::reserve( size_t elementCount )
+    VertexBuffer::Modifier::~Modifier()
     {
-        m_buffer->m_data.reserve( m_end + elementCount * m_buffer->m_blockSize );
-        return *this;
-    }
+        glBindBuffer( GL_ARRAY_BUFFER, m_buffer.m_bufferObject );
 
-    VertexBuffer::Modifier& VertexBuffer::Modifier::trim()
-    {
-        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ), m_end ),
-                                std::end( m_buffer->m_data ) );
-        m_clear = true;
-        return *this;
-    }
-
-    std::shared_ptr< VertexBuffer > VertexBuffer::Modifier::finish()
-    {
-        glBindBuffer( GL_ARRAY_BUFFER, m_buffer->m_bufferObject );
+        auto& data = m_buffer.m_data;
 
         if( m_clear )
         {
             glBufferData( GL_ARRAY_BUFFER,
-                          m_buffer->m_data.size(),
-                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                          data.capacity(),
+                          reinterpret_cast< GLvoid const* >( data.data() ),
                           GL_DYNAMIC_DRAW );
         }
         else
         {
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
-                m_begin,
-                m_end - m_begin,
-                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+            glBufferSubData( GL_ARRAY_BUFFER,
+                             m_begin,
+                             m_end - m_begin,
+                             reinterpret_cast< GLvoid const* >( data.data() + m_begin ) );
         }
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
-        return m_buffer;
     }
 
-
-    VertexBuffer::Attribute::Attribute( GLenum type, size_t size ) : m_type( type ), m_size( size )
+    void VertexBuffer::Modifier::changed( size_t begin, size_t end )
     {
-    }
-
-    GLenum VertexBuffer::Attribute::type() const
-    {
-        return m_type;
-    }
-
-    size_t VertexBuffer::Attribute::size() const
-    {
-        return m_size;
-    }
-
-    size_t VertexBuffer::Attribute::byteSize() const
-    {
-        switch( m_type )
+        if( m_begin == m_end )
         {
-            case GL_FLOAT:
-                return sizeof( GLfloat ) * m_size;
-
-            case GL_BYTE:
-                return sizeof( GLbyte ) * m_size;
-
-            case GL_UNSIGNED_INT:
-                return sizeof( GLuint ) * m_size;
-
-            default:
-                throw std::runtime_error( "Unhandled data type " + std::to_string( m_type ) );
+            m_begin = begin;
+            m_end = end;
+        }
+        else
+        {
+            m_begin = std::min( m_begin, begin );
+            m_end = std::max( m_end, end );
         }
     }
 
 
-
-    VertexBuffer::Creator::Creator()
+    void VertexBuffer::Creator::attribute( GLenum type, size_t size )
     {
+        m_attributes.push_back( Attribute{ type, size, 0 } );
     }
 
-    VertexBuffer::Creator& VertexBuffer::Creator::attribute( GLenum type, size_t size )
-    {
-        m_attributes.emplace_back( type, size );
-        return *this;
-    }
+    VertexBuffer::Creator::Creator() = default;
 
-    std::shared_ptr< VertexBuffer > VertexBuffer::Creator::finish()
-    {
-        return std::shared_ptr< VertexBuffer >( new VertexBuffer( std::move( m_attributes ) ) );
-    }
+    VertexBuffer::Creator::~Creator() = default;
 
-
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start )
+    std::unique_ptr< VertexBuffer > VertexBuffer::Creator::finish()
     {
-        return { buffer, start * buffer->m_blockSize };
-    }
+        size_t offset = 0;
+        for( auto& attribute : m_attributes )
+        {
+            attribute.offset = offset;
+            offset += attribute.byteSize();
+        }
 
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer )
-    {
-        return { buffer, buffer->m_data.size() };
+        return std::unique_ptr< VertexBuffer >{ new VertexBuffer{ std::move( m_attributes ) } };
     }
 }
