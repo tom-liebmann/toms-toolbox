@@ -20,7 +20,7 @@ namespace ttb
 
     std::unique_ptr< VertexBuffer > VertexBuffer::clone() const
     {
-        return std::shared_ptr< VertexBuffer >{ new VertexBuffer{ *this } };
+        return std::unique_ptr< VertexBuffer >{ new VertexBuffer{ *this } };
     }
 
     VertexBuffer::VertexBuffer( std::vector< Attribute > attributes )
@@ -65,12 +65,12 @@ namespace ttb
 
         auto const& attribute = m_attributes[ index ];
 
-        switch( attribute.type() )
+        switch( attribute.type )
         {
             case GL_FLOAT:
                 glVertexAttribPointer( location,
-                                       static_cast< GLint >( attribute.size() ),
-                                       attribute.type(),
+                                       static_cast< GLint >( attribute.size ),
+                                       attribute.type,
                                        GL_FALSE,
                                        static_cast< GLsizei >( m_blockSize ),
                                        reinterpret_cast< const GLvoid* >( offset ) );
@@ -147,6 +147,11 @@ namespace ttb
         }
     }
 
+    size_t VertexBuffer::Modifier::size() const
+    {
+        return m_buffer.size();
+    }
+
     void VertexBuffer::Modifier::pop_back()
     {
         auto& data = m_buffer.m_data;
@@ -155,7 +160,7 @@ namespace ttb
 
     void VertexBuffer::Modifier::clear()
     {
-        m_data.clear();
+        m_buffer.m_data.clear();
         m_begin = 0;
         m_end = 0;
     }
@@ -169,6 +174,7 @@ namespace ttb
 
     auto VertexBuffer::Modifier::operator[]( size_t index ) -> AttributeHandle
     {
+        changed( index * m_buffer.m_blockSize, ( index + 1 ) * m_buffer.m_blockSize );
         return { m_buffer, index };
     }
 
@@ -178,7 +184,7 @@ namespace ttb
 
     VertexBuffer::Modifier::~Modifier()
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_buffer->m_bufferObject );
+        glBindBuffer( GL_ARRAY_BUFFER, m_buffer.m_bufferObject );
 
         auto& data = m_buffer.m_data;
 
@@ -200,7 +206,7 @@ namespace ttb
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
     }
 
-    void VertexBuffer::changed( size_t begin, size_t end )
+    void VertexBuffer::Modifier::changed( size_t begin, size_t end )
     {
         if( m_begin == m_end )
         {
@@ -224,7 +230,7 @@ namespace ttb
 
     VertexBuffer::Creator::~Creator() = default;
 
-    std::unique_ptr< VertexBuffer > finish()
+    std::unique_ptr< VertexBuffer > VertexBuffer::Creator::finish()
     {
         size_t offset = 0;
         for( auto& attribute : m_attributes )
@@ -234,67 +240,5 @@ namespace ttb
         }
 
         return std::unique_ptr< VertexBuffer >{ new VertexBuffer{ std::move( m_attributes ) } };
-    }
-
-
-
-    VertexBuffer::Attribute::Attribute( GLenum type, size_t size ) : m_type( type ), m_size( size )
-    {
-    }
-
-    GLenum VertexBuffer::Attribute::type() const
-    {
-        return m_type;
-    }
-
-    size_t VertexBuffer::Attribute::size() const
-    {
-        return m_size;
-    }
-
-    size_t VertexBuffer::Attribute::byteSize() const
-    {
-        switch( m_type )
-        {
-            case GL_FLOAT:
-                return sizeof( GLfloat ) * m_size;
-
-            case GL_BYTE:
-                return sizeof( GLbyte ) * m_size;
-
-            case GL_UNSIGNED_INT:
-                return sizeof( GLuint ) * m_size;
-
-            default:
-                throw std::runtime_error( "Unhandled data type " + std::to_string( m_type ) );
-        }
-    }
-
-
-
-    VertexBuffer::Creator::Creator()
-    {
-    }
-
-    VertexBuffer::Creator& VertexBuffer::Creator::attribute( GLenum type, size_t size )
-    {
-        m_attributes.emplace_back( type, size );
-        return *this;
-    }
-
-    std::shared_ptr< VertexBuffer > VertexBuffer::Creator::finish()
-    {
-        return std::shared_ptr< VertexBuffer >( new VertexBuffer( std::move( m_attributes ) ) );
-    }
-
-
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start )
-    {
-        return { buffer, start * buffer->m_blockSize };
-    }
-
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer )
-    {
-        return { buffer, buffer->m_data.size() };
     }
 }

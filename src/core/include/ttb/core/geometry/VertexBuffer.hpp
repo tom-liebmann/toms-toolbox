@@ -26,7 +26,6 @@ namespace ttb
     public:
         class Creator;
         class Modifier;
-        class Attribute;
         class AttributeHandle;
 
         template < typename TFunc >
@@ -78,6 +77,8 @@ namespace ttb
 
         AttributeHandle& set( size_t index, float v0, float v1, float v2, float v3 );
 
+        AttributeHandle& setComp( size_t index, size_t component, float value );
+
     private:
         AttributeHandle( VertexBuffer& buffer, size_t index );
 
@@ -100,6 +101,8 @@ namespace ttb
         void reserve( size_t elementCount );
 
         void resize( size_t elementCount );
+
+        size_t size() const;
 
         void pop_back();
 
@@ -210,74 +213,17 @@ namespace ttb
         return *this;
     }
 
+    inline auto VertexBuffer::AttributeHandle::setComp( size_t index,
+                                                        size_t component,
+                                                        float value ) -> AttributeHandle&
+    {
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + component * 4 ] ) = value;
+        return *this;
+    }
+
     inline VertexBuffer::AttributeHandle::AttributeHandle( VertexBuffer& buffer, size_t index )
         : m_buffer{ buffer }, m_index{ index }
-    {
-    }
-
-
-
-    inline auto VertexBuffer::Modifiier::push_back() -> AttributeHandle
-    {
-        auto& data = m_buffer->m_data;
-        auto const blockSize = m_buffer->m_blockSize;
-
-        if( data.capacity() < data.size() + blockSize )
-        {
-            m_clear = true;
-        }
-
-        data.resize( data.size() + blockSize );
-
-        return { *m_buffer, data.size() / blockSize - 1 };
-    }
-
-    inline auto VertexBuffer::Modifier::operator[]( size_t index ) -> AttributeHandle
-    {
-        changed( index * m_buffer->m_blockSize, ( index + 1 ) * m_buffer->m_blockSize );
-        return { *m_buffer, index };
-    }
-
-    inline void VertexBuffer::Modifier::pop_back()
-    {
-        m_clear = true;
-        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ),
-                                           m_buffer->m_data.size() - m_buffer->m_blockSize ),
-                                std::end( m_buffer->m_data ) );
-    }
-
-    inline void VertexBuffer::Modifier::changed( size_t begin, size_t end )
-    {
-        if( m_begin == m_end )
-        {
-            m_begin = begin;
-            m_end = end;
-        }
-        else
-        {
-            m_begin = std::min( m_begin, begin );
-            m_end = std::max( m_end, end );
-        }
-    }
-
-
-    template < typename TType >
-    inline TType& VertexBuffer::AttributeHandle::get( size_t attribIndex, size_t compIndex )
-    {
-        size_t offset = 0;
-
-        for( size_t i = 0; i < attribIndex; ++i )
-        {
-            offset += m_buffer.m_attributes[ i ].byteSize();
-        }
-
-        return reinterpret_cast< TType& >(
-            m_buffer
-                .m_data[ m_index * m_buffer.m_blockSize + offset + compIndex * sizeof( TType ) ] );
-    }
-
-    inline VertexBuffer::AttributeHandle::AttributeHandle( VertexBuffer& buffer, size_t index )
-        : m_buffer( buffer ), m_index( index )
     {
     }
 }
