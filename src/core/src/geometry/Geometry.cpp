@@ -67,9 +67,7 @@ namespace ttb
 
                 for( auto const& attribute : m_attributes )
                 {
-                    minAttrSize = std::min( minAttrSize,
-                                            attribute.buffer()->m_data.size() /
-                                                attribute.buffer()->m_blockSize );
+                    minAttrSize = std::min( minAttrSize, attribute.buffer()->size() );
                 }
             }
 
