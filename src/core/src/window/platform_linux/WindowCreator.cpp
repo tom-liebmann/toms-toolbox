@@ -145,6 +145,11 @@ namespace ttb
                                   GLchar const* message,
                                   void const* /* userParam */ )
         {
+            if( severity == GL_DEBUG_SEVERITY_NOTIFICATION )
+            {
+                return;
+            }
+
             std::cerr << "OpenGL error:\n"                                             //
                       << "    Type:     " << convertErrorType( type ) << '\n'          //
                       << "    Severity: " << convertErrorSeverity( severity ) << '\n'  //
