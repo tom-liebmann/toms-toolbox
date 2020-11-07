@@ -1,0 +1,10 @@
+target_sources(
+    ${TARGET_NAME}
+    PRIVATE
+        Connection.cpp
+        ContextThread.cpp
+        PacketBridge.cpp
+        ConnectionManager.cpp
+        TcpConnector.cpp
+        TcpAcceptor.cpp
+)
