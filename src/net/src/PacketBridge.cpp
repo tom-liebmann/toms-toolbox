@@ -5,7 +5,7 @@
 #include <ttb/utils/data_io/writers/BufferWriter.hpp>
 
 
-namespace ttb
+namespace ttb::net
 {
     PacketBridge::PacketBridge() : m_buffer( sizeof( uint32_t ) )
     {

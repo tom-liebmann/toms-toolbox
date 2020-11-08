@@ -177,8 +177,9 @@ namespace ttb::net
 
         m_active = false;
 
-        boost::asio::dispatch( *m_context,
-                               [ self = shared_from_this() ] { self->m_acceptor.cancel(); } );
+        boost::asio::dispatch( *m_context, [ self = shared_from_this() ] {
+            self->m_acceptor.cancel();  //
+        } );
     }
 
     void TcpAcceptor::Acceptor::acceptHandler( boost::system::error_code const& error )
@@ -196,6 +197,7 @@ namespace ttb::net
             {
                 auto connection = Connection::create( std::move( m_socket ) );
                 m_active = false;
+                m_acceptor.close();
                 lock.unlock();
 
                 m_parent.onConnection( std::move( connection ) );
@@ -210,6 +212,7 @@ namespace ttb::net
             default:
             {
                 m_active = false;
+                m_acceptor.close();
                 lock.unlock();
 
                 m_parent.onAcceptFailed();

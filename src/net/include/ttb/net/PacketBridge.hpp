@@ -8,7 +8,7 @@
 #include <mutex>
 
 
-namespace ttb
+namespace ttb::net
 {
     class PacketBridge
     {
@@ -27,8 +27,6 @@ namespace ttb
             READ_SIZE,
             READ_PAYLOAD,
         };
-
-        PacketCallback m_packetCallback;
 
         State m_state{ State::READ_SIZE };
 
