@@ -14,6 +14,8 @@ namespace ttb::net
                     TcpAcceptor& parent,
                     uint16_t port );
 
+        void accept();
+
         void stop();
 
     private:
@@ -42,7 +44,7 @@ namespace ttb::net
 
     TcpAcceptor::~TcpAcceptor()
     {
-        stop();
+        close();
     }
 
     bool TcpAcceptor::listener( Listener& listener )
@@ -73,7 +75,7 @@ namespace ttb::net
         return true;
     }
 
-    bool TcpAcceptor::start()
+    bool TcpAcceptor::open()
     {
         auto const lock = std::lock_guard{ m_mutex };
 
@@ -86,16 +88,27 @@ namespace ttb::net
         }
 
         m_acceptor = Acceptor::create( m_contextThread->context(), *this, m_config->port );
-        m_contextThread->notify();
 
         return true;
     }
 
-    void TcpAcceptor::stop()
+    bool TcpAcceptor::close()
     {
         auto const lock = std::lock_guard{ m_mutex };
 
         stopInternal();
+
+        return true;
+    }
+
+    bool TcpAcceptor::accept()
+    {
+        auto const lock = std::lock_guard{ m_mutex };
+
+        m_acceptor->accept();
+        m_contextThread->notify();
+
+        return true;
     }
 
     void TcpAcceptor::stopInternal()
@@ -112,11 +125,7 @@ namespace ttb::net
     void TcpAcceptor::onConnection( std::shared_ptr< Connection > connection )
     {
         auto lock = std::unique_lock{ m_mutex };
-
-        stopInternal();
-
         auto const listener = m_listener;
-
         lock.unlock();
 
         listener->onConnection( std::move( connection ) );
@@ -125,11 +134,7 @@ namespace ttb::net
     void TcpAcceptor::onAcceptFailed()
     {
         auto lock = std::unique_lock{ m_mutex };
-
-        stopInternal();
-
         auto const listener = m_listener;
-
         lock.unlock();
 
         listener->onAcceptFailed();
@@ -146,8 +151,8 @@ namespace ttb::net
 
     TcpAcceptor::Acceptor::Acceptor( std::shared_ptr< boost::asio::io_context > context,
                                      TcpAcceptor& parent )
-        : m_context{ std::move( context ) }
-        , m_parent{ parent }
+        : m_parent{ parent }
+        , m_context{ std::move( context ) }
         , m_acceptor{ *m_context }
         , m_socket{ *m_context }
     {
@@ -160,6 +165,11 @@ namespace ttb::net
         m_acceptor.set_option( tcp::acceptor::reuse_address( true ) );
         m_acceptor.bind( tcp::endpoint( tcp::v4(), port ) );
         m_acceptor.listen();
+    }
+
+    void TcpAcceptor::Acceptor::accept()
+    {
+        auto const lock = std::lock_guard{ m_mutex };
 
         m_acceptor.async_accept( m_socket, [ self = shared_from_this() ]( auto const& error ) {
             self->acceptHandler( error );
@@ -175,11 +185,18 @@ namespace ttb::net
             return;
         }
 
+        auto promise = std::promise< bool >{};
+        auto future = promise.get_future();
+
+        boost::asio::dispatch( *m_context, [ this, &promise ] {
+            m_acceptor.cancel();  //
+            m_acceptor.close();
+            promise.set_value( true );
+        } );
+
         m_active = false;
 
-        boost::asio::dispatch( *m_context, [ self = shared_from_this() ] {
-            self->m_acceptor.cancel();  //
-        } );
+        future.get();
     }
 
     void TcpAcceptor::Acceptor::acceptHandler( boost::system::error_code const& error )
@@ -196,8 +213,6 @@ namespace ttb::net
             case boost::system::errc::success:
             {
                 auto connection = Connection::create( std::move( m_socket ) );
-                m_active = false;
-                m_acceptor.close();
                 lock.unlock();
 
                 m_parent.onConnection( std::move( connection ) );
@@ -211,8 +226,6 @@ namespace ttb::net
 
             default:
             {
-                m_active = false;
-                m_acceptor.close();
                 lock.unlock();
 
                 m_parent.onAcceptFailed();

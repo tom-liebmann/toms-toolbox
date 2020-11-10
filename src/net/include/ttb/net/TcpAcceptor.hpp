@@ -32,9 +32,11 @@ namespace ttb::net
 
         bool port( uint16_t port );
 
-        bool start();
+        bool open();
 
-        void stop();
+        bool close();
+
+        bool accept();
 
     private:
         void stopInternal();
