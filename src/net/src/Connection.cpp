@@ -121,6 +121,7 @@ namespace ttb::net
         auto const first = m_writeBuffer.empty();
 
         auto writer = RingBufferWriter{ m_writeBuffer };
+        (void)packet.write( writer );
 
         if( first )
         {

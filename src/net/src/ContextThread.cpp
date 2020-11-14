@@ -23,6 +23,7 @@ namespace ttb::net
             std::lock_guard< std::mutex > lock( m_mutex );
             m_running = false;
             m_context->stop();
+            m_condition.notify_one();
         }
 
         m_thread.join();
