@@ -6,7 +6,7 @@ if( NOT ACTIVATE_${TARGET_NAME} )
     return()
 endif()
 
-include( boost )
+include( asio )
 
 add_library( ${TARGET_NAME} OBJECT EXCLUDE_FROM_ALL )
 
@@ -31,7 +31,7 @@ target_link_libraries(
 
     PUBLIC
         ttbUtils
-        boost
+        asio
 )
 
 set_target_properties(
@@ -49,6 +49,39 @@ target_compile_features(
     )
 
 add_subdirectory( src )
+
+if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
+
+    include( glew )
+    include( opengl )
+
+    target_link_libraries(
+        ${TARGET_NAME}
+
+        PRIVATE
+            glew
+            opengl
+    )
+
+    target_compile_definitions(
+        ${TARGET_NAME}
+
+        PRIVATE
+            GLEW_STATIC
+            GL_EXT_PROTOTYPES
+    )
+
+elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
+
+    target_link_libraries(
+        ${TARGET_NAME}
+
+        PRIVATE
+            android
+            log
+    )
+
+endif()
 
 if( "${LIBRARY_TYPE}" STREQUAL "OBJECT" )
     target_sources(

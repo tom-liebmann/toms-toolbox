@@ -102,25 +102,27 @@ namespace ttb
 
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_com_juicy_1trash_planet_1factory_PlanetFactoryLib_on_1resize(
-        JNIEnv* /* env */, jobject /* obj */, jint width, jint height )
+    JNIEXPORT void JNICALL Java_com_juicy_1trash_ApplicationLib_on_1resize( JNIEnv* /* env */,
+                                                                            jobject /* obj */,
+                                                                            jint width,
+                                                                            jint height )
     {
         ttb::Window::Impl::onResize( width, height );
     }
 
-    JNIEXPORT void JNICALL Java_com_juicy_1trash_planet_1factory_PlanetFactoryLib_on_1pointer_1down(
+    JNIEXPORT void JNICALL Java_com_juicy_1trash_ApplicationLib_on_1pointer_1down(
         JNIEnv* /* env */, jobject /* obj */, jint pointerId, jfloat x, jfloat y )
     {
         ttb::Window::Impl::onPointerDown( pointerId, x, y );
     }
 
-    JNIEXPORT void JNICALL Java_com_juicy_1trash_planet_1factory_PlanetFactoryLib_on_1pointer_1up(
+    JNIEXPORT void JNICALL Java_com_juicy_1trash_ApplicationLib_on_1pointer_1up(
         JNIEnv* /* env */, jobject /* obj */, jint pointerId, jfloat x, jfloat y )
     {
         ttb::Window::Impl::onPointerUp( pointerId, x, y );
     }
 
-    JNIEXPORT void JNICALL Java_com_juicy_1trash_planet_1factory_PlanetFactoryLib_on_1pointer_1move(
+    JNIEXPORT void JNICALL Java_com_juicy_1trash_ApplicationLib_on_1pointer_1move(
         JNIEnv* /* env */, jobject /* obj */, jint pointerId, jfloat x, jfloat y )
     {
         ttb::Window::Impl::onPointerMove( pointerId, x, y );

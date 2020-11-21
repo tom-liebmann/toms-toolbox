@@ -6,7 +6,7 @@
 namespace ttb::net
 {
     ContextThread::ContextThread()
-        : m_context( std::make_shared< boost::asio::io_context >() )
+        : m_context( std::make_shared< asio::io_context >() )
         , m_running( true )
         , m_workAvailable( true )
         , m_thread( [ this ] { run(); } )
@@ -29,7 +29,7 @@ namespace ttb::net
         m_thread.join();
     }
 
-    std::shared_ptr< boost::asio::io_context > const& ContextThread::context()
+    std::shared_ptr< asio::io_context > const& ContextThread::context()
     {
         return m_context;
     }

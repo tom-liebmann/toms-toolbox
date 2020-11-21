@@ -9,30 +9,29 @@ namespace ttb::net
     class TcpAcceptor::Acceptor : public std::enable_shared_from_this< Acceptor >
     {
     public:
-        static std::shared_ptr< Acceptor >
-            create( std::shared_ptr< boost::asio::io_context > context,
-                    TcpAcceptor& parent,
-                    uint16_t port );
+        static std::shared_ptr< Acceptor > create( std::shared_ptr< asio::io_context > context,
+                                                   TcpAcceptor& parent,
+                                                   uint16_t port );
 
         void accept();
 
         void stop();
 
     private:
-        Acceptor( std::shared_ptr< boost::asio::io_context > context, TcpAcceptor& parent );
+        Acceptor( std::shared_ptr< asio::io_context > context, TcpAcceptor& parent );
 
         void init( uint16_t port );
 
-        void acceptHandler( boost::system::error_code const& error );
+        void acceptHandler( std::error_code const& error );
 
         bool m_active{ true };
 
         TcpAcceptor& m_parent;
 
-        std::shared_ptr< boost::asio::io_context > m_context;
+        std::shared_ptr< asio::io_context > m_context;
 
-        boost::asio::ip::tcp::acceptor m_acceptor;
-        boost::asio::ip::tcp::socket m_socket;
+        asio::ip::tcp::acceptor m_acceptor;
+        asio::ip::tcp::socket m_socket;
 
         std::mutex m_mutex;
     };
@@ -142,14 +141,14 @@ namespace ttb::net
 
 
     std::shared_ptr< TcpAcceptor::Acceptor > TcpAcceptor::Acceptor::create(
-        std::shared_ptr< boost::asio::io_context > context, TcpAcceptor& parent, uint16_t port )
+        std::shared_ptr< asio::io_context > context, TcpAcceptor& parent, uint16_t port )
     {
         auto result = std::shared_ptr< Acceptor >{ new Acceptor{ std::move( context ), parent } };
         result->init( port );
         return result;
     }
 
-    TcpAcceptor::Acceptor::Acceptor( std::shared_ptr< boost::asio::io_context > context,
+    TcpAcceptor::Acceptor::Acceptor( std::shared_ptr< asio::io_context > context,
                                      TcpAcceptor& parent )
         : m_parent{ parent }
         , m_context{ std::move( context ) }
@@ -160,7 +159,7 @@ namespace ttb::net
 
     void TcpAcceptor::Acceptor::init( uint16_t port )
     {
-        using boost::asio::ip::tcp;
+        using asio::ip::tcp;
         m_acceptor.open( tcp::v4() );
         m_acceptor.set_option( tcp::acceptor::reuse_address( true ) );
         m_acceptor.bind( tcp::endpoint( tcp::v4(), port ) );
@@ -188,7 +187,7 @@ namespace ttb::net
         auto promise = std::promise< bool >{};
         auto future = promise.get_future();
 
-        boost::asio::dispatch( *m_context, [ this, &promise ] {
+        asio::dispatch( *m_context, [ this, &promise ] {
             m_acceptor.cancel();  //
             m_acceptor.close();
             promise.set_value( true );
@@ -199,7 +198,7 @@ namespace ttb::net
         future.get();
     }
 
-    void TcpAcceptor::Acceptor::acceptHandler( boost::system::error_code const& error )
+    void TcpAcceptor::Acceptor::acceptHandler( std::error_code const& error )
     {
         auto lock = std::unique_lock{ m_mutex };
 
@@ -208,28 +207,22 @@ namespace ttb::net
             return;
         }
 
-        switch( error.value() )
+        if( !error )
         {
-            case boost::system::errc::success:
-            {
-                auto connection = Connection::create( std::move( m_socket ) );
-                lock.unlock();
+            auto connection = Connection::create( std::move( m_socket ) );
+            lock.unlock();
 
-                m_parent.onConnection( std::move( connection ) );
-                break;
-            }
+            m_parent.onConnection( std::move( connection ) );
+        }
+        else if( std::errc::operation_canceled == error )
+        {
+            // do nothing
+        }
+        else
+        {
+            lock.unlock();
 
-            case boost::system::errc::operation_canceled:
-            {
-                break;
-            }
-
-            default:
-            {
-                lock.unlock();
-
-                m_parent.onAcceptFailed();
-            }
+            m_parent.onAcceptFailed();
         }
     }
 }

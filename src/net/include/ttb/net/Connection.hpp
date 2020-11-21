@@ -4,7 +4,7 @@
 #include <ttb/utils/data_io/packets.hpp>
 #include <ttb/utils/signal.hpp>
 
-#include <boost/asio.hpp>
+#include <asio.hpp>
 
 #include <memory>
 #include <queue>
@@ -28,7 +28,7 @@ namespace ttb::net
             virtual void onData( ttb::RandomAccessPacket const& data ) = 0;
         };
 
-        static std::shared_ptr< Connection > create( boost::asio::ip::tcp::socket socket );
+        static std::shared_ptr< Connection > create( asio::ip::tcp::socket socket );
 
         bool listener( Listener& listener );
 
@@ -45,7 +45,7 @@ namespace ttb::net
         bool waitForWriteSpace( size_t size = 1 );
 
     private:
-        Connection( boost::asio::ip::tcp::socket socket );
+        Connection( asio::ip::tcp::socket socket );
 
         void shutdown();
 
@@ -53,11 +53,11 @@ namespace ttb::net
 
         void readData();
 
-        void writeDataHandler( boost::system::error_code const& error, size_t bytesTransferred );
+        void writeDataHandler( std::error_code const& error, size_t bytesTransferred );
 
-        void readDataHandler( boost::system::error_code const& error, size_t bytesTransferred );
+        void readDataHandler( std::error_code const& error, size_t bytesTransferred );
 
-        boost::asio::ip::tcp::socket m_socket;
+        asio::ip::tcp::socket m_socket;
 
         bool m_active{ false };
         bool m_connected{ true };

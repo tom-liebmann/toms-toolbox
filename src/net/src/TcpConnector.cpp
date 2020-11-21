@@ -9,26 +9,25 @@ namespace ttb::net
     class TcpConnector::Connector : public std::enable_shared_from_this< Connector >
     {
     public:
-        static std::shared_ptr< Connector >
-            create( std::shared_ptr< boost::asio::io_context > context,
-                    TcpConnector& parent,
-                    std::string const& ip,
-                    uint16_t port );
+        static std::shared_ptr< Connector > create( std::shared_ptr< asio::io_context > context,
+                                                    TcpConnector& parent,
+                                                    std::string const& ip,
+                                                    uint16_t port );
 
         void stop();
 
     private:
-        Connector( std::shared_ptr< boost::asio::io_context > context, TcpConnector& parent );
+        Connector( std::shared_ptr< asio::io_context > context, TcpConnector& parent );
 
         void init( std::string const& ip, uint16_t port );
 
-        void connectHandler( boost::system::error_code const& error );
+        void connectHandler( std::error_code const& error );
 
         bool m_active{ true };
 
-        std::shared_ptr< boost::asio::io_context > m_context;
+        std::shared_ptr< asio::io_context > m_context;
 
-        boost::asio::ip::tcp::socket m_socket;
+        asio::ip::tcp::socket m_socket;
         TcpConnector& m_parent;
 
         std::mutex m_mutex;
@@ -141,7 +140,7 @@ namespace ttb::net
 namespace ttb::net
 {
     std::shared_ptr< TcpConnector::Connector >
-        TcpConnector::Connector::create( std::shared_ptr< boost::asio::io_context > context,
+        TcpConnector::Connector::create( std::shared_ptr< asio::io_context > context,
                                          TcpConnector& parent,
                                          std::string const& ip,
                                          uint16_t port )
@@ -163,29 +162,27 @@ namespace ttb::net
 
         m_active = false;
 
-        boost::asio::dispatch( *m_context,
-                               [ self = shared_from_this() ] { self->m_socket.cancel(); } );
+        asio::dispatch( *m_context, [ self = shared_from_this() ] { self->m_socket.cancel(); } );
     }
 
-    TcpConnector::Connector::Connector( std::shared_ptr< boost::asio::io_context > context,
+    TcpConnector::Connector::Connector( std::shared_ptr< asio::io_context > context,
                                         TcpConnector& parent )
         : m_context{ std::move( context ) }
-        , m_socket{ *m_context, boost::asio::ip::tcp::v4() }
+        , m_socket{ *m_context, asio::ip::tcp::v4() }
         , m_parent{ parent }
     {
     }
 
     void TcpConnector::Connector::init( std::string const& ip, uint16_t port )
     {
-        auto const endpoint =
-            boost::asio::ip::tcp::endpoint{ boost::asio::ip::address::from_string( ip ), port };
+        auto const endpoint = asio::ip::tcp::endpoint{ asio::ip::address::from_string( ip ), port };
 
         m_socket.async_connect( endpoint, [ self = shared_from_this() ]( auto const& error ) {
             self->connectHandler( error );
         } );
     }
 
-    void TcpConnector::Connector::connectHandler( boost::system::error_code const& error )
+    void TcpConnector::Connector::connectHandler( std::error_code const& error )
     {
         auto lock = std::unique_lock{ m_mutex };
 
@@ -194,30 +191,24 @@ namespace ttb::net
             return;
         }
 
-        switch( error.value() )
+        if( !error )
         {
-            case boost::system::errc::success:
-            {
-                auto connection = Connection::create( std::move( m_socket ) );
-                m_active = false;
-                lock.unlock();
+            auto connection = Connection::create( std::move( m_socket ) );
+            m_active = false;
+            lock.unlock();
 
-                m_parent.onConnection( std::move( connection ) );
-                break;
-            }
+            m_parent.onConnection( std::move( connection ) );
+        }
+        else if( std::errc::operation_canceled == error )
+        {
+            // do nothing
+        }
+        else
+        {
+            m_active = false;
+            lock.unlock();
 
-            case boost::system::errc::operation_canceled:
-            {
-                break;
-            }
-
-            default:
-            {
-                m_active = false;
-                lock.unlock();
-
-                m_parent.onConnectionFailed();
-            }
+            m_parent.onConnectionFailed();
         }
     }
 }

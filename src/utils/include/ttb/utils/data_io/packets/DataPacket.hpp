@@ -12,21 +12,17 @@ namespace ttb
     class DataPacket : public StreamPacket
     {
     public:
-        DataPacket( RandomAccessPacket const& packet, Endianness endianness = Endianness::LITTLE );
+        DataPacket( RandomAccessPacket const& packet );
 
         template < typename TType >
         TType read();
-
-    private:
-        Endianness m_endianness;
     };
 }
 
 
 namespace ttb
 {
-    inline DataPacket::DataPacket( RandomAccessPacket const& packet, Endianness endianness )
-        : StreamPacket{ packet }, m_endianness{ endianness }
+    inline DataPacket::DataPacket( RandomAccessPacket const& packet ) : StreamPacket{ packet }
     {
     }
 
