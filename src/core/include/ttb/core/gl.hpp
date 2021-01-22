@@ -12,3 +12,10 @@
 #include <GL/gl.h>
 
 #endif
+
+#include <string>
+
+
+void checkGlError();
+
+void checkGlError( std::string const& info );

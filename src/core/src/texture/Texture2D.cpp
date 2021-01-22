@@ -292,8 +292,8 @@ namespace ttb
         return *this;
     }
 
-    Texture2D::ConstModifier& Texture2D::ConstModifier::anisotropicFiltering( [
-        [maybe_unused]] bool enabled )
+    Texture2D::ConstModifier&
+        Texture2D::ConstModifier::anisotropicFiltering( [[maybe_unused]] bool enabled )
     {
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
