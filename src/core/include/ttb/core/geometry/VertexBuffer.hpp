@@ -34,6 +34,8 @@ namespace ttb
         template < typename TFunc >
         void modify( TFunc const& func );
 
+        Modifier modify();
+
         ~VertexBuffer();
 
         size_t size() const;
@@ -69,6 +71,8 @@ namespace ttb
     class VertexBuffer::AttributeHandle
     {
     public:
+        AttributeHandle& set( AttributeHandle const& rhs );
+
         AttributeHandle& set( size_t index, float v0 );
 
         AttributeHandle& set( size_t index, float v0, float v1 );
@@ -92,11 +96,17 @@ namespace ttb
     class VertexBuffer::Modifier
     {
     public:
-        Modifier( Modifier const& ) = delete;
-        Modifier( Modifier&& ) = delete;
+        Modifier() = default;
 
-        Modifier& operator==( Modifier const& ) = delete;
-        Modifier& operator==( Modifier&& ) = delete;
+        Modifier( Modifier const& ) = delete;
+
+        Modifier( Modifier&& rhs );
+
+        ~Modifier();
+
+        Modifier& operator=( Modifier const& ) = delete;
+
+        Modifier& operator=( Modifier&& rhs );
 
         void reserve( size_t elementCount );
 
@@ -112,14 +122,18 @@ namespace ttb
 
         AttributeHandle operator[]( size_t index );
 
+        /**
+         * Flush the changes that are stored in this modified.
+         * This also resets the modifier to the original state.
+         */
+        void flush();
+
     private:
         Modifier( VertexBuffer& buffer );
 
-        ~Modifier();
-
         void changed( size_t begin, size_t end );
 
-        VertexBuffer& m_buffer;
+        VertexBuffer* m_buffer{ nullptr };
         size_t m_begin{ 0 };
         size_t m_end{ 0 };
         bool m_clear{ false };
@@ -174,6 +188,19 @@ namespace ttb
         func( modifier );
     }
 
+    inline auto VertexBuffer::modify() -> Modifier
+    {
+        return { *this };
+    }
+
+
+    inline auto VertexBuffer::AttributeHandle::set( AttributeHandle const& rhs ) -> AttributeHandle&
+    {
+        std::copy( m_buffer.m_data.data() + rhs.m_index * m_buffer.m_blockSize,
+                   m_buffer.m_data.data() + ( rhs.m_index + 1 ) * m_buffer.m_blockSize,
+                   m_buffer.m_data.data() + m_index * m_buffer.m_blockSize );
+        return *this;
+    }
 
     inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0 ) -> AttributeHandle&
     {

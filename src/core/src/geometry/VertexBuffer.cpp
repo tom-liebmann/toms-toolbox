@@ -112,10 +112,32 @@ namespace ttb
     }
 
 
+    VertexBuffer::Modifier::Modifier( Modifier&& rhs )
+        : m_buffer{ std::exchange( rhs.m_buffer, nullptr ) }
+        , m_begin{ std::exchange( rhs.m_begin, 0 ) }
+        , m_end{ std::exchange( rhs.m_end, 0 ) }
+        , m_clear{ std::exchange( rhs.m_clear, false ) }
+    {
+    }
+
+    VertexBuffer::Modifier::~Modifier()
+    {
+        flush();
+    }
+
+    auto VertexBuffer::Modifier::operator=( Modifier&& rhs ) -> Modifier&
+    {
+        m_buffer = std::exchange( rhs.m_buffer, nullptr );
+        m_begin = std::exchange( rhs.m_begin, 0 );
+        m_end = std::exchange( rhs.m_end, 0 );
+        m_clear = std::exchange( rhs.m_clear, false );
+        return *this;
+    }
+
     void VertexBuffer::Modifier::reserve( size_t elementCount )
     {
-        auto& data = m_buffer.m_data;
-        auto const newCapacity = elementCount * m_buffer.m_blockSize;
+        auto& data = m_buffer->m_data;
+        auto const newCapacity = elementCount * m_buffer->m_blockSize;
 
         if( newCapacity > data.capacity() )
         {
@@ -126,8 +148,8 @@ namespace ttb
 
     void VertexBuffer::Modifier::resize( size_t elementCount )
     {
-        auto& data = m_buffer.m_data;
-        auto const newSize = elementCount * m_buffer.m_blockSize;
+        auto& data = m_buffer->m_data;
+        auto const newSize = elementCount * m_buffer->m_blockSize;
 
         if( newSize > data.capacity() )
         {
@@ -149,44 +171,64 @@ namespace ttb
 
     size_t VertexBuffer::Modifier::size() const
     {
-        return m_buffer.size();
+        return m_buffer->size();
     }
 
     void VertexBuffer::Modifier::pop_back()
     {
-        auto& data = m_buffer.m_data;
-        data.resize( data.size() - m_buffer.m_blockSize );
+        auto& data = m_buffer->m_data;
+        data.resize( data.size() - m_buffer->m_blockSize );
     }
 
     void VertexBuffer::Modifier::clear()
     {
-        m_buffer.m_data.clear();
+        m_buffer->m_data.clear();
         m_begin = 0;
         m_end = 0;
     }
 
     auto VertexBuffer::Modifier::push_back() -> AttributeHandle
     {
-        auto const elementCount = m_buffer.size();
+        auto const elementCount = m_buffer->size();
         resize( elementCount + 1 );
-        return { m_buffer, elementCount };
+        return { *m_buffer, elementCount };
     }
 
     auto VertexBuffer::Modifier::operator[]( size_t index ) -> AttributeHandle
     {
-        changed( index * m_buffer.m_blockSize, ( index + 1 ) * m_buffer.m_blockSize );
-        return { m_buffer, index };
+        changed( index * m_buffer->m_blockSize, ( index + 1 ) * m_buffer->m_blockSize );
+        return { *m_buffer, index };
     }
 
-    VertexBuffer::Modifier::Modifier( VertexBuffer& buffer ) : m_buffer{ buffer }
+    VertexBuffer::Modifier::Modifier( VertexBuffer& buffer ) : m_buffer{ &buffer }
     {
     }
 
-    VertexBuffer::Modifier::~Modifier()
+    void VertexBuffer::Modifier::changed( size_t begin, size_t end )
     {
-        glBindBuffer( GL_ARRAY_BUFFER, m_buffer.m_bufferObject );
+        if( m_begin == m_end )
+        {
+            m_begin = begin;
+            m_end = end;
+        }
+        else
+        {
+            m_begin = std::min( m_begin, begin );
+            m_end = std::max( m_end, end );
+        }
+    }
 
-        auto& data = m_buffer.m_data;
+    void VertexBuffer::Modifier::flush()
+    {
+        if( !m_clear && m_begin == m_end )
+        {
+            // No changes
+            return;
+        }
+
+        glBindBuffer( GL_ARRAY_BUFFER, m_buffer->m_bufferObject );
+
+        auto& data = m_buffer->m_data;
 
         if( m_clear )
         {
@@ -204,20 +246,10 @@ namespace ttb
         }
 
         glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    }
 
-    void VertexBuffer::Modifier::changed( size_t begin, size_t end )
-    {
-        if( m_begin == m_end )
-        {
-            m_begin = begin;
-            m_end = end;
-        }
-        else
-        {
-            m_begin = std::min( m_begin, begin );
-            m_end = std::max( m_end, end );
-        }
+        m_clear = false;
+        m_begin = 0;
+        m_end = 0;
     }
 
 
