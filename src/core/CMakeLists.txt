@@ -94,19 +94,14 @@ elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
 
 elseif( "${BUILD_PLATFORM}" STREQUAL "Browser" )
 
-    target_compile_options(
-        ${TARGET_NAME}
-
-        PRIVATE
-            -s USE_SDL=2
-    )
-
     target_link_libraries(
         ${TARGET_NAME}
 
-        PUBLIC
+        PRIVATE
             "-s USE_SDL=2"
             "-s DISABLE_EXCEPTION_CATCHING=0"
+            "-s ERROR_ON_UNDEFINED_SYMBOLS=1"
+            "-s WASM=0"
             "-s DEMANGLE_SUPPORT=1"
             "-s ASSERTIONS=2"
     )
