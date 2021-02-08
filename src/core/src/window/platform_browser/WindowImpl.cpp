@@ -5,6 +5,10 @@
 #include <ttb/core/window/WindowCreator.hpp>
 #include <ttb/core/window/WindowEvents.hpp>
 
+#include <GL/glew.h>
+
+#include <emscripten.h>
+
 
 namespace ttb
 {
@@ -90,22 +94,31 @@ namespace ttb
     Window::Impl::Impl( std::string title, WindowMode const& mode )
         : m_mode{ mode }, m_title{ std::move( title ) }
     {
+        std::cout << "debug1\n";
         SDL_GL_SetAttribute( SDL_GL_MULTISAMPLEBUFFERS, 0 );  // disable Antialiasing
+        std::cout << "debug2\n";
 
         if( SDL_Init( SDL_INIT_VIDEO ) != 0 )
         {
             throw std::runtime_error( "Failed to initialize SDL" );
         }
+        std::cout << "debug3\n";
 
-        glewInit();
+        if( GLEW_OK != glewInit() )
+        {
+            throw std::runtime_error( "Failed to initialize GLEW" );
+        }
+        std::cout << "debug3 " << m_mode.width() << " " << m_mode.height() << " " << m_title
+                  << "\n";
 
-        m_handle = SDL_CreateWindow( title.c_str(),
+        m_handle = SDL_CreateWindow( m_title.c_str(),
                                      SDL_WINDOWPOS_UNDEFINED,
                                      SDL_WINDOWPOS_UNDEFINED,
-                                     mode.width(),
-                                     mode.height(),
+                                     m_mode.width(),
+                                     m_mode.height(),
                                      SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE );
 
+        std::cout << "debug3\n";
         if( !m_handle )
         {
             throw std::runtime_error( "Failed to create window" );
