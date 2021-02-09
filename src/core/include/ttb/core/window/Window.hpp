@@ -1,7 +1,6 @@
 #pragma once
 
-#include "WindowMode.hpp"
-
+#include "WindowRequest.hpp"
 #include <ttb/core/Context.hpp>
 #include <ttb/core/RenderTarget.hpp>
 #include <ttb/utils/Event.hpp>
@@ -16,29 +15,35 @@ namespace ttb
     class Window : public Context, public RenderTarget
     {
     public:
-        class Impl;
-
+        using Size = ttb::Vector< uint16_t, 2 >;
         using EventCallback = std::function< void( Event const& ) >;
 
-        ~Window();
+        static void init( std::string_view title, WindowRequest const& request );
 
-        WindowMode const& mode() const;
+        static Window& instance();
 
-        std::string const& title() const;
+        std::string_view title() const;
+
+        Size const& size() const;
+
+        bool flag( WindowFlag value ) const;
 
         void eventCallback( EventCallback callback );
 
-        void resize( uint16_t width, uint16_t height );
-
-        void update();
+        virtual void pollEvents() = 0;
 
         // Override: Context
-        virtual bool use() override;
-        virtual bool unuse() override;
+        virtual bool use() override = 0;
+        virtual bool unuse() override = 0;
+
+    protected:
+        Window( std::string_view title, Size const& size, WindowFlag flags );
+
+        std::string m_title;
+        Size m_size;
+        WindowFlag m_flags;
 
     private:
-        Window( std::unique_ptr< Impl > impl );
-
         Window( Window const& rhs ) = delete;
         Window( Window&& rhs ) = delete;
         Window& operator=( Window const& rhs ) = delete;
@@ -47,11 +52,9 @@ namespace ttb
         // Override: RenderTarget
         virtual size_t width() const override;
         virtual size_t height() const override;
-        virtual void begin( State& state ) const override;
-        virtual void end( State& state ) const override;
+        virtual void begin( State& state ) const override = 0;
+        virtual void end( State& state ) const override = 0;
 
-        std::unique_ptr< Impl > m_impl;
-
-        friend class WindowCreator;
+        EventCallback m_eventCallback;
     };
 }

@@ -16,10 +16,10 @@ namespace ttb
     {
     }
 
-    void State::pushTarget( std::shared_ptr< RenderTarget > const& target )
+    void State::pushTarget( RenderTarget& target )
     {
-        m_renderTargetStack.push( target );
-        target->begin( *this );
+        m_renderTargetStack.push( &target );
+        target.begin( *this );
     }
 
     void State::popTarget()

@@ -1,3 +1,10 @@
+target_sources(
+    ${TARGET_NAME}
+
+    PRIVATE
+        Window.cpp
+)
+
 if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
     add_subdirectory( platform_linux )
 elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )

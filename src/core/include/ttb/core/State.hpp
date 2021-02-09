@@ -38,7 +38,7 @@ namespace ttb
         ~State();
 
         // render target
-        void pushTarget( std::shared_ptr< RenderTarget > const& target );
+        void pushTarget( RenderTarget& target );
         void popTarget();
 
         RenderTarget const& renderTarget() const;
@@ -72,7 +72,7 @@ namespace ttb
 
     private:
         // render target
-        std::stack< std::shared_ptr< ttb::RenderTarget > > m_renderTargetStack;
+        std::stack< ttb::RenderTarget* > m_renderTargetStack;
 
         // geometry
         GLint m_parentArrayObject;
