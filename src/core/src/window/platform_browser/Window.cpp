@@ -2,7 +2,7 @@
 #include <ttb/core/Viewport.hpp>
 #include <ttb/core/window/Window.hpp>
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 #include <cassert>
 

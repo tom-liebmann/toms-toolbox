@@ -39,6 +39,8 @@ namespace ttb
     protected:
         Window( std::string_view title, Size const& size, WindowFlag flags );
 
+        void pushEvent( Event const& event );
+
         std::string m_title;
         Size m_size;
         WindowFlag m_flags;

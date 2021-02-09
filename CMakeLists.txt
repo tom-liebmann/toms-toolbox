@@ -104,6 +104,7 @@ function( ttb_add_module MODULE_NAME )
     set( ACTIVATE_${MODULE_NAME} ON CACHE BOOL "Enable module ${MODULE_NAME}" )
 
     if( NOT ACTIVATE_${MODULE_NAME} )
+        message( STATUS "Skipping ttb module: ${MODULE_NAME}" )
         return()
     endif()
 

@@ -28,6 +28,14 @@ namespace ttb
     {
     }
 
+    void Window::pushEvent( Event const& event )
+    {
+        if( m_eventCallback )
+        {
+            m_eventCallback( event );
+        }
+    }
+
     size_t Window::width() const
     {
         return m_size( 0 );
