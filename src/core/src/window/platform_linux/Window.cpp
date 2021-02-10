@@ -42,7 +42,6 @@ namespace ttb
 
             std::set< int > m_activePointers;
 
-            Window* m_window;
             GLFWwindow* m_handle;
         };
 
@@ -212,7 +211,7 @@ namespace ttb
         {
             auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
 
-            auto const event = events::WindowClose{ *wnd->m_window };
+            auto const event = events::WindowClose{ *wnd };
             wnd->pushEvent( event );
         }
 
@@ -299,7 +298,7 @@ namespace ttb
             wnd->m_size( 0 ) = static_cast< uint16_t >( width );
             wnd->m_size( 1 ) = static_cast< uint16_t >( height );
 
-            auto const event = events::WindowResize{ *wnd->m_window };
+            auto const event = events::WindowResize{ *wnd };
             wnd->pushEvent( event );
         }
 

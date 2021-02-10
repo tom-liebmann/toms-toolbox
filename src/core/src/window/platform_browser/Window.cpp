@@ -1,6 +1,7 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/Viewport.hpp>
 #include <ttb/core/window/Window.hpp>
+#include <ttb/core/window/WindowEvents.hpp>
 
 #include <SDL2/SDL.h>
 
@@ -86,6 +87,24 @@ namespace ttb
             {
                 switch( event.type )
                 {
+                    case SDL_WINDOWEVENT:
+                    {
+                        switch( event.window.event )
+                        {
+                            case SDL_WINDOWEVENT_RESIZED:
+                            {
+                                m_size( 0 ) = event.window.data1;
+                                m_size( 1 ) = event.window.data2;
+
+                                auto const event = events::WindowResize{ *this };
+                                pushEvent( event );
+
+                                break;
+                            }
+                        }
+                        break;
+                    }
+
                     default:
                         break;
                 }
@@ -148,19 +167,26 @@ namespace ttb
                 throw std::runtime_error( "Failed to create window" );
             }
 
+            int width;
+            int height;
+            SDL_GetWindowSize( m_handle, &width, &height );
+            m_size( 0 ) = static_cast< uint16_t >( width );
+            m_size( 1 ) = static_cast< uint16_t >( height );
+
             SDL_EventState( SDL_TEXTINPUT, SDL_DISABLE );
             SDL_EventState( SDL_KEYDOWN, SDL_DISABLE );
             SDL_EventState( SDL_KEYUP, SDL_DISABLE );
 
-            // SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
-            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 2 );
-            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 1 );
+            SDL_GL_SetAttribute( SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES );
+            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MAJOR_VERSION, 3 );
+            SDL_GL_SetAttribute( SDL_GL_CONTEXT_MINOR_VERSION, 0 );
 
             m_context = SDL_GL_CreateContext( m_handle );
 
             if( !m_context )
             {
-                throw std::runtime_error( "Unable to create context" );
+                throw std::runtime_error( "Unable to create context: " +
+                                          std::string( SDL_GetError() ) );
             }
 
             SDL_GL_SetSwapInterval( 1 );
