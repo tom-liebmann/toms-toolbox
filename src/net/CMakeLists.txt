@@ -6,11 +6,11 @@ if( NOT TARGET ${TARGET_NAME} )
     return()
 endif()
 
-include( asio )
+include( boost )
 
 target_include_directories( ${TARGET_NAME} PUBLIC include )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbUtils asio )
+target_link_libraries( ${TARGET_NAME} PUBLIC ttbUtils boost )
 
 add_subdirectory( src )
 

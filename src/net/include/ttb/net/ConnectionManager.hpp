@@ -1,8 +1,6 @@
 #pragma once
 
-#include <ttb/utils/signal.hpp>
-
-#include <asio.hpp>
+#include <memory>
 
 
 namespace ttb::net
