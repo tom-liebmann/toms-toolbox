@@ -6,6 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include <cassert>
+#include <set>
 
 
 namespace ttb
@@ -30,9 +31,14 @@ namespace ttb
         private:
             WindowImpl( std::string_view title, Size const& size, WindowFlag flags );
 
+            std::set< int > m_activePointers;
+
             SDL_Window* m_handle;
             SDL_GLContext m_context;
         };
+
+
+        int convertPointerId( uint8_t pointerId );
     }
 }
 
@@ -101,6 +107,55 @@ namespace ttb
 
                                 break;
                             }
+                        }
+                        break;
+                    }
+
+                    case SDL_KEYDOWN:
+                    {
+                        pushEvent( events::Key{ static_cast< uint32_t >( event.key.keysym.sym ),
+                                                events::Key::Action::DOWN } );
+                        break;
+                    }
+
+                    case SDL_KEYUP:
+                    {
+                        pushEvent( events::Key{ static_cast< uint32_t >( event.key.keysym.sym ),
+                                                events::Key::Action::UP } );
+                        break;
+                    }
+
+                    case SDL_MOUSEBUTTONDOWN:
+                    {
+                        auto const pointerId = convertPointerId( event.button.button );
+
+                        m_activePointers.insert( pointerId );
+
+                        pushEvent( events::PointerDown{ events::PointerType::MOUSE,
+                                                        pointerId,
+                                                        static_cast< double >( event.button.x ),
+                                                        static_cast< double >( event.button.y ) } );
+                        break;
+                    }
+
+                    case SDL_MOUSEBUTTONUP:
+                    {
+                        auto const pointerId = convertPointerId( event.button.button );
+
+                        m_activePointers.erase( pointerId );
+
+                        pushEvent( events::PointerUp{ pointerId,
+                                                      static_cast< double >( event.button.x ),
+                                                      static_cast< double >( event.button.y ) } );
+                        break;
+                    }
+
+                    case SDL_MOUSEMOTION:
+                    {
+                        for( auto const pointerId : m_activePointers )
+                        {
+                            pushEvent(
+                                events::PointerMove( pointerId, event.motion.x, event.motion.y ) );
                         }
                         break;
                     }
@@ -190,6 +245,22 @@ namespace ttb
             }
 
             SDL_GL_SetSwapInterval( 1 );
+        }
+
+
+        int convertPointerId( uint8_t pointerId )
+        {
+            switch( pointerId )
+            {
+                case SDL_BUTTON_LEFT:
+                    return 0;
+                case SDL_BUTTON_RIGHT:
+                    return 1;
+                case SDL_BUTTON_MIDDLE:
+                    return 2;
+                default:
+                    return 3;
+            }
         }
     }
 }

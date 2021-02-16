@@ -39,6 +39,11 @@ namespace ttb
         return m_data.size();
     }
 
+    auto IndexBuffer::modify() -> Modifier
+    {
+        return { *this };
+    }
+
     std::shared_ptr< IndexBuffer > IndexBuffer::clone() const
     {
         return std::shared_ptr< IndexBuffer >( new IndexBuffer( *this ) );
@@ -48,6 +53,11 @@ namespace ttb
     void IndexBuffer::Modifier::reserve( size_t size )
     {
         m_buffer->m_data.reserve( size );
+    }
+
+    size_t IndexBuffer::Modifier::size() const
+    {
+        return m_buffer->size();
     }
 
     uint32_t& IndexBuffer::Modifier::operator[]( size_t index )
@@ -68,36 +78,41 @@ namespace ttb
         m_buffer->m_data.push_back( value );
     }
 
-    std::shared_ptr< IndexBuffer > IndexBuffer::Modifier::finish()
+    void IndexBuffer::Modifier::flush()
     {
-        if( m_clear || m_begin != m_end )
+        if( !m_clear && m_begin == m_end )
         {
-            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
-
-            if( m_clear )
-            {
-                glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                              m_buffer->m_data.size() * sizeof( GLuint ),
-                              reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
-                              GL_DYNAMIC_DRAW );
-            }
-            else
-            {
-                glBufferSubData(
-                    GL_ELEMENT_ARRAY_BUFFER,
-                    m_begin * sizeof( GLuint ),
-                    ( m_end - m_begin ) * sizeof( GLuint ),
-                    reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
-            }
-
-            glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+            // No changes
+            return;
         }
 
-        return m_buffer;
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
+
+        if( m_clear )
+        {
+            glBufferData( GL_ELEMENT_ARRAY_BUFFER,
+                          m_buffer->m_data.size() * sizeof( GLuint ),
+                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                          GL_DYNAMIC_DRAW );
+        }
+        else
+        {
+            std::cout << "IndexBuffer: Uploading " << m_begin << " - " << m_end << '\n';
+            glBufferSubData(
+                GL_ELEMENT_ARRAY_BUFFER,
+                m_begin * sizeof( GLuint ),
+                ( m_end - m_begin ) * sizeof( GLuint ),
+                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+        }
+
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+
+        m_clear = false;
+        m_begin = 0;
+        m_end = 0;
     }
 
-    IndexBuffer::Modifier::Modifier( std::shared_ptr< IndexBuffer > buffer )
-        : m_buffer( std::move( buffer ) )
+    IndexBuffer::Modifier::Modifier( IndexBuffer& buffer ) : m_buffer{ &buffer }
     {
     }
 
@@ -113,11 +128,5 @@ namespace ttb
             m_begin = std::min( m_begin, begin );
             m_end = std::max( m_end, end );
         }
-    }
-
-
-    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer )
-    {
-        return { buffer };
     }
 }
