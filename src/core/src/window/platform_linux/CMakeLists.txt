@@ -3,6 +3,8 @@ target_sources(
 
     PRIVATE
         Window.cpp
+        OffscreenContext.cpp
+        WindowImpl.cpp
 )
 
 include( glfw )

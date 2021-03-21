@@ -1,3 +1,4 @@
+#include "window/OffscreenContext.hpp"
 #include "window/Window.hpp"
 #include "window/WindowEvents.hpp"
 #include "window/WindowFlag.hpp"
