@@ -21,7 +21,7 @@ namespace ttb
 
     private:
         std::reference_wrapper< Writer > m_writer;
-        ssize_t m_offset;
+        intmax_t m_offset;
         size_t m_written{ 0 };
     };
 }
@@ -30,7 +30,7 @@ namespace ttb
 namespace ttb
 {
     inline PacketWriteHelper::PacketWriteHelper( size_t offset, Writer& writer )
-        : m_writer{ writer }, m_offset{ static_cast< ssize_t >( offset ) }
+        : m_writer{ writer }, m_offset{ static_cast< intmax_t >( offset ) }
     {
     }
 

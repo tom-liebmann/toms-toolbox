@@ -7,6 +7,8 @@ target_sources(
         GBuffer.cpp
         PNGLoader.cpp
         RenderTarget.cpp
+        Viewport.cpp
+        gl.cpp
 )
 
 add_subdirectory( uniform )

@@ -2,6 +2,7 @@
 
 #include <ttb/utils/data_io/packets/BufferPacket.hpp>
 
+#include <algorithm>
 #include <cmath>
 
 

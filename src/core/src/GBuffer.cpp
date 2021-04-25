@@ -5,6 +5,14 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/texture/Texture2D.hpp>
 
+#include <cassert>
+
+
+namespace
+{
+    void checkFramebufferStatus();
+}
+
 
 namespace ttb
 {
@@ -68,14 +76,22 @@ namespace ttb
     GBuffer::Modifier& GBuffer::Modifier::drawBuffer( uint8_t unit,
                                                       std::shared_ptr< Texture2D > buffer )
     {
+        std::cout << "Status: " << std::to_string( glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER ) )
+                  << '\n';
+
         if( m_buffer->m_drawBuffers.size() <= unit )
         {
             m_buffer->m_drawBuffers.resize( unit + 1 );
             m_buffer->m_drawBufferIDs.resize( unit + 1 );
         }
 
+        assert( buffer->width() != 0 );
+        assert( buffer->height() != 0 );
+
         glFramebufferTexture2D(
             GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D, buffer->object(), 0 );
+
+        checkFramebufferStatus();
 
         m_buffer->m_drawBuffers[ unit ] = std::move( buffer );
         m_buffer->m_drawBufferIDs[ unit ] = GL_COLOR_ATTACHMENT0 + unit;
@@ -85,11 +101,16 @@ namespace ttb
 
     GBuffer::Modifier& GBuffer::Modifier::depthBuffer( std::shared_ptr< Texture2D > buffer )
     {
+        assert( buffer->width() != 0 );
+        assert( buffer->height() != 0 );
+
         glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
                                 GL_DEPTH_ATTACHMENT,
                                 GL_TEXTURE_2D,
                                 buffer ? buffer->object() : 0,
                                 0 );
+
+        checkFramebufferStatus();
 
         m_buffer->m_depthBuffer = std::move( buffer );
 
@@ -112,5 +133,24 @@ namespace ttb
     GBuffer::Modifier modify( std::shared_ptr< GBuffer > buffer )
     {
         return { std::move( buffer ) };
+    }
+}
+
+
+namespace
+{
+    void checkFramebufferStatus()
+    {
+        auto const status = glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER );
+
+        switch( status )
+        {
+            case GL_FRAMEBUFFER_COMPLETE:
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                return;
+
+            default:
+                throw std::runtime_error( "Framebuffer status error: " + std::to_string( status ) );
+        }
     }
 }

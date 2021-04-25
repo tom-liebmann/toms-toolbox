@@ -7,99 +7,112 @@
 
 namespace ttb
 {
-    uint32_t Window::Impl::s_windowCount = 0;
+    namespace
+    {
+        inline int glfwBool( bool value );
 
-    Window::Impl::~Impl()
+        void callbackErrorGLFW( int error, char const* description );
+
+        void callbackErrorOpenGL( GLenum source,
+                                  GLenum type,
+                                  GLuint id,
+                                  GLenum severity,
+                                  GLsizei length,
+                                  GLchar const* message,
+                                  void const* userParam );
+
+        char const* convertErrorType( GLenum type );
+
+        char const* convertErrorSeverity( GLenum severity );
+    }
+}
+
+
+namespace ttb
+{
+    void WindowImpl::init( std::string_view title, WindowRequest const& request )
+    {
+        instance().reset( new WindowImpl{ title, request.size(), request.flags() } );
+    }
+
+    std::unique_ptr< WindowImpl >& WindowImpl::instance()
+    {
+        static std::unique_ptr< WindowImpl > s_instance;
+        return s_instance;
+    }
+
+    WindowImpl::~WindowImpl()
     {
         glfwDestroyWindow( m_handle );
 
-        --s_windowCount;
-        if( s_windowCount == 0 )
-        {
-            glfwTerminate();
-        }
+        glfwTerminate();
     }
 
-    WindowMode const& Window::Impl::mode() const
+    GLFWwindow* WindowImpl::handle()
     {
-        return m_mode;
+        return m_handle;
     }
 
-    std::string const& Window::Impl::title() const
+    void WindowImpl::pollEvents()
     {
-        return m_title;
-    }
-
-    void Window::Impl::window( Window& window )
-    {
-        m_window = &window;
-    }
-
-    void Window::Impl::eventCallback( EventCallback callback )
-    {
-        m_eventCallback = std::move( callback );
-    }
-
-    void Window::Impl::resize( uint16_t width, uint16_t height )
-    {
-        glfwSetWindowSize( m_handle, width, height );
-
-        m_mode = WindowMode{ width, height, mode().flags() };
-
-        if( m_eventCallback )
-        {
-            auto const event = ttb::events::WindowResize{ *m_window };
-            m_eventCallback( event );
-        }
-    }
-
-    void Window::Impl::update()
-    {
-        glfwSwapBuffers( m_handle );
         glfwPollEvents();
     }
 
-    void Window::Impl::begin( State& state )
+    void WindowImpl::begin( State& state ) const
     {
         auto const viewport = Viewport{
             0,
             0,
-            static_cast< GLsizei >( mode().width() ),
-            static_cast< GLsizei >( mode().height() ),
+            static_cast< GLsizei >( m_size( 0 ) ),
+            static_cast< GLsizei >( m_size( 1 ) ),
         };
 
         state.pushViewport( viewport );
     }
 
-    void Window::Impl::end( State& state )
+    void WindowImpl::end( State& state ) const
     {
         state.popViewport();
+
+        glfwSwapBuffers( m_handle );
     }
 
-    bool Window::Impl::useContext()
+    bool WindowImpl::use()
     {
         glfwMakeContextCurrent( m_handle );
         return true;
     }
 
-    bool Window::Impl::unuseContext()
+    bool WindowImpl::unuse()
     {
         glfwMakeContextCurrent( nullptr );
         return true;
     }
 
-    void Window::Impl::pushEvent( Event const& event )
+    WindowImpl::WindowImpl( std::string_view title, Size const& size, WindowFlag flags )
+        : Window{ title, size, flags }
     {
-        if( m_eventCallback )
-        {
-            m_eventCallback( event );
-        }
-    }
+        glfwInit();
 
-    Window::Impl::Impl( GLFWwindow* handle, std::string title, WindowMode const& mode )
-        : m_mode{ mode }, m_title{ std::move( title ) }, m_handle{ handle }
-    {
-        ++s_windowCount;
+        glfwSetErrorCallback( callbackErrorGLFW );
+
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+        glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+        // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
+        glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+#ifndef NDEBUG
+        glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
+#endif
+
+        GLFWmonitor* const monitor =
+            flag( WindowFlag::FULLSCREEN ) ? glfwGetPrimaryMonitor() : nullptr;
+
+        glfwWindowHint( GLFW_FLOATING, glfwBool( flag( WindowFlag::FLOATING ) ) );
+        glfwWindowHint( GLFW_RESIZABLE, glfwBool( flag( WindowFlag::RESIZABLE ) ) );
+        glfwWindowHint( GLFW_VISIBLE, glfwBool( !flag( WindowFlag::HIDDEN ) ) );
+
+        m_handle = glfwCreateWindow( m_size( 0 ), m_size( 1 ), m_title.c_str(), monitor, nullptr );
 
         glfwSetWindowUserPointer( m_handle, this );
 
@@ -109,108 +122,221 @@ namespace ttb
         glfwSetCursorPosCallback( m_handle, onMouseMove );
         glfwSetWindowSizeCallback( m_handle, onResize );
         glfwSetScrollCallback( m_handle, onScroll );
-    }
 
-    void Window::Impl::onClose( GLFWwindow* window )
-    {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+        // Initialize OpenGL context
         {
-            auto const event = events::WindowClose{ *wnd->m_window };
-            wnd->m_eventCallback( event );
+            glfwMakeContextCurrent( m_handle );
+
+            glfwSwapInterval( 0 );
+
+            // workaround for glew <= 1.13
+            // see https://www.khronos.org/opengl/wiki/OpenGL_Loading_Library
+            glewExperimental = GL_TRUE;
+
+            if( auto const error = glewInit(); error != GLEW_OK )
+            {
+                throw std::runtime_error(
+                    "GLEW error: " +
+                    std::string( reinterpret_cast< char const* >( glewGetErrorString( error ) ) ) );
+            }
+
+#ifndef NDEBUG
+            if( glDebugMessageCallback )
+            {
+                glEnable( GL_DEBUG_OUTPUT );
+                glEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS );
+                glDebugMessageCallback( callbackErrorOpenGL, nullptr );
+            }
+#endif
+
+            glfwMakeContextCurrent( nullptr );
         }
     }
 
-    void Window::Impl::onKey(
+    void WindowImpl::onClose( GLFWwindow* window )
+    {
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
+
+        auto const event = events::WindowClose{ *wnd };
+        wnd->pushEvent( event );
+    }
+
+    void WindowImpl::onKey(
         GLFWwindow* window, int key, int /* scancode */, int action, int /* mods */ )
     {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
+
+        auto const keyAction = [ & ] {
+            switch( action )
+            {
+                case GLFW_PRESS:
+                    return events::Key::Action::DOWN;
+
+                case GLFW_RELEASE:
+                    return events::Key::Action::UP;
+
+                default:
+                    return events::Key::Action::UNKNOWN;
+            }
+        }();
+
+        auto const event = events::Key{ static_cast< uint32_t >( key ), keyAction };
+        wnd->pushEvent( event );
+    }
+
+    void WindowImpl::onMouseButton( GLFWwindow* window, int button, int action, int /* mods */ )
+    {
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
+
+        double x;
+        double y;
+        glfwGetCursorPos( window, &x, &y );
+
+        auto const pointerId = [ & ] {
+            switch( button )
+            {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    return 0;
+
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    return 1;
+
+                case GLFW_MOUSE_BUTTON_MIDDLE:
+                    return 2;
+
+                default:
+                    return 3;
+            }
+        }();
+
+        if( GLFW_PRESS == action )
         {
-            auto const keyAction = [&] {
-                switch( action )
-                {
-                    case GLFW_PRESS:
-                        return events::Key::Action::DOWN;
+            wnd->m_activePointers.insert( pointerId );
 
-                    case GLFW_RELEASE:
-                        return events::Key::Action::UP;
+            auto const event = events::PointerDown{ events::PointerType::MOUSE, pointerId, x, y };
+            wnd->pushEvent( event );
+        }
+        else
+        {
+            wnd->m_activePointers.erase( pointerId );
 
-                    default:
-                        return events::Key::Action::UNKNOWN;
-                }
-            }();
-
-            auto const event = events::Key{ static_cast< uint32_t >( key ), keyAction };
-            wnd->m_eventCallback( event );
+            auto const event = events::PointerUp{ pointerId, x, y };
+            wnd->pushEvent( event );
         }
     }
 
-    void Window::Impl::onMouseButton( GLFWwindow* window, int button, int action, int /* mods */ )
+    void WindowImpl::onMouseMove( GLFWwindow* window, double x, double y )
     {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
+
+        for( auto const pointerId : wnd->m_activePointers )
         {
-            auto const mouseButton = [&] {
-                switch( button )
-                {
-                    case GLFW_MOUSE_BUTTON_LEFT:
-                        return events::MouseButton::Button::LEFT;
-
-                    case GLFW_MOUSE_BUTTON_RIGHT:
-                        return events::MouseButton::Button::RIGHT;
-
-                    case GLFW_MOUSE_BUTTON_MIDDLE:
-                        return events::MouseButton::Button::MIDDLE;
-
-                    default:
-                        return events::MouseButton::Button::UNKNOWN;
-                }
-            }();
-
-            auto const mouseAction = action == GLFW_PRESS ? events::MouseButton::Action::DOWN
-                                                          : ttb::events::MouseButton::Action::UP;
-
-            double mouseX;
-            double mouseY;
-            glfwGetCursorPos( window, &mouseX, &mouseY );
-
-            auto const event = events::MouseButton{ mouseButton, mouseAction, mouseX, mouseY };
-            wnd->m_eventCallback( event );
+            auto const event = events::PointerMove{ pointerId, x, y };
+            wnd->pushEvent( event );
         }
     }
 
-    void Window::Impl::onMouseMove( GLFWwindow* window, double x, double y )
+    void WindowImpl::onResize( GLFWwindow* window, int width, int height )
     {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
-        {
-            auto const event = events::MouseMove{ x, y };
-            wnd->m_eventCallback( event );
-        }
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
+
+        wnd->m_size( 0 ) = static_cast< uint16_t >( width );
+        wnd->m_size( 1 ) = static_cast< uint16_t >( height );
+
+        auto const event = events::WindowResize{ *wnd };
+        wnd->pushEvent( event );
     }
 
-    void Window::Impl::onResize( GLFWwindow* window, int width, int height )
+    void WindowImpl::onScroll( GLFWwindow* window, double xoffset, double yoffset )
     {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
-        {
-            wnd->m_mode = WindowMode{ static_cast< uint16_t >( width ),
-                                      static_cast< uint16_t >( height ),
-                                      wnd->mode().flags() };
+        auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
 
-            auto const event = events::WindowResize{ *wnd->m_window };
-            wnd->m_eventCallback( event );
-        }
+        auto const event = events::Scroll{ xoffset, yoffset };
+        wnd->pushEvent( event );
     }
+}
 
-    void Window::Impl::onScroll( GLFWwindow* window, double xoffset, double yoffset )
+
+namespace ttb
+{
+    namespace
     {
-        auto const wnd = reinterpret_cast< Impl* >( glfwGetWindowUserPointer( window ) );
-        if( wnd->m_eventCallback )
+        int glfwBool( bool value )
         {
-            auto const event = events::Scroll{ xoffset, yoffset };
-            wnd->m_eventCallback( event );
+            return value ? GLFW_TRUE : GLFW_FALSE;
+        }
+
+        void callbackErrorGLFW( int error, char const* description )
+        {
+            std::cerr << "GLFW error (" << error << "): " << description << '\n';
+        }
+
+        void callbackErrorOpenGL( GLenum /* source */,
+                                  GLenum type,
+                                  GLuint /* id */,
+                                  GLenum severity,
+                                  GLsizei /* length */,
+                                  GLchar const* message,
+                                  void const* /* userParam */ )
+        {
+            if( severity == GL_DEBUG_SEVERITY_NOTIFICATION )
+            {
+                return;
+            }
+
+            std::cerr << "OpenGL error:\n"                                             //
+                      << "    Type:     " << convertErrorType( type ) << '\n'          //
+                      << "    Severity: " << convertErrorSeverity( severity ) << '\n'  //
+                      << "    Message:  " << message << '\n';
+
+            if( severity == GL_DEBUG_SEVERITY_HIGH )
+            {
+                throw std::runtime_error( "OpenGL error" );
+            }
+        }
+
+        char const* convertErrorType( GLenum type )
+        {
+            switch( type )
+            {
+                case GL_DEBUG_TYPE_ERROR:
+                    return "ERROR";
+                case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR:
+                    return "DEPRECATED_BEHAVIOR";
+                case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:
+                    return "UNDEFINED_BEHAVIOR";
+                case GL_DEBUG_TYPE_PORTABILITY:
+                    return "PORTABILITY";
+                case GL_DEBUG_TYPE_PERFORMANCE:
+                    return "PERFORMANCE";
+                case GL_DEBUG_TYPE_MARKER:
+                    return "MARKER";
+                case GL_DEBUG_TYPE_PUSH_GROUP:
+                    return "PUSH_GROUP";
+                case GL_DEBUG_TYPE_POP_GROUP:
+                    return "POP_GROUP";
+                case GL_DEBUG_TYPE_OTHER:
+                    return "OTHER";
+                default:
+                    return "UNKNOWN";
+            }
+        }
+
+        char const* convertErrorSeverity( GLenum severity )
+        {
+            switch( severity )
+            {
+                case GL_DEBUG_SEVERITY_LOW:
+                    return "LOW";
+                case GL_DEBUG_SEVERITY_MEDIUM:
+                    return "MEDIUM";
+                case GL_DEBUG_SEVERITY_HIGH:
+                    return "HIGH";
+                case GL_DEBUG_SEVERITY_NOTIFICATION:
+                    return "NOTIFICATION";
+                default:
+                    return "UNKNOWN";
+            }
         }
     }
 }

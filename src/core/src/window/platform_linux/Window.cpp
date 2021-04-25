@@ -2,68 +2,32 @@
 
 #include "WindowImpl.hpp"
 
+#include <ttb/core/State.hpp>
+#include <ttb/core/Viewport.hpp>
+#include <ttb/core/gl.hpp>
+#include <ttb/core/window/WindowEvents.hpp>
+
+#include <GLFW/glfw3.h>
+
+#include <cassert>
+#include <set>
+
 
 namespace ttb
 {
-    Window::~Window() = default;
-
-    WindowMode const& Window::mode() const
+    void Window::init( std::string_view title, WindowRequest const& request )
     {
-        return m_impl->mode();
+        WindowImpl::init( title, request );
     }
 
-    std::string const& Window::title() const
+    Window& Window::instance()
     {
-        return m_impl->title();
-    }
+        auto& window = WindowImpl::instance();
 
-    void Window::eventCallback( EventCallback callback )
-    {
-        m_impl->eventCallback( std::move( callback ) );
-    }
+#ifndef NDEBUG
+        assert( nullptr != window.get() );
+#endif
 
-    void Window::resize( uint16_t width, uint16_t height )
-    {
-        m_impl->resize( width, height );
-    }
-
-    void Window::update()
-    {
-        m_impl->update();
-    }
-
-    Window::Window( std::unique_ptr< Impl > impl ) : m_impl{ std::move( impl ) }
-    {
-        m_impl->window( *this );
-    }
-
-    size_t Window::width() const
-    {
-        return m_impl->mode().width();
-    }
-
-    size_t Window::height() const
-    {
-        return m_impl->mode().height();
-    }
-
-    void Window::begin( State& state ) const
-    {
-        m_impl->begin( state );
-    }
-
-    void Window::end( State& state ) const
-    {
-        m_impl->end( state );
-    }
-
-    bool Window::use()
-    {
-        return m_impl->useContext();
-    }
-
-    bool Window::unuse()
-    {
-        return m_impl->unuseContext();
+        return *window;
     }
 }

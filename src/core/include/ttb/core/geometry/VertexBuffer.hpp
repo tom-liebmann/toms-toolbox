@@ -23,20 +23,35 @@ namespace ttb
 {
     class VertexBuffer
     {
-        class Creator;
-        class Attribute;
-
     public:
+        class Creator;
         class Modifier;
         class AttributeHandle;
 
-        static Creator create();
+        template < typename TFunc >
+        static std::unique_ptr< VertexBuffer > create( TFunc const& func );
+
+        template < typename TFunc >
+        void modify( TFunc const& func );
+
+        Modifier modify();
 
         ~VertexBuffer();
 
-        std::shared_ptr< VertexBuffer > clone() const;
+        size_t size() const;
+
+        std::unique_ptr< VertexBuffer > clone() const;
 
     private:
+        struct Attribute
+        {
+            GLenum type;
+            size_t size;
+            size_t offset;
+
+            size_t byteSize() const;
+        };
+
         VertexBuffer( std::vector< Attribute > attributes );
 
         VertexBuffer( VertexBuffer const& copy );
@@ -50,16 +65,23 @@ namespace ttb
         size_t m_blockSize;
 
         friend class Geometry;
-        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
-        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer );
     };
 
 
     class VertexBuffer::AttributeHandle
     {
     public:
-        template < typename TType >
-        TType& get( size_t attribIndex, size_t compIndex );
+        AttributeHandle& set( AttributeHandle const& rhs );
+
+        AttributeHandle& set( size_t index, float v0 );
+
+        AttributeHandle& set( size_t index, float v0, float v1 );
+
+        AttributeHandle& set( size_t index, float v0, float v1, float v2 );
+
+        AttributeHandle& set( size_t index, float v0, float v1, float v2, float v3 );
+
+        AttributeHandle& setComp( size_t index, size_t component, float value );
 
     private:
         AttributeHandle( VertexBuffer& buffer, size_t index );
@@ -74,74 +96,74 @@ namespace ttb
     class VertexBuffer::Modifier
     {
     public:
-        Modifier& reserve( size_t elementCount );
+        Modifier() = default;
 
-        template < typename TType >
-        Modifier& push( TType value );
+        Modifier( Modifier const& ) = delete;
 
-        template < typename TType, typename... TTypes >
-        Modifier& push( TType value, TTypes... rest );
+        Modifier( Modifier&& rhs );
 
-        // Cuts the buffer after the current position
-        Modifier& trim();
+        ~Modifier();
 
-        AttributeHandle operator[]( size_t index );
+        Modifier& operator=( Modifier const& ) = delete;
 
-        void pop_back();
+        Modifier& operator=( Modifier&& rhs );
 
-        std::shared_ptr< VertexBuffer > finish();
+        void reserve( size_t elementCount );
 
-    private:
-        Modifier( std::shared_ptr< VertexBuffer > buffer, size_t start );
-
-        std::shared_ptr< VertexBuffer > m_buffer;
-        size_t m_begin;
-        size_t m_end;
-        bool m_clear;
-
-        friend class VertexBuffer;
-        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
-        friend Modifier modify( std::shared_ptr< VertexBuffer > buffer );
-    };
-
-
-    class VertexBuffer::Attribute
-    {
-    public:
-        Attribute( GLenum type, size_t size );
-
-        GLenum type() const;
+        void resize( size_t elementCount );
 
         size_t size() const;
 
-        size_t byteSize() const;
+        void pop_back();
+
+        void clear();
+
+        AttributeHandle push_back();
+
+        AttributeHandle operator[]( size_t index );
+
+        /**
+         * Flush the changes that are stored in this modified.
+         * This also resets the modifier to the original state.
+         */
+        void flush();
 
     private:
-        GLenum m_type;
-        size_t m_size;
-    };
+        Modifier( VertexBuffer& buffer );
 
+        void changed( size_t begin, size_t end );
+
+        VertexBuffer* m_buffer{ nullptr };
+        size_t m_begin{ 0 };
+        size_t m_end{ 0 };
+        bool m_clear{ false };
+
+        friend class VertexBuffer;
+    };
 
 
     class VertexBuffer::Creator
     {
     public:
-        Creator& attribute( GLenum type, size_t size );
+        Creator( Creator const& ) = delete;
+        Creator( Creator&& ) = delete;
 
-        std::shared_ptr< VertexBuffer > finish();
+        Creator& operator=( Creator const& ) = delete;
+        Creator& operator=( Creator&& ) = delete;
+
+        void attribute( GLenum type, size_t size );
 
     private:
         Creator();
+
+        ~Creator();
+
+        std::unique_ptr< VertexBuffer > finish();
 
         std::vector< Attribute > m_attributes;
 
         friend class VertexBuffer;
     };
-
-
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer, size_t start );
-
-    VertexBuffer::Modifier modify( std::shared_ptr< VertexBuffer > buffer );
 }
 
 
@@ -151,86 +173,84 @@ namespace ttb
 
 namespace ttb
 {
-    namespace priv
+    template < typename TFunc >
+    inline std::unique_ptr< VertexBuffer > VertexBuffer::create( TFunc const& func )
     {
-        template < typename TType >
-        struct gl_type;
-
-        template <>
-        struct gl_type< float >
-        {
-            using type = GLfloat;
-        };
-
-        template <>
-        struct gl_type< double >
-        {
-            using type = GLfloat;
-        };
+        Creator creator;
+        func( creator );
+        return creator.finish();
     }
-}
 
-
-namespace ttb
-{
-    template < typename TType >
-    VertexBuffer::Modifier& VertexBuffer::Modifier::push( TType value )
+    template < typename TFunc >
+    inline void VertexBuffer::modify( TFunc const& func )
     {
-        using GLType = typename priv::gl_type< TType >::type;
+        Modifier modifier{ *this };
+        func( modifier );
+    }
 
-        auto& data = m_buffer->m_data;
+    inline auto VertexBuffer::modify() -> Modifier
+    {
+        return { *this };
+    }
 
-        if( data.size() < m_end + sizeof( GLType ) )
-        {
-            data.resize( m_end + sizeof( GLType ) );
-            m_clear = true;
-        }
 
-        *reinterpret_cast< GLType* >( data.data() + m_end ) = value;
-
-        m_end += sizeof( GLType );
-
+    inline auto VertexBuffer::AttributeHandle::set( AttributeHandle const& rhs ) -> AttributeHandle&
+    {
+        std::copy( m_buffer.m_data.data() + rhs.m_index * m_buffer.m_blockSize,
+                   m_buffer.m_data.data() + ( rhs.m_index + 1 ) * m_buffer.m_blockSize,
+                   m_buffer.m_data.data() + m_index * m_buffer.m_blockSize );
         return *this;
     }
 
-    template < typename TType, typename... TTypes >
-    VertexBuffer::Modifier& VertexBuffer::Modifier::push( TType value, TTypes... rest )
+    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0 ) -> AttributeHandle&
     {
-        push( value );
-        return push( rest... );
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset ] ) = v0;
+        return *this;
     }
 
-    inline VertexBuffer::AttributeHandle VertexBuffer::Modifier::operator[]( size_t index )
+    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1 )
+        -> AttributeHandle&
     {
-        return { *m_buffer, index };
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
+        return *this;
     }
 
-    inline void VertexBuffer::Modifier::pop_back()
+    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1, float v2 )
+        -> AttributeHandle&
     {
-        m_clear = true;
-        m_buffer->m_data.erase( std::next( std::begin( m_buffer->m_data ),
-                                           m_buffer->m_data.size() - m_buffer->m_blockSize ),
-                                std::end( m_buffer->m_data ) );
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 8 ] ) = v2;
+        return *this;
     }
 
-
-    template < typename TType >
-    inline TType& VertexBuffer::AttributeHandle::get( size_t attribIndex, size_t compIndex )
+    inline auto
+        VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1, float v2, float v3 )
+            -> AttributeHandle&
     {
-        size_t offset = 0;
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 8 ] ) = v2;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + 12 ] ) = v3;
+        return *this;
+    }
 
-        for( size_t i = 0; i < attribIndex; ++i )
-        {
-            offset += m_buffer.m_attributes[ i ].byteSize();
-        }
-
-        return reinterpret_cast< TType& >(
-            m_buffer
-                .m_data[ m_index * m_buffer.m_blockSize + offset + compIndex * sizeof( TType ) ] );
+    inline auto VertexBuffer::AttributeHandle::setComp( size_t index,
+                                                        size_t component,
+                                                        float value ) -> AttributeHandle&
+    {
+        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        reinterpret_cast< float& >( m_buffer.m_data[ offset + component * 4 ] ) = value;
+        return *this;
     }
 
     inline VertexBuffer::AttributeHandle::AttributeHandle( VertexBuffer& buffer, size_t index )
-        : m_buffer( buffer ), m_index( index )
+        : m_buffer{ buffer }, m_index{ index }
     {
     }
 }

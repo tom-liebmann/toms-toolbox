@@ -13,7 +13,7 @@ namespace ttb
     class Range
     {
     public:
-        Range() = default;
+        Range();
 
         Range( const Vector< T, D >& min, const Vector< T, D >& max );
 
@@ -34,6 +34,8 @@ namespace ttb
 
         T extent( size_t index ) const;
 
+        void extent( size_t index, T const& value );
+
         Vector< T, D > extent() const;
 
         T getBound( size_t index ) const;
@@ -41,6 +43,13 @@ namespace ttb
         bool empty() const;
 
         bool contains( const Vector< T, D >& position ) const;
+
+        /**
+         * Extends the range such that it contains the given range.
+         *
+         * @rhs Range to be contained in this one
+         */
+        void extend( Range const& rhs );
 
     private:
         Vector< T, D > m_min;
@@ -69,6 +78,16 @@ std::ostream& operator<<( std::ostream& stream, const ttb::Range< T, D... >& ran
 
 namespace ttb
 {
+    template < typename TType, size_t TDim >
+    inline Range< TType, TDim >::Range()
+    {
+        for( size_t d = 0; d < TDim; ++d )
+        {
+            m_min( d ) = std::numeric_limits< TType >::max();
+            m_max( d ) = std::numeric_limits< TType >::lowest();
+        }
+    }
+
     template < typename T, size_t D >
     inline Range< T, D >::Range( const Vector< T, D >& min, const Vector< T, D >& max )
         : m_min( min ), m_max( max )
@@ -142,6 +161,12 @@ namespace ttb
     }
 
     template < typename TType, size_t TDim >
+    void Range< TType, TDim >::extent( size_t index, TType const& value )
+    {
+        m_max[ index ] = m_min[ index ] + value;
+    }
+
+    template < typename TType, size_t TDim >
     Vector< TType, TDim > Range< TType, TDim >::extent() const
     {
         Vector< TType, TDim > result;
@@ -178,6 +203,15 @@ namespace ttb
         return true;
     }
 
+    template < typename TType, size_t TDim >
+    void Range< TType, TDim >::extend( Range const& rhs )
+    {
+        for( size_t i = 0; i < TDim; ++i )
+        {
+            m_min( i ) = std::min( m_min( i ), rhs.min( i ) );
+            m_max( i ) = std::max( m_max( i ), rhs.max( i ) );
+        }
+    }
 
 
     template < typename T, size_t D >

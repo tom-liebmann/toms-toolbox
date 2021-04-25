@@ -1,7 +1,7 @@
 #include <ttb/core/fonts/Font.hpp>
 
-#include <fstream>
 #include <regex>
+#include <sstream>
 
 
 namespace ttb
@@ -72,10 +72,13 @@ namespace ttb
     }
 
 
-    Font::Font( float lineHeight, uint16_t width, uint16_t height, std::string const& charFile )
+    Font::Font( float lineHeight,
+                uint16_t width,
+                uint16_t height,
+                std::string const& charFileContent )
         : m_lineHeight{ lineHeight }, m_width{ width }, m_height{ height }
     {
-        std::ifstream stream{ charFile };
+        std::istringstream stream{ charFileContent };
 
         std::string line;
 
@@ -99,7 +102,8 @@ namespace ttb
 
         if( iter == std::end( m_characters ) )
         {
-            throw std::runtime_error( "Invalid character id" );
+            throw std::runtime_error( "Invalid character id: " +
+                                      std::to_string( static_cast< int >( index ) ) );
         }
 
         return iter->second;

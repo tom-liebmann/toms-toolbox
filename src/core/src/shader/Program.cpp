@@ -8,29 +8,47 @@
 
 namespace ttb
 {
-    Program::Creator Program::create()
+    Program::~Program()
     {
-        return {};
+        glDeleteProgram( m_object );
+    }
+
+    GLint Program::attributeLocation( std::string const& name ) const
+    {
+        return glGetAttribLocation( m_object, reinterpret_cast< GLchar const* >( name.c_str() ) );
+    }
+
+    void Program::applyUniform( std::string const& name, UniformStackBase const& uniform ) const
+    {
+        auto location =
+            glGetUniformLocation( m_object, reinterpret_cast< const GLchar* >( name.c_str() ) );
+
+        if( location != -1 )
+        {
+            uniform.apply( location );
+        }
     }
 
     Program::Program( std::vector< std::unique_ptr< Shader > > const& shaders )
-        : m_programObject( glCreateProgram() )
+        : m_object{ glCreateProgram() }
     {
         for( auto& shader : shaders )
-            glAttachShader( m_programObject, shader->shaderObject() );
+        {
+            glAttachShader( m_object, shader->shaderObject() );
+        }
 
-        glLinkProgram( m_programObject );
+        glLinkProgram( m_object );
 
         // check error log for info
         GLint linkStatus;
-        glGetProgramiv( m_programObject, GL_LINK_STATUS, &linkStatus );
+        glGetProgramiv( m_object, GL_LINK_STATUS, &linkStatus );
 
         if( !linkStatus )
         {
-            auto const errorMsg = [&]() -> std::string {
+            auto const errorMsg = [ & ]() -> std::string {
                 std::array< char, 256 > buffer;
                 GLsizei strLength = 0;
-                glGetProgramInfoLog( m_programObject, buffer.size(), &strLength, buffer.data() );
+                glGetProgramInfoLog( m_object, buffer.size(), &strLength, buffer.data() );
 
                 if( strLength > 0 )
                 {
@@ -46,39 +64,6 @@ namespace ttb
         }
     }
 
-    Program::~Program()
-    {
-        glDeleteProgram( m_programObject );
-    }
-
-    void Program::use() const
-    {
-        glUseProgram( m_programObject );
-    }
-
-    void Program::unuse() const
-    {
-        glUseProgram( 0 );
-    }
-
-    GLint Program::attributeLocation( std::string const& name ) const
-    {
-        return glGetAttribLocation( m_programObject,
-                                    reinterpret_cast< GLchar const* >( name.c_str() ) );
-    }
-
-    void Program::applyUniform( std::string const& name, UniformStackBase const& uniform ) const
-    {
-        auto location = glGetUniformLocation( m_programObject,
-                                              reinterpret_cast< const GLchar* >( name.c_str() ) );
-
-        if( location != -1 )
-        {
-            uniform.apply( location );
-        }
-    }
-
-
 
     Program::Creator::Creator()
     {
@@ -92,6 +77,28 @@ namespace ttb
 
     std::unique_ptr< Program > Program::Creator::finish()
     {
-        return std::unique_ptr< Program >( new Program( std::move( m_shaders ) ) );
+        return std::unique_ptr< Program >{ new Program{ std::move( m_shaders ) } };
+    }
+
+
+    Program::Binder::~Binder()
+    {
+        m_data.program = m_oldProgram;
+
+        if( m_oldProgram )
+        {
+            glUseProgram( m_oldProgram->m_object );
+        }
+        else
+        {
+            glUseProgram( 0 );
+        }
+    }
+
+    Program::Binder::Binder( Program const& obj, State::Data& data )
+        : m_oldProgram{ data.program }, m_data{ data }
+    {
+        m_data.program = &obj;
+        glUseProgram( obj.m_object );
     }
 }

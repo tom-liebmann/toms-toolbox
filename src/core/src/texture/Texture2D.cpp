@@ -172,7 +172,7 @@ namespace ttb
         Texture2D::Modifier::download( [[maybe_unused]] size_t level,
                                        [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
-#ifndef MODE_ANDROID
+#ifndef PLATFORM_ANDROID
         GLint width, height;
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
@@ -196,7 +196,7 @@ namespace ttb
 
     Texture2D::Modifier& Texture2D::Modifier::depthMode( [[maybe_unused]] GLint mode )
     {
-#ifndef MODE_ANDROID
+#ifndef PLATFORM_ANDROID
 
         glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, mode );
 
@@ -276,7 +276,7 @@ namespace ttb
         Texture2D::ConstModifier::download( [[maybe_unused]] size_t level,
                                             [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
-#ifndef MODE_ANDROID
+#ifndef PLATFORM_ANDROID
 
         GLint width, height;
         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
@@ -292,8 +292,8 @@ namespace ttb
         return *this;
     }
 
-    Texture2D::ConstModifier& Texture2D::ConstModifier::anisotropicFiltering( [
-        [maybe_unused]] bool enabled )
+    Texture2D::ConstModifier&
+        Texture2D::ConstModifier::anisotropicFiltering( [[maybe_unused]] bool enabled )
     {
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )

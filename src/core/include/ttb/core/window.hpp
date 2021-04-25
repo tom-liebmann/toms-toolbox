@@ -1,5 +1,5 @@
+#include "window/OffscreenContext.hpp"
 #include "window/Window.hpp"
-#include "window/WindowCreator.hpp"
 #include "window/WindowEvents.hpp"
 #include "window/WindowFlag.hpp"
-#include "window/WindowMode.hpp"
+#include "window/WindowRequest.hpp"

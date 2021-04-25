@@ -16,10 +16,10 @@ namespace ttb
     {
     }
 
-    void State::pushTarget( std::shared_ptr< RenderTarget > const& target )
+    void State::pushTarget( RenderTarget& target )
     {
-        m_renderTargetStack.push( target );
-        target->begin( *this );
+        m_renderTargetStack.push( &target );
+        target.begin( *this );
     }
 
     void State::popTarget()
@@ -43,34 +43,9 @@ namespace ttb
         return *m_renderTargetStack.top();
     }
 
-    void State::pushProgram( std::shared_ptr< Program const > const& program )
-    {
-        if( m_programStack.empty() )
-        {
-            glGetIntegerv( GL_CURRENT_PROGRAM, &m_parentProgram );
-        }
-
-        program->use();
-        m_programStack.push( program );
-    }
-
-    void State::popProgram()
-    {
-        m_programStack.pop();
-
-        if( m_programStack.empty() )
-        {
-            glUseProgram( m_parentProgram );
-        }
-        else
-        {
-            m_programStack.top()->use();
-        }
-    }
-
     Program const& State::program()
     {
-        return *m_programStack.top();
+        return *m_data.program;
     }
 
     void State::pushArrayObject( GLuint arrayObject )
@@ -143,13 +118,11 @@ namespace ttb
 
     void State::apply()
     {
-        if( !m_programStack.empty() )
+        if( m_data.program )
         {
-            auto& program = *m_programStack.top();
-
             for( auto const& uniformPair : m_uniforms )
             {
-                program.applyUniform( uniformPair.first, *uniformPair.second );
+                m_data.program->applyUniform( uniformPair.first, *uniformPair.second );
             }
         }
     }

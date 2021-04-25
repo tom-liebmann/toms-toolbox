@@ -45,7 +45,10 @@ namespace ttb
             float m_xAdvance;
         };
 
-        Font( float lineHeight, uint16_t width, uint16_t height, std::string const& charFile );
+        Font( float lineHeight,
+              uint16_t width,
+              uint16_t height,
+              std::string const& charFileContent );
 
         Character const& character( char index ) const;
 

@@ -3,7 +3,7 @@ target_sources(
 
     PRIVATE
         Window.cpp
-        WindowCreator.cpp
+        OffscreenContext.cpp
         WindowImpl.cpp
 )
 

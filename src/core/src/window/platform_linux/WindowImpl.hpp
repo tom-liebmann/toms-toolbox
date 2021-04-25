@@ -6,40 +6,30 @@
 
 #include <GLFW/glfw3.h>
 
+#include <set>
+
 
 namespace ttb
 {
-    class Window::Impl
+    class WindowImpl : public Window
     {
     public:
-        ~Impl();
+        static void init( std::string_view title, WindowRequest const& request );
 
-        WindowMode const& mode() const;
+        static std::unique_ptr< WindowImpl >& instance();
 
-        std::string const& title() const;
+        ~WindowImpl();
 
-        void window( Window& window );
+        GLFWwindow* handle();
 
-        void eventCallback( EventCallback callback );
-
-        void resize( uint16_t width, uint16_t height );
-
-        void update();
-
-        void begin( State& state );
-
-        void end( State& state );
-
-        bool useContext();
-
-        bool unuseContext();
-
-        void pushEvent( Event const& event );
+        virtual void pollEvents() override;
+        virtual void begin( State& state ) const override;
+        virtual void end( State& state ) const override;
+        virtual bool use() override;
+        virtual bool unuse() override;
 
     private:
-        static uint32_t s_windowCount;
-
-        Impl( GLFWwindow* handle, std::string title, WindowMode const& mode );
+        WindowImpl( std::string_view title, Size const& size, WindowFlag flags );
 
         static void onClose( GLFWwindow* window );
         static void onKey( GLFWwindow* window, int key, int scancode, int action, int mods );
@@ -48,13 +38,8 @@ namespace ttb
         static void onResize( GLFWwindow* window, int width, int height );
         static void onScroll( GLFWwindow* window, double xoffset, double yoffset );
 
-        EventCallback m_eventCallback;
-        WindowMode m_mode;
-        std::string m_title;
+        std::set< int > m_activePointers;
 
-        Window* m_window;
         GLFWwindow* m_handle;
-
-        friend class WindowCreator;
     };
 }

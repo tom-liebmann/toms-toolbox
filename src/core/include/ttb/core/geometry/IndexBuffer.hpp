@@ -20,6 +20,10 @@ namespace ttb
 
         ~IndexBuffer();
 
+        size_t size() const;
+
+        Modifier modify();
+
         std::shared_ptr< IndexBuffer > clone() const;
 
     private:
@@ -39,34 +43,35 @@ namespace ttb
     class IndexBuffer::Modifier
     {
     public:
-        Modifier& reserve( size_t indexCount );
+        Modifier() = default;
 
-        Modifier& push( size_t index );
+        size_t size() const;
+
+        void reserve( size_t size );
+
+        uint32_t& operator[]( size_t index );
+
+        void resize( size_t size );
+
+        void push_back( size_t value );
 
         template < typename... TType >
-        Modifier& push( size_t index, TType... rest );
+        void push_back( size_t value, TType... rest );
 
-        Modifier& trim();
-
-        std::shared_ptr< IndexBuffer > finish();
+        void flush();
 
     private:
-        Modifier( std::shared_ptr< IndexBuffer > buffer, size_t start );
+        Modifier( IndexBuffer& buffer );
 
-        std::shared_ptr< IndexBuffer > m_buffer;
-        size_t m_begin;
-        size_t m_end;
-        bool m_clear;
+        void changed( size_t begin, size_t end );
+
+        IndexBuffer* m_buffer{ nullptr };
+        size_t m_begin{ 0 };
+        size_t m_end{ 0 };
+        bool m_clear{ false };
 
         friend class IndexBuffer;
-        friend Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start );
-        friend Modifier modify( std::shared_ptr< IndexBuffer > buffer );
     };
-
-
-    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer, size_t start );
-
-    IndexBuffer::Modifier modify( std::shared_ptr< IndexBuffer > buffer );
 }
 
 
@@ -76,9 +81,9 @@ namespace ttb
 namespace ttb
 {
     template < typename... TType >
-    IndexBuffer::Modifier& IndexBuffer::Modifier::push( size_t index, TType... rest )
+    void IndexBuffer::Modifier::push_back( size_t value, TType... rest )
     {
-        push( index );
-        return push( rest... );
+        push_back( value );
+        push_back( rest... );
     }
 }
