@@ -13,7 +13,7 @@
         android:fullBackupContent="false">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".AppActivity"
             android:configChanges="orientation|keyboardHidden"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"

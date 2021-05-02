@@ -22,7 +22,10 @@ ${JAVA_COMPILER} \
     -source 1.8 \
     -target 1.8 \
     -d "${OUT_DIR}/java" \
-    "${SCRIPT_DIR}/src/MainActivity.java"
+    "${SCRIPT_DIR}/src/MainActivity.java" \
+    "${SCRIPT_DIR}/src/MainView.java" \
+    "${SCRIPT_DIR}/src/AppActivity.java" \
+    "${SCRIPT_DIR}/src/ApplicationLib.java"
 
 mkdir -p "${OUT_DIR}/dex"
 
@@ -31,11 +34,11 @@ ${ANDROID_DX} \
     --output="${OUT_DIR}/classes.dex" \
     "${OUT_DIR}/java"
 
-mkdir -p "${OUT_DIR}/res"
+# mkdir -p "${OUT_DIR}/res"
 
-${ANDROID_AAPT2} \
-    compile \
-    "${SCRIPT_DIR}/res/layout/main.xml"
+# ${ANDROID_AAPT2} \
+#     compile \
+#     "${SCRIPT_DIR}/res/layout/main.xml"
 
 
 ${ANDROID_AAPT2} \
