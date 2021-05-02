@@ -18,6 +18,8 @@ public class MainActivity extends android.app.Activity
 
         m_view = new MainView( this );
         setContentView( m_view );
+
+        ApplicationLib.test_callback();
     }
 
     @Override

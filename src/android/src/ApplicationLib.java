@@ -2,19 +2,16 @@ package toms_toolbox;
 
 import android.content.res.AssetManager;
 import toms_toolbox.MainActivity;
+import android.util.Log;
 
 public class ApplicationLib
 {
+    public static final String TAG = "ApplicationLib";
+
     static
     {
-        try
-        {
-            System.loadLibrary( "application" );
-        }
-        catch( UnsatisfiedLinkError error )
-        {
-            System.loadLibrary( "application" );
-        }
+        System.loadLibrary( "project_library" );
+        Log.d( TAG, "Library loaded" );
     }
 
     public static native void init_gl();
@@ -34,4 +31,6 @@ public class ApplicationLib
     public static native void on_sign_in_success( String authCode );
 
     public static native void on_sign_in_failure();
+
+    public static native void test_callback();
 }
