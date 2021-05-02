@@ -1,4 +1,4 @@
-package com.juicy_trash.pong_royale;
+package @ANDROID_PACKAGE_NAME@;
 
 import toms_toolbox.MainActivity;
 

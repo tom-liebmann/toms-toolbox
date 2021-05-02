@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.juicy_trash.pong_royale">
+    package="@ANDROID_PACKAGE_NAME@">
 
     <uses-sdk
-        android:minSdkVersion="29"
-        android:targetSdkVersion="29"
-        android:maxSdkVersion="29" />
+        android:minSdkVersion="@ANDROID_SDK_VERSION_MIN@"
+        android:maxSdkVersion="@ANDROID_SDK_VERSION_MAX@"
+        android:targetSdkVersion="@ANDROID_SDK_VERSION_TARGET@" />
 
     <application
         android:allowBackup="false"

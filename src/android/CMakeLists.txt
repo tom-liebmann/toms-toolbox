@@ -1,21 +1,16 @@
-set( ANDROID_SDK "" CACHE PATH "Path to android sdk" )
-set( ANDROID_REV "" CACHE STRING "Android version" )
+cmake_minimum_required( VERSION 3.10 )
 
-if( not "${ANDROID_SDK}" )
-    message( FATAL_ERROR "ANDROID_SDK not defined" )
-endif()
+cmake_policy( SET CMP0076 NEW ) # allow relative target_sources
 
-set( ANDROID_TOOLS "${ANDROID_SDK}/platforms/${ANDROID_REV}/tools" )
+project( bla )
 
-set( ANDROID_AAPT_PACK "${ANDROID_SDK}/build-tools/${ANDROID_REV}/aapt package -v -f -I ${ANDROID_SDK}/platforms/${ANDROID_REV}/android.jar" )
+message( "TEST" )
 
-add_custom_command(
-    OUTPUT resources.ap_
-    COMMAND "${ANDROID_AAPT_PACK}"
-            "-M \"${CMAKE_CURRENT_LIST_DIR}/AndroidManifest.xml\""
-            "-A \"${CMAKE_CURRENT_LIST_DIR}/assets\""
-            "-S \"${CMAKE_CURRENT_LIST_DIR}/res\""
-            "-m"
-            "-J \"${CMAKE_CURRENT_LIST_DIR}/gen\""
-            "-F \"${CMAKE_CURRENT_BINARY_DIR}/resources.ap_\""
-)
+set( TARGET_NAME "project_library" )
+
+add_library( ${TARGET_NAME} SHARED )
+
+message( STATUS "Including ${PROJECT_CMAKE_FILE}" )
+add_subdirectory( ${PROJECT_CMAKE_FILE} "project_library" )
+
+install( TARGETS ${TARGET_NAME} )
