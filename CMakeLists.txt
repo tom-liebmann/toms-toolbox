@@ -1,6 +1,7 @@
 cmake_minimum_required( VERSION 3.15 )
 
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libs" )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/find_scripts" )
 
 set( BUILD_PLATFORM "" CACHE STRING "Platform the project is built for" )
 set_property(
