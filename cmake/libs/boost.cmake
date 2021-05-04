@@ -9,5 +9,5 @@ if( NOT ${Boost_FOUND} )
 endif()
 
 add_library( boost INTERFACE IMPORTED )
-set_property( TARGET boost PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${Boost_INCLUDE_DIRS} )
-set_property( TARGET boost PROPERTY INTERFACE_LINK_LIBRARIES ${Boost_LIBRARIES} )
+target_include_directories( boost INTERFACE ${Boost_INCLUDE_DIRS} )
+target_link_libraries( boost INTERFACE ${Boost_LIBRARIES} )
