@@ -3,6 +3,4 @@ target_sources(
 
     PRIVATE
         Window.cpp
-        WindowCreator.cpp
-        WindowImpl.cpp
 )

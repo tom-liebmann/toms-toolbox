@@ -7,6 +7,15 @@ function( ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DI
     set( LIBRARY_NAME "project_library_${ANDROID_ABI}" )
     set( OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}/lib/lib${LIBRARY_NAME}.so" )
 
+    # MUST be done before call to 'project'
+    get_cmake_property( _CACHE_VARIABLES CACHE_VARIABLES )
+    foreach( _CACHE_VARIABLE ${_CACHE_VARIABLES} )
+      get_property( _CURRENT_HELP_STRING CACHE "${_CACHE_VARIABLE}" PROPERTY HELPSTRING )
+        if("${_CURRENT_HELP_STRING}" MATCHES "No help, variable specified on the command line." OR "${_CURRENT_HELP_STRING}" STREQUAL "")
+            list(APPEND _USER_ARGS "-D${_CACHE_VARIABLE}=${${_CACHE_VARIABLE}}")
+        endif()
+    endforeach()
+
     ExternalProject_Add(
         "${LIBRARY_NAME}"
         PREFIX "${LIBRARY_NAME}"
@@ -20,6 +29,7 @@ function( ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DI
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
+            ${_USER_ARGS}
     )
 
     add_custom_target(
