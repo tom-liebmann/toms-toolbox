@@ -11,6 +11,9 @@ add_library( ${TARGET_NAME} SHARED )
 
 add_subdirectory( ${PROJECT_CMAKE_FILE} ${PROJECT_NAME} )
 
+set( BUILD_PLATFORM "Android" CACHE STRING "" FORCE )
+add_subdirectory( "${CMAKE_CURRENT_LIST_DIR}/../.." toms-toolbox )
+
 target_link_libraries(
     ${TARGET_NAME}
     PRIVATE

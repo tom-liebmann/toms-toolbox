@@ -5,7 +5,7 @@ endif()
 find_package( GLFW )
 
 if( NOT ${GLFW_FOUND} )
-    message( FATA_ERROR "Did not find GLFW" )
+    message( FATAL_ERROR "Did not find GLFW" )
 endif()
 
 add_library( glfw INTERFACE IMPORTED )
