@@ -55,6 +55,7 @@ namespace ttb
 
     void WindowImpl::pollEvents()
     {
+        glfwSwapBuffers( m_handle );
         glfwPollEvents();
     }
 

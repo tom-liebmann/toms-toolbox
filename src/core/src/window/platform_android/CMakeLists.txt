@@ -3,4 +3,8 @@ target_sources(
 
     PRIVATE
         Window.cpp
+        WindowImpl.cpp
+
+    PUBLIC
+        ApplicationLib.cpp
 )

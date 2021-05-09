@@ -14,9 +14,7 @@ if( PROJECT_HAS_PARENT )
 
     message( "Building toolbox as submodule" )
 
-    add_library( ttb OBJECT )
-
-    target_sources( ttb PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src/dummy.cpp" )
+    set( BUILD_LIBRARY_TYPE "STATIC" )
 
 else()
 
@@ -52,9 +50,9 @@ else()
 
     request_library_type( BUILD_LIBRARY_TYPE )
 
-    add_library( ttb ${BUILD_LIBRARY_TYPE} )
-
 endif()
+
+add_library( ttb INTERFACE )
 
 # Generate documentation
 find_package( Doxygen )
@@ -76,7 +74,7 @@ if( DOXYGEN_FOUND )
 
 endif( DOXYGEN_FOUND )
 
-set(EXPORT_TARGETS "ttb")
+set( EXPORT_TARGETS "ttb" )
 
 add_subdirectory( src/math )
 add_subdirectory( src/core )

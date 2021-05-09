@@ -7,9 +7,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.function.Predicate;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Predicate;
 import javax.microedition.khronos.egl.EGL10;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.egl.EGLContext;
@@ -58,7 +58,7 @@ class MainView extends GLSurfaceView
                 final int pointerId = event.getPointerId( pointerNr );
                 final float x = event.getX( pointerNr );
                 final float y = event.getY( pointerNr );
-                // ApplicationLib.on_pointer_down( pointerId, x, y );
+                ApplicationLib.on_pointer_down( pointerId, x, y );
                 break;
             }
 
@@ -69,7 +69,7 @@ class MainView extends GLSurfaceView
                 final int pointerId = event.getPointerId( pointerNr );
                 final float x = event.getX( pointerNr );
                 final float y = event.getY( pointerNr );
-                // ApplicationLib.on_pointer_up( pointerId, x, y );
+                ApplicationLib.on_pointer_up( pointerId, x, y );
                 break;
             }
 
@@ -80,8 +80,7 @@ class MainView extends GLSurfaceView
                     final int pointerId = event.getPointerId( pointerNr );
                     final float x = event.getX( pointerNr );
                     final float y = event.getY( pointerNr );
-
-                    // ApplicationLib.on_pointer_move( pointerId, x, y );
+                    ApplicationLib.on_pointer_move( pointerId, x, y );
                 }
                 break;
             }
@@ -137,17 +136,17 @@ class MainView extends GLSurfaceView
             }
             m_lock.unlock();
 
-            Log.d( TAG, "Draw" );
+            ApplicationLib.step();
         }
 
         public void onSurfaceChanged( GL10 gl, int width, int height )
         {
-            Log.d( TAG, "Surface changed" );
+            ApplicationLib.on_resize( width, height );
         }
 
         public void onSurfaceCreated( GL10 gl, EGLConfig config )
         {
-            Log.d( TAG, "Surface created" );
+            ApplicationLib.init_gl();
         }
     }
 }

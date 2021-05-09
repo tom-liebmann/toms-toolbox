@@ -2,6 +2,7 @@ target_sources(
     ${TARGET_NAME}
 
     PRIVATE
+        Logger.cpp
         State.cpp
         Context.cpp
         GBuffer.cpp

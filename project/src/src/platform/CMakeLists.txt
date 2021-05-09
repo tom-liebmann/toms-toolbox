@@ -1,0 +1,5 @@
+if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
+    add_subdirectory( desktop )
+elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
+    add_subdirectory( android )
+endif()

@@ -1,4 +1,9 @@
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/platforms" )
+set( TTB_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." )
+
+cmake_policy( SET CMP0079 NEW )
+
+list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/cmake" )
+list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/project/platforms" )
 
 include( ttb_tools )
 

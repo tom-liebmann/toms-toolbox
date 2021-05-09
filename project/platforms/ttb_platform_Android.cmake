@@ -1,5 +1,5 @@
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
-set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/src/android" )
+set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 
 function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DIR )
 
@@ -28,6 +28,7 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
             -DANDROID_PLATFORM=android-30
             -DANDROID_ABI=${ANDROID_ABI}
             -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK}/ndk/22.1.7171670/build/cmake/android.toolchain.cmake
+            -DBUILD_PLATFORM=Android
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}

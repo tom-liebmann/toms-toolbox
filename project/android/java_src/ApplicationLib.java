@@ -31,6 +31,4 @@ public class ApplicationLib
     public static native void on_sign_in_success( String authCode );
 
     public static native void on_sign_in_failure();
-
-    public static native void test_callback();
 }

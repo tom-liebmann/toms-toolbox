@@ -13,14 +13,14 @@ function( ttb_add_module MODULE_NAME )
 
     # create the module target
     # ================================================================
-    add_library( ${MODULE_NAME} OBJECT EXCLUDE_FROM_ALL )
+    add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} EXCLUDE_FROM_ALL )
 
     target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../src/dummy.cpp" )
 
     # add compiler definitions
     # ================================================================
     string( TOUPPER ${BUILD_PLATFORM} BUILD_PLATFORM_UPPER )
-    target_compile_definitions( ${MODULE_NAME} PRIVATE PLATFORM_${BUILD_PLATFORM_UPPER} )
+    target_compile_definitions( ${MODULE_NAME} PUBLIC PLATFORM_${BUILD_PLATFORM_UPPER} )
 
     # set compile options
     # ================================================================
@@ -32,7 +32,7 @@ function( ttb_add_module MODULE_NAME )
 
     # link module to main target
     # ================================================================
-    target_link_libraries( ttb PUBLIC ${MODULE_NAME} )
+    target_link_libraries( ttb INTERFACE ${MODULE_NAME} )
 
     list( APPEND EXPORT_TARGETS ${MODULE_NAME} )
     set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
