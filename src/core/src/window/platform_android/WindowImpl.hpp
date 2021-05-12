@@ -2,44 +2,31 @@
 
 #include <ttb/core/window/Window.hpp>
 
-#include <ttb/core/gl.hpp>
-
 
 namespace ttb
 {
-    class Window::Impl
+    namespace priv
     {
-    public:
-        static void onResize( uint16_t width, uint16_t height );
-        static void onPointerDown( int pointerId, float x, float y );
-        static void onPointerUp( int pointerId, float x, float y );
-        static void onPointerMove( int poitnerId, float x, float y );
+        class WindowImpl : public Window
+        {
+        public:
+            static void init( std::string_view title, WindowRequest const& request );
 
-        WindowMode const& mode() const;
+            static std::unique_ptr< WindowImpl >& instance();
 
-        std::string const& title() const;
+            static void onResize( uint16_t width, uint16_t height );
+            static void onPointerDown( int pointerId, float x, float y );
+            static void onPointerUp( int pointerId, float x, float y );
+            static void onPointerMove( int poitnerId, float x, float y );
 
-        void window( Window& window );
+            virtual void pollEvents() override;
+            virtual void begin( State& state ) const override;
+            virtual void end( State& state ) const override;
+            virtual bool use() override;
+            virtual bool unuse() override;
 
-        void eventCallback( EventCallback callback );
-
-        void resize( uint16_t width, uint16_t height );
-
-        void begin( State& state );
-
-        void end( State& state );
-
-        void pushEvent( Event const& event );
-
-    private:
-        Impl( std::string title, WindowMode const& mode );
-
-        EventCallback m_eventCallback;
-        WindowMode m_mode;
-        std::string m_title;
-
-        Window* m_window;
-
-        friend class WindowCreator;
-    };
+        private:
+            WindowImpl( std::string_view title, Size const& size, WindowFlag flags );
+        };
+    }
 }

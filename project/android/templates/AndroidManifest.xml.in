@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="@ANDROID_PACKAGE_NAME@">
+
+    <uses-sdk
+        android:minSdkVersion="@ANDROID_SDK_VERSION_MIN@"
+        android:maxSdkVersion="@ANDROID_SDK_VERSION_MAX@"
+        android:targetSdkVersion="@ANDROID_SDK_VERSION_TARGET@" />
+
+    <application
+        android:allowBackup="false"
+        android:fullBackupContent="false">
+
+        <activity
+            android:name=".AppActivity"
+            android:configChanges="orientation|keyboardHidden"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

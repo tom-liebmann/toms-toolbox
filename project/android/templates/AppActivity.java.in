@@ -1,0 +1,7 @@
+package @ANDROID_PACKAGE_NAME@;
+
+import toms_toolbox.MainActivity;
+
+public class AppActivity extends MainActivity
+{
+};
