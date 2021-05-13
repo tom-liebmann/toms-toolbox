@@ -1,39 +1,103 @@
 #pragma once
 
+#include "IndexBuffer.hpp"
+#include "VertexBuffer.hpp"
 
-template < typename... TAttributes >
-class BatchElement
+#include <cstdlib>
+#include <list>
+
+
+namespace ttb
 {
-};
+    class ElementBatcher
+    {
+    public:
+        class Handle;
+
+        ElementBatcher( size_t verticesPerElement,
+                        size_t indicesPerElement,
+                        ttb::VertexBuffer::Modifier vertexBuffer,
+                        ttb::IndexBuffer::Modifier indexBuffer );
+
+        Handle createElement();
+
+        Handle element( size_t index );
+
+    private:
+        /** Maps each element index to the location in the packed geometry buffers. */
+        std::vector< size_t > m_elementLocations;
+
+        std::list< size_t > m_freeElements;
+
+        size_t m_verticesPerElement;
+
+        size_t m_indicesPerElement;
+
+        ttb::VertexBuffer::Modifier m_vertexBuffer;
+
+        ttb::IndexBuffer::Modifier m_indexBuffer;
+    };
 
 
-template < typename TElement >
-class ElementBatcher
-{
-public:
-    class Handle;
+    class ElementBatcher::Handle
+    {
+    public:
+        Handle();
 
-    ElementBatcher( ttb::VertexBuffer& vertexBuffer, ttb::IndexBuffer& indexBuffer );
+        Handle( Handle const& rhs );
 
-    Handle createElement();
+        Handle( Handle&& rhs );
 
-    void update();
+        void destroy();
 
-private:
-    /** Maps each element index to the location in the packed geometry buffers. */
-    std::vector< size_t > m_elementLocations;
+        size_t index() const;
 
-    /** Maps each packed location to an element index. */
-    std::vector< size_t > m_locationElements;
-};
+        VertexBuffer::AttributeHandle attribute( size_t offset );
+
+        void index( size_t offset, uint32_t value );
+
+        Handle& operator=( Handle const& rhs );
+
+        Handle& operator=( Handle&& rhs );
+
+    private:
+        Handle( ElementBatcher& batcher, size_t index );
+
+        ElementBatcher* m_batcher{ nullptr };
+        size_t m_index{ 0 };
+
+        friend ElementBatcher;
+    };
 
 
-template < typename TElement >
-class ElementBatcher< TElement >::Handle
-{
-public:
-private:
-    Handle( size_t index );
+    inline ElementBatcher::Handle::Handle() = default;
 
-    size_t m_index;
-};
+    inline ElementBatcher::Handle::Handle( Handle const& rhs ) = default;
+
+    inline ElementBatcher::Handle::Handle( Handle&& rhs )
+        : m_batcher{ std::exchange( rhs.m_batcher, nullptr ) }
+        , m_index{ std::exchange( rhs.m_index, 0 ) }
+    {
+    }
+
+    inline VertexBuffer::AttributeHandle ElementBatcher::Handle::attribute( size_t offset )
+    {
+        auto const location = m_batcher->m_elementLocations[ m_index ];
+        return m_batcher->m_vertexBuffer[ location * m_batcher->m_verticesPerElement + offset ];
+    }
+
+    void ElementBatcher::Handle::index( size_t offset, uint32_t value )
+    {
+        auto const location = m_batcher->m_elementLocations[ m_index ];
+        m_batcher->m_indexBuffer[ location * m_batcher->m_indicesPerElement + offset ] = value;
+    }
+
+    auto ElementBatcher::Handle::operator=( Handle const& rhs ) -> Handle& = default;
+
+    auto ElementBatcher::Handle::operator=( Handle&& rhs ) -> Handle&
+    {
+        m_batcher = std::exchange( rhs.m_batcher, nullptr );
+        m_index = std::exchange( rhs.m_index, 0 );
+        return *this;
+    }
+}
