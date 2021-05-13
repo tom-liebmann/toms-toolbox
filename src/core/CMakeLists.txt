@@ -6,9 +6,11 @@ if( NOT TARGET ${TARGET_NAME} )
     return()
 endif()
 
+include( yamlcpp )
+
 target_include_directories( ${TARGET_NAME} PUBLIC include PRIVATE src )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath ttbUtils )
+target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath ttbUtils yamlcpp )
 
 add_subdirectory( src )
 
