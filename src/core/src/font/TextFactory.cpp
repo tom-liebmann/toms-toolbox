@@ -11,10 +11,11 @@ namespace ttb
             c.attribute( GL_FLOAT, 2 );
         } );
 
-        vertexBuffer->modify( [ & ]( auto& m ) {
+        // push characters
+        {
             float scaleFactor = size / font.lineHeight();
 
-            m.reserve( m.size() + text.size() * 6 );
+            vertexBuffer->reserve( vertexBuffer->numVertices() + text.size() * 6 );
 
             auto const width = font.width();
             auto const height = font.height();
@@ -29,38 +30,38 @@ namespace ttb
                 {
                     auto const& c = font.character( text[ i ] );
                     // upper left triangle
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, c.x() / width, c.y() / height )
                         .set( 1,
                               ( x + c.xOffset() ) * scaleFactor,
                               ( y + c.yOffset() ) * scaleFactor );
 
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, c.x() / width, ( c.y() + c.height() ) / height )
                         .set( 1,
                               ( x + c.xOffset() ) * scaleFactor,
                               ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, ( c.x() + c.width() ) / width, c.y() / height )
                         .set( 1,
                               ( x + c.xOffset() + c.width() ) * scaleFactor,
                               ( y + c.yOffset() ) * scaleFactor );
 
                     // lower right triangle
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, c.x() / width, ( c.y() + c.height() ) / height )
                         .set( 1,
                               ( x + c.xOffset() ) * scaleFactor,
                               ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, ( c.x() + c.width() ) / width, ( c.y() + c.height() ) / height )
                         .set( 1,
                               ( x + c.xOffset() + c.width() ) * scaleFactor,
                               ( y + c.yOffset() + c.height() ) * scaleFactor );
 
-                    m.push_back()
+                    vertexBuffer->push_back()
                         .set( 0, ( c.x() + c.width() ) / width, c.y() / height )
                         .set( 1,
                               ( x + c.xOffset() + c.width() ) * scaleFactor,
@@ -74,7 +75,9 @@ namespace ttb
                     y += font.lineHeight();
                 }
             }
-        } );
+
+            vertexBuffer->flush();
+        }
 
         return Geometry::create( GL_TRIANGLES )
             .attribute( "in_texCoord", vertexBuffer, 0 )

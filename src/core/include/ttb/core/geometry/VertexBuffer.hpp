@@ -25,22 +25,34 @@ namespace ttb
     {
     public:
         class Creator;
-        class Modifier;
-        class AttributeHandle;
+        class VertexHandle;
 
         template < typename TFunc >
         static std::unique_ptr< VertexBuffer > create( TFunc const& func );
 
-        template < typename TFunc >
-        void modify( TFunc const& func );
-
-        Modifier modify();
-
         ~VertexBuffer();
 
-        size_t size() const;
+        size_t numVertices() const;
 
-        std::unique_ptr< VertexBuffer > clone() const;
+        size_t byteSize() const;
+
+        void reserve( size_t numVertices );
+
+        void resize( size_t numVertices );
+
+        void pop_back();
+
+        void clear();
+
+        VertexHandle push_back();
+
+        VertexHandle operator[]( size_t index );
+
+        /**
+         * Flush the changes that are stored in this modified.
+         * This also resets the modifier to the original state.
+         */
+        void flush();
 
     private:
         struct Attribute
@@ -54,89 +66,50 @@ namespace ttb
 
         VertexBuffer( std::vector< Attribute > attributes );
 
-        VertexBuffer( VertexBuffer const& copy );
+        VertexBuffer() = delete;
+        VertexBuffer( VertexBuffer const& rhs ) = delete;
+        VertexBuffer( VertexBuffer&& rhs ) = delete;
+        VertexBuffer& operator=( VertexBuffer const& rhs ) = delete;
+        VertexBuffer& operator=( VertexBuffer&& rhs ) = delete;
 
         void bind( size_t index, GLint location ) const;
+
+        void changed( size_t begin, size_t end );
+
+        size_t m_begin{ 0 };
+        size_t m_end{ 0 };
+        bool m_clear{ false };
 
         GLuint m_bufferObject;
         std::vector< uint8_t > m_data;
 
         std::vector< Attribute > m_attributes;
-        size_t m_blockSize;
+        size_t m_vertexSize;
 
         friend class Geometry;
     };
 
 
-    class VertexBuffer::AttributeHandle
+    class VertexBuffer::VertexHandle
     {
     public:
-        AttributeHandle& set( AttributeHandle const& rhs );
+        VertexHandle& set( VertexHandle const& rhs );
 
-        AttributeHandle& set( size_t index, float v0 );
+        VertexHandle& set( size_t index, float v0 );
 
-        AttributeHandle& set( size_t index, float v0, float v1 );
+        VertexHandle& set( size_t index, float v0, float v1 );
 
-        AttributeHandle& set( size_t index, float v0, float v1, float v2 );
+        VertexHandle& set( size_t index, float v0, float v1, float v2 );
 
-        AttributeHandle& set( size_t index, float v0, float v1, float v2, float v3 );
+        VertexHandle& set( size_t index, float v0, float v1, float v2, float v3 );
 
-        AttributeHandle& setComp( size_t index, size_t component, float value );
+        VertexHandle& setComp( size_t index, size_t component, float value );
 
     private:
-        AttributeHandle( VertexBuffer& buffer, size_t index );
+        VertexHandle( VertexBuffer& buffer, size_t index );
 
         VertexBuffer& m_buffer;
         size_t m_index;
-
-        friend class VertexBuffer;
-    };
-
-
-    class VertexBuffer::Modifier
-    {
-    public:
-        Modifier() = default;
-
-        Modifier( Modifier const& ) = delete;
-
-        Modifier( Modifier&& rhs );
-
-        ~Modifier();
-
-        Modifier& operator=( Modifier const& ) = delete;
-
-        Modifier& operator=( Modifier&& rhs );
-
-        void reserve( size_t elementCount );
-
-        void resize( size_t elementCount );
-
-        size_t size() const;
-
-        void pop_back();
-
-        void clear();
-
-        AttributeHandle push_back();
-
-        AttributeHandle operator[]( size_t index );
-
-        /**
-         * Flush the changes that are stored in this modified.
-         * This also resets the modifier to the original state.
-         */
-        void flush();
-
-    private:
-        Modifier( VertexBuffer& buffer );
-
-        void changed( size_t begin, size_t end );
-
-        VertexBuffer* m_buffer{ nullptr };
-        size_t m_begin{ 0 };
-        size_t m_end{ 0 };
-        bool m_clear{ false };
 
         friend class VertexBuffer;
     };
@@ -181,47 +154,34 @@ namespace ttb
         return creator.finish();
     }
 
-    template < typename TFunc >
-    inline void VertexBuffer::modify( TFunc const& func )
-    {
-        Modifier modifier{ *this };
-        func( modifier );
-    }
 
-    inline auto VertexBuffer::modify() -> Modifier
+    inline auto VertexBuffer::VertexHandle::set( VertexHandle const& rhs ) -> VertexHandle&
     {
-        return { *this };
-    }
-
-
-    inline auto VertexBuffer::AttributeHandle::set( AttributeHandle const& rhs ) -> AttributeHandle&
-    {
-        std::copy( m_buffer.m_data.data() + rhs.m_index * m_buffer.m_blockSize,
-                   m_buffer.m_data.data() + ( rhs.m_index + 1 ) * m_buffer.m_blockSize,
-                   m_buffer.m_data.data() + m_index * m_buffer.m_blockSize );
+        std::copy( m_buffer.m_data.data() + rhs.m_index * m_buffer.m_vertexSize,
+                   m_buffer.m_data.data() + ( rhs.m_index + 1 ) * m_buffer.m_vertexSize,
+                   m_buffer.m_data.data() + m_index * m_buffer.m_vertexSize );
         return *this;
     }
 
-    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0 ) -> AttributeHandle&
+    inline auto VertexBuffer::VertexHandle::set( size_t index, float v0 ) -> VertexHandle&
     {
-        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset ] ) = v0;
         return *this;
     }
 
-    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1 )
-        -> AttributeHandle&
+    inline auto VertexBuffer::VertexHandle::set( size_t index, float v0, float v1 ) -> VertexHandle&
     {
-        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
         return *this;
     }
 
-    inline auto VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1, float v2 )
-        -> AttributeHandle&
+    inline auto VertexBuffer::VertexHandle::set( size_t index, float v0, float v1, float v2 )
+        -> VertexHandle&
     {
-        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 8 ] ) = v2;
@@ -229,10 +189,10 @@ namespace ttb
     }
 
     inline auto
-        VertexBuffer::AttributeHandle::set( size_t index, float v0, float v1, float v2, float v3 )
-            -> AttributeHandle&
+        VertexBuffer::VertexHandle::set( size_t index, float v0, float v1, float v2, float v3 )
+            -> VertexHandle&
     {
-        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 4 ] ) = v1;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 8 ] ) = v2;
@@ -240,16 +200,15 @@ namespace ttb
         return *this;
     }
 
-    inline auto VertexBuffer::AttributeHandle::setComp( size_t index,
-                                                        size_t component,
-                                                        float value ) -> AttributeHandle&
+    inline auto VertexBuffer::VertexHandle::setComp( size_t index, size_t component, float value )
+        -> VertexHandle&
     {
-        auto const offset = m_index * m_buffer.m_blockSize + m_buffer.m_attributes[ index ].offset;
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + component * 4 ] ) = value;
         return *this;
     }
 
-    inline VertexBuffer::AttributeHandle::AttributeHandle( VertexBuffer& buffer, size_t index )
+    inline VertexBuffer::VertexHandle::VertexHandle( VertexBuffer& buffer, size_t index )
         : m_buffer{ buffer }, m_index{ index }
     {
     }

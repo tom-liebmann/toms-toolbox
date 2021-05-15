@@ -15,70 +15,40 @@ namespace ttb
         glGenBuffers( 1, &m_bufferObject );
     }
 
-    IndexBuffer::IndexBuffer( IndexBuffer const& copy ) : m_data( copy.m_data )
-    {
-        glGenBuffers( 1, &m_bufferObject );
-
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_bufferObject );
-
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                      m_data.size() * sizeof( GLuint ),
-                      reinterpret_cast< GLvoid const* >( m_data.data() ),
-                      GL_DYNAMIC_DRAW );
-
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    }
-
     IndexBuffer::~IndexBuffer()
     {
         glDeleteBuffers( 1, &m_bufferObject );
     }
 
-    size_t IndexBuffer::size() const
+    size_t IndexBuffer::numIndices() const
     {
         return m_data.size();
     }
 
-    auto IndexBuffer::modify() -> Modifier
+    void IndexBuffer::reserve( size_t numIndices )
     {
-        return { *this };
+        m_data.reserve( numIndices );
     }
 
-    std::shared_ptr< IndexBuffer > IndexBuffer::clone() const
+    void IndexBuffer::resize( size_t numIndices )
     {
-        return std::shared_ptr< IndexBuffer >( new IndexBuffer( *this ) );
+        m_data.resize( numIndices, 0 );
+        m_clear = true;
     }
 
-
-    void IndexBuffer::Modifier::reserve( size_t size )
-    {
-        m_buffer->m_data.reserve( size );
-    }
-
-    size_t IndexBuffer::Modifier::size() const
-    {
-        return m_buffer->size();
-    }
-
-    uint32_t& IndexBuffer::Modifier::operator[]( size_t index )
+    auto IndexBuffer::operator[]( size_t index ) -> Index&
     {
         changed( index, index + 1 );
-        return *reinterpret_cast< uint32_t* >( m_buffer->m_data.data() + index );
+        return m_data[ index ];
     }
 
-    void IndexBuffer::Modifier::resize( size_t size )
+    void IndexBuffer::push_back( Index value )
     {
+        m_data.push_back( value );
         m_clear = true;
-        m_buffer->m_data.resize( size, 0 );
     }
 
-    void IndexBuffer::Modifier::push_back( size_t value )
-    {
-        m_clear = true;
-        m_buffer->m_data.push_back( value );
-    }
-
-    void IndexBuffer::Modifier::flush()
+    void IndexBuffer::flush()
     {
         if( !m_clear && m_begin == m_end )
         {
@@ -86,23 +56,21 @@ namespace ttb
             return;
         }
 
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_buffer->m_bufferObject );
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, m_bufferObject );
 
         if( m_clear )
         {
             glBufferData( GL_ELEMENT_ARRAY_BUFFER,
-                          m_buffer->m_data.size() * sizeof( GLuint ),
-                          reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() ),
+                          m_data.size() * sizeof( Index ),
+                          reinterpret_cast< GLvoid const* >( m_data.data() ),
                           GL_DYNAMIC_DRAW );
         }
         else
         {
-            std::cout << "IndexBuffer: Uploading " << m_begin << " - " << m_end << '\n';
-            glBufferSubData(
-                GL_ELEMENT_ARRAY_BUFFER,
-                m_begin * sizeof( GLuint ),
-                ( m_end - m_begin ) * sizeof( GLuint ),
-                reinterpret_cast< GLvoid const* >( m_buffer->m_data.data() + m_begin ) );
+            glBufferSubData( GL_ELEMENT_ARRAY_BUFFER,
+                             m_begin * sizeof( GLuint ),
+                             ( m_end - m_begin ) * sizeof( GLuint ),
+                             reinterpret_cast< GLvoid const* >( m_data.data() + m_begin ) );
         }
 
         glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -112,11 +80,7 @@ namespace ttb
         m_end = 0;
     }
 
-    IndexBuffer::Modifier::Modifier( IndexBuffer& buffer ) : m_buffer{ &buffer }
-    {
-    }
-
-    void IndexBuffer::Modifier::changed( size_t begin, size_t end )
+    void IndexBuffer::changed( size_t begin, size_t end )
     {
         if( m_begin == m_end )
         {

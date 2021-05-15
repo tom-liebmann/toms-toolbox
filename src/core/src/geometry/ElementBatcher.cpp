@@ -5,12 +5,12 @@ namespace ttb
 {
     ElementBatcher::ElementBatcher( size_t verticesPerElement,
                                     size_t indicesPerElement,
-                                    ttb::VertexBuffer::Modifier vertexBuffer,
-                                    ttb::IndexBuffer::Modifier indexBuffer )
+                                    ttb::VertexBuffer& vertexBuffer,
+                                    ttb::IndexBuffer& indexBuffer )
         : m_verticesPerElement{ verticesPerElement }
         , m_indicesPerElement{ indicesPerElement }
-        , m_vertexBuffer{ std::move( vertexBuffer ) }
-        , m_indexBuffer{ std::move( indexBuffer ) }
+        , m_vertexBuffer{ vertexBuffer }
+        , m_indexBuffer{ indexBuffer }
     {
     }
 
@@ -31,12 +31,18 @@ namespace ttb
             }
         }();
 
-        m_elementLocations[ index ] = m_vertexBuffer.size();
-        m_vertexBuffer.push_back();
+        m_elementLocations[ index ] = m_vertexBuffer.numVertices();
+
+        m_vertexBuffer.resize( m_vertexBuffer.numVertices() + m_verticesPerElement );
+        m_indexBuffer.resize( m_indexBuffer.numIndices() + m_indicesPerElement );
 
         return { *this, index };
     }
 
+    auto ElementBatcher::element( size_t index ) -> Handle
+    {
+        return { *this, index };
+    }
 
     void ElementBatcher::Handle::destroy()
     {

@@ -16,8 +16,8 @@ namespace ttb
 
         ElementBatcher( size_t verticesPerElement,
                         size_t indicesPerElement,
-                        ttb::VertexBuffer::Modifier vertexBuffer,
-                        ttb::IndexBuffer::Modifier indexBuffer );
+                        ttb::VertexBuffer& vertexBuffer,
+                        ttb::IndexBuffer& indexBuffer );
 
         Handle createElement();
 
@@ -33,9 +33,9 @@ namespace ttb
 
         size_t m_indicesPerElement;
 
-        ttb::VertexBuffer::Modifier m_vertexBuffer;
+        ttb::VertexBuffer& m_vertexBuffer;
 
-        ttb::IndexBuffer::Modifier m_indexBuffer;
+        ttb::IndexBuffer& m_indexBuffer;
     };
 
 
@@ -52,7 +52,7 @@ namespace ttb
 
         size_t index() const;
 
-        VertexBuffer::AttributeHandle attribute( size_t offset );
+        VertexBuffer::VertexHandle vertex( size_t offset );
 
         void index( size_t offset, uint32_t value );
 
@@ -80,24 +80,35 @@ namespace ttb
     {
     }
 
-    inline VertexBuffer::AttributeHandle ElementBatcher::Handle::attribute( size_t offset )
+    inline size_t ElementBatcher::Handle::index() const
+    {
+        return m_index;
+    }
+
+    inline VertexBuffer::VertexHandle ElementBatcher::Handle::vertex( size_t offset )
     {
         auto const location = m_batcher->m_elementLocations[ m_index ];
         return m_batcher->m_vertexBuffer[ location * m_batcher->m_verticesPerElement + offset ];
     }
 
-    void ElementBatcher::Handle::index( size_t offset, uint32_t value )
+    inline void ElementBatcher::Handle::index( size_t offset, uint32_t value )
     {
         auto const location = m_batcher->m_elementLocations[ m_index ];
-        m_batcher->m_indexBuffer[ location * m_batcher->m_indicesPerElement + offset ] = value;
+        m_batcher->m_indexBuffer[ location * m_batcher->m_indicesPerElement + offset ] =
+            value + location * m_batcher->m_verticesPerElement;
     }
 
-    auto ElementBatcher::Handle::operator=( Handle const& rhs ) -> Handle& = default;
+    inline auto ElementBatcher::Handle::operator=( Handle const& rhs ) -> Handle& = default;
 
-    auto ElementBatcher::Handle::operator=( Handle&& rhs ) -> Handle&
+    inline auto ElementBatcher::Handle::operator=( Handle&& rhs ) -> Handle&
     {
         m_batcher = std::exchange( rhs.m_batcher, nullptr );
         m_index = std::exchange( rhs.m_index, 0 );
         return *this;
+    }
+
+    inline ElementBatcher::Handle::Handle( ElementBatcher& batcher, size_t index )
+        : m_batcher{ &batcher }, m_index{ index }
+    {
     }
 }
