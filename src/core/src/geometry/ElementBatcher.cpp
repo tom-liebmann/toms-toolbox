@@ -31,7 +31,7 @@ namespace ttb
             }
         }();
 
-        m_elementLocations[ index ] = m_vertexBuffer.numVertices();
+        m_elementLocations[ index ] = m_vertexBuffer.numVertices() / m_verticesPerElement;
 
         m_vertexBuffer.resize( m_vertexBuffer.numVertices() + m_verticesPerElement );
         m_indexBuffer.resize( m_indexBuffer.numIndices() + m_indicesPerElement );
