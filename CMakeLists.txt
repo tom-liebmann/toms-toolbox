@@ -79,6 +79,7 @@ set( EXPORT_TARGETS "ttb" )
 add_subdirectory( src/math )
 add_subdirectory( src/core )
 add_subdirectory( src/utils )
+add_subdirectory( src/ui )
 
 export(
     TARGETS ${EXPORT_TARGETS}

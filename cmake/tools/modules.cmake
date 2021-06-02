@@ -26,7 +26,7 @@ function( ttb_add_module MODULE_NAME )
     # ================================================================
     target_compile_options( ${MODULE_NAME} PRIVATE -Wall -Wextra -Wpedantic )
 
-    target_compile_features( ${MODULE_NAME} PUBLIC cxx_std_17 )
+    target_compile_features( ${MODULE_NAME} PUBLIC cxx_std_20 )
 
     set_target_properties( ${MODULE_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
 

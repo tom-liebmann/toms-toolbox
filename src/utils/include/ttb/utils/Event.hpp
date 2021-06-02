@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttb/utils/EventType.hpp>
+
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -14,11 +16,9 @@ namespace ttb
     class Event
     {
     public:
-        class Type;
-
         virtual ~Event();
 
-        virtual Type type() const = 0;
+        virtual uint32_t type() const = 0;
         virtual std::unique_ptr< Event > clone() const;
         virtual std::unique_ptr< Event > move();
     };
@@ -28,44 +28,16 @@ namespace ttb
     class TypedEvent : public Event
     {
     public:
-        virtual Type type() const override;
-    };
-
-
-
-    class Event::Type
-    {
-    public:
-        constexpr Type( uint32_t value );
-
-        constexpr uint32_t value() const;
-
-        constexpr bool operator<( const Type& type ) const;
-        constexpr bool operator==( const Type& type ) const;
-        constexpr operator uint32_t() const;
-
-    private:
-        uint32_t m_value;
+        virtual uint32_t type() const override;
     };
 }
-
-
-
-namespace std
-{
-    template <>
-    struct hash< ttb::Event::Type >;
-}
-
 
 
 // definitions
 //=============================================================================
 namespace ttb
 {
-    inline Event::~Event()
-    {
-    }
+    inline Event::~Event() = default;
 
     inline std::unique_ptr< Event > Event::clone() const
     {
@@ -79,47 +51,8 @@ namespace ttb
 
 
     template < uint32_t TType >
-    inline Event::Type TypedEvent< TType >::type() const
+    inline uint32_t TypedEvent< TType >::type() const
     {
-        return { TType };
+        return TType;
     }
-
-
-    inline constexpr Event::Type::Type( uint32_t value ) : m_value( value )
-    {
-    }
-
-    inline constexpr uint32_t Event::Type::value() const
-    {
-        return m_value;
-    }
-
-    inline constexpr bool Event::Type::operator<( const Type& type ) const
-    {
-        return m_value < type.m_value;
-    }
-
-    inline constexpr bool Event::Type::operator==( const Type& type ) const
-    {
-        return m_value == type.m_value;
-    }
-
-    inline constexpr Event::Type::operator uint32_t() const
-    {
-        return m_value;
-    }
-}
-
-
-
-namespace std
-{
-    template <>
-    struct hash< ttb::Event::Type >
-    {
-        size_t operator()( ttb::Event::Type const& type ) const
-        {
-            return type.value();
-        }
-    };
 }
