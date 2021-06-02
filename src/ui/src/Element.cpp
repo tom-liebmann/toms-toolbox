@@ -44,7 +44,7 @@ namespace ttb::ui
     {
     }
 
-    bool Element::onEvent( Event& /* event */ )
+    bool Element::onEvent( Event const& /* event */ )
     {
         return false;
     }

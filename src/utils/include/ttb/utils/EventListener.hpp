@@ -14,7 +14,7 @@ namespace ttb
     public:
         virtual ~EventListener();
 
-        virtual bool onEvent( Event& event ) = 0;
+        virtual bool onEvent( Event const& event ) = 0;
     };
 }
 

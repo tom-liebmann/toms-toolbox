@@ -25,7 +25,7 @@ namespace ttb::ui
         }
     }
 
-    bool PriorityListener::onEvent( Event& event )
+    bool PriorityListener::onEvent( Event const& event )
     {
         return m_listener.get().onEvent( event );
     }

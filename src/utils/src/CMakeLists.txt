@@ -7,6 +7,7 @@ target_sources(
         SHA1.cpp
         RingBufferWriter.cpp
         RingBuffer.cpp
+        EventManager.cpp
 )
 
 add_subdirectory( data_io )

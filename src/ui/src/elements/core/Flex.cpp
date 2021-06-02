@@ -145,7 +145,7 @@ namespace ttb::ui
         }
     }
 
-    bool Flex::onEvent( Event& event )
+    bool Flex::onEvent( Event const& event )
     {
         for( auto const& slot : m_slots )
         {

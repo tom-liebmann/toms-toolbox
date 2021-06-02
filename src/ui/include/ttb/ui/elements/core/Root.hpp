@@ -4,6 +4,7 @@
 
 #include <ttb/math/Range.hpp>
 #include <ttb/utils/EventListener.hpp>
+#include <ttb/utils/UniqueCreate.hpp>
 
 #include <memory>
 
@@ -16,11 +17,9 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    class Root : public Element
+    class Root : public Element, public UniqueCreate< Root >
     {
     public:
-        static std::unique_ptr< Root > create( Range const& range, Framework& framework );
-
         ~Root();
 
         void child( std::unique_ptr< Element > child );
@@ -39,12 +38,14 @@ namespace ttb::ui
 
         virtual Element const* child( std::string const& id ) const override;
 
-    private:
-        Root( Framework& framework, Range const& range );
+        virtual bool onEvent( Event const& event ) override;
 
-        // Override: EventListener
-        virtual bool onEvent( Event& event ) override;
+    private:
+        Root( Framework& framework, Range const& srcRange, Range const& dstRange );
 
         std::unique_ptr< Element > m_child;
+        ttb::Matrix< float, 3, 3 > m_transform;
+
+        friend UniqueCreate;
     };
 }

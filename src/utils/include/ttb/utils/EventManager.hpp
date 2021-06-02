@@ -3,10 +3,14 @@
 #include <ttb/utils/EventPriority.hpp>
 #include <ttb/utils/EventType.hpp>
 
+#include <unordered_map>
+#include <vector>
+
 
 namespace ttb
 {
     class EventListener;
+    class Event;
 }
 
 
@@ -19,7 +23,7 @@ namespace ttb
 
         void removeListener( uint32_t type, EventListener& listener );
 
-        bool pushEvent( Event& event );
+        bool pushEvent( Event const& event ) const;
 
     private:
         struct Entry

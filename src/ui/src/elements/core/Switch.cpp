@@ -112,7 +112,7 @@ namespace ttb::ui
         }
     }
 
-    bool Switch::onEvent( Event& event )
+    bool Switch::onEvent( Event const& event )
     {
         if( m_activeChild )
         {

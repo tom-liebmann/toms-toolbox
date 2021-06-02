@@ -69,7 +69,7 @@ namespace ttb::ui
         }
     }
 
-    bool Group::onEvent( Event& event )
+    bool Group::onEvent( Event const& event )
     {
         for( auto const& child : m_children )
         {

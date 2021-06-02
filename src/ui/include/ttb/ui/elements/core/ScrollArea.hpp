@@ -32,7 +32,7 @@ namespace ttb::ui
         virtual void render( ttb::State& state ) const override;
         virtual Range fit( Range const& space ) override;
         virtual void update( float timeDiff ) override;
-        virtual bool onEvent( Event& event ) override;
+        virtual bool onEvent( Event const& event ) override;
         virtual void onChildChanged( Element& child ) override;
 
     private:

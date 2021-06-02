@@ -57,7 +57,7 @@ namespace ttb::ui
         }
     }
 
-    bool ElementWrapper::onEvent( Event& event )
+    bool ElementWrapper::onEvent( Event const& event )
     {
         return m_child ? m_child->onEvent( event ) : false;
     }

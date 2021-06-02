@@ -20,7 +20,7 @@ namespace ttb::ui
         wrappedChild( std::move( element ) );
     }
 
-    bool Clickable::onEvent( Event& event )
+    bool Clickable::onEvent( Event const& event )
     {
         if( !m_callback )
         {
@@ -32,7 +32,7 @@ namespace ttb::ui
         {
             case gst::CURSOR_PRESS_START:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressStart& >( event );
+                auto& ev = static_cast< ttb::events::gst::CursorPressStart const& >( event );
 
                 if( range().contains( screenToParent( ev.position() ) ) )
                 {
@@ -63,7 +63,7 @@ namespace ttb::ui
 
             case gst::CURSOR_PRESS_END:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressEnd& >( event );
+                auto& ev = static_cast< ttb::events::gst::CursorPressEnd const& >( event );
 
                 if( m_prioListener )
                 {

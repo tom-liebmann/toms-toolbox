@@ -184,7 +184,7 @@ namespace ttb::ui
         }
     }
 
-    bool RowLayout::onEvent( Event& event )
+    bool RowLayout::onEvent( Event const& event )
     {
         for( auto& c : m_children )
         {

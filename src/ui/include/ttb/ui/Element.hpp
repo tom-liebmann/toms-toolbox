@@ -38,8 +38,6 @@ namespace ttb::ui
          */
         virtual void range( Range const& range );
 
-        virtual void init();
-
         virtual void destroy();
 
         virtual void render( ttb::State& state ) const = 0;
@@ -56,7 +54,7 @@ namespace ttb::ui
 
         virtual void update( float timeDiff );
 
-        virtual bool onEvent( Event& event ) override;
+        virtual bool onEvent( Event const& event ) override;
 
         virtual void onChildChanged( Element& child );
 

@@ -1,5 +1,7 @@
 #include <ttb/ui/elements/core/Ratio.hpp>
 
+#include <iostream>
+
 
 namespace ttb::ui
 {

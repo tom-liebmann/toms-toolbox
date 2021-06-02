@@ -143,7 +143,7 @@ namespace ttb::ui
         }
     }
 
-    bool Priority::onEvent( Event& event )
+    bool Priority::onEvent( Event const& event )
     {
         if( m_firstChild )
         {

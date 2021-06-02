@@ -102,7 +102,7 @@ namespace ttb::ui
         m_child->update( timeDiff );
     }
 
-    bool ScrollArea::onEvent( Event& event )
+    bool ScrollArea::onEvent( Event const& event )
     {
         if( !m_child )
         {
@@ -114,7 +114,7 @@ namespace ttb::ui
         {
             case gst::CURSOR_PRESS_START:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressStart& >( event );
+                auto& ev = static_cast< ttb::events::gst::CursorPressStart const& >( event );
 
                 if( !range().contains( screenToParent( ev.position() ) ) )
                 {
@@ -126,7 +126,7 @@ namespace ttb::ui
 
             case gst::DRAG_START:
             {
-                auto& ev = static_cast< ttb::events::gst::DragStart& >( event );
+                auto& ev = static_cast< ttb::events::gst::DragStart const& >( event );
 
                 if( !range().contains( screenToParent( ev.position() ) ) )
                 {
@@ -158,7 +158,7 @@ namespace ttb::ui
             {
                 if( m_prioListener )
                 {
-                    auto& ev = static_cast< ttb::events::gst::DragMove& >( event );
+                    auto& ev = static_cast< ttb::events::gst::DragMove const& >( event );
                     offset( m_offset + ev.position()( 1 ) - m_dragPos( 1 ) );
                     m_dragPos = ev.position();
                     return true;

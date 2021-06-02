@@ -38,8 +38,8 @@ namespace ttb::ui
         //! @copydoc Element::render(ttb::State&)
         virtual void render( ttb::State& state ) const override;
 
-        //! @copydoc Element::onEvent(Event&)
-        virtual bool onEvent( Event& event ) override;
+        //! @copydoc Element::onEvent(Event const&)
+        virtual bool onEvent( Event const& event ) override;
 
         //! @copydoc Element::onChildChanged(Element&)
         virtual void onChildChanged( Element& child ) override;

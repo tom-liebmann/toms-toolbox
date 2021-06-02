@@ -24,7 +24,7 @@ namespace ttb::ui
 
         void addType( uint32_t type );
 
-        virtual bool onEvent( Event& event ) override;
+        virtual bool onEvent( Event const& event ) override;
 
     private:
         std::reference_wrapper< EventManager > m_manager;

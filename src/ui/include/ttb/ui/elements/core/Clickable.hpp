@@ -36,8 +36,8 @@ namespace ttb::ui
     private:
         Clickable( Framework& framework );
 
-        /// @copydoc EventListenere::onEvent( Event& event )
-        virtual bool onEvent( Event& event ) override;
+        //! @copydoc Element::onEvent( Event const& )
+        virtual bool onEvent( Event const& event ) override;
 
         ClickCallback m_callback;
 

@@ -4,6 +4,7 @@ target_sources(
     PRIVATE
         Element.cpp
         ElementWrapper.cpp
+        Framework.cpp
 )
 
 add_subdirectory( elements )
