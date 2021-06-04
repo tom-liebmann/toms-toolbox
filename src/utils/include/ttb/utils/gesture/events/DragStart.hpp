@@ -4,9 +4,9 @@
 #include <ttb/utils/EventType.hpp>
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
-    class DragStart : public TypedEvent< ttb::event::type::gst::DRAG_START >
+    class DragStart : public TypedEvent< ttb::event::type::DRAG_START >
     {
     public:
         using Position = ttb::Vector< float, 2 >;
@@ -21,7 +21,7 @@ namespace ttb::events::gst
 }
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
     inline DragStart::DragStart( Position const& position ) : m_position( position )
     {

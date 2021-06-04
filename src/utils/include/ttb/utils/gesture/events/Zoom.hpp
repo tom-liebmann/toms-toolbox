@@ -1,12 +1,13 @@
 #pragma once
 
+#include <ttb/math/Quaternion.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventType.hpp>
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
-    class Zoom : public TypedEvent< ttb::event::type::gst::ZOOM >
+    class Zoom : public TypedEvent< ttb::event::type::ZOOM >
     {
     public:
         using Rotation = ttb::Quaternion< float >;
@@ -24,7 +25,7 @@ namespace ttb::events::gst
 }
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
     inline Zoom::Zoom( float factor, Rotation rotation )
         : m_factor{ factor }, m_rotation{ rotation }

@@ -12,3 +12,4 @@ target_sources(
 
 add_subdirectory( data_io )
 add_subdirectory( dcel )
+add_subdirectory( gesture )

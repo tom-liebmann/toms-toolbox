@@ -109,12 +109,12 @@ namespace ttb::ui
             return false;
         }
 
-        using namespace ttb::event::type;
+        using namespace ttb::event;
         switch( event.type() )
         {
-            case gst::CURSOR_PRESS_START:
+            case type::POINTER_PRESS_START:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressStart const& >( event );
+                auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
 
                 if( !range().contains( screenToParent( ev.position() ) ) )
                 {
@@ -124,9 +124,9 @@ namespace ttb::ui
                 return m_child->onEvent( event );
             }
 
-            case gst::DRAG_START:
+            case type::DRAG_START:
             {
-                auto& ev = static_cast< ttb::events::gst::DragStart const& >( event );
+                auto& ev = static_cast< ttb::events::DragStart const& >( event );
 
                 if( !range().contains( screenToParent( ev.position() ) ) )
                 {
@@ -137,13 +137,13 @@ namespace ttb::ui
 
                 m_prioListener =
                     std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                m_prioListener->addType( gst::DRAG_END );
-                m_prioListener->addType( gst::DRAG_MOVE );
+                m_prioListener->addType( type::DRAG_END );
+                m_prioListener->addType( type::DRAG_MOVE );
 
                 return true;
             }
 
-            case gst::DRAG_END:
+            case type::DRAG_END:
             {
                 if( m_prioListener )
                 {
@@ -154,11 +154,11 @@ namespace ttb::ui
                 return false;
             }
 
-            case gst::DRAG_MOVE:
+            case type::DRAG_MOVE:
             {
                 if( m_prioListener )
                 {
-                    auto& ev = static_cast< ttb::events::gst::DragMove const& >( event );
+                    auto& ev = static_cast< ttb::events::DragMove const& >( event );
                     offset( m_offset + ev.position()( 1 ) - m_dragPos( 1 ) );
                     m_dragPos = ev.position();
                     return true;

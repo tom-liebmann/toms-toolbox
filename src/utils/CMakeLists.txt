@@ -8,6 +8,8 @@ endif()
 
 target_include_directories( ${TARGET_NAME} PUBLIC include )
 
+target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath )
+
 add_subdirectory( src )
 
 set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )

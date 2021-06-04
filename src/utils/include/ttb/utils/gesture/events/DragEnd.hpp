@@ -4,9 +4,9 @@
 #include <ttb/utils/EventType.hpp>
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
-    class DragEnd : public TypedEvent< ttb::event::type::gst::DRAG_END >
+    class DragEnd : public TypedEvent< ttb::event::type::DRAG_END >
     {
     public:
         using Position = ttb::Vector< float, 2 >;
@@ -21,7 +21,7 @@ namespace ttb::events::gst
 }
 
 
-namespace ttb::events::gst
+namespace ttb::events
 {
     inline DragEnd::DragEnd( Position const& position ) : m_position( position )
     {

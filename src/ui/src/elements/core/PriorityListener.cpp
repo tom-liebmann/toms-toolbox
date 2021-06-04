@@ -12,7 +12,7 @@ namespace ttb::ui
 
     void PriorityListener::addType( uint32_t type )
     {
-        m_manager.get().addListener( type, ttb::event::prio::ui::PRIO, *this );
+        m_manager.get().addListener( type, ttb::event::prio::PRIO, *this );
 
         m_types.push_back( type );
     }

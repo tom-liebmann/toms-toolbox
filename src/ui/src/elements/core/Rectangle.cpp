@@ -8,6 +8,8 @@
 
 namespace ttb::ui
 {
+    Rectangle::~Rectangle() = default;
+
     void Rectangle::render( ttb::State& state ) const
     {
         auto const innerRange = Range{

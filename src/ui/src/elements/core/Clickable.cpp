@@ -27,19 +27,19 @@ namespace ttb::ui
             return false;
         }
 
-        using namespace ttb::event::type;
+        using namespace ttb::event;
         switch( event.type() )
         {
-            case gst::CURSOR_PRESS_START:
+            case type::POINTER_PRESS_START:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressStart const& >( event );
+                auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
 
                 if( range().contains( screenToParent( ev.position() ) ) )
                 {
                     m_prioListener =
                         std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                    m_prioListener->addType( ttb::event::type::gst::CURSOR_PRESS_ABORT );
-                    m_prioListener->addType( ttb::event::type::gst::CURSOR_PRESS_END );
+                    m_prioListener->addType( type::POINTER_PRESS_ABORT );
+                    m_prioListener->addType( type::POINTER_PRESS_END );
                     m_callback( Action::START, *this );
                     return true;
                 }
@@ -47,7 +47,7 @@ namespace ttb::ui
                 return false;
             }
 
-            case gst::CURSOR_PRESS_ABORT:
+            case type::POINTER_PRESS_ABORT:
             {
                 if( m_prioListener )
                 {
@@ -61,9 +61,9 @@ namespace ttb::ui
                 return false;
             }
 
-            case gst::CURSOR_PRESS_END:
+            case type::POINTER_PRESS_END:
             {
-                auto& ev = static_cast< ttb::events::gst::CursorPressEnd const& >( event );
+                auto& ev = static_cast< ttb::events::PointerPressEnd const& >( event );
 
                 if( m_prioListener )
                 {

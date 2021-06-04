@@ -13,15 +13,15 @@ namespace ttb::ui
 
         using namespace ttb::event;
 
-        eventMngr.removeListener( type::gst::CURSOR_DOWN, *this );
-        eventMngr.removeListener( type::gst::CURSOR_UP, *this );
-        eventMngr.removeListener( type::gst::CURSOR_PRESS_START, *this );
-        eventMngr.removeListener( type::gst::CURSOR_PRESS_END, *this );
-        eventMngr.removeListener( type::gst::CURSOR_PRESS_ABORT, *this );
-        eventMngr.removeListener( type::gst::DRAG_START, *this );
-        eventMngr.removeListener( type::gst::DRAG_END, *this );
-        eventMngr.removeListener( type::gst::DRAG_MOVE, *this );
-        eventMngr.removeListener( type::gst::ZOOM, *this );
+        eventMngr.removeListener( type::POINTER_DOWN, *this );
+        eventMngr.removeListener( type::POINTER_UP, *this );
+        eventMngr.removeListener( type::POINTER_PRESS_START, *this );
+        eventMngr.removeListener( type::POINTER_PRESS_END, *this );
+        eventMngr.removeListener( type::POINTER_PRESS_ABORT, *this );
+        eventMngr.removeListener( type::DRAG_START, *this );
+        eventMngr.removeListener( type::DRAG_END, *this );
+        eventMngr.removeListener( type::DRAG_MOVE, *this );
+        eventMngr.removeListener( type::ZOOM, *this );
     }
 
     void Root::child( std::unique_ptr< Element > child )
@@ -105,15 +105,15 @@ namespace ttb::ui
 
         using namespace ttb::event;
 
-        eventMngr.addListener( type::gst::CURSOR_DOWN, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::CURSOR_UP, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::CURSOR_PRESS_START, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::CURSOR_PRESS_END, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::CURSOR_PRESS_ABORT, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::DRAG_START, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::DRAG_END, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::DRAG_MOVE, prio::ui::ROOT, *this );
-        eventMngr.addListener( type::gst::ZOOM, prio::ui::ROOT, *this );
+        eventMngr.addListener( type::POINTER_DOWN, prio::ROOT, *this );
+        eventMngr.addListener( type::POINTER_UP, prio::ROOT, *this );
+        eventMngr.addListener( type::POINTER_PRESS_START, prio::ROOT, *this );
+        eventMngr.addListener( type::POINTER_PRESS_END, prio::ROOT, *this );
+        eventMngr.addListener( type::POINTER_PRESS_ABORT, prio::ROOT, *this );
+        eventMngr.addListener( type::DRAG_START, prio::ROOT, *this );
+        eventMngr.addListener( type::DRAG_END, prio::ROOT, *this );
+        eventMngr.addListener( type::DRAG_MOVE, prio::ROOT, *this );
+        eventMngr.addListener( type::ZOOM, prio::ROOT, *this );
 
         Element::range( dstRange );
     }
