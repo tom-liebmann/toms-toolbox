@@ -6,26 +6,26 @@ namespace ttb
     class TypeValueEvent : public Event
     {
     public:
-        TypeValueEvent( Event::Type type );
+        TypeValueEvent( uint32_t type );
 
         // Override: Event
-        virtual Type type() const override;
+        virtual uint32_t type() const override;
         virtual std::unique_ptr< Event > clone() const override;
         virtual std::unique_ptr< Event > move() override;
 
     private:
-        Event::Type const m_type;
+        uint32_t const m_type;
     };
 }
 
 
 namespace ttb
 {
-    inline TypeValueEvent::TypeValueEvent( Event::Type type ) : m_type{ type }
+    inline TypeValueEvent::TypeValueEvent( uint32_t type ) : m_type{ type }
     {
     }
 
-    inline Event::Type TypeValueEvent::type() const
+    inline uint32_t TypeValueEvent::type() const
     {
         return m_type;
     }
