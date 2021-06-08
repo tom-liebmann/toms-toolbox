@@ -4,4 +4,5 @@ target_sources(
     PRIVATE
         BufferPacket.cpp
         StreamPacket.cpp
+        CopiedPacket.cpp
 )
