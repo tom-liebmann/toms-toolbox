@@ -8,4 +8,5 @@ target_sources(
         PrefixPacket.cpp
         DataPacket.cpp
         ValuePacket.cpp
+        SubPacket.cpp
 )
