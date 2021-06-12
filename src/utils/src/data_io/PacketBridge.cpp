@@ -1,4 +1,4 @@
-#include <ttb/net/PacketBridge.hpp>
+#include <ttb/utils/data_io/PacketBridge.hpp>
 
 #include <ttb/utils/RingBufferWriter.hpp>
 #include <ttb/utils/data_io/packets/BufferPacket.hpp>
@@ -27,15 +27,17 @@ namespace ttb::net
     {
         auto lock = std::unique_lock{ m_mutex };
 
+        auto const packetSize = packet.size();
+
         size_t offset = 0;
 
-        while( offset < packet.size() )
+        while( offset < packetSize )
         {
             auto const bufferOffset = m_buffer.size() - m_bytesRequired;
             auto const blockSize = std::min( m_bytesRequired, packet.size() );
 
             auto writer = ttb::BufferWriter{ m_buffer.data() + bufferOffset, blockSize };
-            auto const written = packet.write( offset, writer );
+            auto const written = packet.write( offset, packetSize - offset, writer );
 
             offset += written;
             m_bytesRequired -= written;

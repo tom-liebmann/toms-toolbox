@@ -17,6 +17,6 @@ namespace ttb
 
     size_t Packet::write( Writer& writer ) const
     {
-        return write( 0, writer );
+        return write( 0, size(), writer );
     }
 }

@@ -20,7 +20,7 @@ namespace ttb
 
         // Override: ttb::Packet
         virtual size_t size() const override;
-        virtual size_t write( size_t offset, Writer& writer ) const override;
+        virtual size_t write( size_t offset, size_t size, Writer& writer ) const override;
         using Packet::write;
 
     private:
@@ -48,9 +48,9 @@ namespace ttb
     }
 
     template < typename TPrefixType >
-    size_t PrefixPacket< TPrefixType >::write( size_t offset, Writer& writer ) const
+    size_t PrefixPacket< TPrefixType >::write( size_t offset, size_t size, Writer& writer ) const
     {
-        auto writeHelper = PacketWriteHelper{ offset, writer };
+        auto writeHelper = PacketWriteHelper{ offset, size, writer };
 
         writeHelper.write( &m_prefix, sizeof( m_prefix ) );
         writeHelper.write( m_packet.get() );

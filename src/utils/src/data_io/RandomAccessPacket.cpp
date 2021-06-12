@@ -2,12 +2,14 @@
 
 #include <ttb/utils/data_io/writers/BufferWriter.hpp>
 
+#include <cmath>
+
 
 namespace ttb
 {
-    size_t RandomAccessPacket::write( size_t offset, Writer& writer ) const
+    size_t RandomAccessPacket::write( size_t offset, size_t size, Writer& writer ) const
     {
-        auto const dataSize = size();
+        auto const dataSize = this->size();
 
         if( offset > dataSize )
         {
@@ -15,7 +17,7 @@ namespace ttb
         }
         else
         {
-            return writer.write( data() + offset, size() - offset );
+            return writer.write( data() + offset, std::min( size, dataSize - offset ) );
         }
     }
 }

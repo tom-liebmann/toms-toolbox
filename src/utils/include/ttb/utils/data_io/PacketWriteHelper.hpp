@@ -3,6 +3,8 @@
 #include "Packet.hpp"
 #include "Writer.hpp"
 
+#include <cassert>
+#include <cstdint>
 #include <functional>
 
 
@@ -11,7 +13,7 @@ namespace ttb
     class PacketWriteHelper
     {
     public:
-        PacketWriteHelper( size_t offset, Writer& writer );
+        PacketWriteHelper( size_t offset, size_t size, Writer& writer );
 
         void write( void const* data, size_t dataSize );
 
@@ -21,7 +23,8 @@ namespace ttb
 
     private:
         std::reference_wrapper< Writer > m_writer;
-        intmax_t m_offset;
+        size_t m_offset;
+        size_t m_size;
         size_t m_written{ 0 };
     };
 }
@@ -29,50 +32,59 @@ namespace ttb
 
 namespace ttb
 {
-    inline PacketWriteHelper::PacketWriteHelper( size_t offset, Writer& writer )
-        : m_writer{ writer }, m_offset{ static_cast< intmax_t >( offset ) }
+    inline PacketWriteHelper::PacketWriteHelper( size_t offset, size_t size, Writer& writer )
+        : m_writer{ writer }, m_offset{ offset }, m_size{ size }
     {
     }
 
     inline void PacketWriteHelper::write( void const* data, size_t dataSize )
     {
-        if( m_offset < 0 )
+        if( m_size == 0 )
         {
+            // Done writing data
             return;
         }
 
-        if( static_cast< size_t >( m_offset ) > dataSize )
+        if( m_offset >= dataSize )
         {
+            // Block not within writing area
             m_offset -= dataSize;
             return;
         }
 
+        auto const writeSize = std::min( dataSize - m_offset, m_size );
+
         auto const dataPtr = reinterpret_cast< uint8_t const* >( data );
-        auto const written = m_writer.get().write( dataPtr + m_offset, dataSize - m_offset );
+        auto const written = m_writer.get().write( dataPtr + m_offset, writeSize );
         m_written += written;
-        m_offset += dataSize;
-        m_offset -= written;
+        m_size -= written;
+        m_offset = 0;
     }
 
     inline void PacketWriteHelper::write( ttb::Packet const& packet )
     {
-        if( m_offset < 0 )
+        if( m_size == 0 )
         {
+            // Done writing data
             return;
         }
 
+        // Only perform expensive packet size calculation once
         auto const packetSize = packet.size();
 
-        if( static_cast< size_t >( m_offset ) > packetSize )
+        if( m_offset >= packetSize )
         {
+            // Block not within writing area
             m_offset -= packetSize;
             return;
         }
 
-        auto const written = packet.write( static_cast< size_t >( m_offset ), m_writer.get() );
+        auto const writeSize = std::min( packetSize - m_offset, m_size );
+        auto const written = packet.write( m_offset, writeSize, m_writer.get() );
+
         m_written += written;
-        m_offset += packetSize;
-        m_offset -= written;
+        m_size -= written;
+        m_offset = 0;
     }
 
     inline size_t PacketWriteHelper::written() const

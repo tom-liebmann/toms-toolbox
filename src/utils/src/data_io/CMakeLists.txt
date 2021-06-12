@@ -5,6 +5,8 @@ target_sources(
         Packet.cpp
         RandomAccessPacket.cpp
         Writer.cpp
+        PacketWriteHelper.cpp
+        PacketBridge.cpp
 )
 
 add_subdirectory( packets )

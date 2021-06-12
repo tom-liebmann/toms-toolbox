@@ -5,4 +5,7 @@ target_sources(
         BufferPacket.cpp
         StreamPacket.cpp
         CopiedPacket.cpp
+        PrefixPacket.cpp
+        DataPacket.cpp
+        ValuePacket.cpp
 )

@@ -6,7 +6,7 @@
 namespace ttb
 {
     template < typename TType, TType TValue >
-    class ValuePacket : public ttb::RandomAccessPacket
+    class ValuePacket : public RandomAccessPacket
     {
     public:
         virtual size_t size() const override;
