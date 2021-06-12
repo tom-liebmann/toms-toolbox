@@ -41,10 +41,9 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
     private:
-        Root( Framework& framework, Range const& srcRange, Range const& dstRange );
+        Root( Framework& framework, Range const& range );
 
         std::unique_ptr< Element > m_child;
-        ttb::Matrix< float, 3, 3 > m_transform;
 
         friend UniqueCreate;
     };

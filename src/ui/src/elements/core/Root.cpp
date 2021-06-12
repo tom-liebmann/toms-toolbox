@@ -74,9 +74,6 @@ namespace ttb::ui
         {
             glDisable( GL_DEPTH_TEST );
 
-            auto u =
-                state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( m_transform );
-
             m_child->render( state );
 
             glEnable( GL_DEPTH_TEST );
@@ -98,8 +95,7 @@ namespace ttb::ui
         return m_child.get();
     }
 
-    Root::Root( Framework& framework, Range const& srcRange, Range const& dstRange )
-        : Element{ framework }, m_transform( ttb::mat::transform( dstRange, srcRange ) )
+    Root::Root( Framework& framework, Range const& range ) : Element{ framework }
     {
         auto& eventMngr = framework.eventManager();
 
@@ -115,6 +111,6 @@ namespace ttb::ui
         eventMngr.addListener( type::DRAG_MOVE, prio::ROOT, *this );
         eventMngr.addListener( type::ZOOM, prio::ROOT, *this );
 
-        Element::range( dstRange );
+        Element::range( range );
     }
 }
