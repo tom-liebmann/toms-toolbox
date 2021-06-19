@@ -18,15 +18,4 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
 
     add_subdirectory( "${TTB_ROOT}/project/src" ttb_project )
 
-    add_subdirectory( "${TTB_ROOT_DIR}" toms-toolbox )
-
-    target_link_libraries(
-        ${TARGET_NAME}
-        PRIVATE
-            ttbCore
-            ttbMath
-            ttbUtils
-            ttbUi
-    )
-
 endmacro()

@@ -7,11 +7,6 @@ target_sources(
         WindowImpl.cpp
 )
 
-include( glfw )
+ttb_add_module_dependency( ${TARGET_NAME} "glfw" )
 
-target_link_libraries(
-    ${TARGET_NAME}
-
-    PUBLIC
-        glfw
-)
+set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )

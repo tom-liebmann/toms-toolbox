@@ -13,7 +13,7 @@ function( ttb_add_module MODULE_NAME )
 
     # create the module target
     # ================================================================
-    add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} EXCLUDE_FROM_ALL )
+    add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} )
 
     target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../src/dummy.cpp" )
 
@@ -35,4 +35,16 @@ function( ttb_add_module MODULE_NAME )
     list( APPEND EXPORT_TARGETS ${MODULE_NAME} )
     set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
 
+endfunction()
+
+function( ttb_add_module_dependency MODULE_NAME DEPENDENCY )
+    # Find dependency
+    find_package( ${DEPENDENCY} REQUIRED )
+
+    # Link dependency to module
+    target_link_libraries( ${MODULE_NAME} PUBLIC ${DEPENDENCY} )
+
+    # Add dependency to export set
+    list( APPEND EXPORT_DEPENDENCIES "${DEPENDENCY}" )
+    set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
 endfunction()

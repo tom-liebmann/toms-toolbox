@@ -4,3 +4,12 @@ set(
     TTB_LIBRARIES
     @EXPORT_TARGETS@
 )
+
+set(
+    TTB_PROJECT_TOOLS
+    @CMAKE_CURRENT_SOURCE_DIR@/project
+)
+
+foreach( DEPENDENCY @EXPORT_DEPENDENCIES@ )
+    find_package( ${DEPENDENCY} REQUIRED )
+endforeach()

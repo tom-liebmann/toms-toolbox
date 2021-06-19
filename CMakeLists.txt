@@ -1,11 +1,6 @@
 cmake_minimum_required( VERSION 3.15 )
 
-# Set up cmake environment by setting the module path
-set( MODULES_DIR "" CACHE PATH "Path of cmake-modules repository" )
-if( NOT MODULES_DIR )
-    message( FATAL_ERROR "MODULES_DIR not set" )
-endif()
-list( APPEND CMAKE_MODULE_PATH "${MODULES_DIR}/modules" )
+find_package( cmake-modules REQUIRED )
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
@@ -79,6 +74,7 @@ if( DOXYGEN_FOUND )
 endif( DOXYGEN_FOUND )
 
 set( EXPORT_TARGETS "" )
+set( EXPORT_DEPENDENCIES "" )
 
 add_subdirectory( src/math )
 add_subdirectory( src/core )
@@ -87,11 +83,11 @@ add_subdirectory( src/ui )
 
 export(
     TARGETS ${EXPORT_TARGETS}
-    NAMESPACE ttb::
     FILE "${PROJECT_BINARY_DIR}/ttbTargets.cmake"
 )
 
 configure_file(
     ttbConfig.cmake.in
     "${CMAKE_CURRENT_BINARY_DIR}/ttbConfig.cmake"
+    @ONLY
 )

@@ -6,31 +6,23 @@ if( NOT TARGET ${TARGET_NAME} )
     return()
 endif()
 
-include( yamlcpp )
-
 target_include_directories( ${TARGET_NAME} PUBLIC include PRIVATE src )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath ttbUtils yamlcpp )
+target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath ttbUtils )
+
+ttb_add_module_dependency( ${TARGET_NAME} "yamlcpp" )
 
 add_subdirectory( src )
 
 if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
 
-    include( glew )
-    include( opengl )
-
-    target_link_libraries(
-        ${TARGET_NAME}
-
-        PRIVATE
-            glew
-            opengl
-    )
+    ttb_add_module_dependency( ${TARGET_NAME} "glew" )
+    ttb_add_module_dependency( ${TARGET_NAME} "opengl" )
 
     target_compile_definitions(
         ${TARGET_NAME}
 
-        PRIVATE
+        PUBLIC
             GLEW_STATIC
             GL_EXT_PROTOTYPES
     )
@@ -40,7 +32,7 @@ elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
     target_link_libraries(
         ${TARGET_NAME}
 
-        PRIVATE
+        PUBLIC
             android
             log
             EGL
@@ -50,3 +42,4 @@ elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
 endif()
 
 set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
+set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
