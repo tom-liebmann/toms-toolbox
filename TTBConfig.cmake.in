@@ -1,6 +1,0 @@
-include( "@CMAKE_CURRENT_BINARY_DIR@/TTBTargets.cmake" )
-
-set(
-    TTB_LIBRARIES
-    @EXPORT_TARGETS@
-)

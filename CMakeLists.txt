@@ -1,10 +1,16 @@
 cmake_minimum_required( VERSION 3.15 )
 
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/libs" )
-list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake/find_scripts" )
+# Set up cmake environment by setting the module path
+set( MODULES_DIR "" CACHE PATH "Path of cmake-modules repository" )
+if( NOT MODULES_DIR )
+    message( FATAL_ERROR "MODULES_DIR not set" )
+endif()
+list( APPEND CMAKE_MODULE_PATH "${MODULES_DIR}/modules" )
 
-include( ttb_tools )
+list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
+
+include( ttb_general )
+include( ttb_module_functions )
 
 request_build_platform( BUILD_PLATFORM )
 
@@ -52,8 +58,6 @@ else()
 
 endif()
 
-add_library( ttb INTERFACE )
-
 # Generate documentation
 find_package( Doxygen )
 
@@ -74,7 +78,7 @@ if( DOXYGEN_FOUND )
 
 endif( DOXYGEN_FOUND )
 
-set( EXPORT_TARGETS "ttb" )
+set( EXPORT_TARGETS "" )
 
 add_subdirectory( src/math )
 add_subdirectory( src/core )
@@ -83,10 +87,11 @@ add_subdirectory( src/ui )
 
 export(
     TARGETS ${EXPORT_TARGETS}
-    FILE "${PROJECT_BINARY_DIR}/TTBTargets.cmake"
+    NAMESPACE ttb::
+    FILE "${PROJECT_BINARY_DIR}/ttbTargets.cmake"
 )
 
 configure_file(
-    TTBConfig.cmake.in
-    "${CMAKE_CURRENT_BINARY_DIR}/TTBConfig.cmake"
+    ttbConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/ttbConfig.cmake"
 )

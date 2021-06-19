@@ -2,7 +2,7 @@ function( ttb_add_module MODULE_NAME )
 
     # add cache option for enabling/disabling module
     # ================================================================
-    set( ACTIVATE_${MODULE_NAME} ON CACHE BOOL "Enable module ${MODULE_NAME}" )
+    set( ACTIVATE_${MODULE_NAME} OFF CACHE BOOL "Enable module ${MODULE_NAME}" )
 
     if( NOT ACTIVATE_${MODULE_NAME} )
         message( STATUS "Skipping ttb module: ${MODULE_NAME}" )
@@ -15,7 +15,7 @@ function( ttb_add_module MODULE_NAME )
     # ================================================================
     add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} EXCLUDE_FROM_ALL )
 
-    target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../../src/dummy.cpp" )
+    target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../src/dummy.cpp" )
 
     # add compiler definitions
     # ================================================================
@@ -32,8 +32,6 @@ function( ttb_add_module MODULE_NAME )
 
     # link module to main target
     # ================================================================
-    target_link_libraries( ttb INTERFACE ${MODULE_NAME} )
-
     list( APPEND EXPORT_TARGETS ${MODULE_NAME} )
     set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )
 
