@@ -22,7 +22,10 @@ target_link_libraries(
     PRIVATE
         android
         log
-        ttb
+        ttbCore
+        ttbUtils
+        ttbMath
+        ttbUi
 )
 
 install( TARGETS ${TARGET_NAME} )

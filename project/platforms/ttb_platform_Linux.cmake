@@ -23,7 +23,10 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
     target_link_libraries(
         ${TARGET_NAME}
         PRIVATE
-            ttb
+            ttbCore
+            ttbMath
+            ttbUtils
+            ttbUi
     )
 
 endmacro()
