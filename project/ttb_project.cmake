@@ -5,7 +5,7 @@ cmake_policy( SET CMP0079 NEW )
 list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/cmake" )
 list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/project/platforms" )
 
-include( ttb_tools )
+include( ttb_general )
 
 macro( ttb_init_project PROJECT_CMAKE_FILE )
 
