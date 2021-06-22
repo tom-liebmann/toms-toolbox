@@ -1,49 +1,61 @@
 #pragma once
 
-#include <ttb/math/Tensor.hpp>
-
-#include <cmath>
-#include <utility>
+#include <array>
+#include <cassert>
+#include <cstdlib>
 
 
 namespace ttb
 {
-    namespace impl
+    template < typename TType, size_t TDim >
+    class Vector
     {
-        template < typename TType >
-        constexpr TType HOMOGENIZE_THRESHOLD = static_cast< TType >( 1e-8 );
-    }
-}
+    public:
+        static constexpr size_t size = TDim;
 
+        Vector();
 
-// declarations
-//=============================================================================
+        template < typename... TArgs,
+                   std::enable_if_t< TDim == 1 && TDim == sizeof...( TArgs ), int > = 0 >
+        explicit Vector( TArgs... values ) : m_values{ values... }
+        {
+        }
 
-namespace ttb
-{
-    template < typename TType, size_t TDimension >
-    using Vector = Tensor< TType, TDimension >;
+        template < typename... TArgs,
+                   std::enable_if_t< 1 < TDim && TDim == sizeof...( TArgs ), int > = 1 >
+        Vector( TArgs... values ) : m_values{ values... }
+        {
+        }
 
-    template < typename TType, size_t TDimension >
-    auto norm( Vector< TType, TDimension > const& vec );
+        // Access
+        TType& operator[]( size_t index );
 
-    template < typename TType, size_t TDimension >
-    auto norm2( Vector< TType, TDimension > const& vec );
+        TType const& operator[]( size_t index ) const;
 
-    template < typename TType, size_t TDimension >
-    auto normalize( Vector< TType, TDimension > const& vec );
+        TType& operator()( size_t index );
 
-    template < typename TType1, typename TType2 >
-    auto cross( Vector< TType1, 3 > const& lhs, Vector< TType2, 3 > const& rhs );
+        TType const& operator()( size_t index ) const;
 
-    template < typename TType1, typename TType2, size_t TDimension >
-    auto dot( Vector< TType1, TDimension > const& lhs, Vector< TType2, TDimension > const& rhs );
+        TType const* data() const;
 
-    template < typename TType >
-    Vector< TType, 4 > homogenize( Vector< TType, 3 > const& vec );
+        // Special access
+        TType& x();
+        TType& y();
+        TType& z();
 
-    template < typename TType >
-    Vector< TType, 3 > homogenize( Vector< TType, 4 > const& vec );
+        TType const& x() const;
+        TType const& y() const;
+        TType const& z() const;
+
+    private:
+        std::array< TType, TDim > m_values;
+    };
+
+    template < typename... TArgs >
+    using CommonVectorElementType = std::decay_t< decltype( ( std::declval< TArgs >() + ... ) ) >;
+
+    template < typename... TArgs >
+    Vector( TArgs... ) -> Vector< CommonVectorElementType< TArgs... >, sizeof...( TArgs ) >;
 }
 
 
@@ -52,71 +64,82 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename TType, size_t TDimension >
-    auto norm( Vector< TType, TDimension > const& vec )
+    template < typename TType, size_t TDim >
+    Vector< TType, TDim >::Vector() = default;
+
+    template < typename TType, size_t TDim >
+    inline TType& Vector< TType, TDim >::operator[]( size_t index )
     {
-        using std::sqrt;
-        return sqrt( norm2( vec ) );
+        assert( index < size );
+        return m_values[ index ];
     }
 
-    template < typename TType, size_t TDimension >
-    auto norm2( Vector< TType, TDimension > const& vec )
+    template < typename TType, size_t TDim >
+    inline const TType& Vector< TType, TDim >::operator[]( size_t index ) const
     {
-        TType result = 0;
-
-        for( size_t d = 0; d < TDimension; ++d )
-        {
-            result += vec[ d ] * vec[ d ];
-        }
-
-        return result;
+        assert( index < size );
+        return m_values[ index ];
     }
 
-    template < typename TType, size_t TDimension >
-    auto normalize( Vector< TType, TDimension > const& vec )
+    template < typename TType, size_t TDim >
+    inline TType& Vector< TType, TDim >::operator()( size_t index )
     {
-        return vec / norm( vec );
+        assert( index < size );
+        return m_values[ index ];
     }
 
-    template < typename TType1, typename TType2 >
-    auto cross( Vector< TType1, 3 > const& lhs, Vector< TType2, 3 > const& rhs )
+    template < typename TType, size_t TDim >
+    inline const TType& Vector< TType, TDim >::operator()( size_t index ) const
     {
-        using ElementType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
-
-        return Vector< ElementType, 3 >( { lhs[ 1 ] * rhs[ 2 ] - lhs[ 2 ] * rhs[ 1 ],
-                                           lhs[ 2 ] * rhs[ 0 ] - lhs[ 0 ] * rhs[ 2 ],
-                                           lhs[ 0 ] * rhs[ 1 ] - lhs[ 1 ] * rhs[ 0 ] } );
+        assert( index < size );
+        return m_values[ index ];
     }
 
-    template < typename TType1, typename TType2, size_t TDimension >
-    auto dot( Vector< TType1, TDimension > const& lhs, Vector< TType2, TDimension > const& rhs )
+    template < typename TType, size_t TDim >
+    TType const* Vector< TType, TDim >::data() const
     {
-        using ReturnType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
-
-        ReturnType result = 0;
-
-        for( size_t d = 0; d < TDimension; ++d )
-        {
-            result += lhs[ d ] * rhs[ d ];
-        }
-
-        return result;
+        return m_values.data();
     }
 
-    template < typename TType >
-    Vector< TType, 4 > homogenize( Vector< TType, 3 > const& vec )
+    template < typename TType, size_t TDim >
+    TType& Vector< TType, TDim >::x()
     {
-        return { vec( 0 ), vec( 1 ), vec( 2 ), static_cast< TType >( 1 ) };
+        static_assert( size > 0, "Wrong vector type" );
+        return m_values[ 0 ];
     }
 
-    template < typename TType >
-    Vector< TType, 3 > homogenize( Vector< TType, 4 > const& vec )
+    template < typename TType, size_t TDim >
+    TType& Vector< TType, TDim >::y()
     {
-        using std::abs;
+        static_assert( size > 1, "Wrong vector type" );
+        return m_values[ 1 ];
+    }
 
-        return Vector< TType, 3 >{ vec( 0 ), vec( 1 ), vec( 2 ) } /
-               ( abs( vec( 3 ) ) > impl::HOMOGENIZE_THRESHOLD< TType >
-                     ? vec( 3 )
-                     : static_cast< TType >( 1 ) );
+    template < typename TType, size_t TDim >
+    TType& Vector< TType, TDim >::z()
+    {
+        static_assert( size > 2, "Wrong vector type" );
+        return m_values[ 2 ];
+    }
+
+    template < typename TType, size_t TDim >
+    TType const& Vector< TType, TDim >::x() const
+    {
+        static_assert( size > 0, "Wrong vector type" );
+        return m_values[ 0 ];
+    }
+
+    template < typename TType, size_t TDim >
+    TType const& Vector< TType, TDim >::y() const
+    {
+        static_assert( size > 1, "Wrong vector type" );
+        return m_values[ 1 ];
+    }
+
+    template < typename TType, size_t TDim >
+    TType const& Vector< TType, TDim >::z() const
+    {
+        static_assert( size > 2, "Wrong vector type" );
+        return m_values[ 2 ];
     }
 }

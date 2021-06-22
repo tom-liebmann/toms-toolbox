@@ -1,3 +1,30 @@
+function( ttb_add_test )
+
+    cmake_parse_arguments(
+        ADD_TEST
+        ""
+        "TARGET_NAME"
+        "SOURCES"
+        ${ARGN}
+    )
+
+    # Create test target
+    add_executable(
+        ${ADD_TEST_TARGET_NAME}
+        ${ADD_TEST_SOURCES}
+    )
+
+    # Import and link catch2 test framework to target
+    find_package( catch2 REQUIRED )
+    target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE catch2 )
+
+    # Propagate test using the catch cmake tools
+    include( Catch )
+    include( CTest )
+    catch_discover_tests( ${ADD_TEST_TARGET_NAME} )
+
+endfunction()
+
 function( ttb_add_module MODULE_NAME )
 
     # add cache option for enabling/disabling module

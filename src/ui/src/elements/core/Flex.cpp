@@ -1,5 +1,7 @@
 #include <ttb/ui/elements/core/Flex.hpp>
 
+#include <ttb/math/matrix_operations.hpp>
+
 
 namespace ttb::ui
 {

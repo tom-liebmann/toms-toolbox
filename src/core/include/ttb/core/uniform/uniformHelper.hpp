@@ -2,6 +2,7 @@
 
 #include <ttb/core/gl.hpp>
 #include <ttb/math/Matrix.hpp>
+#include <ttb/math/Vector.hpp>
 
 
 namespace ttb

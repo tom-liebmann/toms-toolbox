@@ -73,6 +73,8 @@ if( DOXYGEN_FOUND )
 
 endif( DOXYGEN_FOUND )
 
+enable_testing()
+
 set( EXPORT_TARGETS "" )
 set( EXPORT_DEPENDENCIES "" )
 

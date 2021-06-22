@@ -1,5 +1,7 @@
 #include <ttb/ui/ElementWrapper.hpp>
 
+#include <ttb/math/matrix_operations.hpp>
+
 
 namespace ttb::ui
 {

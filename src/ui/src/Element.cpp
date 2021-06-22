@@ -1,5 +1,6 @@
 #include <ttb/ui/Element.hpp>
 
+#include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/elements/core/Root.hpp>
 
 

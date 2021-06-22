@@ -3,6 +3,7 @@
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/shader.hpp>
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
 
 

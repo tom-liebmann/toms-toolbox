@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/math/math.hpp>
+#include <ttb/math/utils.hpp>
 
 #include <cmath>
 

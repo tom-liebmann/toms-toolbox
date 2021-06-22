@@ -1,5 +1,6 @@
 #include <ttb/utils/gesture/PointerPressHandler.hpp>
 
+#include <ttb/math/vector_operations.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
 #include <sstream>

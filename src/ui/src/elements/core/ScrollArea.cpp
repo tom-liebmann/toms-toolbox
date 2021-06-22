@@ -2,6 +2,7 @@
 
 #include "PriorityListener.hpp"
 #include <ttb/core/window.hpp>
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/ElementWrapper.hpp>
 #include <ttb/ui/Framework.hpp>
 #include <ttb/utils/gesture/events.hpp>

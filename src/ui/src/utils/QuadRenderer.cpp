@@ -3,6 +3,8 @@
 #include <ttb/core/gl.hpp>
 #include <ttb/core/shader.hpp>
 
+#include <limits>
+
 
 namespace
 {

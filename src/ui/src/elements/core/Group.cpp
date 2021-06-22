@@ -1,5 +1,8 @@
 #include <ttb/ui/elements/core/Group.hpp>
 
+#include <ttb/math/matrix_operations.hpp>
+#include <ttb/math/vector_operations.hpp>
+
 
 namespace ttb::ui
 {

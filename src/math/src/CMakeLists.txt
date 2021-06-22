@@ -1,0 +1,9 @@
+target_sources(
+    ${TARGET_NAME}
+    PRIVATE
+        Matrix.cpp
+        Vector.cpp
+        matrix_operations.cpp
+        vector_operations.cpp
+        utils.cpp
+)

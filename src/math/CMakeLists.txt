@@ -13,4 +13,7 @@ target_include_directories(
         include
 )
 
+add_subdirectory( src )
+add_subdirectory( tests )
+
 set( EXPORT_TARGETS ${EXPORT_TARGETS} PARENT_SCOPE )

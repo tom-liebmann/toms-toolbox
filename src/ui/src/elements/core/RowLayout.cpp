@@ -1,5 +1,9 @@
 #include <ttb/ui/elements/core/RowLayout.hpp>
 
+#include <ttb/math/matrix_operations.hpp>
+
+#include <limits>
+
 
 namespace ttb::ui
 {
