@@ -2,8 +2,11 @@ target_sources(
     ${TARGET_NAME}
     PRIVATE
         Matrix.cpp
+        Quaternion.cpp
+        Range.cpp
         Vector.cpp
         matrix_operations.cpp
-        vector_operations.cpp
+        trigonometry.cpp
         utils.cpp
+        vector_operations.cpp
 )
