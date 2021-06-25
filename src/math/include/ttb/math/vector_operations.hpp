@@ -297,7 +297,8 @@ namespace ttb
     {
         using std::max;
 
-        using ResultType = decltype( max( std::declval< TType1 >(), std::declval< TType2 >() ) );
+        using ResultType =
+            std::decay_t< decltype( max( std::declval< TType1 >(), std::declval< TType2 >() ) ) >;
 
         Vector< ResultType, TDim > result;
         for( size_t i = 0; i < lhs.size; ++i )

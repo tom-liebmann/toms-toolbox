@@ -38,6 +38,9 @@ namespace ttb
 
         TType const* data() const;
 
+        template < typename TType2 >
+        Vector< TType2, TDim > as() const;
+
         // Special access
         TType& x();
         TType& y();
@@ -99,6 +102,18 @@ namespace ttb
     TType const* Vector< TType, TDim >::data() const
     {
         return m_values.data();
+    }
+
+    template < typename TType, size_t TDim >
+    template < typename TType2 >
+    Vector< TType2, TDim > Vector< TType, TDim >::as() const
+    {
+        Vector< TType2, TDim > result;
+        for( size_t i = 0; i < TDim; ++i )
+        {
+            result( i ) = static_cast< TType2 >( m_values[ i ] );
+        }
+        return result;
     }
 
     template < typename TType, size_t TDim >
