@@ -100,7 +100,7 @@ namespace ttb
     Vector< TType, TDim + 1 > homogenize( Vector< TType, TDim > const& vec );
 
     template < typename TType, size_t TDim >
-    Vector< TType, TDim > dehomogenize( Vector< TType, TDim + 1 > const& vec );
+    Vector< TType, TDim - 1 > dehomogenize( Vector< TType, TDim > const& vec );
 }
 
 
@@ -374,14 +374,16 @@ namespace ttb
     }
 
     template < typename TType, size_t TDim >
-    Vector< TType, TDim > dehomogenize( Vector< TType, TDim + 1 > const& vec )
+    Vector< TType, TDim - 1 > dehomogenize( Vector< TType, TDim > const& vec )
     {
+        static_assert( TDim > 0 );
+
         using std::abs;
 
-        Vector< TType, TDim > result;
-        for( size_t i = 0; i < TDim; ++i )
+        Vector< TType, TDim - 1 > result;
+        for( size_t i = 0; i < TDim - 1; ++i )
         {
-            result( i ) = vec( i ) / vec( TDim );
+            result( i ) = vec( i ) / vec( TDim - 1 );
         }
 
         return result;
