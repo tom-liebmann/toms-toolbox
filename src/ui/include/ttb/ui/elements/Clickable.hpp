@@ -1,0 +1,43 @@
+#pragma once
+
+#include <ttb/ui/WrappedElement.hpp>
+#include <ttb/utils/EventListener.hpp>
+
+
+namespace ttb::ui
+{
+    class PriorityListener;
+}
+
+
+namespace ttb::ui
+{
+    class Clickable : public WrappedElement
+    {
+    public:
+        enum class Action
+        {
+            START,
+            ABORT,
+            END
+        };
+
+        using ClickCallback = std::function< void( Action, Element& ) >;
+
+        Clickable( Framework& framework );
+
+        ~Clickable();
+
+        void callback( ClickCallback value );
+
+        void child( Element* element );
+
+    private:
+        //! @copydoc Element::onEvent( Event const& )
+        virtual bool onEvent( Event const& event ) override;
+
+        ClickCallback m_callback;
+
+        std::unique_ptr< PriorityListener > m_prioListener;
+    };
+}

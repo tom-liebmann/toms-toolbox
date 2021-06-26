@@ -1,7 +1,6 @@
 #include <ttb/ui/Element.hpp>
 
 #include <ttb/math/vector_operations.hpp>
-#include <ttb/ui/elements/core/Root.hpp>
 
 
 namespace ttb::ui
@@ -21,9 +20,9 @@ namespace ttb::ui
         return m_parent;
     }
 
-    void Element::parent( Element& parent )
+    void Element::parent( Element* parent )
     {
-        m_parent = &parent;
+        m_parent = parent;
     }
 
     Element::Range const& Element::range() const
@@ -76,15 +75,5 @@ namespace ttb::ui
     void Element::onChildChanged( Element& /* child */ )
     {
         changed();
-    }
-
-    Element* Element::child( std::string const& /* id */ )
-    {
-        return nullptr;
-    }
-
-    Element const* Element::child( std::string const& /* id */ ) const
-    {
-        return nullptr;
     }
 }

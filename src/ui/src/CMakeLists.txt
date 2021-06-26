@@ -3,7 +3,8 @@ target_sources(
 
     PRIVATE
         Element.cpp
-        ElementWrapper.cpp
+        CombinedElement.cpp
+        WrappedElement.cpp
         Framework.cpp
 )
 
