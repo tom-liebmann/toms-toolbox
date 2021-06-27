@@ -14,39 +14,38 @@ namespace ttb::ui
 
     void ScaleToFit::child( Element* element )
     {
-        wrappedChild( element );
+        wrappedChild(
+            element,
+            [ this ]( auto const& pos ) { return transform( pos ); },
+            [ this ]( auto const& pos ) { return transformInv( pos ); } );
     }
 
-    auto ScaleToFit::fit( Range const& space ) -> Range
+    auto ScaleToFit::fit( Size const& size ) -> Size
     {
         if( auto const child = wrappedChild(); child )
         {
-            auto const childSpace = child->fit( space );
+            auto const childSpace = child->fit( { std::numeric_limits< float >::infinity(),
+                                                  std::numeric_limits< float >::infinity() } );
 
-            m_factor = std::min( space.extent( 0 ) / childSpace.extent( 0 ),
-                                 space.extent( 1 ) / childSpace.extent( 1 ) );
+            m_factor = std::min( size( 0 ) / childSpace( 0 ), size( 1 ) / childSpace( 1 ) );
 
-            auto const result =
-                Range{ space.min(),
-                       space.min() + ttb::Vector{ childSpace.extent( 0 ) * m_factor,
-                                                  childSpace.extent( 1 ) * m_factor } };
-
-            return result;
+            return Element::fit( { childSpace( 0 ) * m_factor, childSpace( 1 ) * m_factor } );
         }
 
-        return space;
-    }
-
-    void ScaleToFit::range( Range const& value )
-    {
-        Element::range( value );
-
-        auto const childRange = Range{
-            { 0.0f, 0.0f },
-        };
+        return Element::fit( { 0.0f, 0.0f } );
     }
 
     void ScaleToFit::render( ttb::State& state ) const
     {
+    }
+
+    auto ScaleToFit::transform( Position const& pos ) const -> Position
+    {
+        return { pos( 0 ) * m_factor, pos( 1 ) * m_factor };
+    }
+
+    auto ScaleToFit::transformInv( Position const& pos ) const -> Position
+    {
+        return { pos( 0 ) / m_factor, pos( 1 ) / m_factor };
     }
 }

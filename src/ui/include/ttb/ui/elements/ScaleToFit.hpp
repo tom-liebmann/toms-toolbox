@@ -12,13 +12,17 @@ namespace ttb::ui
 
         void child( Element* element );
 
-        /// @copydoc WrappedElement::fit( Range const& )
-        virtual Range fit( Range const& space ) override;
+        /// @copydoc WrappedElement::fit( Size const& )
+        virtual Size fit( Size const& size ) override;
 
         /// @copydoc WrappedElement::
         virtual void render( ttb::State& state ) const override;
 
     private:
+        Position transform( Position const& pos ) const;
+
+        Position transformInv( Position const& pos ) const;
+
         float m_factor{ 1.0f };
     };
 }
