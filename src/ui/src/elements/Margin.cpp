@@ -14,39 +14,73 @@ namespace ttb::ui
 
     void Margin::child( Element* element )
     {
-        wrappedChild( element );
+        wrappedChild(
+            element,
+            [ this ]( auto const& pos ) { return transform( pos ); },
+            [ this ]( auto const& pos ) { return transformInv( pos ); } );
     }
 
-    void Margin::range( Range const& range )
+    void Margin::right( float value, bool isLastChange )
     {
-        WrappedElement::range( range );
+        m_right = value;
 
-        if( auto const child = wrappedChild(); child )
+        if( isLastChange )
         {
-            auto const subRange =
-                Range{ { m_left, m_top },
-                       { range.extent( 0 ) - m_right, range.extent( 1 ) - m_bottom } };
-
-            child->range( subRange );
+            changed();
         }
     }
 
-    Element::Range Margin::fit( Range const& space )
+    void Margin::top( float value, bool isLastChange )
+    {
+        m_top = value;
+
+        if( isLastChange )
+        {
+            changed();
+        }
+    }
+
+    void Margin::left( float value, bool isLastChange )
+    {
+        m_left = value;
+
+        if( isLastChange )
+        {
+            changed();
+        }
+    }
+
+    void Margin::bottom( float value, bool isLastChange )
+    {
+        m_bottom = value;
+
+        if( isLastChange )
+        {
+            changed();
+        }
+    }
+
+    auto Margin::fit( Size const& size ) -> Size
     {
         if( auto const child = wrappedChild(); child )
         {
-            auto const subSpace =
-                Range{ { m_left, m_top },
-                       { space.extent( 0 ) - m_right, space.extent( 1 ) - m_bottom } };
+            auto const childSize =
+                child->fit( { size( 0 ) - m_left - m_right, size( 1 ) - m_top - m_bottom } );
 
-            auto childSpace = child->fit( subSpace );
-
-            return { { space.min( 0 ) + childSpace.min( 0 ) - m_left,
-                       space.min( 1 ) + childSpace.min( 1 ) - m_top },
-                     { space.min( 0 ) + childSpace.max( 0 ) + m_right,
-                       space.min( 1 ) + childSpace.max( 1 ) + m_bottom } };
+            return Element::fit(
+                { childSize( 0 ) + m_left + m_right, childSize( 1 ) + m_top + m_bottom } );
         }
 
-        return space;
+        return Element::fit( { 0.0f, 0.0f } );
+    }
+
+    auto Margin::transform( Position const& pos ) const -> Position
+    {
+        return { pos( 0 ) + m_left, pos( 1 ) + m_top };
+    }
+
+    auto Margin::transformInv( Position const& pos ) const -> Position
+    {
+        return { pos( 0 ) - m_left, pos( 1 ) - m_top };
     }
 }

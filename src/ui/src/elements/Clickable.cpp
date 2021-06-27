@@ -38,7 +38,10 @@ namespace ttb::ui
             {
                 auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
 
-                if( range().contains( screenToParent( ev.position() ) ) )
+                auto const localPos = screenToLocal( ev.position() );
+
+                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < 1.0f && localPos( 1 ) >= 0.0f &&
+                    localPos( 1 ) < 1.0f )
                 {
                     m_prioListener =
                         std::make_unique< PriorityListener >( framework().eventManager(), *this );
@@ -71,7 +74,10 @@ namespace ttb::ui
 
                 if( m_prioListener )
                 {
-                    if( range().contains( screenToParent( ev.position() ) ) )
+                    auto const localPos = screenToLocal( ev.position() );
+
+                    if( localPos( 0 ) >= 0.0f && localPos( 0 ) < 1.0f && localPos( 1 ) >= 0.0f &&
+                        localPos( 1 ) < 1.0f )
                     {
                         m_callback( Action::END, *this );
                     }

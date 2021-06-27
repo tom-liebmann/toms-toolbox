@@ -24,7 +24,10 @@ namespace ttb::ui
 
         void image( std::shared_ptr< Texture2D const > image );
 
-        virtual void range( Range const& range ) override;
+        /// @copydoc Element::fit( Size const& )
+        virtual Size fit( Size const& size ) override;
+
+        /// @copydoc Element::render( ttb::State& ) const
         virtual void render( ttb::State& state ) const override;
 
     private:

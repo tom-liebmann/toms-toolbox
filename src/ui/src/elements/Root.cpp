@@ -42,6 +42,14 @@ namespace ttb::ui
         eventMngr.removeListener( type::ZOOM, *this );
     }
 
+    void Root::destroy()
+    {
+        if( m_child )
+        {
+            m_child->destroy();
+        }
+    }
+
     void Root::child( Element* child )
     {
         if( m_child )

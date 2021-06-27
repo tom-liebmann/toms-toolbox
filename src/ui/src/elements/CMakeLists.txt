@@ -19,4 +19,5 @@ target_sources(
         Switch.cpp
         ScrollArea.cpp
         PriorityListener.cpp
+        ScaleToFit.cpp
 )

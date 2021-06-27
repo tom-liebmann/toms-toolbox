@@ -6,8 +6,7 @@
 
 namespace ttb::ui
 {
-    WrappedElement::WrappedElement( Framework& framework )
-        : Element{ framework }, m_transform( ttb::mat::identity< float, 3 >() )
+    WrappedElement::WrappedElement( Framework& framework ) : Element{ framework }
     {
     }
 
@@ -19,30 +18,9 @@ namespace ttb::ui
         }
     }
 
-    void WrappedElement::range( Range const& range )
+    auto WrappedElement::fit( Size const& size ) -> Size
     {
-        if( m_child )
-        {
-            auto const childRange = m_child->fit( range );
-            m_child->range( { childRange.min() - range.min(), childRange.extent() } );
-        }
-
-        m_transform( 0, 2 ) = range.min( 0 );
-        m_transform( 1, 2 ) = range.min( 1 );
-
-        Element::range( range );
-    }
-
-    WrappedElement::Range WrappedElement::fit( Range const& space )
-    {
-        if( m_child )
-        {
-            return m_child->fit( space );
-        }
-        else
-        {
-            return space;
-        }
+        return Element::fit( m_child ? m_child->fit( size ) : Size{ 0.0f, 0.0f } );
     }
 
     void WrappedElement::update( float timeDiff )
@@ -57,9 +35,6 @@ namespace ttb::ui
     {
         if( m_child )
         {
-            auto const u =
-                state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( m_transform );
-
             m_child->render( state );
         }
     }
@@ -74,7 +49,7 @@ namespace ttb::ui
         return false;
     }
 
-    void WrappedElement::wrappedChild( Element* child )
+    void WrappedElement::wrappedChild( Element* child, Transform transform, Transform transformInv )
     {
         if( m_child )
         {
@@ -85,7 +60,7 @@ namespace ttb::ui
 
         if( m_child )
         {
-            m_child->parent( this );
+            m_child->parent( this, std::move( transform ), std::move( transformInv ) );
         }
 
         changed();

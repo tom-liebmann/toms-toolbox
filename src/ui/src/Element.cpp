@@ -20,24 +20,23 @@ namespace ttb::ui
         return m_parent;
     }
 
-    void Element::parent( Element* parent )
+    void Element::parent( Element* parent, Transform transform, Transform transformInv )
     {
         m_parent = parent;
+        m_transform = std::move( transform );
+        m_transformInv = std::move( transformInv );
     }
 
-    Element::Range const& Element::range() const
+    auto Element::size() const -> Size const&
     {
-        return m_range;
+        return m_size;
     }
 
-    void Element::range( Element::Range const& range )
+    auto Element::fit( Size const& size ) -> Size
     {
-        m_range = range;
-    }
+        m_size = size;
 
-    Element::Range Element::fit( Range const& space )
-    {
-        return space;
+        return m_size;
     }
 
     void Element::update( float /* timeDiff */ )
@@ -57,19 +56,16 @@ namespace ttb::ui
         }
     }
 
-    ttb::Vector< float, 2 > Element::screenToParent( ttb::Vector< float, 2 > const& vec ) const
+    ttb::Vector< float, 2 > Element::localToScreen( ttb::Vector< float, 2 > const& vec ) const
     {
-        return m_parent ? m_parent->screenToLocal( vec ) : vec;
+        auto const v = m_transform ? m_transform( vec ) : vec;
+        return m_parent ? m_parent->localToScreen( v ) : v;
     }
 
     ttb::Vector< float, 2 > Element::screenToLocal( ttb::Vector< float, 2 > const& vec ) const
     {
-        return screenToParent( vec ) - m_range.min();
-    }
-
-    ttb::Vector< float, 2 > Element::localToScreen( ttb::Vector< float, 2 > const& vec ) const
-    {
-        return ( m_parent ? m_parent->localToScreen( vec ) : vec ) + m_range.min();
+        auto const v = m_parent ? m_parent->screenToLocal( vec ) : vec;
+        return m_transformInv ? m_transformInv( v ) : v;
     }
 
     void Element::onChildChanged( Element& /* child */ )

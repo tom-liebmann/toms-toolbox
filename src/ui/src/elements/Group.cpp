@@ -6,6 +6,10 @@
 
 namespace ttb::ui
 {
+    Group::Group( Framework& framework ) : CombinedElement{ framework }
+    {
+    }
+
     void Group::addChild( Element* child, bool considerSize )
     {
         CombinedElement::add( child, considerSize );

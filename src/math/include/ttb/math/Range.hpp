@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/math/Vector.hpp>
+#include <ttb/math/vector_operations.hpp>
 
 #include <iostream>
 
@@ -70,8 +71,8 @@ namespace ttb
     Range< T, D > intersect( const Range< T, D >& lhs, const Range< T, D >& rhs );
 }
 
-template < typename T, size_t... D >
-std::ostream& operator<<( std::ostream& stream, const ttb::Range< T, D... >& range );
+template < typename TType, size_t TDim >
+std::ostream& operator<<( std::ostream& stream, ttb::Range< TType, TDim > const& range );
 
 
 
@@ -242,8 +243,8 @@ namespace ttb
     }
 }
 
-template < typename T, size_t... D >
-std::ostream& operator<<( std::ostream& stream, const ttb::Range< T, D... >& range )
+template < typename TType, size_t TDim >
+std::ostream& operator<<( std::ostream& stream, ttb::Range< TType, TDim > const& range )
 {
     return stream << range.getMin() << "-" << range.getMax();
 }

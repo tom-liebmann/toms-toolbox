@@ -4,3 +4,11 @@ ttb_add_test(
 )
 
 target_link_libraries( test_vector PRIVATE ttbMath )
+
+
+ttb_add_test(
+    TARGET_NAME test_range
+    SOURCES test_range.cpp
+)
+
+target_link_libraries( test_range PRIVATE ttbMath )

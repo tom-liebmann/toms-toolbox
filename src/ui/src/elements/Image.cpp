@@ -37,17 +37,19 @@ namespace ttb::ui
     {
         m_image = std::move( image );
 
-        Range const sourceRange = { { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+        auto const sourceRange = Range< float, 2 >{ { 0.0f, 0.0f }, { 1.0f, 1.0f } };
         // m_texTransform = ttb::mat::transform( sourceRange, m_image->range() );
         m_texTransform = ttb::mat::transform( sourceRange, sourceRange );
     }
 
-    void Image::range( Range const& range )
+    auto Image::fit( Size const& size ) -> Size
     {
-        Element::range( range );
+        auto const result = Element::fit( size );
 
-        auto const sourceRange = Range{ { 0.0f, 0.0f }, { 1.0f, 1.0f } };
-        m_transform = ttb::mat::transform( sourceRange, range );
+        m_transform = ttb::mat::transform( Range{ Vector{ 0.0f, 0.0f }, Vector{ 1.0f, 1.0f } },
+                                           Range{ Vector{ 0.0f, 0.0f }, result } );
+
+        return result;
     }
 
     void Image::render( ttb::State& state ) const

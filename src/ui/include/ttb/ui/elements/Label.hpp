@@ -17,7 +17,8 @@ namespace ttb::ui
 
         void text( std::string value );
 
-        virtual Range fit( Range const& space ) override;
+        virtual Size fit( Size const& size ) override;
+
         virtual void render( ttb::State& state ) const override;
 
     private:
