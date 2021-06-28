@@ -32,12 +32,14 @@ namespace ttb::ui
 
     void Rectangle::render( ttb::State& state ) const
     {
-        auto const innerRange = Range{
+        auto const innerRange = ttb::Range< float, 2 >{
             { 0.0f, 0.0f },
             { 1.0f, 1.0f },
         };
 
-        auto const transform = ttb::mat::transform( innerRange, range() );
+        auto const outerRange = ttb::Range< float, 2 >{ { 0.0f, 0.0f }, size() };
+
+        auto const transform = ttb::mat::transform( innerRange, outerRange );
 
         auto const uniformHandle1 =
             state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( transform );

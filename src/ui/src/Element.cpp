@@ -2,6 +2,8 @@
 
 #include <ttb/math/vector_operations.hpp>
 
+#include <iostream>
+
 
 namespace ttb::ui
 {
@@ -34,6 +36,7 @@ namespace ttb::ui
 
     auto Element::fit( Size const& size ) -> Size
     {
+        std::cout << info() << ": " << size << '\n';
         m_size = size;
 
         return m_size;
@@ -46,6 +49,11 @@ namespace ttb::ui
     bool Element::onEvent( Event const& /* event */ )
     {
         return false;
+    }
+
+    std::string Element::info() const
+    {
+        return "Element";
     }
 
     void Element::changed()

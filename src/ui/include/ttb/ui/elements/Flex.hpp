@@ -38,6 +38,8 @@ namespace ttb::ui
         //! @copydoc Element::onChildChanged(Element&)
         virtual void onChildChanged( Element& child ) override;
 
+        virtual std::string info() const override;
+
         size_t addSlot( SlotType type, float value, bool isLastChange = true );
 
         void child( size_t slot, Element* element, bool isLastChange = true );

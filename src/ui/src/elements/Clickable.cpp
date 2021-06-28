@@ -40,8 +40,8 @@ namespace ttb::ui
 
                 auto const localPos = screenToLocal( ev.position() );
 
-                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < 1.0f && localPos( 1 ) >= 0.0f &&
-                    localPos( 1 ) < 1.0f )
+                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) && localPos( 1 ) >= 0.0f &&
+                    localPos( 1 ) < size()( 1 ) )
                 {
                     m_prioListener =
                         std::make_unique< PriorityListener >( framework().eventManager(), *this );
@@ -76,8 +76,8 @@ namespace ttb::ui
                 {
                     auto const localPos = screenToLocal( ev.position() );
 
-                    if( localPos( 0 ) >= 0.0f && localPos( 0 ) < 1.0f && localPos( 1 ) >= 0.0f &&
-                        localPos( 1 ) < 1.0f )
+                    if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) &&
+                        localPos( 1 ) >= 0.0f && localPos( 1 ) < size()( 1 ) )
                     {
                         m_callback( Action::END, *this );
                     }

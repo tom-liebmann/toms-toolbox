@@ -98,10 +98,10 @@ namespace ttb
 
     template < typename TType, size_t TDim >
     Vector< TType, TDim - 1 > dehomogenize( Vector< TType, TDim > const& vec );
-}
 
-template < typename TType, size_t TDim >
-std::ostream& operator<<( std::ostream& stream, ttb::Vector< TType, TDim > const& tensor );
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Vector< TType, TDim > const& vec );
+}
 
 
 // Definitions
@@ -372,21 +372,21 @@ namespace ttb
 
         return result;
     }
-}
 
-template < typename TType, size_t TDim >
-std::ostream& operator<<( std::ostream& stream, ttb::Vector< TType, TDim > const& tensor )
-{
-    stream << '(';
-    for( size_t i = 0; i < tensor.size; ++i )
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Vector< TType, TDim > const& vec )
     {
-        if( i != 0 )
+        stream << '(';
+        for( size_t i = 0; i < vec.size; ++i )
         {
-            stream << ", ";
+            if( i != 0 )
+            {
+                stream << ", ";
+            }
+            stream << vec[ i ];
         }
-        stream << tensor[ i ];
-    }
-    stream << ')';
+        stream << ')';
 
-    return stream;
+        return stream;
+    }
 }

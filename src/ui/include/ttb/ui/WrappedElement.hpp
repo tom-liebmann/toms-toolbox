@@ -32,6 +32,8 @@ namespace ttb::ui
 
         Element* wrappedChild();
 
+        Element const* wrappedChild() const;
+
     private:
         Element* m_child{ nullptr };
     };

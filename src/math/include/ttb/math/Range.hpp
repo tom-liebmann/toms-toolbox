@@ -60,20 +60,18 @@ namespace ttb
     };
 
 
+    template < typename T, size_t D >
+    bool operator==( ttb::Range< T, D > const& lhs, Range< T, D > const& rhs );
 
     template < typename T, size_t D >
-    bool operator==( ttb::Range< T, D > const& lhs, ttb::Range< T, D > const& rhs );
+    bool operator!=( ttb::Range< T, D > const& lhs, Range< T, D > const& rhs );
 
     template < typename T, size_t D >
-    bool operator!=( ttb::Range< T, D > const& lhs, ttb::Range< T, D > const& rhs );
+    Range< T, D > intersect( Range< T, D > const& lhs, Range< T, D > const& rhs );
 
-    template < typename T, size_t D >
-    Range< T, D > intersect( const Range< T, D >& lhs, const Range< T, D >& rhs );
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Range< TType, TDim > const& range );
 }
-
-template < typename TType, size_t TDim >
-std::ostream& operator<<( std::ostream& stream, ttb::Range< TType, TDim > const& range );
-
 
 
 // definitions
@@ -241,10 +239,10 @@ namespace ttb
                               Vector< T, D >( { min( lhs.getMax( 0 ), rhs.getMax( 0 ) ),
                                                 min( lhs.getMax( 1 ), rhs.getMax( 1 ) ) } ) );
     }
-}
 
-template < typename TType, size_t TDim >
-std::ostream& operator<<( std::ostream& stream, ttb::Range< TType, TDim > const& range )
-{
-    return stream << range.getMin() << "-" << range.getMax();
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Range< TType, TDim > const& range )
+    {
+        return stream << range.getMin() << "-" << range.getMax();
+    }
 }

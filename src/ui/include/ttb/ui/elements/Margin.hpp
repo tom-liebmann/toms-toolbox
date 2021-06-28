@@ -26,6 +26,8 @@ namespace ttb::ui
 
         virtual Size fit( Size const& size ) override;
 
+        virtual void render( ttb::State& state ) const override;
+
     private:
         Position transform( Position const& pos ) const;
 
@@ -35,5 +37,7 @@ namespace ttb::ui
         float m_top;
         float m_left;
         float m_bottom;
+
+        ttb::Matrix< float, 3, 3 > m_transform;
     };
 }

@@ -37,6 +37,8 @@ namespace ttb::ui
 
         virtual bool onEvent( Event const& event ) override;
 
+        virtual std::string info() const;
+
         Element* parent() const;
 
         void parent( Element* parent, Transform transform = {}, Transform transformInv = {} );

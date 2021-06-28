@@ -17,6 +17,9 @@ namespace ttb::ui
         float fixedSum = 0.0f;
         float flexSum = 0.0f;
 
+        auto totalSize = Size{ 0.0f, 0.0f };
+
+        // Compute the overall sums of all flex and fixed elements
         for( auto const& slot : m_slots )
         {
             switch( slot.type )
@@ -26,26 +29,62 @@ namespace ttb::ui
                     break;
 
                 case SlotType::FIXED:
+                {
                     fixedSum += slot.value;
                     break;
+                }
 
                 case SlotType::FIT:
+                {
+                    if( slot.child )
+                    {
+                        auto childSize = size;
+                        childSize( dimDir() ) = 0.0f;
+
+                        childSize = slot.child->fit( childSize );
+
+                        slot.value = childSize( dimDir() );
+                        totalSize( 1 - dimDir() ) =
+                            std::max( totalSize( 1 - dimDir() ), slot.value );
+                    }
                     break;
+                }
             }
         }
 
+        // Position elements
         for( auto& slot : m_slots )
         {
+            switch( slot.type )
+            {
+                case SlotType::FLEX:
+                {
+                    break;
+                }
+
+                case SlotType::FIXED:
+                {
+                    auto const childSize = slot.child->fit(
+                        { m_direction == Direction::HORIZONTAL ? slot.value : size( 0 ),
+                          m_direction == Direction::HORIZONTAL ? size( 1 ) : slot.value } );
+
+                    break;
+                }
+
+                case SlotType::FIT:
+                {
+                    break;
+                }
+            }
+
             if( slot.type == SlotType::FIT )
             {
-                if( slot.child )
-                {
-                    auto childSize = size;
-                    childSize( dirDim() ) -= fixedSum;
+                auto const childSize = Size{ m_direction == Direction::HORIZONTAL ? };
+                auto childSize = size;
+                childSize( dirDim() ) = 0.0f;
 
-                    slot.value = slot.child->fit( childSize )( dirDim() );
-                    fixedSum += slot.value;
-                }
+                slot.value = slot.child->fit( childSize )( dirDim() );
+                fixedSum += slot.value;
             }
         }
 
@@ -65,9 +104,8 @@ namespace ttb::ui
             }
         }
 
-        auto result = size;
-        result( dirDim() ) = offset;
-        return result;
+        return Element::fit( { m_direction == Direction::HORIZONTAL ? offset : size( 0 ),
+                               m_direction == Direction::HORIZONTAL ? size( 1 ) : offset } );
     }
 
     void Flex::update( float timeDiff )
@@ -118,6 +156,11 @@ namespace ttb::ui
     void Flex::onChildChanged( Element& /* child */ )
     {
         changed();
+    }
+
+    std::string Flex::info() const
+    {
+        return "Flex";
     }
 
     size_t Flex::addSlot( SlotType type, float value, bool isLastChange )

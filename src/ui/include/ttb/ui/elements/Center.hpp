@@ -29,6 +29,8 @@ namespace ttb::ui
         /// @copydoc WrappedElement::fit( Size const& )
         virtual Size fit( Size const& size ) override;
 
+        virtual void render( ttb::State& state ) const override;
+
     private:
         Position transform( Position const& pos ) const;
 

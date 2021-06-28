@@ -24,5 +24,6 @@ namespace ttb::ui
         Position transformInv( Position const& pos ) const;
 
         float m_factor{ 1.0f };
+        ttb::Matrix< float, 3, 3 > m_transform;
     };
 }

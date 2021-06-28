@@ -38,6 +38,9 @@ namespace ttb
     auto operator*( Matrix< TType1, TDim + 1, TDim + 1 > const& matrix,
                     Vector< TType2, TDim > const& vector );
 
+    template < typename TType, size_t TRows, size_t TCols >
+    std::ostream& operator<<( std::ostream& stream, Matrix< TType, TRows, TCols > const& mat );
+
     namespace mat
     {
         template < typename TType, size_t TDim >
@@ -246,6 +249,25 @@ namespace ttb
     {
         return dehomogenize( matrix * homogenize( vector ) );
     }
+
+    template < typename TType, size_t TRows, size_t TCols >
+    std::ostream& operator<<( std::ostream& stream, Matrix< TType, TRows, TCols > const& mat )
+    {
+        stream << '(';
+        for( size_t i = 0; i < mat.size; ++i )
+        {
+            if( i != 0 )
+            {
+                stream << ", ";
+            }
+            stream << mat[ i ];
+        }
+        stream << ')';
+
+        return stream;
+    }
+
+
     namespace mat
     {
         template < typename TType, size_t TDim >

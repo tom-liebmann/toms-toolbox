@@ -1,5 +1,7 @@
 #include <ttb/ui/elements/Center.hpp>
 
+#include <ttb/math/matrix_operations.hpp>
+
 
 namespace ttb::ui
 {
@@ -60,6 +62,16 @@ namespace ttb::ui
         }
 
         return Element::fit( size );
+    }
+
+    void Center::render( ttb::State& state ) const
+    {
+        if( auto const child = wrappedChild(); child )
+        {
+            auto const u = state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" )
+                               .push( ttb::mat::translation( m_offset ) );
+            child->render( state );
+        }
     }
 
     auto Center::transform( Position const& pos ) const -> Position

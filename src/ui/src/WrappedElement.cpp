@@ -70,4 +70,9 @@ namespace ttb::ui
     {
         return m_child;
     }
+
+    Element const* WrappedElement::wrappedChild() const
+    {
+        return m_child;
+    }
 }
