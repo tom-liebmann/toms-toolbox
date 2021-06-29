@@ -31,6 +31,8 @@ namespace ttb::ui
 
         virtual void render( ttb::State& state ) const override;
 
+        virtual std::string info() const override;
+
     private:
         Position transform( Position const& pos ) const;
 

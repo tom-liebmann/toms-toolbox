@@ -58,6 +58,7 @@ namespace ttb::ui
             SlotType type;
             float value;
             float offset{ 0.0f };
+            float width{ 0.0f };
             Element* child;
         };
 

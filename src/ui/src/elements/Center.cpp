@@ -34,10 +34,12 @@ namespace ttb::ui
                         break;
 
                     case HAlignment::CENTER:
+                        result( 0 ) = ( size( 0 ) + childSize( 0 ) ) / 2.0f;
                         m_offset( 0 ) = ( size( 0 ) - childSize( 0 ) ) / 2.0f;
                         break;
 
                     case HAlignment::RIGHT:
+                        result( 0 ) = size( 0 );
                         m_offset( 0 ) = size( 0 ) - childSize( 0 );
                         break;
                 }
@@ -49,11 +51,13 @@ namespace ttb::ui
                         break;
 
                     case VAlignment::MIDDLE:
+                        result( 1 ) = ( size( 1 ) + childSize( 1 ) ) / 2.0f;
                         m_offset( 1 ) = ( size( 1 ) - childSize( 1 ) ) / 2.0f;
                         break;
 
                     case VAlignment::BOTTOM:
-                        m_offset( 0 ) = size( 1 ) - childSize( 1 );
+                        result( 1 ) = size( 1 );
+                        m_offset( 1 ) = size( 1 ) - childSize( 1 );
                         break;
                 }
             }
@@ -72,6 +76,11 @@ namespace ttb::ui
                                .push( ttb::mat::translation( m_offset ) );
             child->render( state );
         }
+    }
+
+    std::string Center::info() const
+    {
+        return "Center";
     }
 
     auto Center::transform( Position const& pos ) const -> Position
