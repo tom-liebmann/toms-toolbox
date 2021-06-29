@@ -36,7 +36,6 @@ namespace ttb::ui
 
     auto Element::fit( Size const& size ) -> Size
     {
-        std::cout << info() << ": " << size << '\n';
         m_size = size;
 
         return m_size;
