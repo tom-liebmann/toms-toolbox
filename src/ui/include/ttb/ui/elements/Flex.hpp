@@ -13,6 +13,7 @@ namespace ttb::ui
             FIXED,
             FLEX,
             FIT,
+            FIT_INFINITY,
         };
 
         enum class Direction

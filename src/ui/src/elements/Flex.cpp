@@ -41,6 +41,21 @@ namespace ttb::ui
                     break;
                 }
 
+                case SlotType::FIT_INFINITY:
+                {
+                    slot.width = std::numeric_limits< float >::infinity();
+
+                    if( slot.child )
+                    {
+                        auto childSize = size;
+                        childSize( dirDim() ) = slot.width;
+                        slot.width = slot.child->fit( childSize )( dirDim() );
+                    }
+
+                    fixedSum += slot.width;
+                    break;
+                }
+
                 case SlotType::FIT:
                 {
                     slot.width = 0.0f;
@@ -48,7 +63,7 @@ namespace ttb::ui
                     if( slot.child )
                     {
                         auto childSize = size;
-                        childSize( dirDim() ) = 0.0f;
+                        childSize( dirDim() ) = slot.width;
                         slot.width = slot.child->fit( childSize )( dirDim() );
                     }
 
@@ -85,6 +100,7 @@ namespace ttb::ui
 
                 case SlotType::FIXED:
                 case SlotType::FIT:
+                case SlotType::FIT_INFINITY:
                 {
                     totalSize( dirDim() ) += slot.width;
                     break;
