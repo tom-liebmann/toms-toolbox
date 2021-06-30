@@ -50,6 +50,9 @@ namespace ttb
         Matrix< TType, TDim + 1, TDim + 1 > translation( Vector< TType, TDim > const& vec );
 
         template < typename TType >
+        Matrix< TType, 3, 3 > rotation( TType angle );
+
+        template < typename TType >
         Matrix< TType, 4, 4 > rotation( Quaternion< TType > const& quat );
 
         template < typename TType, size_t TDim >
@@ -297,6 +300,24 @@ namespace ttb
             }
 
             return result;
+        }
+
+        template < typename TType >
+        Matrix< TType, 3, 3 > rotation( TType angle )
+        {
+            using std::cos;
+            using std::sin;
+
+            auto const c = cos( angle );
+            auto const s = sin( angle );
+
+            // clang-format off
+            return {
+                c         , -s        , TType{ 0 },
+                s         , c         , TType{ 0 },
+                TType{ 0 }, TType{ 0 }, TType{ 1 }
+            };
+            // clang-format on
         }
 
         template < typename TType >

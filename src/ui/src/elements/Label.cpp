@@ -33,13 +33,13 @@ namespace ttb::ui
     auto Label::fit( Size const& /* size */ ) -> Size
     {
         auto const fontRange = m_font->textDimensions( m_size, m_text );
-
         return Element::fit( fontRange.extent() );
     }
 
     void Label::render( ttb::State& state ) const
     {
         glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
         state.with( *m_shader, [ & ] {
             auto const u2 = state.uniform< int >( "u_texture" ).push( 0 );

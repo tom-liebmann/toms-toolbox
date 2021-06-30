@@ -20,6 +20,8 @@ namespace ttb::ui
 
         ~Rectangle();
 
+        void color( ColorRgb const& value );
+
         virtual void render( ttb::State& state ) const override;
 
     private:
