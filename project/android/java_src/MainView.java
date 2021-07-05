@@ -95,7 +95,7 @@ class MainView extends GLSurfaceView
         {
             // clang-format off
             final int[] attribList = {
-                EGL_CONTEXT_CLIENT_VERSION, 3,
+                EGL_CONTEXT_CLIENT_VERSION, 2,
                 EGL10.EGL_NONE };
             // clang-format on
 

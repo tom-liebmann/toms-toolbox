@@ -38,7 +38,8 @@ namespace ttb
         void set_uniform< Matrix< float, 3, 3 > >::apply( GLint location,
                                                           Matrix< float, 3, 3 > const& value )
         {
-            glUniformMatrix3fv( location, 1, GL_TRUE, value.data() );
+            auto const mat = transpose( value );
+            glUniformMatrix3fv( location, 1, GL_FALSE, mat.data() );
         }
 
         void set_uniform< Matrix< float, 4, 4 > >::apply( GLint location,
