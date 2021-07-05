@@ -126,12 +126,12 @@ namespace ttb
 
     ttb::Range< float, 2 > Font::textDimensions( float size, std::string const& text ) const
     {
-        ttb::Range< float, 2 > dimensions{ { 0.0f, 0.0f }, { 0.0f, 0.0f } };
+        auto dimensions = ttb::Range< float, 2 >{ { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 
-        float scaleFactor = size / lineHeight();
+        auto const scaleFactor = size / lineHeight();
 
-        float x = 0.0f;
-        float y = 0.0f;
+        auto x = 0.0f;
+        auto y = 0.0f;
         for( size_t i = 0; i < text.size(); ++i )
         {
             char cId = text[ i ];
@@ -140,8 +140,8 @@ namespace ttb
             {
                 auto const& c = character( text[ i ] );
 
-                auto charRightX = ( x + c.xOffset() + c.width() ) * scaleFactor;
-                auto charBottomY = ( y + c.yOffset() + c.height() ) * scaleFactor;
+                auto const charRightX = ( x + c.xOffset() + c.width() ) * scaleFactor;
+                auto const charBottomY = ( y + c.yOffset() + c.height() ) * scaleFactor;
 
                 dimensions.max( 0, std::max( dimensions.getMax( 0 ), charRightX ) );
                 dimensions.max( 1, std::max( dimensions.getMax( 1 ), charBottomY ) );
