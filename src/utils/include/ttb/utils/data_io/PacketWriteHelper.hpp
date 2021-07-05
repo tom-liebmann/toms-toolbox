@@ -3,6 +3,7 @@
 #include "Packet.hpp"
 #include "Writer.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <functional>
