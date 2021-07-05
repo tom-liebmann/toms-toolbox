@@ -14,6 +14,9 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
 
     add_executable( ${TARGET_NAME} )
 
+    find_package( ttb REQUIRED )
+    target_link_libraries( ${TARGET_NAME} PRIVATE ttbCore ttbUtils ttbUi ttbMath )
+
     add_subdirectory( ${PROJECT_CMAKE_FILE} _target_${PROJECT_NAME} )
 
     add_subdirectory( "${TTB_ROOT}/project/src" ttb_project )

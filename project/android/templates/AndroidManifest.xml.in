@@ -8,7 +8,6 @@
 
     <uses-sdk
         android:minSdkVersion="@ANDROID_SDK_VERSION_MIN@"
-        android:maxSdkVersion="@ANDROID_SDK_VERSION_MAX@"
         android:targetSdkVersion="@ANDROID_SDK_VERSION_TARGET@" />
 
     <application

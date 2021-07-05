@@ -4,6 +4,13 @@ find_package( cmake-modules REQUIRED )
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
+set(
+    TTB_PROJECT_TOOLS
+    /home/tom/development/toms-toolbox/project
+)
+
+set( TTB_PROJECT_TOOLS ${TTB_PROJECT_TOOLS} PARENT_SCOPE )
+
 include( ttb_general )
 include( ttb_module_functions )
 
