@@ -9,8 +9,7 @@
 
 namespace ttb::ui
 {
-    Image::Image( Framework& framework, std::shared_ptr< Texture2D const > image )
-        : Element{ framework }
+    Image::Image( Framework& framework ) : Element{ framework }
     {
         auto vertexBuffer = ttb::VertexBuffer::create( [ & ]( auto& c ) {
             c.attribute( GL_FLOAT, 2 );  //
@@ -26,8 +25,12 @@ namespace ttb::ui
                          .attribute( "in_vertex", std::move( vertexBuffer ), 0 )
                          .finish();
 
-        framework.resourceManager().get< ttb::Program >( "ui_image" );
+        m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
+    }
 
+    Image::Image( Framework& framework, std::shared_ptr< Texture2D const > image )
+        : Image{ framework }
+    {
         this->image( std::move( image ) );
     }
 

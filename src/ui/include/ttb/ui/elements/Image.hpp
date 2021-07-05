@@ -18,6 +18,8 @@ namespace ttb::ui
     class Image : public Element
     {
     public:
+        Image( Framework& framework );
+
         Image( Framework& framework, std::shared_ptr< Texture2D const > image );
 
         ~Image();
