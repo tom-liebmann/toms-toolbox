@@ -48,6 +48,11 @@ namespace ttb
         m_clear = true;
     }
 
+    void IndexBuffer::pop_back()
+    {
+        m_data.pop_back();
+    }
+
     void IndexBuffer::flush()
     {
         if( !m_clear && m_begin == m_end )

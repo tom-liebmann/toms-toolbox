@@ -16,22 +16,25 @@ namespace ttb
 
     auto ElementBatcher::createElement() -> Handle
     {
-        auto const index = [ this ] {
+        auto const location = m_locationElements.size();
+
+        auto const index = [ & ] {
             if( m_freeElements.empty() )
             {
                 auto const index = m_elementLocations.size();
-                m_elementLocations.push_back( 0 );
+                m_elementLocations.push_back( location );
                 return index;
             }
             else
             {
                 auto const index = m_freeElements.front();
                 m_freeElements.pop_front();
+                m_elementLocations[ index ] = location;
                 return index;
             }
         }();
 
-        m_elementLocations[ index ] = m_vertexBuffer.numVertices() / m_verticesPerElement;
+        m_locationElements.push_back( index );
 
         m_vertexBuffer.resize( m_vertexBuffer.numVertices() + m_verticesPerElement );
         m_indexBuffer.resize( m_indexBuffer.numIndices() + m_indicesPerElement );
@@ -48,33 +51,39 @@ namespace ttb
     {
         if( m_batcher )
         {
-            auto const location = m_batcher->m_elementLocations[ m_index ];
-            auto const oldLastLocation = m_batcher->m_elementLocations.back();
-            m_batcher->m_elementLocations.back() = location;
+            auto const newLocation = m_batcher->m_elementLocations[ m_index ];
+            auto const oldLocation = m_batcher->m_locationElements.size() - 1;
+            auto const index = m_batcher->m_locationElements.back();
+
+            m_batcher->m_elementLocations[ index ] = newLocation;
+            m_batcher->m_locationElements[ newLocation ] = index;
+            m_batcher->m_locationElements.pop_back();
 
             // Copy indices to empty slot
             for( size_t i = 0; i < m_batcher->m_indicesPerElement; ++i )
             {
                 auto& newIndex =
-                    m_batcher->m_indexBuffer[ location * m_batcher->m_indicesPerElement + i ];
+                    m_batcher->m_indexBuffer[ newLocation * m_batcher->m_indicesPerElement + i ];
                 auto const oldIndex =
-                    m_batcher
-                        ->m_indexBuffer[ oldLastLocation * m_batcher->m_indicesPerElement + i ];
-                newIndex = oldIndex + location - oldLastLocation;
+                    m_batcher->m_indexBuffer[ oldLocation * m_batcher->m_indicesPerElement + i ];
+                newIndex = oldIndex + newLocation - oldLocation;
             }
 
             // Copy vertices to empty slot
             for( size_t i = 0; i < m_batcher->m_verticesPerElement; ++i )
             {
                 auto newVertex =
-                    m_batcher->m_vertexBuffer[ location * m_batcher->m_verticesPerElement + i ];
+                    m_batcher->m_vertexBuffer[ newLocation * m_batcher->m_verticesPerElement + i ];
                 auto oldVertex =
-                    m_batcher
-                        ->m_vertexBuffer[ oldLastLocation * m_batcher->m_verticesPerElement + i ];
+                    m_batcher->m_vertexBuffer[ oldLocation * m_batcher->m_verticesPerElement + i ];
                 newVertex.set( oldVertex );
             }
 
-            m_batcher->m_vertexBuffer.pop_back();
+            m_batcher->m_vertexBuffer.resize( m_batcher->m_vertexBuffer.numVertices() -
+                                              m_batcher->m_verticesPerElement );
+            m_batcher->m_indexBuffer.resize( m_batcher->m_indexBuffer.numIndices() -
+                                             m_batcher->m_indicesPerElement );
+
             m_batcher->m_freeElements.push_back( m_index );
 
             m_batcher = nullptr;
