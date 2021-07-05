@@ -4,15 +4,22 @@
 namespace ttb::ui
 {
     Size::Size( Framework& framework, float width, float height )
-        : WrappedElement{ framework }, m_width{ framework, width }, m_height{ framework, height }
+        : WrappedElement{ framework }, m_width{ width }, m_height{ height }
     {
-        m_width.child( &m_height );
-
-        wrappedChild( &m_height );
     }
 
     void Size::child( Element* element )
     {
-        m_height.child( element );
+        wrappedChild( element );
+    }
+
+    auto Size::fit( Element::Size const& /* size */ ) -> Element::Size
+    {
+        if( auto const child = wrappedChild(); child )
+        {
+            child->fit( { m_width, m_height } );
+        }
+
+        return Element::fit( { m_width, m_height } );
     }
 }
