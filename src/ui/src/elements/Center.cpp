@@ -62,6 +62,18 @@ namespace ttb::ui
                 }
             }
 
+            if( childSize( 0 ) > result( 0 ) )
+            {
+                result( 0 ) = childSize( 0 );
+                m_offset( 0 ) = 0.0f;
+            }
+
+            if( childSize( 1 ) > result( 1 ) )
+            {
+                result( 1 ) = childSize( 1 );
+                m_offset( 1 ) = 0.0f;
+            }
+
             return Element::fit( result );
         }
 
