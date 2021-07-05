@@ -1,8 +1,8 @@
 package toms_toolbox;
 
 import android.content.res.AssetManager;
-import toms_toolbox.MainActivity;
 import android.util.Log;
+import toms_toolbox.MainActivity;
 
 public class ApplicationLib
 {
@@ -11,7 +11,6 @@ public class ApplicationLib
     static
     {
         System.loadLibrary( "project_library" );
-        Log.d( TAG, "Library loaded" );
     }
 
     public static native void init_gl();
@@ -20,7 +19,7 @@ public class ApplicationLib
 
     public static native void step();
 
-    public static native void init_asset_mng( AssetManager assetMngr );
+    public static native void init_asset_mng( AssetManager assetMngr, String appDir );
 
     public static native void on_pointer_down( int pointerId, float x, float y );
 

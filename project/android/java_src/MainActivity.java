@@ -3,6 +3,7 @@ package toms_toolbox;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.content.Context;
 
 
 public class MainActivity extends android.app.Activity
@@ -15,6 +16,10 @@ public class MainActivity extends android.app.Activity
     protected void onCreate( final Bundle savedInstanceState )
     {
         super.onCreate( savedInstanceState );
+
+        final Context context = getApplicationContext();
+
+        ApplicationLib.init_asset_mng( context.getAssets(), context.getFilesDir().toString() );
 
         m_view = new MainView( this );
         setContentView( m_view );
