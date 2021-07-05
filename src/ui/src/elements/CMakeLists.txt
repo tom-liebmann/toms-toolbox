@@ -16,7 +16,7 @@ target_sources(
         Root.cpp
         # RowLayout.cpp
         Clickable.cpp
-        # Switch.cpp
+        Switch.cpp
         # ScrollArea.cpp
         PriorityListener.cpp
         ScaleToFit.cpp

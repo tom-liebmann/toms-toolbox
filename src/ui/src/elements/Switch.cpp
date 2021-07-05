@@ -73,24 +73,14 @@ namespace ttb::ui
         }
     }
 
-    void Switch::range( Range const& range )
-    {
-        Element::range( { { 0.0f, 0.0f }, range.extent() } );
-
-        if( m_activeChild )
-        {
-            m_activeChild->range( range );
-        }
-    }
-
-    Switch::Range Switch::fit( Range const& space )
+    auto Switch::fit( Size const& size ) -> Size
     {
         if( m_activeChild )
         {
-            return m_activeChild->fit( space );
+            return Element::fit( m_activeChild->fit( size ) );
         }
 
-        return { space.min(), space.min() };
+        return Element::fit( { 0.0f, 0.0f } );
     }
 
     void Switch::update( float timeDiff )
