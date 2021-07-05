@@ -34,19 +34,25 @@ namespace ttb::ui
         using namespace ttb::event;
         switch( event.type() )
         {
-            case type::POINTER_PRESS_START:
+            case type::POINTER_DOWN:
             {
-                auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
+                if( m_prioListener )
+                {
+                    return false;
+                }
 
-                auto const localPos = screenToLocal( ev.position() );
+                auto& ev = static_cast< ttb::events::PointerDown const& >( event );
+                auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
 
+                auto const localPos = screenToLocal( eventPos );
                 if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) && localPos( 1 ) >= 0.0f &&
                     localPos( 1 ) < size()( 1 ) )
                 {
+                    m_pointerId = ev.pointerId();
                     m_prioListener =
                         std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                    m_prioListener->addType( type::POINTER_PRESS_ABORT );
-                    m_prioListener->addType( type::POINTER_PRESS_END );
+                    m_prioListener->addType( type::POINTER_MOVE );
+                    m_prioListener->addType( type::POINTER_UP );
                     m_callback( Action::START, *this );
                     return true;
                 }
@@ -54,42 +60,61 @@ namespace ttb::ui
                 return false;
             }
 
-            case type::POINTER_PRESS_ABORT:
+            case type::POINTER_MOVE:
             {
-                if( m_prioListener )
+                if( !m_prioListener )
+                {
+                    return false;
+                }
+
+                auto& ev = static_cast< ttb::events::PointerMove const& >( event );
+
+                if( ev.pointerId() != m_pointerId )
+                {
+                    return false;
+                }
+
+                auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
+
+                auto const localPos = screenToLocal( eventPos );
+                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= size()( 0 ) || localPos( 1 ) < 0.0f ||
+                    localPos( 1 ) >= size()( 1 ) )
                 {
                     m_callback( Action::ABORT, *this );
-
                     m_prioListener.reset();
-
-                    return true;
                 }
 
                 return false;
             }
 
-            case type::POINTER_PRESS_END:
+            case type::POINTER_UP:
             {
-                auto& ev = static_cast< ttb::events::PointerPressEnd const& >( event );
-
-                if( m_prioListener )
+                if( !m_prioListener )
                 {
-                    auto const localPos = screenToLocal( ev.position() );
-
-                    if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) &&
-                        localPos( 1 ) >= 0.0f && localPos( 1 ) < size()( 1 ) )
-                    {
-                        m_callback( Action::END, *this );
-                    }
-                    else
-                    {
-                        m_callback( Action::ABORT, *this );
-                    }
-
-                    m_prioListener.reset();
-
-                    return true;
+                    return false;
                 }
+
+                auto& ev = static_cast< ttb::events::PointerUp const& >( event );
+
+                if( ev.pointerId() != m_pointerId )
+                {
+                    return false;
+                }
+
+                auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
+
+                auto const localPos = screenToLocal( eventPos );
+                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) && localPos( 1 ) >= 0.0f &&
+                    localPos( 1 ) < size()( 1 ) )
+                {
+                    m_callback( Action::END, *this );
+                }
+                else
+                {
+                    m_callback( Action::ABORT, *this );
+                }
+
+                m_prioListener.reset();
 
                 return false;
             }
