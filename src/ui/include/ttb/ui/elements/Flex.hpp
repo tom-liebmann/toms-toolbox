@@ -2,6 +2,8 @@
 
 #include <ttb/ui/Element.hpp>
 
+#include <vector>
+
 
 namespace ttb::ui
 {
@@ -42,6 +44,8 @@ namespace ttb::ui
         virtual std::string info() const override;
 
         size_t addSlot( SlotType type, float value, bool isLastChange = true );
+
+        size_t addSlot( SlotType type, float value, Element* child, bool isLastChange = true );
 
         void child( size_t slot, Element* element, bool isLastChange = true );
 

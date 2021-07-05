@@ -197,6 +197,23 @@ namespace ttb::ui
         return m_slots.size() - 1;
     }
 
+    size_t Flex::addSlot( SlotType type, float value, Element* element, bool isLastChange )
+    {
+        element->parent(
+            this,
+            [ this, slot = m_slots.size() ]( auto const& pos ) { return transform( slot, pos ); },
+            [ this, slot = m_slots.size() ]( auto const& pos ) { return transformInv( slot, pos ); } );
+
+        m_slots.push_back( Slot{ type, value, 0.0f, 0.0f, element } );
+
+        if( isLastChange )
+        {
+            changed();
+        }
+
+        return m_slots.size() - 1;
+    }
+
     void Flex::child( size_t slot, Element* element, bool isLastChange )
     {
         element->parent(
