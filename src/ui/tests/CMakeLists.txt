@@ -3,4 +3,6 @@ ttb_add_test(
     SOURCES test_elements.cpp
 )
 
-target_link_libraries( test_elements PRIVATE ttbUi )
+if( TARGET test_elements )
+    target_link_libraries( test_elements PRIVATE ttbUi )
+endif()

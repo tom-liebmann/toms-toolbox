@@ -4,13 +4,6 @@ find_package( cmake-modules REQUIRED )
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
-set(
-    TTB_PROJECT_TOOLS
-    /home/tom/development/toms-toolbox/project
-)
-
-set( TTB_PROJECT_TOOLS ${TTB_PROJECT_TOOLS} PARENT_SCOPE )
-
 include( ttb_general )
 include( ttb_module_functions )
 
@@ -21,6 +14,9 @@ request_build_type()
 if( PROJECT_HAS_PARENT )
 
     message( "Building toolbox as submodule" )
+
+    set( TTB_PROJECT_TOOLS "${CMAKE_CURRENT_SOURCE_DIR}/project" )
+    set( TTB_PROJECT_TOOLS ${TTB_PROJECT_TOOLS} PARENT_SCOPE )
 
     set( BUILD_LIBRARY_TYPE "STATIC" )
 
@@ -79,8 +75,6 @@ if( DOXYGEN_FOUND )
     )
 
 endif( DOXYGEN_FOUND )
-
-enable_testing()
 
 set( EXPORT_TARGETS "" )
 set( EXPORT_DEPENDENCIES "" )
