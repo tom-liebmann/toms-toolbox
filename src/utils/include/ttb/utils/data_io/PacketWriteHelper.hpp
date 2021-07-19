@@ -20,6 +20,9 @@ namespace ttb
 
         void write( ttb::Packet const& packet );
 
+        template < typename TType >
+        void write( TType const& value );
+
         size_t written() const;
 
     private:
@@ -86,6 +89,12 @@ namespace ttb
         m_written += written;
         m_size -= written;
         m_offset = 0;
+    }
+
+    template < typename TType >
+    inline void PacketWriteHelper::write( TType const& value )
+    {
+        write( &value, sizeof( TType ) );
     }
 
     inline size_t PacketWriteHelper::written() const
