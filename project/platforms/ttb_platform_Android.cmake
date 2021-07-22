@@ -111,9 +111,14 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
             android_dex
             project_library_arm64-v8a_copy
         COMMAND ${ANDROID_AAPT2}
+            compile --dir "/home/tom/development/nonogram_solver/app/res"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+        COMMAND ${ANDROID_AAPT2}
             link
+            "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
             -I "${ANDROID_JAR}"
             --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
+            -A "/home/tom/development/nonogram_solver/app/assets"
             -v
             -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
         COMMAND zip
