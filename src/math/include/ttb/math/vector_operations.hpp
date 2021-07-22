@@ -72,9 +72,6 @@ namespace ttb
     template < typename TType1, typename TType2, size_t TDim >
     ttb::Vector< TType1, TDim >& operator/=( ttb::Vector< TType1, TDim >& lhs, TType2 rhs );
 
-    template < class TType, size_t TDim >
-    std::ostream& operator<<( std::ostream& stream, ttb::Vector< TType, TDim > const& tensor );
-
     template < typename TType1, typename TType2, size_t TDim >
     auto min( Vector< TType1, TDim > const& lhs, Vector< TType2, TDim > const& rhs );
 
@@ -101,6 +98,9 @@ namespace ttb
 
     template < typename TType, size_t TDim >
     Vector< TType, TDim - 1 > dehomogenize( Vector< TType, TDim > const& vec );
+
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Vector< TType, TDim > const& vec );
 }
 
 
@@ -259,23 +259,6 @@ namespace ttb
         return lhs;
     }
 
-    template < class TType, size_t TDim >
-    std::ostream& operator<<( std::ostream& stream, ttb::Vector< TType, TDim > const& tensor )
-    {
-        stream << '(';
-        for( size_t i = 0; i < tensor.size; ++i )
-        {
-            if( i != 0 )
-            {
-                stream << ", ";
-            }
-            stream << tensor[ i ];
-        }
-        stream << ')';
-
-        return stream;
-    }
-
     template < typename TType1, typename TType2, size_t TDim >
     auto min( Vector< TType1, TDim > const& lhs, Vector< TType2, TDim > const& rhs )
     {
@@ -388,5 +371,22 @@ namespace ttb
         }
 
         return result;
+    }
+
+    template < typename TType, size_t TDim >
+    std::ostream& operator<<( std::ostream& stream, Vector< TType, TDim > const& vec )
+    {
+        stream << '(';
+        for( size_t i = 0; i < vec.size; ++i )
+        {
+            if( i != 0 )
+            {
+                stream << ", ";
+            }
+            stream << vec[ i ];
+        }
+        stream << ')';
+
+        return stream;
     }
 }

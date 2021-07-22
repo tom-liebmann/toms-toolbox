@@ -30,22 +30,18 @@ namespace ttb::ui
         changed();
     }
 
-    Element::Range Label::fit( Range const& space )
+    auto Label::fit( Size const& /* size */ ) -> Size
     {
         auto const fontRange = m_font->textDimensions( m_size, m_text );
-        return { space.min(), space.min() + fontRange.extent() };
+        return Element::fit( fontRange.extent() );
     }
 
     void Label::render( ttb::State& state ) const
     {
         glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
         state.with( *m_shader, [ & ] {
-            auto const transform = ttb::mat::translation( Element::range().min() );
-
-            auto const u1 =
-                state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( transform );
-
             auto const u2 = state.uniform< int >( "u_texture" ).push( 0 );
 
             auto const u3 = state.uniform< ttb::Vector< float, 3 > >( "u_color" )

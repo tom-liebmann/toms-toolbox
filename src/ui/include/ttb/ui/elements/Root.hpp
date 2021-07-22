@@ -19,17 +19,13 @@ namespace ttb::ui
     class Root : public Element
     {
     public:
-        Root( Framework& framework, Range const& range );
+        Root( Framework& framework, Size const& size );
 
         ~Root();
 
         void child( Element* child );
 
         virtual void destroy() override;
-
-        using Element::range;
-
-        virtual void range( Range const& range ) override;
 
         virtual void update( float timeDiff ) override;
 

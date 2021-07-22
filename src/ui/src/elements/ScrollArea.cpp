@@ -103,7 +103,9 @@ namespace ttb::ui
             {
                 auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
 
-                if( !range().contains( screenToParent( ev.position() ) ) )
+                auto const localPos = screenToLocal( ev.position() );
+                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= 1.0f || localPos( 1 ) < 0.0f ||
+                    localPos( 1 ) >= 1.0f )
                 {
                     return false;
                 }
@@ -115,7 +117,9 @@ namespace ttb::ui
             {
                 auto& ev = static_cast< ttb::events::DragStart const& >( event );
 
-                if( !range().contains( screenToParent( ev.position() ) ) )
+                auto const localPos = screenToLocal( ev.position() );
+                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= 1.0f || localPos( 1 ) < 0.0f ||
+                    localPos( 1 ) >= 1.0f )
                 {
                     return false;
                 }

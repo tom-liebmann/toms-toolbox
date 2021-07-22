@@ -2,6 +2,8 @@
 
 #include <ttb/ui/Element.hpp>
 
+#include <vector>
+
 
 namespace ttb::ui
 {
@@ -13,6 +15,7 @@ namespace ttb::ui
             FIXED,
             FLEX,
             FIT,
+            FIT_INFINITY,
         };
 
         enum class Direction
@@ -23,11 +26,8 @@ namespace ttb::ui
 
         Flex( Framework& framework, Direction direction );
 
-        //! @copydoc Element::range(Range const&)
-        virtual void range( Range const& range ) override;
-
-        //! @copydoc Element::fit(Range const&)
-        virtual Range fit( Range const& space ) override;
+        //! @copydoc Element::fit(Size const&)
+        virtual Size fit( Size const& space ) override;
 
         //! @copydoc Element::update(float)
         virtual void update( float timeDiff ) override;
@@ -41,19 +41,29 @@ namespace ttb::ui
         //! @copydoc Element::onChildChanged(Element&)
         virtual void onChildChanged( Element& child ) override;
 
+        virtual std::string info() const override;
+
         size_t addSlot( SlotType type, float value, bool isLastChange = true );
+
+        size_t addSlot( SlotType type, float value, Element* child, bool isLastChange = true );
 
         void child( size_t slot, Element* element, bool isLastChange = true );
 
         void slotValue( size_t slot, float value, bool isLastChange = true );
 
     private:
+        Position transform( size_t slot, Position const& pos ) const;
+
+        Position transformInv( size_t slot, Position const& pos ) const;
+
         size_t dirDim() const;
 
         struct Slot
         {
             SlotType type;
             float value;
+            float offset{ 0.0f };
+            float width{ 0.0f };
             Element* child;
         };
 

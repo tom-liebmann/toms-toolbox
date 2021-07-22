@@ -36,6 +36,13 @@ namespace ttb
         m_clear = true;
     }
 
+    void IndexBuffer::clear()
+    {
+        m_data.clear();
+        m_begin = 0;
+        m_end = 0;
+    }
+
     auto IndexBuffer::operator[]( size_t index ) -> Index&
     {
         changed( index, index + 1 );
@@ -46,6 +53,11 @@ namespace ttb
     {
         m_data.push_back( value );
         m_clear = true;
+    }
+
+    void IndexBuffer::pop_back()
+    {
+        m_data.pop_back();
     }
 
     void IndexBuffer::flush()

@@ -17,13 +17,13 @@ namespace ttb
 
         template < typename... TArgs,
                    std::enable_if_t< TDim == 1 && TDim == sizeof...( TArgs ), int > = 0 >
-        explicit Vector( TArgs... values ) : m_values{ values... }
+        explicit Vector( TArgs... values ) : m_values{ static_cast< TType >( values )... }
         {
         }
 
         template < typename... TArgs,
                    std::enable_if_t< 1 < TDim && TDim == sizeof...( TArgs ), int > = 1 >
-        Vector( TArgs... values ) : m_values{ values... }
+        Vector( TArgs... values ) : m_values{ static_cast< TType >( values )... }
         {
         }
 

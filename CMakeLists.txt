@@ -15,6 +15,9 @@ if( PROJECT_HAS_PARENT )
 
     message( "Building toolbox as submodule" )
 
+    set( TTB_PROJECT_TOOLS "${CMAKE_CURRENT_SOURCE_DIR}/project" )
+    set( TTB_PROJECT_TOOLS ${TTB_PROJECT_TOOLS} PARENT_SCOPE )
+
     set( BUILD_LIBRARY_TYPE "STATIC" )
 
 else()
@@ -72,8 +75,6 @@ if( DOXYGEN_FOUND )
     )
 
 endif( DOXYGEN_FOUND )
-
-enable_testing()
 
 set( EXPORT_TARGETS "" )
 set( EXPORT_DEPENDENCIES "" )

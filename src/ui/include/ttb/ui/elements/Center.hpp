@@ -26,14 +26,21 @@ namespace ttb::ui
 
         void child( Element* element );
 
-        /// @copydoc WrappedElement::range( Range const& )
-        virtual void range( Range const& range ) override;
+        /// @copydoc WrappedElement::fit( Size const& )
+        virtual Size fit( Size const& size ) override;
 
-        /// @copydoc WrappedElement::fit( Range const& )
-        virtual Range fit( Range const& space ) override;
+        virtual void render( ttb::State& state ) const override;
+
+        virtual std::string info() const override;
 
     private:
+        Position transform( Position const& pos ) const;
+
+        Position transformInv( Position const& pos ) const;
+
         HAlignment m_hAlign;
         VAlignment m_vAlign;
+
+        Position m_offset{ 0.0f, 0.0f };
     };
 }

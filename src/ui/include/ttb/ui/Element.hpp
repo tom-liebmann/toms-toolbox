@@ -17,9 +17,9 @@ namespace ttb::ui
     class Element : public EventListener
     {
     public:
-        using Range = ttb::Range< float, 2 >;
         using Size = ttb::Vector< float, 2 >;
-        using Offset = ttb::Vector< float, 2 >;
+        using Position = ttb::Vector< float, 2 >;
+        using Transform = std::function< Position( Position const& ) >;
 
         Element( Framework& framework );
 
@@ -27,24 +27,9 @@ namespace ttb::ui
 
         virtual void destroy();
 
-        Range const& range() const;
+        Size const& size() const;
 
-        /**
-         * Sets the range of the element relative to the parent's position.
-         *
-         * @param range Range of the element within the parent space
-         */
-        virtual void range( Range const& range );
-
-        /**
-         * Returns the space the element takes within the provided area.
-         *
-         * Default behavior is that the element takes all the available space.
-         *
-         * @param space Space available to the element
-         * @returns Space taken by the element
-         */
-        virtual Range fit( Range const& space );
+        virtual Size fit( Size const& space );
 
         virtual void render( ttb::State& state ) const = 0;
 
@@ -52,17 +37,17 @@ namespace ttb::ui
 
         virtual bool onEvent( Event const& event ) override;
 
+        virtual std::string info() const;
+
         Element* parent() const;
 
-        void parent( Element* parent );
+        void parent( Element* parent, Transform transform = {}, Transform transformInv = {} );
 
         virtual void onChildChanged( Element& child );
 
-        ttb::Vector< float, 2 > screenToParent( ttb::Vector< float, 2 > const& vec ) const;
+        ttb::Vector< float, 2 > localToScreen( ttb::Vector< float, 2 > const& vec ) const;
 
         ttb::Vector< float, 2 > screenToLocal( ttb::Vector< float, 2 > const& vec ) const;
-
-        ttb::Vector< float, 2 > localToScreen( ttb::Vector< float, 2 > const& vec ) const;
 
     protected:
         void changed();
@@ -72,8 +57,13 @@ namespace ttb::ui
     private:
         Element* m_parent{ nullptr };
 
-        //! The range of the element relative to the parents root range.
-        Range m_range{ { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+        Size m_size{ 0.0f, 0.0f };
+
+        /// Transforms local coordinates to parent coordinates
+        Transform m_transform;
+
+        /// Transforms parent coordinates to local coordinates
+        Transform m_transformInv;
 
         Framework& m_framework;
     };

@@ -14,7 +14,7 @@ namespace ttb
     class IndexBuffer
     {
     public:
-        using Index = GLuint;
+        using Index = GLushort;
 
         static std::shared_ptr< IndexBuffer > create();
 
@@ -26,9 +26,13 @@ namespace ttb
 
         void resize( size_t numIndices );
 
+        void clear();
+
         Index& operator[]( size_t index );
 
         void push_back( Index value );
+
+        void pop_back();
 
         template < typename... TType >
         void push_back( Index value, TType... rest );

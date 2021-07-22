@@ -1,15 +1,8 @@
 #include <ttb/ui/utils/QuadRenderer.hpp>
 
 #include <ttb/core/gl.hpp>
+#include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/shader.hpp>
-
-#include <limits>
-
-
-namespace
-{
-    constexpr uint32_t k_restartIndex = std::numeric_limits< uint32_t >::max();
-}
 
 
 namespace ttb::ui
@@ -26,7 +19,7 @@ namespace ttb::ui
 
         m_indexBuffer = ttb::IndexBuffer::create();
 
-        m_geometry = ttb::Geometry::create( GL_TRIANGLE_FAN )
+        m_geometry = ttb::Geometry::create( GL_TRIANGLES )
                          .attribute( "in_vertex", m_vertexBuffer, 0 )
                          .attribute( "in_color", m_vertexBuffer, 1 )
                          .attribute( "in_coord", m_vertexBuffer, 2 )
@@ -36,7 +29,6 @@ namespace ttb::ui
 
     void QuadRenderer::draw( ttb::State& state ) const
     {
-        glEnable( GL_PRIMITIVE_RESTART_FIXED_INDEX );
         glEnable( GL_BLEND );
 
         state.with( *m_program, [ & ] {
@@ -44,7 +36,6 @@ namespace ttb::ui
         } );
 
         glDisable( GL_BLEND );
-        glDisable( GL_PRIMITIVE_RESTART_FIXED_INDEX );
     }
 
     auto QuadRenderer::add() -> Handle
@@ -65,27 +56,31 @@ namespace ttb::ui
         }
 
         // clang-format off
-        /*
-         *  0  1  2  3
-         *  4  5  6  7
-         *  8  9 10 11
-         * 12 13 14 15
-         */
-         static size_t const indices[] = { 5,           4,  0,  1,     2,  6,  k_restartIndex, 6,  2,  3,
-                                           7,          11, 10, k_restartIndex, 10, 11, 15,    14, 13, 9,
-                                           k_restartIndex,  9,  13, 12,    8,  4,  5,     6,  10, k_restartIndex };
+    /*
+     *  0  1  2  3
+     *  4  5  6  7
+     *  8  9 10 11
+     * 12 13 14 15
+     */
+     static size_t const indices[] = {
+         // corners
+         5, 4, 0, 5, 0, 1,
+         6, 2, 3, 6, 3, 7,
+         10, 11, 15, 10, 15, 14,
+         9, 13, 12, 9, 12, 8,
+         // sides
+         5, 1, 2, 5, 2, 6,
+         6, 7, 11, 6, 11, 10,
+         10, 14, 13, 10, 13, 9,
+         9, 8, 4, 9, 4, 5,
+         // center
+         5, 6, 10, 5, 10, 9
+     };
         // clang-format on
 
         for( size_t i = 0; i < sizeof( indices ) / sizeof( size_t ); ++i )
         {
-            if( k_restartIndex == indices[ i ] )
-            {
-                m_indexBuffer->push_back( k_restartIndex );
-            }
-            else
-            {
-                m_indexBuffer->push_back( index * 16 + indices[ i ] );
-            }
+            m_indexBuffer->push_back( index * 16 + indices[ i ] );
         }
 
         m_quads.push_back( Quad{ { 0.0f, 0.0f }, { 0.0f, 0.0f }, 0.0f } );

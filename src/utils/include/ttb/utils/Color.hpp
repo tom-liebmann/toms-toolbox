@@ -63,6 +63,8 @@ namespace ttb
 
         constexpr float l() const;
 
+        constexpr ColorHsl lighten( float value ) const;
+
     private:
         float m_h{ 0.0f };
         float m_s{ 0.0f };
@@ -241,6 +243,11 @@ namespace ttb
     inline constexpr float ColorHsl::l() const
     {
         return m_l;
+    }
+
+    inline constexpr ColorHsl ColorHsl::lighten( float value ) const
+    {
+        return { m_h, m_s, ttb::clamp( m_l + value, 0.0f, 1.0f ) };
     }
 
 

@@ -3,9 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="@ANDROID_PACKAGE_NAME@">
 
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <uses-sdk
         android:minSdkVersion="@ANDROID_SDK_VERSION_MIN@"
-        android:maxSdkVersion="@ANDROID_SDK_VERSION_MAX@"
         android:targetSdkVersion="@ANDROID_SDK_VERSION_TARGET@" />
 
     <application

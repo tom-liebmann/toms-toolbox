@@ -3,4 +3,5 @@ target_sources(
     PRIVATE
         ProgramLoader.cpp
         TextureLoader.cpp
+        FontLoader.cpp
 )

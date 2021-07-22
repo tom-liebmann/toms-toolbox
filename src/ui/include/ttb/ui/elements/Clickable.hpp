@@ -38,6 +38,7 @@ namespace ttb::ui
 
         ClickCallback m_callback;
 
+        int m_pointerId{ 0 };
         std::unique_ptr< PriorityListener > m_prioListener;
     };
 }

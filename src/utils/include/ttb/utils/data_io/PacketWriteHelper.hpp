@@ -3,6 +3,7 @@
 #include "Packet.hpp"
 #include "Writer.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -18,6 +19,9 @@ namespace ttb
         void write( void const* data, size_t dataSize );
 
         void write( ttb::Packet const& packet );
+
+        template < typename TType >
+        void write( TType const& value );
 
         size_t written() const;
 
@@ -85,6 +89,12 @@ namespace ttb
         m_written += written;
         m_size -= written;
         m_offset = 0;
+    }
+
+    template < typename TType >
+    inline void PacketWriteHelper::write( TType const& value )
+    {
+        write( &value, sizeof( TType ) );
     }
 
     inline size_t PacketWriteHelper::written() const

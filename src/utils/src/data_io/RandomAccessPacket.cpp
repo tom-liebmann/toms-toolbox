@@ -3,6 +3,7 @@
 #include <ttb/utils/data_io/writers/BufferWriter.hpp>
 
 #include <cmath>
+#include <algorithm>
 
 
 namespace ttb

@@ -7,7 +7,7 @@
 
 namespace ttb::ui
 {
-    Root::Root( Framework& framework, Range const& range ) : Element{ framework }
+    Root::Root( Framework& framework, Size const& size ) : Element{ framework }
     {
         auto& eventMngr = framework.eventManager();
 
@@ -22,7 +22,7 @@ namespace ttb::ui
         eventMngr.addListener( type::DRAG_MOVE, prio::ROOT, *this );
         eventMngr.addListener( type::ZOOM, prio::ROOT, *this );
 
-        Element::range( range );
+        Element::fit( size );
     }
 
     Root::~Root()
@@ -42,6 +42,14 @@ namespace ttb::ui
         eventMngr.removeListener( type::ZOOM, *this );
     }
 
+    void Root::destroy()
+    {
+        if( m_child )
+        {
+            m_child->destroy();
+        }
+    }
+
     void Root::child( Element* child )
     {
         if( m_child )
@@ -50,21 +58,11 @@ namespace ttb::ui
         }
 
         m_child = child;
-        m_child->parent( this );
 
         if( m_child )
         {
-            m_child->range( m_child->fit( range() ) );
-        }
-    }
-
-    void Root::range( Range const& range )
-    {
-        Element::range( range );
-
-        if( m_child )
-        {
-            m_child->range( m_child->fit( range ) );
+            m_child->parent( this );
+            m_child->fit( size() );
         }
     }
 
@@ -100,6 +98,6 @@ namespace ttb::ui
 
     void Root::onChildChanged( Element& /* child */ )
     {
-        m_child->range( m_child->fit( range() ) );
+        m_child->fit( size() );
     }
 }

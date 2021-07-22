@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cmath>
+#include <algorithm>
 
 
 namespace ttb
@@ -10,6 +11,12 @@ namespace ttb
 
     template < typename TType >
     constexpr TType fmod( TType numer, TType denom );
+
+    template < typename TType >
+    constexpr auto clamp( TType value, TType lowerBound, TType upperBound );
+
+    template < typename TType1, typename TType2 >
+    constexpr auto mix( TType1 min, TType1 max, TType2 value );
 }
 
 
@@ -30,5 +37,19 @@ namespace ttb
             result += denom;
         }
         return std::copysign( result, numer );
+    }
+
+    template < typename TType >
+    inline constexpr auto clamp( TType value, TType minValue, TType maxValue )
+    {
+        using std::max;
+        using std::min;
+        return min( maxValue, max( minValue, value ) );
+    }
+
+    template < typename TType1, typename TType2 >
+    inline constexpr auto mix( TType1 min, TType1 max, TType2 value )
+    {
+        return ( 1 - value ) * min + value * max;
     }
 }

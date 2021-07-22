@@ -7,6 +7,7 @@
 namespace
 {
     static AAssetManager* android_asset_manager = nullptr;
+    static std::string s_appDir;
 }
 
 
@@ -64,6 +65,11 @@ namespace ttb::resources
         return data;
     }
 
+    std::string const& AssetManager::appDir() const
+    {
+        return s_appDir;
+    }
+
     AssetManager::AssetManager() = default;
 }
 
@@ -72,9 +78,12 @@ extern "C"
 {
     JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_init_1asset_1mng( JNIEnv* env,
                                                                                jobject /* obj */,
-                                                                               jobject assetMgr )
+                                                                               jobject assetMgr,
+                                                                               jstring appDir )
     {
         auto android_java_asset_manager = env->NewGlobalRef( assetMgr );
+
+        s_appDir = env->GetStringUTFChars( appDir, NULL );
 
         android_asset_manager = AAssetManager_fromJava( env, android_java_asset_manager );
     }

@@ -14,9 +14,10 @@ target_sources(
         Ratio.cpp
         Rectangle.cpp
         Root.cpp
-        RowLayout.cpp
+        # RowLayout.cpp
         Clickable.cpp
         Switch.cpp
-        ScrollArea.cpp
+        # ScrollArea.cpp
         PriorityListener.cpp
+        ScaleToFit.cpp
 )

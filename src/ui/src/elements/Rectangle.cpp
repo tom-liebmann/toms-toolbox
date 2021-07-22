@@ -22,6 +22,7 @@ namespace ttb::ui
         vertexBuffer->push_back().set( 0, 0.0f, 1.0f );
         vertexBuffer->push_back().set( 0, 1.0f, 0.0f );
         vertexBuffer->push_back().set( 0, 1.0f, 1.0f );
+        vertexBuffer->flush();
 
         m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
                          .attribute( "in_vertex", std::move( vertexBuffer ) )
@@ -30,17 +31,16 @@ namespace ttb::ui
 
     Rectangle::~Rectangle() = default;
 
+    void Rectangle::color( ColorRgb const& value )
+    {
+        m_color = value;
+    }
+
     void Rectangle::render( ttb::State& state ) const
     {
-        auto const innerRange = Range{
-            { 0.0f, 0.0f },
-            { 1.0f, 1.0f },
-        };
+        auto const uniformHandle1 = state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" )
+                                        .push( ttb::mat::scale( size() ) );
 
-        auto const transform = ttb::mat::transform( innerRange, range() );
-
-        auto const uniformHandle1 =
-            state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( transform );
         auto const uniformHandle2 = state.uniform< ttb::Vector< float, 3 > >( "u_color" )
                                         .push( { m_color.rF(), m_color.gF(), m_color.bF() } );
 

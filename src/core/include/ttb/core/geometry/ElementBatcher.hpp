@@ -27,6 +27,9 @@ namespace ttb
         /** Maps each element index to the location in the packed geometry buffers. */
         std::vector< size_t > m_elementLocations;
 
+        /** Maps each location in the packed buffers to an element. */
+        std::vector< size_t > m_locationElements;
+
         std::list< size_t > m_freeElements;
 
         size_t m_verticesPerElement;

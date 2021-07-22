@@ -10,33 +10,30 @@ namespace ttb::ui
     {
     }
 
+    void Ratio::ratio( float ratio )
+    {
+        m_ratio = ratio;
+        changed();
+    }
+
     void Ratio::child( Element* element )
     {
         wrappedChild( element );
     }
 
-    auto Ratio::fit( Range const& space ) -> Range
+    auto Ratio::fit( Size const& size ) -> Size
     {
         if( auto const child = wrappedChild(); child )
         {
-            auto const ratio = space.extent( 0 ) / space.extent( 1 );
+            auto const ratio = size( 0 ) / size( 1 );
 
-            auto const subSpace = [ & ]() -> Range {
-                if( ratio > m_ratio )
-                {
-                    return { space.min(),
-                             { space.min( 0 ) + space.extent( 1 ) * m_ratio, space.max( 1 ) } };
-                }
-                else
-                {
-                    return { space.min(),
-                             { space.max( 0 ), space.min( 1 ) + space.extent( 0 ) / m_ratio } };
-                }
-            }();
+            auto const childSize =
+                child->fit( ratio > m_ratio ? Size{ size( 1 ) * m_ratio, size( 1 ) }
+                                            : Size{ size( 0 ), size( 0 ) / m_ratio } );
 
-            return child->fit( subSpace );
+            return Element::fit( childSize );
         }
 
-        return space;
+        return Element::fit( { 0.0f, 0.0f } );
     }
 }

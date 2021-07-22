@@ -2,6 +2,8 @@
 
 #include <ttb/ui/Element.hpp>
 
+#include <vector>
+
 
 namespace ttb::ui
 {
@@ -13,23 +15,23 @@ namespace ttb::ui
         //! @copydoc Element::destroy()
         virtual void destroy() override;
 
-        //! @copydoc Element::range(Range const&)
-        virtual void range( Range const& range ) override;
+        //! @copydoc Element::fit( Size const& )
+        virtual Size fit( Size const& size ) override;
 
-        //! @copydoc Element::fit(Range const&)
-        virtual Range fit( Range const& space ) override;
-
-        //! @copydoc Element::update(float)
+        //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
 
-        //! @copydoc Element::render(ttb::State&)
+        //! @copydoc Element::render( ttb::State& )
         virtual void render( ttb::State& state ) const override;
 
-        //! @copydoc Element::onEvent(Event const&)
+        //! @copydoc Element::onEvent( Event const& )
         virtual bool onEvent( Event const& event ) override;
 
     protected:
-        void add( Element* child, bool considerSize = true );
+        void add( Element* child,
+                  bool considerSize = true,
+                  Transform transform = {},
+                  Transform transformInv = {} );
 
     private:
         struct Slot
@@ -39,7 +41,5 @@ namespace ttb::ui
         };
 
         std::vector< Slot > m_children;
-
-        ttb::Matrix< float, 3, 3 > m_transform;
     };
 }

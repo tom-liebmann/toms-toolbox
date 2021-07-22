@@ -14,8 +14,10 @@ namespace ttb::ui
 
         void child( Element* element );
 
+        virtual Element::Size fit( Element::Size const& size ) override;
+
     private:
-        Width m_width;
-        Height m_height;
+        float m_width;
+        float m_height;
     };
 }

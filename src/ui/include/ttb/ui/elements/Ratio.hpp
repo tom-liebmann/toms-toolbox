@@ -8,11 +8,13 @@ namespace ttb::ui
     class Ratio : public WrappedElement
     {
     public:
-        Ratio( Framework& framework, float ratio );
+        Ratio( Framework& framework, float ratio = 1.0f );
 
         void child( Element* element );
 
-        virtual Range fit( Range const& space ) override;
+        void ratio( float ratio );
+
+        virtual Size fit( Size const& size ) override;
 
     private:
         float m_ratio;

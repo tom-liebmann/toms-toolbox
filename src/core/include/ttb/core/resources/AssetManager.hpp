@@ -15,6 +15,8 @@ namespace ttb::resources
 
         std::vector< uint8_t > loadData( std::string const& filename );
 
+        std::string const& appDir() const;
+
     private:
         AssetManager();
     };

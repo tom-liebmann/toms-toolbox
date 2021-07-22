@@ -1,6 +1,7 @@
 #include <ttb/core/window.hpp>
 #include <ttb/project/Application.hpp>
 
+#include <chrono>
 #include <cstdlib>
 
 
@@ -35,11 +36,19 @@ namespace ttb
 
         app.init();
 
+        auto lastTime = std::chrono::steady_clock::now();
+
         while( !app.stopped() )
         {
             window.pollEvents();
 
-            app.update( 1.0f );
+            auto const now = std::chrono::steady_clock::now();
+            auto const frameTime =
+                std::chrono::duration_cast< std::chrono::duration< float > >( now - lastTime )
+                    .count();
+            lastTime = now;
+
+            app.update( frameTime );
 
             app.draw();
         }

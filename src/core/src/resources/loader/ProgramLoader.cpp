@@ -82,9 +82,11 @@ namespace ttb::resources
                     if( cmd == "version" )
                     {
 #if defined( PLATFORM_LINUX )
-                        line = "#version 330";
+                        // line = "#version 330";
+                        line = "#version 100";
 #elif defined( PLATFORM_ANDROID )
-                        line = "#version 320 es";
+                        // line = "#version 320 es";
+                        line = "#version 100";
 #elif defined( PLATFORM_BROWSER )
                         line = "#version 300 es";
 #endif

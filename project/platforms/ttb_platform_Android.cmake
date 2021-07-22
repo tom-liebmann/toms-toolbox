@@ -1,6 +1,8 @@
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 
+set( ANDROID_NDK_VERSION "22.1.7171670" )
+
 function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DIR )
 
     include( ExternalProject )
@@ -16,8 +18,6 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
         endif()
     endforeach()
 
-    message( STATUS "User args: ${_USER_ARGS}" )
-
     ExternalProject_Add(
         "${LIBRARY_NAME}"
         PREFIX "${LIBRARY_NAME}"
@@ -25,13 +25,14 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
         BUILD_ALWAYS TRUE
         BUILD_BYPRODUCTS "${OUTPUT_FILE}"
         CMAKE_ARGS
-            -DANDROID_PLATFORM=android-30
+            -DANDROID_PLATFORM=android-${ANDROID_SDK_VERSION_TARGET}
             -DANDROID_ABI=${ANDROID_ABI}
-            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK}/ndk/22.1.7171670/build/cmake/android.toolchain.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake
             -DBUILD_PLATFORM=Android
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
+            -Dcmake-modules_DIR=${cmake-modules_DIR}
             ${_USER_ARGS}
     )
 
@@ -50,7 +51,6 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
 
     set( ANDROID_PACKAGE_NAME "" CACHE STRING "Name of the android package" )
     set( ANDROID_SDK_VERSION_MIN "" CACHE STRING "Lowest supported SDK version" )
-    set( ANDROID_SDK_VERSION_MAX "" CACHE STRING "Highest supported SDK version" )
     set( ANDROID_SDK_VERSION_TARGET "" CACHE STRING "SDK version target" )
 
     if( NOT ANDROID_PACKAGE_NAME )
@@ -70,11 +70,12 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
     )
 
     set( ANDROID_SDK "/home/tom/libraries/android_sdk" )
-    set( ANDROID_JAR "${ANDROID_SDK}/platforms/android-30/android.jar" )
+    set( ANDROID_JAR "${ANDROID_SDK}/platforms/android-${ANDROID_SDK_VERSION_TARGET}/android.jar" )
     add_custom_target(
         android_java_sources
         COMMAND javac
             -classpath "${ANDROID_JAR}"
+            -Xlint:deprecation
             -source 1.8
             -target 1.8
             -d "${CMAKE_CURRENT_BINARY_DIR}/android/java_sources"
@@ -100,6 +101,7 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
     )
 
     _ttb_create_android_target( "arm64-v8a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
+    # _ttb_create_android_target( "armeabi-v7a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
 
     set( ANDROID_AAPT2 "${ANDROID_SDK}/build-tools/30.0.3/aapt2" )
     set( ANDROID_ZIPALIGN "${ANDROID_SDK}/build-tools/30.0.3/zipalign" )
@@ -109,9 +111,14 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
             android_dex
             project_library_arm64-v8a_copy
         COMMAND ${ANDROID_AAPT2}
+            compile --dir "/home/tom/development/nonogram_solver/app/res"
+            -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+        COMMAND ${ANDROID_AAPT2}
             link
+            "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
             -I "${ANDROID_JAR}"
             --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
+            -A "/home/tom/development/nonogram_solver/app/assets"
             -v
             -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
         COMMAND zip

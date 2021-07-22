@@ -29,7 +29,8 @@ namespace ttb::ui
 
         void color( ColorRgb const& value );
 
-        virtual void range( Range const& range ) override;
+        virtual Size fit( Size const& size ) override;
+
         virtual void render( ttb::State& state ) const override;
 
     private:

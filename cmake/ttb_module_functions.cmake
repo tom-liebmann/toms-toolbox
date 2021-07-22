@@ -1,27 +1,34 @@
 function( ttb_add_test )
 
-    cmake_parse_arguments(
-        ADD_TEST
-        ""
-        "TARGET_NAME"
-        "SOURCES"
-        ${ARGN}
-    )
+    set( BUILD_TESTS "OFF" CACHE BOOL "Whether to build tests" )
 
-    # Create test target
-    add_executable(
-        ${ADD_TEST_TARGET_NAME}
-        ${ADD_TEST_SOURCES}
-    )
+    if( ${BUILD_TESTS} )
+        enable_testing()
 
-    # Import and link catch2 test framework to target
-    find_package( catch2 REQUIRED )
-    target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE catch2 )
+        cmake_parse_arguments(
+            ADD_TEST
+            ""
+            "TARGET_NAME"
+            "SOURCES"
+            ${ARGN}
+        )
 
-    # Propagate test using the catch cmake tools
-    include( Catch )
-    include( CTest )
-    catch_discover_tests( ${ADD_TEST_TARGET_NAME} )
+        # Create test target
+        add_executable(
+            ${ADD_TEST_TARGET_NAME}
+            EXCLUDE_FROM_ALL
+            ${ADD_TEST_SOURCES}
+        )
+
+        # Import and link catch2 test framework to target
+        find_package( catch2 REQUIRED )
+        target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE catch2 )
+
+        # Propagate test using the catch cmake tools
+        include( Catch )
+        include( CTest )
+        catch_discover_tests( ${ADD_TEST_TARGET_NAME} )
+    endif()
 
 endfunction()
 

@@ -19,9 +19,7 @@ namespace ttb::ui
         void activate( Index index );
 
         virtual void destroy() override;
-        using Element::range;
-        virtual void range( Range const& range ) override;
-        virtual Range fit( Range const& space ) override;
+        virtual Size fit( Size const& size ) override;
         virtual void update( float timeDiff ) override;
         virtual void render( ttb::State& state ) const override;
         virtual bool onEvent( Event const& event ) override;
