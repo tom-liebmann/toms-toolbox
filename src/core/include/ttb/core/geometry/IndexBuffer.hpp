@@ -26,6 +26,8 @@ namespace ttb
 
         void resize( size_t numIndices );
 
+        void clear();
+
         Index& operator[]( size_t index );
 
         void push_back( Index value );
