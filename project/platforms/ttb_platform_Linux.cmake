@@ -1,11 +1,10 @@
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 
-macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
+macro( _ttb_init_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
 
     cmake_policy( SET CMP0076 NEW )
 
-    # TODO: pass in as parameter
-    set( PROJECT_NAME "linux_project" )
+    set( PROJECT_NAME ${PROJECT_NAME} )
 
     set( TARGET_NAME ${PROJECT_NAME} )
 

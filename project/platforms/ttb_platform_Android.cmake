@@ -1,7 +1,70 @@
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 
-set( ANDROID_NDK_VERSION "22.1.7171670" )
+macro( _ttb_android_request_sdk )
+
+    set( ANDROID_SDK_DIR "" CACHE PATH "Path to the android sdk root" )
+
+    if( NOT ANDROID_SDK_DIR )
+        message( FATAL_ERROR "ANDROID_SDK_DIR missing" )
+    endif()
+
+endmacro()
+
+macro( _ttb_android_request_sdk_version )
+
+    _ttb_android_request_sdk()
+
+    file( GLOB ANDROID_PLATFORM_VERSIONS RELATIVE "${ANDROID_SDK_DIR}/platforms" "${ANDROID_SDK_DIR}/platforms/*" )
+
+    if( NOT ANDROID_PLATFORM_VERSIONS )
+        message( FATAL_ERROR "No installed SDK versions found")
+    endif()
+
+    set( ANDROID_SDK_VERSIONS "" )
+    foreach( ANDROID_PLATFORM_VERSION ${ANDROID_PLATFORM_VERSIONS} )
+        string( REGEX REPLACE "^android-([0-9]+)$" "\\1" ANDROID_SDK_VERSION ${ANDROID_PLATFORM_VERSION} )
+        list( APPEND ANDROID_SDK_VERSIONS ${ANDROID_SDK_VERSION} )
+    endforeach()
+
+    list( SORT ANDROID_SDK_VERSIONS COMPARE NATURAL )
+    list( GET ANDROID_SDK_VERSIONS -1 ANDROID_SDK_VERSION_DEFAULT )
+
+    set( ANDROID_SDK_VERSION_MIN "${ANDROID_SDK_VERSION_DEFAULT}" CACHE STRING "Android minimum SDK version" )
+
+    set( ANDROID_SDK_VERSION_TARGET "${ANDROID_SDK_VERSION_DEFAULT}" CACHE STRING "Android target SDK version" )
+    set_property( CACHE ANDROID_SDK_VERSION_TARGET PROPERTY STRINGS ${ANDROID_SDK_VERSIONS} )
+
+endmacro()
+
+macro( _ttb_android_request_ndk_version )
+
+    _ttb_android_request_sdk()
+
+    file( GLOB ANDROID_NDK_VERSIONS RELATIVE "${ANDROID_SDK_DIR}/ndk" "${ANDROID_SDK_DIR}/ndk/*" )
+
+    list( SORT ANDROID_NDK_VERSIONS COMPARE NATURAL )
+    list( GET ANDROID_NDK_VERSIONS -1 ANDROID_NDK_VERSION_DEFAULT )
+
+    set( ANDROID_NDK_VERSION "${ANDROID_NDK_VERSION_DEFAULT}" CACHE STRING "Android NDK version" )
+
+    set_property( CACHE ANDROID_NDK_VERSION PROPERTY STRINGS ${ANDROID_NDK_VERSIONS} )
+
+endmacro()
+
+macro( _ttb_android_request_build_tools_version )
+
+    _ttb_android_request_sdk()
+
+    file( GLOB ANDROID_TOOLS_VERSIONS RELATIVE "${ANDROID_SDK_DIR}/build-tools" "${ANDROID_SDK_DIR}/build-tools/*" )
+    list( SORT ANDROID_TOOLS_VERSIONS COMPARE NATURAL )
+    list( GET ANDROID_TOOLS_VERSIONS -1 ANDROID_TOOLS_VERSION_DEFAULT )
+
+    set( ANDROID_TOOLS_VERSION "${ANDROID_TOOLS_VERSION_DEFAULT}" CACHE STRING "Android build tools version" )
+
+    set_property( CACHE ANDROID_TOOLS_VERSION PROPERTY STRINGS ${ANDROID_TOOLS_VERSIONS} )
+
+endmacro()
 
 function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DIR )
 
@@ -27,7 +90,7 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
         CMAKE_ARGS
             -DANDROID_PLATFORM=android-${ANDROID_SDK_VERSION_TARGET}
             -DANDROID_ABI=${ANDROID_ABI}
-            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_DIR}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake
             -DBUILD_PLATFORM=Android
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
@@ -47,11 +110,14 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
 
 endfunction()
 
-macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
+macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
+
+    _ttb_android_request_sdk()
+    _ttb_android_request_sdk_version()
+    _ttb_android_request_ndk_version()
+    _ttb_android_request_build_tools_version()
 
     set( ANDROID_PACKAGE_NAME "" CACHE STRING "Name of the android package" )
-    set( ANDROID_SDK_VERSION_MIN "" CACHE STRING "Lowest supported SDK version" )
-    set( ANDROID_SDK_VERSION_TARGET "" CACHE STRING "SDK version target" )
 
     if( NOT ANDROID_PACKAGE_NAME )
         message( FATAL_ERROR "ANDROID_PACKAGE_NAME not set" )
@@ -69,11 +135,21 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
         @ONLY
     )
 
-    set( ANDROID_SDK "/home/tom/libraries/android_sdk" )
-    set( ANDROID_JAR "${ANDROID_SDK}/platforms/android-${ANDROID_SDK_VERSION_TARGET}/android.jar" )
+    set( ANDROID_PLATFORM_DIR "${ANDROID_SDK_DIR}/platforms/android-${ANDROID_SDK_VERSION_TARGET}" )
+    set( ANDROID_TOOLS_DIR "${ANDROID_SDK_DIR}/build-tools/${ANDROID_TOOLS_VERSION}")
+
+    set( ANDROID_JAR "${ANDROID_PLATFORM_DIR}/android.jar" )
+    set( ANDROID_DX "${ANDROID_TOOLS_DIR}/dx" )
+    set( ANDROID_AAPT2 "${ANDROID_TOOLS_DIR}/aapt2" )
+    set( ANDROID_ZIPALIGN "${ANDROID_TOOLS_DIR}/zipalign" )
+    set( JAVA_COMPILER "javac"  )
+    set( JAVA_SIGNER "jarsigner" )
+
+    file( MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android/java_sources")
+
     add_custom_target(
         android_java_sources
-        COMMAND javac
+        COMMAND ${JAVA_COMPILER}
             -classpath "${ANDROID_JAR}"
             -Xlint:deprecation
             -source 1.8
@@ -90,7 +166,6 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
             "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
     )
 
-    set( ANDROID_DX "${ANDROID_SDK}/build-tools/30.0.3/dx" )
     add_custom_target(
         android_dex
         DEPENDS android_java_sources
@@ -101,24 +176,21 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
     )
 
     _ttb_create_android_target( "arm64-v8a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
-    # _ttb_create_android_target( "armeabi-v7a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
 
-    set( ANDROID_AAPT2 "${ANDROID_SDK}/build-tools/30.0.3/aapt2" )
-    set( ANDROID_ZIPALIGN "${ANDROID_SDK}/build-tools/30.0.3/zipalign" )
     add_custom_target(
         android_apk_link
         DEPENDS
             android_dex
             project_library_arm64-v8a_copy
-        COMMAND ${ANDROID_AAPT2}
-            compile --dir "/home/tom/development/nonogram_solver/app/res"
-            -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+        #COMMAND ${ANDROID_AAPT2}
+        #    compile --dir "/home/tom/development/nonogram_solver/app/res"
+        #    -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
         COMMAND ${ANDROID_AAPT2}
             link
-            "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+        #    "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
             -I "${ANDROID_JAR}"
             --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
-            -A "/home/tom/development/nonogram_solver/app/assets"
+        #    -A "/home/tom/development/nonogram_solver/app/assets"
             -v
             -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
         COMMAND zip
@@ -132,12 +204,11 @@ macro( _ttb_init_project_impl PROJECT_CMAKE_FILE )
             "${CMAKE_CURRENT_BINARY_DIR}/android/app_unsigned.apk"
     )
 
-    set( JAVA_SIGNER "jarsigner" )
     add_custom_target(
         android_apk_sign ALL
         DEPENDS android_apk_link
         COMMAND ${JAVA_SIGNER}
-            -keystore "/home/tom/.android/debug.keystore"
+            -keystore "${TTB_ANDROID_RES_DIR}/debug.keystore"
             -storepass "android"
             -keypass "android"
             -signedjar "${CMAKE_CURRENT_BINARY_DIR}/app_signed.apk"
