@@ -21,3 +21,12 @@ macro( ttb_add_project PROJECT_NAME PROJECT_CMAKE_FILE )
 
 endmacro()
 
+macro( ttb_project_assets ASSET_DIR )
+
+    request_build_platform( BUILD_PLATFORM )
+
+    include( ttb_platform_${BUILD_PLATFORM} )
+
+    _ttb_project_assets_impl( ${ASSET_DIR} )
+
+endmacro()

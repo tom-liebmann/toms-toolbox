@@ -1,3 +1,5 @@
+include_guard( GLOBAL )
+
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 
 macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
@@ -19,5 +21,11 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
     add_subdirectory( ${PROJECT_CMAKE_FILE} _target_${PROJECT_NAME} )
 
     add_subdirectory( "${TTB_ROOT}/project/src" ttb_project )
+
+endmacro()
+
+macro( _ttb_project_assets_impl ASSET_DIR )
+
+    # Do nothing for now. Later, this macro could be used to bundle assets into a data blob
 
 endmacro()

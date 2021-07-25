@@ -1,3 +1,5 @@
+include_guard( GLOBAL )
+
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 
@@ -178,21 +180,37 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
     _ttb_create_android_target( "arm64-v8a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
 
     add_custom_target(
+        ttb_project_initialize_asset_args
+        COMMAND
+            rm -f "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
+        COMMAND
+            touch "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
+    )
+
+    add_custom_target(
         android_apk_link
         DEPENDS
+            ttb_project_initialize_asset_args
             android_dex
             project_library_arm64-v8a_copy
         #COMMAND ${ANDROID_AAPT2}
         #    compile --dir "/home/tom/development/nonogram_solver/app/res"
         #    -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
-        COMMAND ${ANDROID_AAPT2}
-            link
-        #    "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
-            -I "${ANDROID_JAR}"
-            --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
-        #    -A "/home/tom/development/nonogram_solver/app/assets"
-            -v
-            -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
+        COMMAND
+            xargs
+                -0
+                -a "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
+                -I "ASSET_ARGS"
+            sh -c '
+            ${ANDROID_AAPT2}
+                link
+            #    "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+                -I "${ANDROID_JAR}"
+                --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
+                ASSET_ARGS
+                -v
+                -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
+            '
         COMMAND zip
             -uj "${CMAKE_CURRENT_BINARY_DIR}/android/app_tmp.apk"
             "${CMAKE_CURRENT_BINARY_DIR}/android/classes.dex"
@@ -215,5 +233,24 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             "${CMAKE_CURRENT_BINARY_DIR}/android/app_unsigned.apk"
             "androiddebugkey"
     )
+
+endmacro()
+
+set( TTB_PROJECT_ASSET_TARGET_NR "0" )
+
+macro( _ttb_project_assets_impl ASSET_DIR )
+
+    set( TTB_PROJECT_ASSET_TARGET "ttb_project_asset_target_${TTB_PROJECT_ASSET_TARGET_NR}")
+    math( EXPR TTB_PROJECT_ASSET_TARGET_NR "${TTB_PROJECT_ASSET_TARGET_NR}+1" )
+
+    add_custom_target(
+        ${TTB_PROJECT_ASSET_TARGET}
+        DEPENDS
+        ttb_project_initialize_asset_args
+        COMMAND
+        echo -n "-A ${ASSET_DIR} " >> "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
+        )
+
+    add_dependencies( android_apk_link ${TTB_PROJECT_ASSET_TARGET} )
 
 endmacro()
