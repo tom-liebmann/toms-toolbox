@@ -1,8 +1,7 @@
 #pragma once
 
-#include "uniform.hpp"
 #include <ttb/core/Viewport.hpp>
-#include <ttb/core/uniform.hpp>
+#include <ttb/core/uniform/UniformHolder.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <memory>
@@ -32,6 +31,7 @@ namespace ttb
         struct Data
         {
             Program const* program{ nullptr };
+            std::unordered_map< std::string, std::unique_ptr< UniformHolder > > uniforms;
         };
 
         State();
@@ -43,9 +43,17 @@ namespace ttb
 
         RenderTarget const& renderTarget() const;
 
-        // shader
         template < typename TBindable, typename TFunc >
         void with( TBindable const& bindable, TFunc const& func );
+
+        template < typename TBindable,
+                   typename TRestFirst,
+                   typename TRestSecond,
+                   typename... TRest >
+        void with( TBindable const& bindable,
+                   TRestFirst const& restFirst,
+                   TRestSecond const& restSecond,
+                   TRest const&... rest );
 
         Program const& program();
 
@@ -65,10 +73,7 @@ namespace ttb
         void apply();
 
         template < typename TType >
-        UniformStack< TType >& uniform( std::string const& name );
-
-        template < typename TType >
-        UniformStack< TType > const& uniform( std::string const& name ) const;
+        TType const* uniform( std::string const& name ) const;
 
     private:
         // render target
@@ -85,9 +90,6 @@ namespace ttb
         // viewport
         std::stack< Viewport > m_viewportStack;
 
-        // uniforms
-        std::unordered_map< std::string, std::unique_ptr< UniformStackBase > > m_uniforms;
-
         Data m_data;
     };
 }
@@ -102,33 +104,30 @@ namespace ttb
         func();
     }
 
-    template < typename TType >
-    UniformStack< TType >& State::uniform( std::string const& name )
+    template < typename TBindable, typename TRestFirst, typename TRestSecond, typename... TRest >
+    inline void State::with( TBindable const& bindable,
+                             TRestFirst const& restFirst,
+                             TRestSecond const& restSecond,
+                             TRest const&... rest )
     {
-        auto iter = m_uniforms.find( name );
-
-        if( iter == std::end( m_uniforms ) )
-        {
-            m_uniforms[ name ] = std::make_unique< UniformStack< TType > >();
-            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
-        }
-        else
-        {
-#ifndef NDEBUG
-            return dynamic_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
-#else
-            return static_cast< UniformStack< TType >& >( *m_uniforms[ name ] );
-#endif
-        }
+        auto const binder = bindable.bind( m_data );
+        with( restFirst, restSecond, rest... );
     }
 
     template < typename TType >
-    UniformStack< TType > const& State::uniform( std::string const& name ) const
+    TType const* State::uniform( std::string const& name ) const
     {
+        auto const iter = m_data.uniforms.find( name );
+
+        if( iter == std::end( m_data.uniforms ) )
+        {
+            return nullptr;
+        }
+
 #ifndef NDEBUG
-        return dynamic_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+        return dynamic_cast< TypedUniformHolder< TType >& >( iter->second ).value();
 #else
-        return static_cast< UniformStack< TType > const& >( m_uniforms.at( name ) );
+        return static_cast< TypedUniformHolder< TType >& >( iter->second ).value();
 #endif
     }
 }

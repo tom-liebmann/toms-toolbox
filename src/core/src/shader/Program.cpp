@@ -1,7 +1,6 @@
 #include <ttb/core/shader/Program.hpp>
 
 #include <ttb/core/shader/Shader.hpp>
-#include <ttb/core/uniform/stacks/UniformStack.hpp>
 #include <ttb/math/Matrix.hpp>
 
 #include <iostream>
@@ -18,15 +17,9 @@ namespace ttb
         return glGetAttribLocation( m_object, reinterpret_cast< GLchar const* >( name.c_str() ) );
     }
 
-    void Program::applyUniform( std::string const& name, UniformStackBase const& uniform ) const
+    GLint Program::uniformLocation( std::string const& name ) const
     {
-        auto location =
-            glGetUniformLocation( m_object, reinterpret_cast< const GLchar* >( name.c_str() ) );
-
-        if( location != -1 )
-        {
-            uniform.apply( location );
-        }
+        return glGetUniformLocation( m_object, reinterpret_cast< GLchar const* >( name.c_str() ) );
     }
 
     Program::Program( std::vector< std::unique_ptr< Shader > > const& shaders )
@@ -45,7 +38,8 @@ namespace ttb
 
         if( !linkStatus )
         {
-            auto const errorMsg = [ & ]() -> std::string {
+            auto const errorMsg = [ & ]() -> std::string
+            {
                 std::array< char, 256 > buffer;
                 GLsizei strLength = 0;
                 glGetProgramInfoLog( m_object, buffer.size(), &strLength, buffer.data() );

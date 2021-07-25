@@ -4,6 +4,7 @@
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/shader.hpp>
 #include <ttb/core/texture.hpp>
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
 
@@ -15,9 +16,11 @@ namespace ttb::ui
                           ColorRgb const& color )
         : Element{ framework }, m_color( color )
     {
-        auto vertexBuffer = ttb::VertexBuffer::create( [ & ]( auto& c ) {
-            c.attribute( GL_FLOAT, 2 );  //
-        } );
+        auto vertexBuffer = ttb::VertexBuffer::create(
+            [ & ]( auto& c )
+            {
+                c.attribute( GL_FLOAT, 2 );  //
+            } );
 
         vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
         vertexBuffer->push_back().set( 0, 1.0f, 0.0f );
@@ -62,23 +65,26 @@ namespace ttb::ui
 
     void MonoImage::render( ttb::State& state ) const
     {
-        auto const u1 =
-            state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( m_transform );
-        auto const u2 =
-            state.uniform< ttb::Matrix< float, 3, 3 > >( "u_texTransform" ).push( m_texTransform );
-        auto const u3 = state.uniform< int >( "u_texture" ).push( 0 );
-        auto const u4 = state.uniform< ttb::Vector< float, 3 > >( "u_color" )
-                            .push( { m_color.rF(), m_color.gF(), m_color.bF() } );
+        state.with(
+            ttb::UniformBinder{ "u_transform", m_transform },
+            ttb::UniformBinder{ "u_texTransform", m_texTransform },
+            ttb::UniformBinder{ "u_texture", 0 },
+            ttb::UniformBinder{
+                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
+            [ & ]
+            {
+                glEnable( GL_BLEND );
+                glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        glEnable( GL_BLEND );
-        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+                state.with( *m_program,
+                            [ & ]
+                            {
+                                m_image->bind( 0 );
+                                m_geometry->draw( state );
+                                m_image->unbind( 0 );
+                            } );
 
-        state.with( *m_program, [ & ] {
-            m_image->bind( 0 );
-            m_geometry->draw( state );
-            m_image->unbind( 0 );
-        } );
-
-        glDisable( GL_BLEND );
+                glDisable( GL_BLEND );
+            } );
     }
 }

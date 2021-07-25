@@ -1,5 +1,6 @@
 #include <ttb/ui/elements/ScaleToFit.hpp>
 
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/Range.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
@@ -18,8 +19,14 @@ namespace ttb::ui
     {
         wrappedChild(
             element,
-            [ this ]( auto const& pos ) { return transform( pos ); },
-            [ this ]( auto const& pos ) { return transformInv( pos ); } );
+            [ this ]( auto const& pos )
+            {
+                return transform( pos );
+            },
+            [ this ]( auto const& pos )
+            {
+                return transformInv( pos );
+            } );
     }
 
     auto ScaleToFit::fit( Size const& size ) -> Size
@@ -42,10 +49,11 @@ namespace ttb::ui
     {
         if( auto const child = wrappedChild(); child )
         {
-            auto const u =
-                state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( m_transform );
-
-            child->render( state );
+            state.with( ttb::UniformBinder{ "u_transform", m_transform },
+                        [ & ]
+                        {
+                            child->render( state );
+                        } );
         }
     }
 

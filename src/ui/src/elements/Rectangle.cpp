@@ -3,6 +3,7 @@
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/shader.hpp>
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
 
@@ -14,9 +15,11 @@ namespace ttb::ui
     {
         m_program = framework.resourceManager().get< ttb::Program >( "ui_rect" );
 
-        auto vertexBuffer = ttb::VertexBuffer::create( [ & ]( auto& c ) {
-            c.attribute( GL_FLOAT, 2 );  //
-        } );
+        auto vertexBuffer = ttb::VertexBuffer::create(
+            [ & ]( auto& c )
+            {
+                c.attribute( GL_FLOAT, 2 );  //
+            } );
 
         vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
         vertexBuffer->push_back().set( 0, 0.0f, 1.0f );
@@ -38,14 +41,14 @@ namespace ttb::ui
 
     void Rectangle::render( ttb::State& state ) const
     {
-        auto const uniformHandle1 = state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" )
-                                        .push( ttb::mat::scale( size() ) );
-
-        auto const uniformHandle2 = state.uniform< ttb::Vector< float, 3 > >( "u_color" )
-                                        .push( { m_color.rF(), m_color.gF(), m_color.bF() } );
-
-        state.with( *m_program, [ & ] {
-            m_geometry->draw( state );  //
-        } );
+        state.with(
+            *m_program,
+            ttb::UniformBinder{ "u_transform", ttb::mat::scale( size() ) },
+            ttb::UniformBinder{
+                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
+            [ & ]
+            {
+                m_geometry->draw( state );
+            } );
     }
 }

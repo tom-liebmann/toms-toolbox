@@ -1,5 +1,6 @@
 #include <ttb/ui/elements/Center.hpp>
 
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 
 
@@ -84,9 +85,11 @@ namespace ttb::ui
     {
         if( auto const child = wrappedChild(); child )
         {
-            auto const u = state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" )
-                               .push( ttb::mat::translation( m_offset ) );
-            child->render( state );
+            state.with( ttb::UniformBinder( "u_transform", ttb::mat::translation( m_offset ) ),
+                        [ & ]
+                        {
+                            child->render( state );  //
+                        } );
         }
     }
 

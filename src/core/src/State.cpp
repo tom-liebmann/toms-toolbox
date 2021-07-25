@@ -120,9 +120,10 @@ namespace ttb
     {
         if( m_data.program )
         {
-            for( auto const& uniformPair : m_uniforms )
+            for( auto const& uniformPair : m_data.uniforms )
             {
-                m_data.program->applyUniform( uniformPair.first, *uniformPair.second );
+                auto const location = m_data.program->uniformLocation( uniformPair.first );
+                uniformPair.second->apply( location );
             }
         }
     }

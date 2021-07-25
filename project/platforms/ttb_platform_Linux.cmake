@@ -1,6 +1,6 @@
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 
-macro( _ttb_init_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
+macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
 
     cmake_policy( SET CMP0076 NEW )
 

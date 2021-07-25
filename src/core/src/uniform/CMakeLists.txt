@@ -3,6 +3,6 @@ target_sources(
 
     PRIVATE
         uniformHelper.cpp
+        UniformBinder.cpp
+        UniformHolder.cpp
 )
-
-add_subdirectory( stacks )

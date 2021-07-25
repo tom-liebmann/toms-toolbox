@@ -2,6 +2,7 @@
 
 #include <ttb/core/fonts/TextFactory.hpp>
 #include <ttb/core/resources/Manager.hpp>
+#include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/Framework.hpp>
@@ -41,17 +42,19 @@ namespace ttb::ui
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        state.with( *m_shader, [ & ] {
-            auto const u2 = state.uniform< int >( "u_texture" ).push( 0 );
-
-            auto const u3 = state.uniform< ttb::Vector< float, 3 > >( "u_color" )
-                                .push( { m_color.rF(), m_color.gF(), m_color.bF() } );
-            m_texture->bind( 0 );
+        state.with(
+            *m_shader,
+            ttb::UniformBinder{ "u_texture", 0 },
+            ttb::UniformBinder{
+                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
+            [ & ]
             {
-                m_textGeometry->draw( state );
-            }
-            m_texture->unbind( 0 );
-        } );
+                m_texture->bind( 0 );
+                {
+                    m_textGeometry->draw( state );
+                }
+                m_texture->unbind( 0 );
+            } );
 
         glDisable( GL_BLEND );
     }
