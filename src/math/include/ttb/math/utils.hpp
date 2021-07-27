@@ -1,7 +1,7 @@
 #pragma once
 
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 
 namespace ttb
@@ -15,8 +15,8 @@ namespace ttb
     template < typename TType >
     constexpr auto clamp( TType value, TType lowerBound, TType upperBound );
 
-    template < typename TType1, typename TType2 >
-    constexpr auto mix( TType1 min, TType1 max, TType2 value );
+    template < typename TType1, typename TType2, typename TType3 >
+    constexpr auto mix( TType1 min, TType2 max, TType3 value );
 }
 
 
@@ -47,8 +47,8 @@ namespace ttb
         return min( maxValue, max( minValue, value ) );
     }
 
-    template < typename TType1, typename TType2 >
-    inline constexpr auto mix( TType1 min, TType1 max, TType2 value )
+    template < typename TType1, typename TType2, typename TType3 >
+    inline constexpr auto mix( TType1 min, TType2 max, TType3 value )
     {
         return ( 1 - value ) * min + value * max;
     }
