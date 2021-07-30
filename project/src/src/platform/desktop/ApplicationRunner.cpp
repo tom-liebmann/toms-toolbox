@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <thread>
 
 
 namespace ttb
@@ -42,13 +43,11 @@ namespace ttb
         {
             window.pollEvents();
 
-            auto const now = std::chrono::steady_clock::now();
-            auto const frameTime =
-                std::chrono::duration_cast< std::chrono::duration< float > >( now - lastTime )
-                    .count();
-            lastTime = now;
+            lastTime += std::chrono::duration_cast< std::chrono::steady_clock::duration >(
+                std::chrono::duration< float >{ 1.0f / 60.0f } );
+            std::this_thread::sleep_until( lastTime );
 
-            app.update( frameTime );
+            app.update( 1.0f / 60.0f );
 
             app.draw();
         }
