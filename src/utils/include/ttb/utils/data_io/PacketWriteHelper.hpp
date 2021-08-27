@@ -20,6 +20,8 @@ namespace ttb
 
         void write( ttb::Packet const& packet );
 
+        void write( ttb::Packet const& packet, size_t offset, size_t size );
+
         template < typename TType >
         void write( TType const& value );
 
@@ -65,7 +67,7 @@ namespace ttb
         m_offset = 0;
     }
 
-    inline void PacketWriteHelper::write( ttb::Packet const& packet )
+    inline void PacketWriteHelper::write( ttb::Packet const& packet, size_t offset, size_t size )
     {
         if( m_size == 0 )
         {
@@ -73,22 +75,24 @@ namespace ttb
             return;
         }
 
-        // Only perform expensive packet size calculation once
-        auto const packetSize = packet.size();
-
-        if( m_offset >= packetSize )
+        if( m_offset >= size )
         {
             // Block not within writing area
-            m_offset -= packetSize;
+            m_offset -= size;
             return;
         }
 
-        auto const writeSize = std::min( packetSize - m_offset, m_size );
-        auto const written = packet.write( m_offset, writeSize, m_writer.get() );
+        auto const writeSize = std::min( size - m_offset, m_size );
+        auto const written = packet.write( m_offset + offset, writeSize, m_writer.get() );
 
         m_written += written;
         m_size -= written;
         m_offset = 0;
+    }
+
+    inline void PacketWriteHelper::write( ttb::Packet const& packet )
+    {
+        write( packet, 0, packet.size() );
     }
 
     template < typename TType >
