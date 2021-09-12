@@ -22,4 +22,6 @@ namespace ttb::event::type
     constexpr uint32_t DRAG_END = 0xC;
 
     constexpr uint32_t ZOOM = 0xD;
+
+    constexpr uint32_t LAST_CORE = ZOOM;
 }

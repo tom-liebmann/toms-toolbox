@@ -8,6 +8,7 @@ target_sources(
         RingBufferWriter.cpp
         RingBuffer.cpp
         EventManager.cpp
+        UnionFind.cpp
 )
 
 add_subdirectory( data_io )
