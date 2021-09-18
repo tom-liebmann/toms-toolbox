@@ -8,9 +8,9 @@ namespace ttb
         return m_title;
     }
 
-    auto Window::size() const -> Size const&
+    auto Window::viewport() const -> Viewport
     {
-        return m_size;
+        return { { 0, 0 }, { m_size( 0 ), m_size( 1 ) } };
     }
 
     bool Window::flag( WindowFlag value ) const
@@ -34,15 +34,5 @@ namespace ttb
         {
             m_eventCallback( event );
         }
-    }
-
-    size_t Window::width() const
-    {
-        return m_size( 0 );
-    }
-
-    size_t Window::height() const
-    {
-        return m_size( 1 );
     }
 }

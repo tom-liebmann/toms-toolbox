@@ -5,6 +5,7 @@
 #include <ttb/math/Matrix.hpp>
 
 #include <memory>
+#include <optional>
 #include <stack>
 #include <unordered_map>
 
@@ -15,7 +16,9 @@
 namespace ttb
 {
     class Program;
+    class ViewportBinder;
     class RenderTarget;
+    class Geometry;
 }
 
 
@@ -31,17 +34,23 @@ namespace ttb
         struct Data
         {
             Program const* program{ nullptr };
+            RenderTarget const* renderTarget{ nullptr };
+
             std::unordered_map< std::string, std::unique_ptr< UniformHolder > > uniforms;
+
+            std::optional< Viewport > viewport;
+            bool enabledScissors{ false };
+
+            std::stack< GLint > arrayObjectStack;
+
+            std::stack< GLint > frameBufferObjectStack;
+
+            void applyViewport() const;
         };
 
         State();
+
         ~State();
-
-        // render target
-        void pushTarget( RenderTarget& target );
-        void popTarget();
-
-        RenderTarget const& renderTarget() const;
 
         template < typename TBindable, typename TFunc >
         void with( TBindable const& bindable, TFunc const& func );
@@ -55,41 +64,16 @@ namespace ttb
                    TRestSecond const& restSecond,
                    TRest const&... rest );
 
+        void draw( Geometry const& geometry );
+
         Program const& program();
 
-        // geometry
-        void pushArrayObject( GLuint arrayObject );
-        void popArrayObject();
-
-        // framebuffer
-        void pushFramebuffer( GLuint framebufferObject );
-        void popFramebuffer();
-
-        // viewport
-        void pushViewport( Viewport const& viewport );
-        void popViewport();
-
-        // events
-        void apply();
+        RenderTarget const& renderTarget() const;
 
         template < typename TType >
         TType const* uniform( std::string const& name ) const;
 
     private:
-        // render target
-        std::stack< ttb::RenderTarget* > m_renderTargetStack;
-
-        // geometry
-        GLint m_parentArrayObject;
-        std::stack< GLuint > m_arrayObjectStack;
-
-        // framebuffer
-        GLint m_parentFramebufferObject;
-        std::stack< GLuint > m_framebufferObjectStack;
-
-        // viewport
-        std::stack< Viewport > m_viewportStack;
-
         Data m_data;
     };
 }

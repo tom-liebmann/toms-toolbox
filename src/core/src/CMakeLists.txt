@@ -8,7 +8,7 @@ target_sources(
         GBuffer.cpp
         PNGLoader.cpp
         RenderTarget.cpp
-        Viewport.cpp
+        ViewportBinder.cpp
         gl.cpp
 )
 

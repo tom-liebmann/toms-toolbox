@@ -55,26 +55,27 @@ namespace ttb
 
     void WindowImpl::pollEvents()
     {
-        glfwSwapBuffers( m_handle );
+        // glfwSwapBuffers( m_handle );
         glfwPollEvents();
     }
 
-    void WindowImpl::begin( State& state ) const
+    void WindowImpl::begin( State::Data& /* data */ ) const
     {
-        auto const viewport = Viewport{
-            0,
-            0,
-            static_cast< GLsizei >( m_size( 0 ) ),
-            static_cast< GLsizei >( m_size( 1 ) ),
-        };
-
-        state.pushViewport( viewport );
+        // Do nothing
     }
 
-    void WindowImpl::end( State& state ) const
+    void WindowImpl::suspend( State::Data& /* data */ ) const
     {
-        state.popViewport();
+        // Do nothing
+    }
 
+    void WindowImpl::resume( State::Data& /* data */ ) const
+    {
+        // Do nothing
+    }
+
+    void WindowImpl::end( State::Data& /* data */ ) const
+    {
         glfwSwapBuffers( m_handle );
     }
 
@@ -101,6 +102,8 @@ namespace ttb
         glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
         // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
         glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+        glfwWindowHint( GLFW_SAMPLES, 8 );
 
 #ifndef NDEBUG
         glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );
@@ -167,7 +170,8 @@ namespace ttb
     {
         auto const wnd = reinterpret_cast< WindowImpl* >( glfwGetWindowUserPointer( window ) );
 
-        auto const keyAction = [ & ] {
+        auto const keyAction = [ & ]
+        {
             switch( action )
             {
                 case GLFW_PRESS:
@@ -193,7 +197,8 @@ namespace ttb
         double y;
         glfwGetCursorPos( window, &x, &y );
 
-        auto const pointerId = [ & ] {
+        auto const pointerId = [ & ]
+        {
             switch( button )
             {
                 case GLFW_MOUSE_BUTTON_LEFT:

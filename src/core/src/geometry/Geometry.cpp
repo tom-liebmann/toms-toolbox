@@ -27,16 +27,23 @@ namespace ttb
         glGenVertexArrays( 1, &m_arrayObject );
     }
 
-    void Geometry::draw( State& state ) const
+    void Geometry::draw( State::Data& data ) const
     {
-        // Apply uniforms to currently bound program
-        state.apply();
-
         // Bind all vertex attributes
-        auto const& program = state.program();
+        auto const& program = *data.program;
 
-        state.pushArrayObject( m_arrayObject );
+        // Enable vertex array object
+        if( data.arrayObjectStack.empty() )
+        {
+            GLint parentArrayObject;
+            glGetIntegerv( GL_VERTEX_ARRAY_BINDING, &parentArrayObject );
+            data.arrayObjectStack.push( parentArrayObject );
+        }
 
+        data.arrayObjectStack.push( m_arrayObject );
+        glBindVertexArray( m_arrayObject );
+
+        // Bind attributes
         std::vector< GLuint > locations;
 
         for( auto const& attribute : m_attributes )
@@ -76,7 +83,8 @@ namespace ttb
             glDrawArrays( m_mode, 0, static_cast< GLsizei >( minAttrSize ) );
         }
 
-        state.popArrayObject();
+        data.arrayObjectStack.pop();
+        glBindVertexArray( data.arrayObjectStack.top() );
     }
 
     Geometry::Attribute const& Geometry::attribute( size_t index ) const

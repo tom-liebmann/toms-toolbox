@@ -20,6 +20,9 @@ namespace ttb
 
         Range( const Vector< T, D >& min, const Vector< T, D >& max );
 
+        template < typename TType2 >
+        Range( Range< TType2, D > const& rhs );
+
         const T& getMin( size_t index ) const;
         const T& getMax( size_t index ) const;
 
@@ -94,6 +97,14 @@ namespace ttb
         : m_min( min ), m_max( max )
     {
     }
+
+    template < typename T, size_t D >
+    template < typename TType2 >
+    inline Range< T, D >::Range( Range< TType2, D > const& rhs )
+        : m_min( rhs.min().template as< T >() ), m_max( rhs.max().template as< T >() )
+    {
+    }
+
 
     template < typename T, size_t D >
     inline const T& Range< T, D >::getMin( size_t index ) const

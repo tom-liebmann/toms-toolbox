@@ -48,7 +48,7 @@ namespace ttb::ui
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
             [ & ]
             {
-                m_geometry->draw( state );
+                state.draw( *m_geometry );
             } );
     }
 }

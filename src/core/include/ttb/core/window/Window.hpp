@@ -15,8 +15,8 @@ namespace ttb
     class Window : public Context, public RenderTarget
     {
     public:
-        using Size = ttb::Vector< uint16_t, 2 >;
         using EventCallback = std::function< void( Event const& ) >;
+        using Size = ttb::Vector< uint16_t, 2 >;
 
         static void init( std::string_view title, WindowRequest const& request );
 
@@ -24,7 +24,14 @@ namespace ttb
 
         std::string_view title() const;
 
-        Size const& size() const;
+        /// @copydoc RenderTarget::viewport() const
+        virtual Viewport viewport() const override;
+
+        /// @copydoc RenderTarget::begin( State::Data& ) const
+        virtual void begin( State::Data& data ) const override = 0;
+
+        /// @copydoc RenderTarget::end( State::Data& ) const
+        virtual void end( State::Data& data ) const override = 0;
 
         bool flag( WindowFlag value ) const;
 
@@ -50,12 +57,6 @@ namespace ttb
         Window( Window&& rhs ) = delete;
         Window& operator=( Window const& rhs ) = delete;
         Window& operator=( Window&& rhs ) = delete;
-
-        // Override: RenderTarget
-        virtual size_t width() const override;
-        virtual size_t height() const override;
-        virtual void begin( State& state ) const override = 0;
-        virtual void end( State& state ) const override = 0;
 
         EventCallback m_eventCallback;
     };

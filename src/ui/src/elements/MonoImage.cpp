@@ -80,7 +80,7 @@ namespace ttb::ui
                             [ & ]
                             {
                                 m_image->bind( 0 );
-                                m_geometry->draw( state );
+                                state.draw( *m_geometry );
                                 m_image->unbind( 0 );
                             } );
 

@@ -28,6 +28,7 @@ namespace ttb
     {
     public:
         class Modifier;
+        class Handle;
 
         static Modifier create();
 
@@ -37,14 +38,23 @@ namespace ttb
 
         std::shared_ptr< Texture2D > const& depthBuffer() const;
 
-        // Override: RenderTarget
-        virtual size_t width() const override;
-        virtual size_t height() const override;
-        virtual void begin( State& state ) const override;
-        virtual void end( State& state ) const override;
+        /// @copydoc RenderTarget::viewport() const
+        virtual Viewport viewport() const override;
 
     private:
         GBuffer();
+
+        /// @copydoc RenderTarget::begin( State::Data& ) const
+        virtual void begin( State::Data& data ) const override;
+
+        /// @copydoc RenderTarget::begin( State::Data& ) const
+        virtual void suspend( State::Data& data ) const override;
+
+        /// @copydoc RenderTarget::begin( State::Data& ) const
+        virtual void resume( State::Data& data ) const override;
+
+        /// @copydoc RenderTarget::end( State::Data& ) const
+        virtual void end( State::Data& data ) const override;
 
         GLuint m_frameBufferObject;
 

@@ -11,11 +11,13 @@ namespace ttb::ui
     {
         m_program = resourceManager.get< ttb::Program >( "ui_quad" );
 
-        m_vertexBuffer = ttb::VertexBuffer::create( [ & ]( auto& c ) {
-            c.attribute( GL_FLOAT, 3 );
-            c.attribute( GL_FLOAT, 3 );
-            c.attribute( GL_FLOAT, 2 );
-        } );
+        m_vertexBuffer = ttb::VertexBuffer::create(
+            [ & ]( auto& c )
+            {
+                c.attribute( GL_FLOAT, 3 );
+                c.attribute( GL_FLOAT, 3 );
+                c.attribute( GL_FLOAT, 2 );
+            } );
 
         m_indexBuffer = ttb::IndexBuffer::create();
 
@@ -31,9 +33,11 @@ namespace ttb::ui
     {
         glEnable( GL_BLEND );
 
-        state.with( *m_program, [ & ] {
-            m_geometry->draw( state );  //
-        } );
+        state.with( *m_program,
+                    [ & ]
+                    {
+                        state.draw( *m_geometry );
+                    } );
 
         glDisable( GL_BLEND );
     }

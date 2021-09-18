@@ -26,6 +26,17 @@ namespace ttb
     auto operator*( Matrix< TType1, TRows1, TCols1 > const& lhs,
                     Matrix< TType2, TCols1, TCols2 > const& rhs );
 
+    template < typename TType1,
+               typename TType2,
+               size_t TRows,
+               size_t TCols,
+               typename Enabled = typename std::enable_if_t< std::is_arithmetic_v< TType1 > > >
+    auto operator*( TType1 lhs, Matrix< TType2, TRows, TCols > const& rhs );
+
+    template < typename TType1, typename TType2, size_t TRows, size_t TCols >
+    auto operator-( Matrix< TType1, TRows, TCols > const& lhs,
+                    Matrix< TType2, TRows, TCols > const& rhs );
+
     template < typename TType1, typename TType2, size_t TRows, size_t TCols >
     Matrix< TType1, TRows, TCols >& operator*=( Matrix< TType1, TRows, TCols >& lhs,
                                                 Matrix< TType2, TCols, TCols > const& rhs );
@@ -213,6 +224,43 @@ namespace ttb
                 {
                     result( i, j ) += lhs( i, k ) * rhs( k, j );
                 }
+            }
+        }
+
+        return result;
+    }
+
+    template < typename TType1, typename TType2, size_t TRows, size_t TCols, typename Enabled >
+    auto operator*( TType1 lhs, Matrix< TType2, TRows, TCols > const& rhs )
+    {
+        using ResultType = decltype( std::declval< TType1 >() * std::declval< TType2 >() );
+
+        Matrix< ResultType, TRows, TCols > result;
+
+        for( size_t i = 0; i < TRows; ++i )
+        {
+            for( size_t j = 0; j < TCols; ++j )
+            {
+                result( i, j ) = lhs * rhs( i, j );
+            }
+        }
+
+        return result;
+    }
+
+    template < typename TType1, typename TType2, size_t TRows, size_t TCols >
+    auto operator-( Matrix< TType1, TRows, TCols > const& lhs,
+                    Matrix< TType2, TRows, TCols > const& rhs )
+    {
+        using ResultType = decltype( std::declval< TType1 >() - std::declval< TType2 >() );
+
+        Matrix< ResultType, TRows, TCols > result;
+
+        for( size_t i = 0; i < TRows; ++i )
+        {
+            for( size_t j = 0; j < TCols; ++j )
+            {
+                result( i, j ) = lhs( i, j ) - rhs( i, j );
             }
         }
 

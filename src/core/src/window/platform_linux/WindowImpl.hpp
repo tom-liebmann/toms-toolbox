@@ -23,8 +23,11 @@ namespace ttb
         GLFWwindow* handle();
 
         virtual void pollEvents() override;
-        virtual void begin( State& state ) const override;
-        virtual void end( State& state ) const override;
+        virtual void begin( State::Data& data ) const override;
+        virtual void suspend( State::Data& data ) const override;
+        virtual void resume( State::Data& data ) const override;
+        virtual void end( State::Data& data ) const override;
+
         virtual bool use() override;
         virtual bool unuse() override;
 

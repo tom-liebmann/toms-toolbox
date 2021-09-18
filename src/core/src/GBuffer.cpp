@@ -39,29 +39,40 @@ namespace ttb
         return m_depthBuffer;
     }
 
-    size_t GBuffer::width() const
+    auto GBuffer::viewport() const -> Viewport
     {
-        return m_drawBuffers[ 0 ]->width();
+        return { { 0, 0 }, { m_drawBuffers[ 0 ]->width(), m_drawBuffers[ 0 ]->height() } };
     }
 
-    size_t ttb::GBuffer::height() const
+    void GBuffer::begin( State::Data& data ) const
     {
-        return m_drawBuffers[ 0 ]->height();
+        if( data.frameBufferObjectStack.empty() )
+        {
+            GLint parentFrameBufferObject;
+            glGetIntegerv( GL_FRAMEBUFFER_BINDING, &parentFrameBufferObject );
+
+            data.frameBufferObjectStack.push( parentFrameBufferObject );
+        }
+
+        data.frameBufferObjectStack.push( m_frameBufferObject );
     }
 
-    void GBuffer::begin( State& state ) const
+    void GBuffer::suspend( State::Data& /* data */ ) const
     {
-        state.pushFramebuffer( m_frameBufferObject );
+        // Do nothing
+    }
 
+    void GBuffer::resume( State::Data& /* data */ ) const
+    {
+        glBindFramebuffer( GL_FRAMEBUFFER, m_frameBufferObject );
         glDrawBuffers( m_drawBufferIDs.size(), &m_drawBufferIDs[ 0 ] );
-
-        state.pushViewport( Viewport( 0, 0, width(), height() ) );
     }
 
-    void ttb::GBuffer::end( State& state ) const
+    void ttb::GBuffer::end( State::Data& data ) const
     {
-        state.popViewport();
-        state.popFramebuffer();
+        data.frameBufferObjectStack.pop();
+
+        glBindFramebuffer( GL_FRAMEBUFFER, data.frameBufferObjectStack.top() );
     }
 
     GBuffer::GBuffer()

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ttb/core/State.hpp>
 #include <ttb/core/gl.hpp>
 
 #include <memory>
@@ -34,7 +35,7 @@ namespace ttb
 
         ~Geometry();
 
-        void draw( State& state ) const;
+        void draw( State::Data& data ) const;
 
         Attribute const& attribute( size_t index ) const;
 

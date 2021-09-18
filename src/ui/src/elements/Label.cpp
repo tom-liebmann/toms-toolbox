@@ -51,7 +51,7 @@ namespace ttb::ui
             {
                 m_texture->bind( 0 );
                 {
-                    m_textGeometry->draw( state );
+                    state.draw( *m_textGeometry );
                 }
                 m_texture->unbind( 0 );
             } );
