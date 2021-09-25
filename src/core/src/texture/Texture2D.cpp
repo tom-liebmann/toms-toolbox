@@ -1,19 +1,15 @@
 #include <ttb/core/texture/Texture2D.hpp>
 
+#include <cassert>
 #include <iostream>
 
 namespace ttb
 {
-    Texture2D::Modifier Texture2D::create()
-    {
-        return modify( std::shared_ptr< Texture2D >( new Texture2D() ) );
-    }
-
     Texture2D::Modifier Texture2D::create(
-        size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType )
+        size_t width, size_t height, GLint internalFormat, uint8_t levels, uint8_t samples )
     {
         return modify( std::shared_ptr< Texture2D >(
-            new Texture2D( width, height, internalFormat, format, valueType ) ) );
+            new Texture2D( width, height, internalFormat, levels, samples ) ) );
     }
 
     size_t Texture2D::width() const
@@ -46,60 +42,57 @@ namespace ttb
         }
     }
 
-    uint8_t Texture2D::bytesPerPixel() const
+    uint8_t Texture2D::samples() const
     {
-        return colorChannel() * bitDepth();
-    }
-
-    uint8_t Texture2D::bitDepth() const
-    {
-        switch( m_valueType )
-        {
-            case GL_UNSIGNED_BYTE:
-                return 1;
-
-            case GL_FLOAT:
-                return 4;
-
-            default:
-                throw std::runtime_error( "Unknown value type" );
-        }
+        return m_samples;
     }
 
     void Texture2D::bind( uint8_t slot ) const
     {
         glActiveTexture( GL_TEXTURE0 + slot );
-        glBindTexture( GL_TEXTURE_2D, object() );
+        glBindTexture( target(), object() );
     }
 
     void Texture2D::unbind( uint8_t slot ) const
     {
         glActiveTexture( GL_TEXTURE0 + slot );
-        glBindTexture( GL_TEXTURE_2D, 0 );
+        glBindTexture( target(), 0 );
     }
 
-
-    Texture2D::Texture2D() : m_width( 0 ), m_height( 0 )
-    {
-    }
 
     Texture2D::Texture2D(
-        size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType )
+        size_t width, size_t height, GLint internalFormat, uint8_t levels, uint8_t samples )
         : m_width( width )
         , m_height( height )
         , m_internalFormat( internalFormat )
-        , m_format( format )
-        , m_valueType( valueType )
+        , m_levels{ levels }
+        , m_samples{ samples }
     {
-        glBindTexture( GL_TEXTURE_2D, m_object );
+        bind( 0 );
+        initStorage();
+        unbind( 0 );
+    }
 
-        glTexImage2D(
-            GL_TEXTURE_2D, 0, m_internalFormat, m_width, m_height, 0, m_format, m_valueType, NULL );
+    GLenum Texture2D::target() const
+    {
+        return m_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
+    }
 
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-
-        glBindTexture( GL_TEXTURE_2D, 0 );
+    void Texture2D::initStorage()
+    {
+        if( m_samples > 1 )
+        {
+            glTexStorage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE,
+                                       m_samples,
+                                       m_internalFormat,
+                                       m_width,
+                                       m_height,
+                                       GL_TRUE );
+        }
+        else
+        {
+            glTexStorage2D( GL_TEXTURE_2D, m_levels, m_internalFormat, m_width, m_height );
+        }
     }
 
 
@@ -111,18 +104,37 @@ namespace ttb
         }
     }
 
-    Texture2D::Modifier& Texture2D::Modifier::upload(
-        size_t x, size_t y, size_t width, size_t height, void const* data )
+    Texture2D::Modifier& Texture2D::Modifier::resize(
+        size_t width, size_t height, GLint internalFormat, uint8_t levels, uint8_t samples )
     {
-        glTexSubImage2D( GL_TEXTURE_2D,
-                         0,
-                         x,
-                         y,
-                         width,
-                         height,
-                         m_texture->m_format,
-                         m_texture->m_valueType,
-                         data );
+        m_texture->m_width = width;
+        m_texture->m_height = height;
+        m_texture->m_internalFormat = internalFormat;
+        m_texture->m_levels = levels;
+        m_texture->m_samples = samples;
+
+        m_texture->unbind( 0 );
+
+        glDeleteTextures( 1, &m_texture->m_object );
+        glGenTextures( 1, &m_texture->m_object );
+
+        m_texture->bind( 0 );
+        m_texture->initStorage();
+
+        return *this;
+    }
+
+    Texture2D::Modifier& Texture2D::Modifier::upload( size_t x,
+                                                      size_t y,
+                                                      size_t width,
+                                                      size_t height,
+                                                      GLenum format,
+                                                      GLenum valueType,
+                                                      void const* data )
+    {
+        assert( m_texture->m_samples == 1 );
+
+        glTexSubImage2D( m_texture->target(), 0, x, y, width, height, format, valueType, data );
 
         return *this;
     }
@@ -134,62 +146,41 @@ namespace ttb
                                                       GLenum valueType,
                                                       void const* data )
     {
-        m_texture->m_width = width;
-        m_texture->m_height = height;
-        m_texture->m_internalFormat = internalFormat;
-        m_texture->m_format = format;
-        m_texture->m_valueType = valueType;
-
-        glTexImage2D( GL_TEXTURE_2D,
-                      0,
-                      m_texture->m_internalFormat,
-                      m_texture->m_width,
-                      m_texture->m_height,
-                      0,
-                      m_texture->m_format,
-                      m_texture->m_valueType,
-                      data );
+        resize( width, height, internalFormat );
+        upload( format, valueType, data );
 
         return *this;
     }
 
-    Texture2D::Modifier& Texture2D::Modifier::upload( void const* data )
+    Texture2D::Modifier&
+        Texture2D::Modifier::upload( GLenum format, GLenum valueType, void const* data )
     {
-        glTexSubImage2D( GL_TEXTURE_2D,
-                         0,
-                         0,
-                         0,
-                         m_texture->m_width,
-                         m_texture->m_height,
-                         m_texture->m_format,
-                         m_texture->m_valueType,
-                         data );
-
-        return *this;
+        return upload( 0, 0, m_texture->m_width, m_texture->m_height, format, valueType, data );
     }
 
     Texture2D::Modifier&
         Texture2D::Modifier::download( [[maybe_unused]] size_t level,
                                        [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
-#ifndef PLATFORM_ANDROID
-        GLint width, height;
-        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
-        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+        // #ifndef PLATFORM_ANDROID
+        //         GLint width, height;
+        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
 
-        buffer.resize( width * height * m_texture->bytesPerPixel() );
+        //         buffer.resize( width * height * m_texture->bytesPerPixel() );
 
-        glGetTexImage(
-            GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
-#endif
+        //         glGetTexImage(
+        //             GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType,
+        //             buffer.data() );
+        // #endif
 
         return *this;
     }
 
     Texture2D::Modifier& Texture2D::Modifier::minMagFilter( GLint minFilter, GLint magFilter )
     {
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_MIN_FILTER, minFilter );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_MAG_FILTER, magFilter );
 
         return *this;
     }
@@ -198,7 +189,7 @@ namespace ttb
     {
 #ifndef PLATFORM_ANDROID
 
-        glTexParameteri( GL_TEXTURE_2D, GL_DEPTH_TEXTURE_MODE, mode );
+        glTexParameteri( m_texture->target(), GL_DEPTH_TEXTURE_MODE, mode );
 
 #endif
 
@@ -207,22 +198,22 @@ namespace ttb
 
     Texture2D::Modifier& Texture2D::Modifier::compareMode( GLint mode )
     {
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, mode );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_COMPARE_MODE, mode );
 
         return *this;
     }
 
     Texture2D::Modifier& Texture2D::Modifier::compareFunc( GLint func )
     {
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, func );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_COMPARE_FUNC, func );
 
         return *this;
     }
 
     Texture2D::Modifier& Texture2D::Modifier::wrap( GLenum xWrap, GLenum yWrap )
     {
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, xWrap );
-        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, yWrap );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_WRAP_S, xWrap );
+        glTexParameteri( m_texture->target(), GL_TEXTURE_WRAP_T, yWrap );
 
         return *this;
     }
@@ -232,11 +223,11 @@ namespace ttb
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
         {
-            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
+            glTexParameterf( m_texture->target(), GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
         }
         else
         {
-            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
+            glTexParameterf( m_texture->target(), GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
         }
 #endif
 
@@ -245,14 +236,16 @@ namespace ttb
 
     Texture2D::Modifier& Texture2D::Modifier::generateMipMap()
     {
-        glGenerateMipmap( GL_TEXTURE_2D );
+        assert( m_texture->m_samples == 1 );
+
+        glGenerateMipmap( m_texture->target() );
 
         return *this;
     }
 
     std::shared_ptr< Texture2D > Texture2D::Modifier::finish()
     {
-        glBindTexture( GL_TEXTURE_2D, 0 );
+        m_texture->unbind( 0 );
 
         return std::exchange( m_texture, std::shared_ptr< Texture2D >() );
     }
@@ -260,7 +253,7 @@ namespace ttb
     Texture2D::Modifier::Modifier( std::shared_ptr< Texture2D > texture )
         : m_texture( std::move( texture ) )
     {
-        glBindTexture( GL_TEXTURE_2D, m_texture->object() );
+        m_texture->bind( 0 );
     }
 
 
@@ -276,18 +269,19 @@ namespace ttb
         Texture2D::ConstModifier::download( [[maybe_unused]] size_t level,
                                             [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
-#ifndef PLATFORM_ANDROID
+        // #ifndef PLATFORM_ANDROID
 
-        GLint width, height;
-        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
-        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+        //         GLint width, height;
+        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
 
-        buffer.resize( width * height * m_texture->bytesPerPixel() );
+        //         buffer.resize( width * height * m_texture->bytesPerPixel() );
 
-        glGetTexImage(
-            GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType, buffer.data() );
+        //         glGetTexImage(
+        //             GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType,
+        //             buffer.data() );
 
-#endif
+        // #endif
 
         return *this;
     }
@@ -298,11 +292,11 @@ namespace ttb
 #ifdef GL_TEXTURE_MAX_ANISOTROPY
         if( enabled )
         {
-            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
+            glTexParameterf( m_texture->target(), GL_TEXTURE_MAX_ANISOTROPY, 16.0f );
         }
         else
         {
-            glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
+            glTexParameterf( m_texture->target(), GL_TEXTURE_MAX_ANISOTROPY, 1.0f );
         }
 #endif
 
@@ -311,13 +305,13 @@ namespace ttb
 
     void Texture2D::ConstModifier::finish()
     {
-        glBindTexture( GL_TEXTURE_2D, 0 );
+        m_texture->unbind( 0 );
         m_texture = nullptr;
     }
 
     Texture2D::ConstModifier::ConstModifier( ttb::Texture2D const& texture ) : m_texture( &texture )
     {
-        glBindTexture( GL_TEXTURE_2D, m_texture->object() );
+        m_texture->bind( 0 );
     }
 
 

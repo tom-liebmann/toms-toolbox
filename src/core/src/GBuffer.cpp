@@ -87,20 +87,36 @@ namespace ttb
     GBuffer::Modifier& GBuffer::Modifier::drawBuffer( uint8_t unit,
                                                       std::shared_ptr< Texture2D > buffer )
     {
-        std::cout << "Status: " << std::to_string( glCheckFramebufferStatus( GL_DRAW_FRAMEBUFFER ) )
-                  << '\n';
-
         if( m_buffer->m_drawBuffers.size() <= unit )
         {
             m_buffer->m_drawBuffers.resize( unit + 1 );
             m_buffer->m_drawBufferIDs.resize( unit + 1 );
         }
 
-        assert( buffer->width() != 0 );
-        assert( buffer->height() != 0 );
+        if( !buffer )
+        {
+            glFramebufferTexture( GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, 0, 0 );
+        }
+        else
+        {
+            assert( buffer->width() != 0 );
+            assert( buffer->height() != 0 );
 
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, GL_TEXTURE_2D, buffer->object(), 0 );
+            if( buffer->target() == GL_TEXTURE_2D_MULTISAMPLE )
+            {
+                std::cout << "Binding texture" << std::endl;
+                glFramebufferTexture(
+                    GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, buffer->object(), 0 );
+            }
+            else
+            {
+                glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
+                                        GL_COLOR_ATTACHMENT0 + unit,
+                                        buffer->target(),
+                                        buffer->object(),
+                                        0 );
+            }
+        }
 
         checkFramebufferStatus();
 
@@ -112,14 +128,18 @@ namespace ttb
 
     GBuffer::Modifier& GBuffer::Modifier::depthBuffer( std::shared_ptr< Texture2D > buffer )
     {
-        assert( buffer->width() != 0 );
-        assert( buffer->height() != 0 );
+        if( buffer )
+        {
+            assert( buffer->width() != 0 );
+            assert( buffer->height() != 0 );
 
-        glFramebufferTexture2D( GL_DRAW_FRAMEBUFFER,
-                                GL_DEPTH_ATTACHMENT,
-                                GL_TEXTURE_2D,
-                                buffer ? buffer->object() : 0,
-                                0 );
+            glFramebufferTexture2D(
+                GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, buffer->target(), buffer->object(), 0 );
+        }
+        else
+        {
+            glFramebufferTexture( GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 0, 0 );
+        }
 
         checkFramebufferStatus();
 

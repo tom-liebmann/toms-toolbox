@@ -18,8 +18,8 @@ namespace ttb
                                    LCT_RGBA,
                                    8 );
 
-            auto texture = Texture2D::create()
-                               .upload( width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pngData )
+            auto texture = Texture2D::create( width, height, GL_RGBA8 )
+                               .upload( GL_RGBA, GL_UNSIGNED_BYTE, pngData )
                                .minMagFilter( GL_LINEAR, GL_LINEAR )
                                .finish();
 
@@ -34,8 +34,8 @@ namespace ttb
             unsigned int width, height;
             lodepng_decode_file( &pngData, &width, &height, filename.c_str(), LCT_RGBA, 8 );
 
-            auto texture = Texture2D::create()
-                               .upload( width, height, GL_RGBA, GL_RGBA, GL_UNSIGNED_BYTE, pngData )
+            auto texture = Texture2D::create( width, height, GL_RGBA8 )
+                               .upload( GL_RGBA, GL_UNSIGNED_BYTE, pngData )
                                .minMagFilter( GL_LINEAR, GL_LINEAR )
                                .finish();
 
@@ -51,7 +51,8 @@ namespace ttb
         //     std::unique_ptr< uint8_t[] > textureData;
 
         //     // copy image data into continuous memory area
-        //     // TODO: get png decode to accept an already allocated memory region to fill the image
+        //     // TODO: get png decode to accept an already allocated memory region to fill the
+        //     image
         //     // data into to avoid unnecessary extra copy operation
         //     // TODO: use a faster png library if possible
         //     for( size_t fileNr = 0; fileNr < filenames.size(); ++fileNr )
@@ -82,7 +83,8 @@ namespace ttb
         //         else
         //         {
         //             free( pngData );
-        //             throw std::runtime_error( "Invalid PNG Array. Width and height don't match." );
+        //             throw std::runtime_error( "Invalid PNG Array. Width and height don't match."
+        //             );
         //         }
         //     }
 
@@ -110,7 +112,8 @@ namespace ttb
 
             modify( texture ).download( 0, data ).finish();
 
-            LodePNGColorType type = []( uint8_t channel ) {
+            LodePNGColorType type = []( uint8_t channel )
+            {
                 switch( channel )
                 {
                     case 3:
@@ -127,12 +130,9 @@ namespace ttb
             // TODO: Find out why lodepng crashes with "double free" error when textures are in RGB
             // rather than RGBA format
 
-            lodepng_encode_file( filename.c_str(),
-                                 data.data(),
-                                 texture->width(),
-                                 texture->height(),
-                                 type,
-                                 texture->bitDepth() * 8 );
+            // TODO: Proparly compute bit depth
+            lodepng_encode_file(
+                filename.c_str(), data.data(), texture->width(), texture->height(), type, 4 * 8 );
         }
     }
 }

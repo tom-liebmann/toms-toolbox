@@ -103,7 +103,7 @@ namespace ttb
         // glfwWindowHint( GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE );
         glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
 
-        glfwWindowHint( GLFW_SAMPLES, 8 );
+        // glfwWindowHint( GLFW_SAMPLES, 8 );
 
 #ifndef NDEBUG
         glfwWindowHint( GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE );

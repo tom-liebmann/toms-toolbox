@@ -38,24 +38,26 @@ namespace ttb::resources
             { "geometry", ttb::Shader::Type::GEOMETRY },
         };
 
-        return ttb::Program::create( [ & ]( auto& creator ) {
-            for( auto const shaderNode : node )
+        return ttb::Program::create(
+            [ & ]( auto& creator )
             {
-                auto const type = shaderTypes.at( shaderNode[ "type" ].as< std::string >() );
-                auto const file = rootPath() + "/" + shaderNode[ "file" ].as< std::string >();
-
-                auto const source = loadSource( rootPath(), file );
-
-                try
+                for( auto const shaderNode : node )
                 {
-                    creator.attachShader( ttb::Shader::fromSource( type, source ) );
+                    auto const type = shaderTypes.at( shaderNode[ "type" ].as< std::string >() );
+                    auto const file = rootPath() + "/" + shaderNode[ "file" ].as< std::string >();
+
+                    auto const source = loadSource( rootPath(), file );
+
+                    try
+                    {
+                        creator.attachShader( ttb::Shader::fromSource( type, source ) );
+                    }
+                    catch( std::runtime_error& e )
+                    {
+                        throw std::runtime_error( file + ":\n" + source + "\n" + e.what() );
+                    }
                 }
-                catch( std::runtime_error& e )
-                {
-                    throw std::runtime_error( file + ":\n" + source + "\n" + e.what() );
-                }
-            }
-        } );
+            } );
     }
 }
 
@@ -82,8 +84,8 @@ namespace ttb::resources
                     if( cmd == "version" )
                     {
 #if defined( PLATFORM_LINUX )
-                        // line = "#version 330";
-                        line = "#version 100";
+                        line = "#version 330";
+                        // line = "#version 100";
 #elif defined( PLATFORM_ANDROID )
                         // line = "#version 320 es";
                         line = "#version 100";

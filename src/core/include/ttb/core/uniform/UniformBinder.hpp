@@ -16,13 +16,14 @@ namespace ttb
     class UniformBinder
     {
     public:
-        UniformBinder( std::string const& name, TType const& value );
+        UniformBinder( std::string const& name, TType const& value, bool overwrite = false );
 
         UniformBinderHandle< TType > bind( State::Data& data ) const;
 
     private:
         std::string const& m_name;
         TType const& m_value;
+        bool m_overwrite;
     };
 
 
@@ -33,7 +34,10 @@ namespace ttb
         ~UniformBinderHandle();
 
     private:
-        UniformBinderHandle( std::string const& name, TType const& value, State::Data& data );
+        UniformBinderHandle( std::string const& name,
+                             TType const& value,
+                             bool overwrite,
+                             State::Data& data );
 
         std::string const& m_name;
         State::Data& m_data;
@@ -52,6 +56,7 @@ namespace ttb
     private:
         UniformBinderHandle( std::string const& name,
                              Matrix< TType, TRows, TCols > const& value,
+                             bool overwrite,
                              State::Data& data );
 
         std::string const& m_name;
@@ -66,15 +71,17 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    UniformBinder< TType >::UniformBinder( std::string const& name, TType const& value )
-        : m_name{ name }, m_value{ value }
+    UniformBinder< TType >::UniformBinder( std::string const& name,
+                                           TType const& value,
+                                           bool overwrite )
+        : m_name{ name }, m_value{ value }, m_overwrite{ overwrite }
     {
     }
 
     template < typename TType >
     UniformBinderHandle< TType > UniformBinder< TType >::bind( State::Data& data ) const
     {
-        return { m_name, m_value, data };
+        return { m_name, m_value, m_overwrite, data };
     }
 
 
@@ -97,6 +104,7 @@ namespace ttb
     template < typename TType >
     UniformBinderHandle< TType >::UniformBinderHandle( std::string const& name,
                                                        TType const& value,
+                                                       bool /* overwrite */,
                                                        State::Data& data )
         : m_name{ name }, m_data{ data }
     {
@@ -134,7 +142,10 @@ namespace ttb
 
     template < typename TType, size_t TRows, size_t TCols >
     UniformBinderHandle< Matrix< TType, TRows, TCols > >::UniformBinderHandle(
-        std::string const& name, Matrix< TType, TRows, TCols > const& value, State::Data& data )
+        std::string const& name,
+        Matrix< TType, TRows, TCols > const& value,
+        bool overwrite,
+        State::Data& data )
         : m_name{ name }, m_data{ data }
     {
         auto const iter = m_data.uniforms.find( m_name );
@@ -144,7 +155,15 @@ namespace ttb
             auto& holder = static_cast< TypedUniformHolder< Matrix< TType, TRows, TCols > >& >(
                 *iter->second );
             m_oldValue = holder.value();
-            holder.value( holder.value() * value );
+
+            if( overwrite )
+            {
+                holder.value( value );
+            }
+            else
+            {
+                holder.value( holder.value() * value );
+            }
         }
         else
         {

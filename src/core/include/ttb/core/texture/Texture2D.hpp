@@ -19,10 +19,11 @@ namespace ttb
         class Modifier;
         class ConstModifier;
 
-        static Modifier create();
-
-        static Modifier create(
-            size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType );
+        static Modifier create( size_t width,
+                                size_t height,
+                                GLint internalFormat,
+                                uint8_t levels = 1,
+                                uint8_t samples = 1 );
 
         // Properties
         size_t width() const;
@@ -31,9 +32,9 @@ namespace ttb
 
         uint8_t colorChannel() const;
 
-        uint8_t bytesPerPixel() const;
+        uint8_t samples() const;
 
-        uint8_t bitDepth() const;
+        GLenum target() const;
 
         // Override: Texture
         virtual void bind( uint8_t slot ) const override;
@@ -41,16 +42,16 @@ namespace ttb
         virtual void unbind( uint8_t slot ) const override;
 
     private:
-        Texture2D();
-
         Texture2D(
-            size_t width, size_t height, GLint internalFormat, GLenum format, GLenum valueType );
+            size_t width, size_t height, GLint internalFormat, uint8_t levels, uint8_t samples );
+
+        void initStorage();
 
         size_t m_width;
         size_t m_height;
         GLint m_internalFormat;
-        GLenum m_format;
-        GLenum m_valueType;
+        uint8_t m_levels{ 1 };
+        uint8_t m_samples{ 1 };
     };
 
 
@@ -58,6 +59,12 @@ namespace ttb
     {
     public:
         ~Modifier();
+
+        Modifier& resize( size_t width,
+                          size_t height,
+                          GLint internalFormat,
+                          uint8_t levels = 1,
+                          uint8_t samples = 1 );
 
         /// Upload values into the texture
         /*
@@ -71,10 +78,16 @@ namespace ttb
                           void const* data );
 
         /// Update a rectangular part of the texture
-        Modifier& upload( size_t x, size_t y, size_t width, size_t height, void const* data );
+        Modifier& upload( size_t x,
+                          size_t y,
+                          size_t width,
+                          size_t height,
+                          GLenum format,
+                          GLenum valueType,
+                          void const* data );
 
         /// Update the texture's data
-        Modifier& upload( void const* data );
+        Modifier& upload( GLenum format, GLenum valueType, void const* data );
 
         Modifier& download( size_t level, std::vector< uint8_t >& buffer );
 
@@ -89,6 +102,8 @@ namespace ttb
         Modifier& wrap( GLenum xWrap, GLenum yWrap );
 
         Modifier& anisotropicFiltering( bool enabled );
+
+        Modifier& multisampling( uint8_t numSamples );
 
         Modifier& generateMipMap();
 
