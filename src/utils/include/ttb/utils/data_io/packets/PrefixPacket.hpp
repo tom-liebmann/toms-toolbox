@@ -52,8 +52,8 @@ namespace ttb
     {
         auto writeHelper = PacketWriteHelper{ offset, size, writer };
 
-        writeHelper.write( &m_prefix, sizeof( m_prefix ) );
-        writeHelper.write( m_packet.get() );
+        writeHelper.writeData( &m_prefix, sizeof( m_prefix ) );
+        writeHelper.writePacket( m_packet.get() );
 
         return writeHelper.written();
     }

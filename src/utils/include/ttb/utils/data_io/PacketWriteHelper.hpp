@@ -17,14 +17,14 @@ namespace ttb
     public:
         PacketWriteHelper( size_t offset, size_t size, Writer& writer );
 
-        void write( void const* data, size_t dataSize );
+        void writeData( void const* data, size_t dataSize );
 
-        void write( ttb::Packet const& packet );
+        void writePacket( ttb::Packet const& packet );
 
-        void write( ttb::Packet const& packet, size_t offset, size_t size );
+        void writePacket( ttb::Packet const& packet, size_t offset, size_t size );
 
         template < typename TType >
-        void write( TType const& value );
+        void writeValue( TType const& value );
 
         size_t written() const;
 
@@ -44,7 +44,7 @@ namespace ttb
     {
     }
 
-    inline void PacketWriteHelper::write( void const* data, size_t dataSize )
+    inline void PacketWriteHelper::writeData( void const* data, size_t dataSize )
     {
         if( m_size == 0 )
         {
@@ -68,7 +68,8 @@ namespace ttb
         m_offset = 0;
     }
 
-    inline void PacketWriteHelper::write( ttb::Packet const& packet, size_t offset, size_t size )
+    inline void
+        PacketWriteHelper::writePacket( ttb::Packet const& packet, size_t offset, size_t size )
     {
         if( m_size == 0 )
         {
@@ -91,15 +92,15 @@ namespace ttb
         m_offset = 0;
     }
 
-    inline void PacketWriteHelper::write( ttb::Packet const& packet )
+    inline void PacketWriteHelper::writePacket( ttb::Packet const& packet )
     {
-        write( packet, 0, packet.size() );
+        writePacket( packet, 0, packet.size() );
     }
 
     template < typename TType >
-    inline void PacketWriteHelper::write( TType const& value )
+    inline void PacketWriteHelper::writeValue( TType const& value )
     {
-        write( &value, sizeof( TType ) );
+        writeData( &value, sizeof( TType ) );
     }
 
     inline size_t PacketWriteHelper::written() const
