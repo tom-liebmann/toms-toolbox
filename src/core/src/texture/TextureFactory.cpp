@@ -2,11 +2,23 @@
 #include <ttb/core/PNGLoader.hpp>
 #include <ttb/core/texture/TextureFactory.hpp>
 
+
+namespace
+{
+    std::shared_ptr< ttb::Texture2D > createTextureFromData( size_t width,
+                                                             size_t height,
+                                                             GLenum internalFormat,
+                                                             uint8_t levels,
+                                                             GLenum dataFormat,
+                                                             GLenum dataType,
+                                                             void const* data );
+}
+
 namespace ttb
 {
     namespace TextureFactory
     {
-        std::shared_ptr< Texture2D > loadData( void const* data, size_t dataSize )
+        std::shared_ptr< Texture2D > loadData( void const* data, size_t dataSize, uint8_t levels )
         {
             uint8_t* pngData;
             unsigned int width, height;
@@ -18,26 +30,22 @@ namespace ttb
                                    LCT_RGBA,
                                    8 );
 
-            auto texture = Texture2D::create( width, height, GL_RGBA8 )
-                               .upload( GL_RGBA, GL_UNSIGNED_BYTE, pngData )
-                               .minMagFilter( GL_LINEAR, GL_LINEAR )
-                               .finish();
+            auto texture = createTextureFromData(
+                width, height, GL_RGBA8, levels, GL_RGBA, GL_UNSIGNED_BYTE, pngData );
 
             free( pngData );
 
             return texture;
         }
 
-        std::shared_ptr< Texture2D > loadPNG( std::string const& filename )
+        std::shared_ptr< Texture2D > loadPNG( std::string const& filename, uint8_t levels )
         {
             uint8_t* pngData;
             unsigned int width, height;
             lodepng_decode_file( &pngData, &width, &height, filename.c_str(), LCT_RGBA, 8 );
 
-            auto texture = Texture2D::create( width, height, GL_RGBA8 )
-                               .upload( GL_RGBA, GL_UNSIGNED_BYTE, pngData )
-                               .minMagFilter( GL_LINEAR, GL_LINEAR )
-                               .finish();
+            auto texture = createTextureFromData(
+                width, height, GL_RGBA8, levels, GL_RGBA, GL_UNSIGNED_BYTE, pngData );
 
             free( pngData );
 
@@ -134,5 +142,34 @@ namespace ttb
             lodepng_encode_file(
                 filename.c_str(), data.data(), texture->width(), texture->height(), type, 4 * 8 );
         }
+    }
+}
+
+
+namespace
+{
+    std::shared_ptr< ttb::Texture2D > createTextureFromData( size_t width,
+                                                             size_t height,
+                                                             GLenum internalFormat,
+                                                             uint8_t levels,
+                                                             GLenum dataFormat,
+                                                             GLenum dataType,
+                                                             void const* data )
+    {
+        auto textureMod = ttb::Texture2D::create( width, height, internalFormat, levels, 1 );
+
+        textureMod.upload( dataFormat, dataType, data );
+
+        if( levels > 1 )
+        {
+            textureMod.minMagFilter( GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR );
+            textureMod.generateMipMap();
+        }
+        else
+        {
+            textureMod.minMagFilter( GL_LINEAR, GL_LINEAR );
+        }
+
+        return textureMod.finish();
     }
 }
