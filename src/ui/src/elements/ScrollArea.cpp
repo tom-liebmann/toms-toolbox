@@ -13,7 +13,7 @@ namespace ttb::ui
     class ScrollArea::ScrollableArea : public WrappedElement
     {
     public:
-        ScrollableArea( Framework& framework );
+        explicit ScrollableArea( Framework& framework );
 
         void child( Element* element );
     };
@@ -76,10 +76,11 @@ namespace ttb::ui
         glEnable( GL_SCISSOR_TEST );
         glScissor( viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight() );
         {
-            auto const u =
-                state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( m_transform );
-
-            m_child->render( state );
+            state.with( ttb::UniformBinder( "u_transform", m_transform ),
+                        [ & ]
+                        {
+                            m_child->render( state );
+                        } );
         }
         glDisable( GL_SCISSOR_TEST );
     }

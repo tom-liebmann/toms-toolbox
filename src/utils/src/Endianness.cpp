@@ -24,6 +24,7 @@ namespace
     ttb::Endianness computeNativeEndianness()
     {
         uint16_t value = 0x1234;
+        // cppcheck-suppress knownConditionTrueFalse
         if( *reinterpret_cast< uint8_t* >( &value ) == 0x12 )
         {
             return ttb::Endianness::BIG;

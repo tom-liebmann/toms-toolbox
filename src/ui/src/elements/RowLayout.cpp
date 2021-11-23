@@ -19,10 +19,12 @@ namespace ttb::ui
             element->parent( this );
         }
 
-        auto const iter =
-            std::find_if( std::begin( m_children ),
-                          std::end( m_children ),
-                          [ & ]( auto const& child ) { return child.index == index; } );
+        auto const iter = std::find_if( std::begin( m_children ),
+                                        std::end( m_children ),
+                                        [ & ]( auto const& child )
+                                        {
+                                            return child.index == index;
+                                        } );
 
         if( iter == std::end( m_children ) )
         {
@@ -44,10 +46,12 @@ namespace ttb::ui
 
     void RowLayout::erase( uint16_t index )
     {
-        auto const iter =
-            std::find_if( std::begin( m_children ),
-                          std::end( m_children ),
-                          [ & ]( auto const& child ) { return child.index == index; } );
+        auto const iter = std::find_if( std::begin( m_children ),
+                                        std::end( m_children ),
+                                        [ & ]( auto const& child )
+                                        {
+                                            return child.index == index;
+                                        } );
 
         if( iter != std::end( m_children ) )
         {
@@ -59,10 +63,12 @@ namespace ttb::ui
 
     uint16_t RowLayout::findChild( Element const& element )
     {
-        auto const iter =
-            std::find_if( std::begin( m_children ),
-                          std::end( m_children ),
-                          [ & ]( auto const& child ) { return child.element == &element; } );
+        auto const iter = std::find_if( std::begin( m_children ),
+                                        std::end( m_children ),
+                                        [ & ]( auto const& child )
+                                        {
+                                            return child.element == &element;
+                                        } );
 
         if( iter == std::end( m_children ) )
         {
@@ -181,16 +187,17 @@ namespace ttb::ui
     {
         auto const transform = ttb::mat::translation( Element::range().min() );
 
-        auto const u1 =
-            state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ).push( transform );
-
-        for( auto const& c : m_children )
-        {
-            if( c.element )
-            {
-                c.element->render( state );
-            }
-        }
+        state.with( ttb::UniformBinder( "u_transform", transform ),
+                    [ & ]
+                    {
+                        for( auto const& c : m_children )
+                        {
+                            if( c.element )
+                            {
+                                c.element->render( state );
+                            }
+                        }
+                    } );
     }
 
     bool RowLayout::onEvent( Event const& event )

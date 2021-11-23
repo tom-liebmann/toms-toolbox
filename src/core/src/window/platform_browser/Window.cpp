@@ -102,9 +102,7 @@ namespace ttb
                                 m_size( 0 ) = event.window.data1;
                                 m_size( 1 ) = event.window.data2;
 
-                                auto const event = events::WindowResize{ *this };
-                                pushEvent( event );
-
+                                pushEvent( events::WindowResize{ *this } );
                                 break;
                             }
                         }

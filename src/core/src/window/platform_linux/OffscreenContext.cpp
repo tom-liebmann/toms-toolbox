@@ -12,7 +12,7 @@ namespace ttb
     class OffscreenContext::Impl
     {
     public:
-        Impl( Context& sharedContext );
+        explicit Impl( Context& sharedContext );
 
         Impl();
 

@@ -56,7 +56,7 @@ namespace ttb::ui
         for( auto const& child : m_children )
         {
             if( child.element->onEvent( event ) )
-            {
+            {  // cppcheck-suppress useStlAlgorithm // raw loop much cleaner than using std::any_of
                 return true;
             }
         }

@@ -5,6 +5,7 @@
 #include <ttb/core/window.hpp>
 
 
+// cppcheck suppress unusedFunction
 ttb::Application& application()
 {
     return Application::instance();

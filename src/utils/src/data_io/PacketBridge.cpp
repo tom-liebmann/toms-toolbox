@@ -15,6 +15,7 @@ namespace ttb::net
     {
         auto const lock = std::scoped_lock{ m_mutex };
 
+        // cppcheck-suppress unreadVariable // FIXME https://trac.cppcheck.net/ticket/10505
         m_bytesRequired = sizeof( uint32_t );
         m_buffer.resize( sizeof( uint32_t ) );
         m_state = State::READ_SIZE;
