@@ -109,9 +109,9 @@ namespace ttb
         }
 
 #ifndef NDEBUG
-        return dynamic_cast< TypedUniformHolder< TType >& >( iter->second ).value();
+        return &dynamic_cast< TypedUniformHolder< TType > const& >( *iter->second ).value();
 #else
-        return static_cast< TypedUniformHolder< TType >& >( iter->second ).value();
+        return &static_cast< TypedUniformHolder< TType > const& >( *iter->second ).value();
 #endif
     }
 }
