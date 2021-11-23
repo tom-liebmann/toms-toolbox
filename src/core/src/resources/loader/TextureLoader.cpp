@@ -17,7 +17,7 @@ namespace ttb::resources
 
             if( auto const levelNode = node[ "levels" ] )
             {
-                levels = levelNode.as< uint8_t >();
+                levels = levelNode.as< int >();
             }
 
 #if defined( PLATFORM_ANDROID )
@@ -29,6 +29,10 @@ namespace ttb::resources
 #elif defined( PLATFORM_LINUX ) || defined( PLATFORM_BROWSER )
 
             auto texture = ttb::TextureFactory::loadPNG( file, levels );
+
+#else
+
+#error Unknown platform
 
 #endif
 
