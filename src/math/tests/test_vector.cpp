@@ -47,6 +47,7 @@ TEST_CASE( "Vector assignment", "[math][vector]" )
         auto const vec1 = ttb::Vector{ 1, 2 };
         auto vec2 = ttb::Vector{ 3, 4 };
 
+        // cppcheck-suppress redundantInitialization
         vec2 = vec1;
 
         REQUIRE( 1 == vec2( 0 ) );
@@ -57,6 +58,7 @@ TEST_CASE( "Vector assignment", "[math][vector]" )
     {
         auto vec = ttb::Vector{ 1, 2 };
 
+        // cppcheck-suppress redundantInitialization
         vec = { 3, 4 };
 
         REQUIRE( 3 == vec( 0 ) );
@@ -67,6 +69,7 @@ TEST_CASE( "Vector assignment", "[math][vector]" )
     {
         auto vec = ttb::Vector{ 1 };
 
+        // cppcheck-suppress redundantInitialization
         vec = ttb::Vector{ 5 };
 
         REQUIRE( 5 == vec( 0 ) );

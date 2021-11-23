@@ -6,7 +6,16 @@
 
 TEST_CASE( "Range", "[math][range]" )
 {
-    auto const range = ttb::Range< float, 2 >{ { 0.0f, 0.0f }, { 1.0f, 1.0f } };
+    auto range = ttb::Range< double, 2 >{};
 
-    std::cout << range << '\n';
+    REQUIRE( range.empty() );
+
+    range.expand( { 0.0, 0.0 } );
+    range.expand( { 1.0, 1.0 } );
+
+    REQUIRE( !range.empty() );
+
+    range = {};
+
+    REQUIRE( range.empty() );
 }

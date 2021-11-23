@@ -19,6 +19,9 @@ namespace ttb
     constexpr auto mix( TType1 min, TType2 max, TType3 value );
 
     template < typename TType >
+    constexpr auto smoothstep( TType value );
+
+    template < typename TType >
     auto factorial( TType value );
 
     template < typename TType >
@@ -57,6 +60,13 @@ namespace ttb
     inline constexpr auto mix( TType1 min, TType2 max, TType3 value )
     {
         return ( 1 - value ) * min + value * max;
+    }
+
+    template < typename TType >
+    inline constexpr auto smoothstep( TType value )
+    {
+        auto const x = clamp( value, TType{ 0 }, TType{ 1 } );
+        return x * x * ( TType{ 3 } - TType{ 2 } * x );
     }
 
     template < typename TType >

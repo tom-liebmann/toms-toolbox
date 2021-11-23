@@ -57,6 +57,13 @@ namespace ttb
          */
         void extend( Range const& rhs );
 
+        /**
+         * Expands the range such that it contains the given point.
+         *
+         * @rhs Point to include in the range
+         */
+        void expand( Vector< T, D > const& point );
+
     private:
         Vector< T, D > m_min;
         Vector< T, D > m_max;
@@ -222,6 +229,16 @@ namespace ttb
         {
             m_min( i ) = std::min( m_min( i ), rhs.min( i ) );
             m_max( i ) = std::max( m_max( i ), rhs.max( i ) );
+        }
+    }
+
+    template < typename TType, size_t TDim >
+    void Range< TType, TDim >::expand( Vector< TType, TDim > const& point )
+    {
+        for( size_t i = 0; i < TDim; ++i )
+        {
+            m_min( i ) = std::min( m_min( i ), point( i ) );
+            m_max( i ) = std::max( m_max( i ), point( i ) );
         }
     }
 
