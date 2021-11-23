@@ -1,6 +1,7 @@
 target_sources(
     ${TARGET_NAME}
     PRIVATE
+        Bezier.cpp
         Matrix.cpp
         Quaternion.cpp
         Range.cpp

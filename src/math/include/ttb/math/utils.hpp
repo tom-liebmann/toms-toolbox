@@ -17,6 +17,12 @@ namespace ttb
 
     template < typename TType1, typename TType2, typename TType3 >
     constexpr auto mix( TType1 min, TType2 max, TType3 value );
+
+    template < typename TType >
+    auto factorial( TType value );
+
+    template < typename TType >
+    auto binomial( TType n, TType k );
 }
 
 
@@ -51,5 +57,25 @@ namespace ttb
     inline constexpr auto mix( TType1 min, TType2 max, TType3 value )
     {
         return ( 1 - value ) * min + value * max;
+    }
+
+    template < typename TType >
+    auto factorial( TType value )
+    {
+        auto result = TType{ 1 };
+
+        while( value > 1 )
+        {
+            result *= value;
+            value -= 1;
+        }
+
+        return result;
+    }
+
+    template < typename TType >
+    auto binomial( TType n, TType k )
+    {
+        return factorial( n ) / factorial( k ) / factorial( n - k );
     }
 }

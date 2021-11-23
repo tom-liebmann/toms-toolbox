@@ -16,3 +16,13 @@ ttb_add_test(
 if( TARGET test_range )
     target_link_libraries( test_range PRIVATE ttbMath )
 endif()
+
+
+ttb_add_test(
+    TARGET_NAME test_bezier
+    SOURCES test_bezier.cpp
+)
+
+if( TARGET test_bezier )
+    target_link_libraries( test_bezier PRIVATE ttbMath )
+endif()

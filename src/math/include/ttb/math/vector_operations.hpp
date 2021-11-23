@@ -70,7 +70,7 @@ namespace ttb
     ttb::Vector< TType1, TDim >& operator*=( ttb::Vector< TType1, TDim >& lhs, TType2 rhs );
 
     template < typename TType1, typename TType2, size_t TDim >
-    ttb::Vector< TType1, TDim >& operator/=( ttb::Vector< TType1, TDim >& lhs, TType2 rhs );
+    ttb::Vector< TType1, TDim >& operator/=( ttb::Vector< TType1, TDim >& lhs, TType2 const& rhs );
 
     template < typename TType1, typename TType2, size_t TDim >
     auto min( Vector< TType1, TDim > const& lhs, Vector< TType2, TDim > const& rhs );
