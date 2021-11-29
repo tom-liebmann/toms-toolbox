@@ -104,7 +104,6 @@ namespace ttb
 
             if( buffer->target() == GL_TEXTURE_2D_MULTISAMPLE )
             {
-                std::cout << "Binding texture" << std::endl;
                 glFramebufferTexture(
                     GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + unit, buffer->object(), 0 );
             }
