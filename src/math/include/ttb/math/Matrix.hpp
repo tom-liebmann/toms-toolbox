@@ -53,7 +53,9 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TRows, size_t TCols >
-    Matrix< TType, TRows, TCols >::Matrix() = default;
+    Matrix< TType, TRows, TCols >::Matrix() : m_values{}
+    {
+    }
 
     template < typename TType, size_t TRows, size_t TCols >
     inline TType& Matrix< TType, TRows, TCols >::operator[]( size_t index )

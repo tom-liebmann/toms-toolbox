@@ -68,7 +68,9 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TDim >
-    Vector< TType, TDim >::Vector() = default;
+    Vector< TType, TDim >::Vector() : m_values{}
+    {
+    }
 
     template < typename TType, size_t TDim >
     inline TType& Vector< TType, TDim >::operator[]( size_t index )
