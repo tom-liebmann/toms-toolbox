@@ -34,6 +34,10 @@ namespace ttb
     auto operator*( TType1 lhs, Matrix< TType2, TRows, TCols > const& rhs );
 
     template < typename TType1, typename TType2, size_t TRows, size_t TCols >
+    auto operator+( Matrix< TType1, TRows, TCols > const& lhs,
+                    Matrix< TType2, TRows, TCols > const& rhs );
+
+    template < typename TType1, typename TType2, size_t TRows, size_t TCols >
     auto operator-( Matrix< TType1, TRows, TCols > const& lhs,
                     Matrix< TType2, TRows, TCols > const& rhs );
 
@@ -242,6 +246,25 @@ namespace ttb
             for( size_t j = 0; j < TCols; ++j )
             {
                 result( i, j ) = lhs * rhs( i, j );
+            }
+        }
+
+        return result;
+    }
+
+    template < typename TType1, typename TType2, size_t TRows, size_t TCols >
+    auto operator+( Matrix< TType1, TRows, TCols > const& lhs,
+                    Matrix< TType2, TRows, TCols > const& rhs )
+    {
+        using ResultType = decltype( std::declval< TType1 >() - std::declval< TType2 >() );
+
+        Matrix< ResultType, TRows, TCols > result;
+
+        for( size_t i = 0; i < TRows; ++i )
+        {
+            for( size_t j = 0; j < TCols; ++j )
+            {
+                result( i, j ) = lhs( i, j ) + rhs( i, j );
             }
         }
 
