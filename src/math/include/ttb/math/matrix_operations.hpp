@@ -20,6 +20,15 @@ namespace ttb
     Matrix< TType, TCols, TRows > transpose( Matrix< TType, TRows, TCols > const& matrix );
 
     template < typename TType >
+    Matrix< TType, 1, 1 > invert( Matrix< TType, 1, 1 > const& matrix );
+
+    template < typename TType >
+    Matrix< TType, 2, 2 > invert( Matrix< TType, 2, 2 > const& matrix );
+
+    template < typename TType >
+    Matrix< TType, 3, 3 > invert( Matrix< TType, 3, 3 > const& matrix );
+
+    template < typename TType >
     Matrix< TType, 4, 4 > invert( Matrix< TType, 4, 4 > const& matrix );
 
     template < typename TType1, typename TType2, size_t TRows1, size_t TCols1, size_t TCols2 >
@@ -120,6 +129,43 @@ namespace ttb
         }
 
         return result;
+    }
+
+    template < typename TType >
+    Matrix< TType, 1, 1 > invert( Matrix< TType, 1, 1 > const& m )
+    {
+        return Matrix< TType, 1, 1 >{ TType{ 1 } / m( 0, 0 ) };
+    }
+
+    template < typename TType >
+    Matrix< TType, 2, 2 > invert( Matrix< TType, 2, 2 > const& m )
+    {
+        auto const det = m( 0, 0 ) * m( 1, 1 ) - m( 1, 0 ) * m( 0, 1 );
+        return Matrix< TType, 2, 2 >{
+            m( 1, 1 ) / det, -m( 0, 1 ) / det, -m( 1, 0 ) / det, m( 0, 0 ) / det
+        };
+    }
+
+    template < typename TType >
+    Matrix< TType, 3, 3 > invert( Matrix< TType, 3, 3 > const& m )
+    {
+        Matrix< TType, 3, 3 > r;
+
+        auto const det = m( 0, 0 ) * ( m( 1, 1 ) * m( 2, 2 ) - m( 2, 1 ) * m( 1, 2 ) ) -
+                         m( 0, 1 ) * ( m( 1, 0 ) * m( 2, 2 ) - m( 1, 2 ) * m( 2, 0 ) ) +
+                         m( 0, 2 ) * ( m( 1, 0 ) * m( 2, 1 ) - m( 1, 1 ) * m( 2, 0 ) );
+
+        r( 0, 0 ) = ( m( 1, 1 ) * m( 2, 2 ) - m( 2, 1 ) * m( 1, 2 ) ) * det;
+        r( 0, 1 ) = ( m( 0, 2 ) * m( 2, 1 ) - m( 0, 1 ) * m( 2, 2 ) ) * det;
+        r( 0, 2 ) = ( m( 0, 1 ) * m( 1, 2 ) - m( 0, 2 ) * m( 1, 1 ) ) * det;
+        r( 1, 0 ) = ( m( 1, 2 ) * m( 2, 0 ) - m( 1, 0 ) * m( 2, 2 ) ) * det;
+        r( 1, 1 ) = ( m( 0, 0 ) * m( 2, 2 ) - m( 0, 2 ) * m( 2, 0 ) ) * det;
+        r( 1, 2 ) = ( m( 1, 0 ) * m( 0, 2 ) - m( 0, 0 ) * m( 1, 2 ) ) * det;
+        r( 2, 0 ) = ( m( 1, 0 ) * m( 2, 1 ) - m( 2, 0 ) * m( 1, 1 ) ) * det;
+        r( 2, 1 ) = ( m( 2, 0 ) * m( 0, 1 ) - m( 0, 0 ) * m( 2, 1 ) ) * det;
+        r( 2, 2 ) = ( m( 0, 0 ) * m( 1, 1 ) - m( 1, 0 ) * m( 0, 1 ) ) * det;
+
+        return r;
     }
 
     template < typename TType >

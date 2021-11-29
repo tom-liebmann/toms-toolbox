@@ -9,6 +9,16 @@ endif()
 
 
 ttb_add_test(
+    TARGET_NAME test_matrix
+    SOURCES test_matrix.cpp
+    )
+
+if( TARGET test_matrix )
+    target_link_libraries( test_matrix PRIVATE ttbMath )
+endif()
+
+
+ttb_add_test(
     TARGET_NAME test_range
     SOURCES test_range.cpp
 )
