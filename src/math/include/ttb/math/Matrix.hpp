@@ -41,6 +41,9 @@ namespace ttb
 
         TType const* data() const;
 
+        template < typename TType2 >
+        Matrix< TType2, TRows, TCols > as() const;
+
     private:
         std::array< TType, TRows * TCols > m_values;
     };
@@ -91,5 +94,22 @@ namespace ttb
     TType const* Matrix< TType, TRows, TCols >::data() const
     {
         return m_values.data();
+    }
+
+    template < typename TType, size_t TRows, size_t TCols >
+    template < typename TType2 >
+    Matrix< TType2, TRows, TCols > Matrix< TType, TRows, TCols >::as() const
+    {
+        Matrix< TType2, TRows, TCols > result;
+
+        for( size_t r = 0; r < TRows; ++r )
+        {
+            for( size_t c = 0; c < TCols; ++c )
+            {
+                result( r, c ) = static_cast< TType2 >( m_values[ c + r * TCols ] );
+            }
+        }
+
+        return result;
     }
 }
