@@ -12,6 +12,11 @@ namespace ttb
             glUniform1f( location, value );
         }
 
+        void set_uniform< double >::apply( GLint location, double value )
+        {
+            glUniform1f( location, static_cast< float >( value ) );
+        }
+
         void set_uniform< int >::apply( GLint location, int value )
         {
             glUniform1i( location, value );
@@ -47,11 +52,23 @@ namespace ttb
             glUniformMatrix3fv( location, 1, GL_FALSE, mat.data() );
         }
 
+        void set_uniform< Matrix< double, 3, 3 > >::apply( GLint location,
+                                                           Matrix< double, 3, 3 > const& value )
+        {
+            set_uniform< Matrix< float, 3, 3 > >::apply( location, value.as< float >() );
+        }
+
         void set_uniform< Matrix< float, 4, 4 > >::apply( GLint location,
                                                           Matrix< float, 4, 4 > const& value )
         {
             auto mat = transpose( value );
             glUniformMatrix4fv( location, 1, GL_FALSE, mat.data() );
+        }
+
+        void set_uniform< Matrix< double, 4, 4 > >::apply( GLint location,
+                                                           Matrix< double, 4, 4 > const& value )
+        {
+            set_uniform< Matrix< float, 4, 4 > >::apply( location, value.as< float >() );
         }
     }
 }
