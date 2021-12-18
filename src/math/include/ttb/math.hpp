@@ -2,6 +2,7 @@
 #include "math/Quaternion.hpp"
 #include "math/Range.hpp"
 #include "math/Vector.hpp"
+#include "math/matrix_operations.hpp"
 #include "math/trigonometry.hpp"
 #include "math/utils.hpp"
 #include "math/vector_operations.hpp"
