@@ -1,8 +1,8 @@
 #pragma once
 
+#include <ttb/core/Bindable.hpp>
 #include <ttb/ui/Element.hpp>
 
-#include <ttb/core/texture.hpp>
 #include <ttb/math/Matrix.hpp>
 
 
@@ -20,11 +20,11 @@ namespace ttb::ui
     public:
         Image( Framework& framework );
 
-        Image( Framework& framework, std::shared_ptr< Texture2D const > image );
+        Image( Framework& framework, std::shared_ptr< DynamicBindable > image );
 
         ~Image();
 
-        void image( std::shared_ptr< Texture2D const > image );
+        void image( std::shared_ptr< DynamicBindable > image );
 
         /// @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
@@ -33,10 +33,9 @@ namespace ttb::ui
         virtual void render( ttb::State& state ) const override;
 
     private:
-        std::shared_ptr< Texture2D const > m_image;
+        std::shared_ptr< DynamicBindable > m_image;
 
         ttb::Matrix< float, 3, 3 > m_transform;
-        ttb::Matrix< float, 3, 3 > m_texTransform;
 
         std::unique_ptr< ttb::Geometry > m_geometry;
         std::shared_ptr< ttb::Program > m_program;

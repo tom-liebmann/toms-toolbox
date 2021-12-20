@@ -2,9 +2,32 @@
 
 #include <ttb/core/State.hpp>
 
+#include <functional>
+
 
 namespace ttb
 {
+    /**
+     * Provides a base for all classes that want to provide a bindable interface.
+     */
+    class DynamicBindable
+    {
+    public:
+        class Binder;
+
+        virtual ~DynamicBindable();
+
+        virtual std::unique_ptr< Binder > bind( State::Data& data ) const = 0;
+    };
+
+
+    class DynamicBindable::Binder
+    {
+    public:
+        virtual ~Binder();
+    };
+
+
     template < typename TClass >
     class Bindable
     {

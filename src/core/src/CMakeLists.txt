@@ -2,6 +2,7 @@ target_sources(
     ${TARGET_NAME}
 
     PRIVATE
+        Bindable.cpp
         Logger.cpp
         State.cpp
         Context.cpp

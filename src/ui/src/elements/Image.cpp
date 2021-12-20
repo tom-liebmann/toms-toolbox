@@ -31,7 +31,7 @@ namespace ttb::ui
         m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
     }
 
-    Image::Image( Framework& framework, std::shared_ptr< Texture2D const > image )
+    Image::Image( Framework& framework, std::shared_ptr< DynamicBindable > image )
         : Image{ framework }
     {
         this->image( std::move( image ) );
@@ -39,13 +39,9 @@ namespace ttb::ui
 
     Image::~Image() = default;
 
-    void Image::image( std::shared_ptr< Texture2D const > image )
+    void Image::image( std::shared_ptr< DynamicBindable > image )
     {
         m_image = std::move( image );
-
-        auto const sourceRange = Range< float, 2 >{ { 0.0f, 0.0f }, { 1.0f, 1.0f } };
-        // m_texTransform = ttb::mat::transform( sourceRange, m_image->range() );
-        m_texTransform = ttb::mat::transform( sourceRange, sourceRange );
     }
 
     auto Image::fit( Size const& size ) -> Size
@@ -60,23 +56,18 @@ namespace ttb::ui
 
     void Image::render( ttb::State& state ) const
     {
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
         state.with( ttb::UniformBinder{ "u_transform", m_transform },
-                    ttb::UniformBinder{ "u_texTransform", m_texTransform },
                     ttb::UniformBinder{ "u_texture", 0 },
+                    *m_image,
+                    *m_program,
                     [ & ]
                     {
-                        glEnable( GL_BLEND );
-                        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-                        state.with( *m_program,
-                                    [ & ]
-                                    {
-                                        m_image->bind( 0 );
-                                        state.draw( *m_geometry );
-                                        m_image->unbind( 0 );
-                                    } );
-
-                        glDisable( GL_BLEND );
+                        state.draw( *m_geometry );
                     } );
+
+        glDisable( GL_BLEND );
     }
 }
