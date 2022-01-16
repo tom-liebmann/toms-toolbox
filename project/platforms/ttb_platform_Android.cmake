@@ -144,8 +144,8 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
     set( ANDROID_DX "${ANDROID_TOOLS_DIR}/dx" )
     set( ANDROID_AAPT2 "${ANDROID_TOOLS_DIR}/aapt2" )
     set( ANDROID_ZIPALIGN "${ANDROID_TOOLS_DIR}/zipalign" )
+    set( ANDROID_APK_SIGNER "${ANDROID_TOOLS_DIR}/apksigner" )
     set( JAVA_COMPILER "javac"  )
-    set( JAVA_SIGNER "jarsigner" )
 
     file( MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/android/java_sources")
 
@@ -225,13 +225,12 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
     add_custom_target(
         android_apk_sign ALL
         DEPENDS android_apk_link
-        COMMAND ${JAVA_SIGNER}
-            -keystore "${TTB_ANDROID_RES_DIR}/debug.keystore"
-            -storepass "android"
-            -keypass "android"
-            -signedjar "${CMAKE_CURRENT_BINARY_DIR}/app_signed.apk"
+        COMMAND ${ANDROID_APK_SIGNER}
+            sign
+            --ks "${TTB_ANDROID_RES_DIR}/debug.keystore"
+            --ks-pass pass:android
+            --out "${CMAKE_CURRENT_BINARY_DIR}/app_signed.apk"
             "${CMAKE_CURRENT_BINARY_DIR}/android/app_unsigned.apk"
-            "androiddebugkey"
     )
 
 endmacro()
