@@ -11,7 +11,8 @@ namespace ttb
 {
     namespace TextureFactory
     {
-        std::shared_ptr< Texture2D > loadData( void const* data, size_t dataSize );
+        std::shared_ptr< Texture2D >
+            loadData( void const* data, size_t dataSize, uint8_t levels = 1 );
 
         std::shared_ptr< Texture2D > loadPNG( std::string const& filename, uint8_t levels = 1 );
 

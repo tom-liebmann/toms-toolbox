@@ -58,21 +58,24 @@ namespace ttb
             WindowImpl::instance()->pushEvent( event );
         }
 
-        void WindowImpl::begin( State& state ) const
+        void WindowImpl::begin( State::Data& /* data */ ) const
         {
-            auto const viewport = Viewport{
-                0,
-                0,
-                static_cast< GLsizei >( m_size( 0 ) ),
-                static_cast< GLsizei >( m_size( 1 ) ),
-            };
-
-            state.pushViewport( viewport );
+            // Do nothing
         }
 
-        void WindowImpl::end( State& state ) const
+        void WindowImpl::suspend( State::Data& /* data */ ) const
         {
-            state.popViewport();
+            // Do nothing
+        }
+
+        void WindowImpl::resume( State::Data& /* data */ ) const
+        {
+            // Do nothing
+        }
+
+        void WindowImpl::end( State::Data& /* data */ ) const
+        {
+            // Do nothing
         }
 
         bool WindowImpl::use()
