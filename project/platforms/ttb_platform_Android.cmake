@@ -187,6 +187,10 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             touch "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
     )
 
+# TODO:
+# - implement resource directory
+# - fix behavior when no asset dir is given
+
     add_custom_target(
         android_apk_link
         DEPENDS
@@ -204,7 +208,7 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             sh -c '
             ${ANDROID_AAPT2}
                 link
-            #    "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
+                # "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
                 -I "${ANDROID_JAR}"
                 --manifest "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
                 ASSET_ARGS
@@ -229,6 +233,7 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             sign
             --ks "${TTB_ANDROID_RES_DIR}/debug.keystore"
             --ks-pass pass:android
+            --min-sdk-version ${ANDROID_SDK_VERSION_MIN}
             --out "${CMAKE_CURRENT_BINARY_DIR}/app_signed.apk"
             "${CMAKE_CURRENT_BINARY_DIR}/android/app_unsigned.apk"
     )
