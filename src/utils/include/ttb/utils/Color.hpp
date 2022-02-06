@@ -3,6 +3,7 @@
 #include <ttb/math/utils.hpp>
 
 #include <cmath>
+#include <iostream>
 
 
 namespace ttb
