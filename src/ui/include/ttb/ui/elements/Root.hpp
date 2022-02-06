@@ -36,6 +36,8 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
     private:
+        ttb::Matrix< float, 3, 3 > m_transform;
+
         Element* m_child{ nullptr };
     };
 }

@@ -15,6 +15,9 @@ namespace ttb::events
 
         Position const& position() const;
 
+        virtual void transform( Transform const& transform,
+                                EventCallback const& eventCallback ) const override;
+
     private:
         Position m_position;
     };
@@ -30,5 +33,11 @@ namespace ttb::events
     inline auto DragStart::position() const -> Position const&
     {
         return m_position;
+    }
+
+    inline void DragStart::transform( Transform const& transform,
+                                      EventCallback const& eventCallback ) const
+    {
+        eventCallback( DragStart{ transform( m_position ) } );
     }
 }

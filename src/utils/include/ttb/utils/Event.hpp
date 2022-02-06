@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ttb/math/Matrix.hpp>
+#include <ttb/math/Vector.hpp>
 #include <ttb/utils/EventType.hpp>
 
 #include <cstdint>
@@ -19,8 +21,15 @@ namespace ttb
         virtual ~Event();
 
         virtual uint32_t type() const = 0;
-        virtual std::unique_ptr< Event > clone() const;
-        virtual std::unique_ptr< Event > move();
+
+        using Transform =
+            std::function< ttb::Vector< float, 2 >( ttb::Vector< float, 2 > const& ) >;
+        using EventCallback = std::function< void( ttb::Event const& ) >;
+
+        virtual void transform( Transform const& transform, EventCallback const& callback ) const;
+
+        void transform( ttb::Matrix< float, 3, 3 > const& transform,
+                        EventCallback const& callback ) const;
     };
 
 
@@ -38,16 +47,6 @@ namespace ttb
 namespace ttb
 {
     inline Event::~Event() = default;
-
-    inline std::unique_ptr< Event > Event::clone() const
-    {
-        throw std::runtime_error( "Event not clonable" );
-    }
-
-    inline std::unique_ptr< Event > Event::move()
-    {
-        throw std::runtime_error( "Event not movable" );
-    }
 
 
     template < uint32_t TType >

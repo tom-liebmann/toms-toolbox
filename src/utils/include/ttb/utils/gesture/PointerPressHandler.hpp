@@ -14,9 +14,11 @@ namespace ttb
     class PointerPressHandler : public EventListener
     {
     public:
-        PointerPressHandler( ttb::EventManager& eventManager, float moveTolerance );
+        using EventCallback = std::function< void( ttb::Event const& ) >;
 
-        ~PointerPressHandler();
+        PointerPressHandler( EventCallback eventCallback, float moveTolerance );
+
+        virtual bool onEvent( Event const& event ) override;
 
     private:
         enum class State
@@ -27,8 +29,6 @@ namespace ttb
             TRANSFORM,
             NONE,
         };
-
-        virtual bool onEvent( Event const& event ) override;
 
         bool onPointerDown( events::PointerDown const& event );
 
@@ -41,7 +41,7 @@ namespace ttb
             ttb::Vector< float, 2 > position;
         };
 
-        ttb::EventManager& m_eventManager;
+        EventCallback m_eventCallback;
         float m_moveTolerance;
 
         std::map< int, PointerInfo > m_activePointers;

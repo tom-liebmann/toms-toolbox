@@ -8,21 +8,9 @@
 
 namespace ttb
 {
-    PointerPressHandler::PointerPressHandler( ttb::EventManager& eventManager, float moveTolerance )
-        : m_eventManager{ eventManager }, m_moveTolerance{ moveTolerance }
+    PointerPressHandler::PointerPressHandler( EventCallback eventCallback, float moveTolerance )
+        : m_eventCallback{ std::move( eventCallback ) }, m_moveTolerance{ moveTolerance }
     {
-        using namespace ttb::event;
-        m_eventManager.addListener( type::POINTER_DOWN, prio::POINTER_PRESS, *this );
-        m_eventManager.addListener( type::POINTER_UP, prio::POINTER_PRESS, *this );
-        m_eventManager.addListener( type::POINTER_MOVE, prio::POINTER_PRESS, *this );
-    }
-
-    PointerPressHandler::~PointerPressHandler()
-    {
-        using namespace ttb::event;
-        m_eventManager.removeListener( type::POINTER_MOVE, *this );
-        m_eventManager.removeListener( type::POINTER_UP, *this );
-        m_eventManager.removeListener( type::POINTER_DOWN, *this );
     }
 
     bool PointerPressHandler::onEvent( Event const& event )
@@ -56,7 +44,7 @@ namespace ttb
                     auto const e = events::PointerPressStart{ event.pointerType(),
                                                               event.pointerId(),
                                                               { event.x(), event.y() } };
-                    m_eventManager.pushEvent( e );
+                    m_eventCallback( e );
                 }
 
                 return false;
@@ -69,7 +57,7 @@ namespace ttb
                     auto const pointerId = m_activePointers.begin()->first;
 
                     auto const e = events::PointerPressAbort{ pointerId };
-                    m_eventManager.pushEvent( e );
+                    m_eventCallback( e );
                 }
 
                 m_activePointers.insert(
@@ -85,7 +73,7 @@ namespace ttb
                 {
                     auto const& dragEndPosition = m_activePointers.begin()->second.position;
                     auto const e = events::DragEnd{ dragEndPosition };
-                    m_eventManager.pushEvent( e );
+                    m_eventCallback( e );
                 }
 
                 m_activePointers.insert(
@@ -148,7 +136,7 @@ namespace ttb
                 m_state = State::IDLE;
 
                 auto const e = events::DragEnd{ { event.x(), event.y() } };
-                m_eventManager.pushEvent( e );
+                m_eventCallback( e );
                 return false;
             }
 
@@ -159,7 +147,7 @@ namespace ttb
 
                 auto const e =
                     events::PointerPressEnd{ event.pointerId(), { event.x(), event.y() } };
-                m_eventManager.pushEvent( e );
+                m_eventCallback( e );
                 return false;
             }
         }
@@ -201,7 +189,7 @@ namespace ttb
                     float const zoomFactor = lenOld / lenNew;
 
                     // TODO: Compute and pass in rotation
-                    m_eventManager.pushEvent( events::Zoom{ zoomFactor } );
+                    m_eventCallback( events::Zoom{ zoomFactor } );
                 }
 
                 return false;
@@ -212,7 +200,7 @@ namespace ttb
                 auto& info = m_activePointers[ event.pointerId() ];
                 info.position = { event.x(), event.y() };
 
-                m_eventManager.pushEvent( events::DragMove{ { event.x(), event.y() } } );
+                m_eventCallback( events::DragMove{ { event.x(), event.y() } } );
                 return false;
             }
 
@@ -227,17 +215,17 @@ namespace ttb
                     m_state = State::DRAG;
 
                     // abort active press
-                    m_eventManager.pushEvent( events::PointerPressAbort{ event.pointerId() } );
+                    m_eventCallback( events::PointerPressAbort{ event.pointerId() } );
 
                     // start drag
                     {
                         // start event
-                        m_eventManager.pushEvent( events::DragStart{ info.position } );
+                        m_eventCallback( events::DragStart{ info.position } );
 
                         info.position = eventPosition;
 
                         // move event
-                        m_eventManager.pushEvent( events::DragMove{ eventPosition } );
+                        m_eventCallback( events::DragMove{ eventPosition } );
                     }
                 }
 

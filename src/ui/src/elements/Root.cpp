@@ -1,5 +1,7 @@
 #include <ttb/ui/elements/Root.hpp>
 
+#include <ttb/core/uniform.hpp>
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
 #include <ttb/utils/EventManager.hpp>
 #include <ttb/utils/EventPriority.hpp>
@@ -7,7 +9,8 @@
 
 namespace ttb::ui
 {
-    Root::Root( Framework& framework, Size const& size ) : Element{ framework }
+    Root::Root( Framework& framework, Size const& size )
+        : Element{ framework }, m_transform{ ttb::mat::identity< float, 3 >() }
     {
         auto& eventMngr = framework.eventManager();
 
@@ -90,7 +93,11 @@ namespace ttb::ui
         {
             glDisable( GL_DEPTH_TEST );
 
-            m_child->render( state );
+            state.with( ttb::UniformBinder{ "u_transform", m_transform },
+                        [ & ]
+                        {
+                            m_child->render( state );
+                        } );
 
             glEnable( GL_DEPTH_TEST );
         }

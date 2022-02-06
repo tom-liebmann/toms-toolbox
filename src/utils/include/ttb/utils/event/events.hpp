@@ -54,6 +54,9 @@ namespace ttb::events
 
         double y() const;
 
+        virtual void transform( Transform const& transform,
+                                EventCallback const& eventCallback ) const override;
+
     private:
         PointerType m_pointerType;
         int m_pointerId;
@@ -73,6 +76,9 @@ namespace ttb::events
 
         double y() const;
 
+        virtual void transform( Transform const& transform,
+                                EventCallback const& eventCallback ) const override;
+
     private:
         int m_pointerId;
         double m_x;
@@ -90,6 +96,9 @@ namespace ttb::events
         double x() const;
 
         double y() const;
+
+        virtual void transform( Transform const& transform,
+                                EventCallback const& eventCallback ) const override;
 
     private:
         int m_pointerId;

@@ -15,8 +15,14 @@ namespace ttb::ui
     {
         wrappedChild(
             element,
-            [ this ]( auto const& pos ) { return transform( pos ); },
-            [ this ]( auto const& pos ) { return transformInv( pos ); } );
+            [ this ]( auto const& pos )
+            {
+                return transform( pos );
+            },
+            [ this ]( auto const& pos )
+            {
+                return transformInv( pos );
+            } );
     }
 
     auto Center::fit( Size const& size ) -> Size
@@ -96,6 +102,26 @@ namespace ttb::ui
     std::string Center::info() const
     {
         return "Center";
+    }
+
+    bool Center::onEvent( ttb::Event const& event )
+    {
+        auto result = false;
+
+        if( auto const child = wrappedChild(); child )
+        {
+            event.transform(
+                [ this ]( auto const& v )
+                {
+                    return v - m_offset;
+                },
+                [ &child, &result ]( auto const& event )
+                {
+                    result = child->onEvent( event );
+                } );
+        }
+
+        return result;
     }
 
     auto Center::transform( Position const& pos ) const -> Position

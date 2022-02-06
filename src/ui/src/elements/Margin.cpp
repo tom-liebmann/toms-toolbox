@@ -16,6 +16,16 @@ namespace ttb::ui
     {
     }
 
+    Margin::Margin( Framework& framework, float hMargin, float vMargin )
+        : Margin{ framework, hMargin, vMargin, hMargin, vMargin }
+    {
+    }
+
+    Margin::Margin( Framework& framework, float margin )
+        : Margin{ framework, margin, margin, margin, margin }
+    {
+    }
+
     void Margin::child( Element* element )
     {
         wrappedChild(
@@ -97,6 +107,26 @@ namespace ttb::ui
                             child->render( state );
                         } );
         }
+    }
+
+    bool Margin::onEvent( ttb::Event const& event )
+    {
+        auto result = false;
+
+        if( auto const child = wrappedChild(); child )
+        {
+            event.transform(
+                [ this ]( auto const& v ) -> ttb::Vector< float, 2 >
+                {
+                    return { v( 0 ) - m_left, v( 1 ) - m_top };
+                },
+                [ &result, &child ]( auto const& event )
+                {
+                    result = child->onEvent( event );
+                } );
+        }
+
+        return result;
     }
 
     auto Margin::transform( Position const& pos ) const -> Position

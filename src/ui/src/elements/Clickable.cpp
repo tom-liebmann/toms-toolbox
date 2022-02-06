@@ -44,9 +44,8 @@ namespace ttb::ui
                 auto& ev = static_cast< ttb::events::PointerDown const& >( event );
                 auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
 
-                auto const localPos = screenToLocal( eventPos );
-                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) && localPos( 1 ) >= 0.0f &&
-                    localPos( 1 ) < size()( 1 ) )
+                if( eventPos( 0 ) >= 0.0f && eventPos( 0 ) < size()( 0 ) && eventPos( 1 ) >= 0.0f &&
+                    eventPos( 1 ) < size()( 1 ) )
                 {
                     m_pointerId = ev.pointerId();
                     m_prioListener =
@@ -76,9 +75,8 @@ namespace ttb::ui
 
                 auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
 
-                auto const localPos = screenToLocal( eventPos );
-                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= size()( 0 ) || localPos( 1 ) < 0.0f ||
-                    localPos( 1 ) >= size()( 1 ) )
+                if( eventPos( 0 ) < 0.0f || eventPos( 0 ) >= size()( 0 ) || eventPos( 1 ) < 0.0f ||
+                    eventPos( 1 ) >= size()( 1 ) )
                 {
                     m_callback( Action::ABORT, *this );
                     m_prioListener.reset();
@@ -103,9 +101,8 @@ namespace ttb::ui
 
                 auto const eventPos = ttb::Vector{ ev.x(), ev.y() }.as< float >();
 
-                auto const localPos = screenToLocal( eventPos );
-                if( localPos( 0 ) >= 0.0f && localPos( 0 ) < size()( 0 ) && localPos( 1 ) >= 0.0f &&
-                    localPos( 1 ) < size()( 1 ) )
+                if( eventPos( 0 ) >= 0.0f && eventPos( 0 ) < size()( 0 ) && eventPos( 1 ) >= 0.0f &&
+                    eventPos( 1 ) < size()( 1 ) )
                 {
                     m_callback( Action::END, *this );
                 }

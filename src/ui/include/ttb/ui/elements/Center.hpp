@@ -33,6 +33,8 @@ namespace ttb::ui
 
         virtual std::string info() const override;
 
+        virtual bool onEvent( ttb::Event const& event ) override;
+
     private:
         Position transform( Position const& pos ) const;
 

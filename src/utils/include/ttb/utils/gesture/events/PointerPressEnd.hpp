@@ -17,6 +17,9 @@ namespace ttb::events
 
         Position const& position() const;
 
+        virtual void transform( Transform const& transform,
+                                EventCallback const& eventCallback ) const override;
+
     private:
         int m_pointerId;
         Position m_position;
@@ -39,5 +42,11 @@ namespace ttb::events
     inline auto PointerPressEnd::position() const -> Position const&
     {
         return m_position;
+    }
+
+    inline void PointerPressEnd::transform( Transform const& transform,
+                                            EventCallback const& eventCallback ) const
+    {
+        eventCallback( PointerPressEnd{ m_pointerId, transform( m_position ) } );
     }
 }

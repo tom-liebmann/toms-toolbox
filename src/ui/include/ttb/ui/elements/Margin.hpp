@@ -8,11 +8,11 @@ namespace ttb::ui
     class Margin : public WrappedElement
     {
     public:
-        Margin( Framework& framework,
-                float right = 0.0f,
-                float top = 0.0f,
-                float left = 0.0f,
-                float bottom = 0.0f );
+        Margin( Framework& framework, float right, float top, float left, float bottom );
+
+        Margin( Framework& framework, float hMargin, float vMargin );
+
+        Margin( Framework& framework, float margin );
 
         void child( Element* element );
 
@@ -27,6 +27,8 @@ namespace ttb::ui
         virtual Size fit( Size const& size ) override;
 
         virtual void render( ttb::State& state ) const override;
+
+        virtual bool onEvent( ttb::Event const& event ) override;
 
     private:
         Position transform( Position const& pos ) const;
