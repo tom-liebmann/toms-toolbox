@@ -64,6 +64,9 @@ namespace ttb
          */
         void expand( Vector< T, D > const& point );
 
+        template < typename TType2 >
+        Range< TType2, D > as() const;
+
     private:
         Vector< T, D > m_min;
         Vector< T, D > m_max;
@@ -240,6 +243,13 @@ namespace ttb
             m_min( i ) = std::min( m_min( i ), point( i ) );
             m_max( i ) = std::max( m_max( i ), point( i ) );
         }
+    }
+
+    template < typename TType, std::size_t TDim >
+    template < typename TType2 >
+    inline Range< TType2, TDim > Range< TType, TDim >::as() const
+    {
+        return { m_min.template as< TType2 >(), m_max.template as< TType2 >() };
     }
 
 
