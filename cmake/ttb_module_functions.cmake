@@ -1,33 +1,44 @@
+include_guard( GLOBAL )
+
+add_custom_target( check ${CMAKE_CTEST_COMMAND} )
+
+add_library(
+    test_main
+    OBJECT
+    ${CMAKE_CURRENT_LIST_DIR}/src/test_main.cpp
+    )
+
+find_package( catch2 REQUIRED )
+target_link_libraries( test_main PRIVATE catch2 )
+
 function( ttb_add_test )
 
     set( BUILD_TESTS "OFF" CACHE BOOL "Whether to build tests" )
 
     if( ${BUILD_TESTS} )
-        enable_testing()
 
         cmake_parse_arguments(
             ADD_TEST
             ""
             "TARGET_NAME"
-            "SOURCES"
+            "SOURCES;DEPENDENCIES;INCLUDES"
             ${ARGN}
         )
 
         # Create test target
         add_executable(
             ${ADD_TEST_TARGET_NAME}
-            EXCLUDE_FROM_ALL
             ${ADD_TEST_SOURCES}
         )
 
-        # Import and link catch2 test framework to target
-        find_package( catch2 REQUIRED )
-        target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE catch2 )
+        target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE test_main ${ADD_TEST_DEPENDENCIES} )
 
-        # Propagate test using the catch cmake tools
-        include( Catch )
-        include( CTest )
-        catch_discover_tests( ${ADD_TEST_TARGET_NAME} )
+        target_include_directories( ${ADD_TEST_TARGET_NAME} PRIVATE ${ADD_TEST_INCLUDES} )
+
+        add_test( NAME ${ADD_TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${ADD_TEST_TARGET_NAME}> )
+
+        add_dependencies( check ${ADD_TEST_TARGET_NAME} )
+
     endif()
 
 endfunction()
