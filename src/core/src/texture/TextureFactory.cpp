@@ -2,6 +2,8 @@
 #include <ttb/core/PNGLoader.hpp>
 #include <ttb/core/texture/TextureFactory.hpp>
 
+#include <ttb/core/gl.hpp>
+
 
 namespace
 {
@@ -30,14 +32,22 @@ namespace ttb
                                    LCT_RGBA,
                                    8 );
 
+
+#if defined( PLATFORM_ANDROID )
+            // TODO: Older android versions do not support GL_RGB8
+            auto texture = createTextureFromData(
+                width, height, GL_RGBA, levels, GL_RGBA, GL_UNSIGNED_BYTE, pngData );
+#else
             auto texture = createTextureFromData(
                 width, height, GL_RGBA8, levels, GL_RGBA, GL_UNSIGNED_BYTE, pngData );
+#endif
 
             free( pngData );
 
             return texture;
         }
 
+#if !defined( PLATFORM_ANDROID )
         std::shared_ptr< Texture2D > loadPNG( std::string const& filename, uint8_t levels )
         {
             uint8_t* pngData;
@@ -51,6 +61,7 @@ namespace ttb
 
             return texture;
         }
+#endif
 
         // std::unique_ptr< Texture3D > loadPNGArray( std::vector< std::string > const& filenames )
         // {
@@ -114,6 +125,7 @@ namespace ttb
         //     return texture;
         // }
 
+#if !defined( PLATFORM_ANDROID )
         void savePNG( std::shared_ptr< Texture2D > texture, std::string const& filename )
         {
             std::vector< uint8_t > data;
@@ -142,6 +154,7 @@ namespace ttb
             lodepng_encode_file(
                 filename.c_str(), data.data(), texture->width(), texture->height(), type, 4 * 8 );
         }
+#endif
     }
 }
 

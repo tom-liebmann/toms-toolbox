@@ -10,6 +10,7 @@
 
 namespace ttb
 {
+#if !defined( PLATFORM_ANDROID )
     std::unique_ptr< Shader > Shader::fromFile( Type type, std::string const& filename )
     {
         std::ifstream stream( filename, std::ios::in | std::ios::binary );
@@ -44,6 +45,7 @@ namespace ttb
             throw std::runtime_error( "Error compiling shader (" + filename + "): " + e.what() );
         }
     }
+#endif
 
     std::unique_ptr< Shader > Shader::fromSource( Type type, std::string const& source )
     {
@@ -89,7 +91,8 @@ namespace ttb
 
             if( compileStatus != GL_TRUE )
             {
-                auto const errorMsg = [&]() -> std::string {
+                auto const errorMsg = [ & ]() -> std::string
+                {
                     std::array< GLchar, 256 > buffer;
                     GLsizei strLength = 0;
                     glGetShaderInfoLog( m_shaderObject, buffer.size(), &strLength, buffer.data() );

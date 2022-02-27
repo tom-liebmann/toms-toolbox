@@ -80,6 +80,17 @@ namespace ttb
 
     void Texture2D::initStorage()
     {
+#if defined( PLATFORM_ANDROID )
+        glTexImage2D( GL_TEXTURE_2D,
+                      0,
+                      m_internalFormat,
+                      m_width,
+                      m_height,
+                      0,
+                      GL_RGBA,
+                      GL_UNSIGNED_BYTE,
+                      nullptr );
+#else
         if( m_samples > 1 )
         {
             glTexStorage2DMultisample( GL_TEXTURE_2D_MULTISAMPLE,
@@ -93,6 +104,7 @@ namespace ttb
         {
             glTexStorage2D( GL_TEXTURE_2D, m_levels, m_internalFormat, m_width, m_height );
         }
+#endif
     }
 
 

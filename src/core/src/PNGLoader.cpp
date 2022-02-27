@@ -353,6 +353,7 @@ static void lodepng_add32bitInt(ucvector* buffer, unsigned value)
 /* / File IO                                                                / */
 /* ////////////////////////////////////////////////////////////////////////// */
 
+#if !defined( PLATFORM_ANDROID )
 #ifdef LODEPNG_COMPILE_DISK
 
 unsigned lodepng_load_file(unsigned char** out, size_t* outsize, const char* filename)
@@ -394,6 +395,7 @@ unsigned lodepng_save_file(const unsigned char* buffer, size_t buffersize, const
 }
 
 #endif /*LODEPNG_COMPILE_DISK*/
+#endif
 
 /* ////////////////////////////////////////////////////////////////////////// */
 /* ////////////////////////////////////////////////////////////////////////// */
@@ -4810,6 +4812,7 @@ unsigned lodepng_decode24(unsigned char** out, unsigned* w, unsigned* h, const u
   return lodepng_decode_memory(out, w, h, in, insize, LCT_RGB, 8);
 }
 
+#if !defined( PLATFORM_ANDROID )
 #ifdef LODEPNG_COMPILE_DISK
 unsigned lodepng_decode_file(unsigned char** out, unsigned* w, unsigned* h, const char* filename,
                              LodePNGColorType colortype, unsigned bitdepth)
@@ -4833,6 +4836,7 @@ unsigned lodepng_decode24_file(unsigned char** out, unsigned* w, unsigned* h, co
   return lodepng_decode_file(out, w, h, filename, LCT_RGB, 8);
 }
 #endif /*LODEPNG_COMPILE_DISK*/
+#endif
 
 void lodepng_decoder_settings_init(LodePNGDecoderSettings* settings)
 {
@@ -5886,6 +5890,7 @@ unsigned lodepng_encode24(unsigned char** out, size_t* outsize, const unsigned c
   return lodepng_encode_memory(out, outsize, image, w, h, LCT_RGB, 8);
 }
 
+#if !defined(PLATFORM_ANDROID)
 #ifdef LODEPNG_COMPILE_DISK
 unsigned lodepng_encode_file(const char* filename, const unsigned char* image, unsigned w, unsigned h,
                              LodePNGColorType colortype, unsigned bitdepth)
@@ -5908,6 +5913,7 @@ unsigned lodepng_encode24_file(const char* filename, const unsigned char* image,
   return lodepng_encode_file(filename, image, w, h, LCT_RGB, 8);
 }
 #endif /*LODEPNG_COMPILE_DISK*/
+#endif
 
 void lodepng_encoder_settings_init(LodePNGEncoderSettings* settings)
 {
