@@ -94,6 +94,7 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
             -DANDROID_ABI=${ANDROID_ABI}
             -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_DIR}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake
             -DBUILD_PLATFORM=Android
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
