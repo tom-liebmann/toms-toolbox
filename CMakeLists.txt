@@ -11,6 +11,8 @@ request_build_platform( BUILD_PLATFORM )
 
 request_build_type()
 
+ttb_init_testing()
+
 if( PROJECT_HAS_PARENT )
 
     message( "Building toolbox as submodule" )
