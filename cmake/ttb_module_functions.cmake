@@ -74,7 +74,7 @@ function( ttb_add_module MODULE_NAME )
     # ================================================================
     add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} )
 
-    target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../src/dummy.cpp" )
+    target_sources( ${MODULE_NAME} PRIVATE "${TTB_MODULE_FUNCTIONS_DIR}/src/dummy.cpp" )
 
     # add compiler definitions
     # ================================================================
