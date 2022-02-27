@@ -36,12 +36,6 @@ namespace ttb::resources
 
 #endif
 
-            auto mod = ttb::modify( texture );
-            mod.generateMipMap();
-            mod.minMagFilter( GL_LINEAR_MIPMAP_LINEAR, GL_LINEAR );
-            // mod.minMagFilter( GL_LINEAR, GL_LINEAR );
-            mod.finish();
-
             return texture;
         }
 
