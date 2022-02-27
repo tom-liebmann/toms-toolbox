@@ -29,7 +29,7 @@ else()
 
         if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
-            set( REQUIRED_GCC_VERSION "9.0.0" )
+            set( REQUIRED_GCC_VERSION "8.0.0" )
 
             if( CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${REQUIRED_GCC_VERSION})
 
