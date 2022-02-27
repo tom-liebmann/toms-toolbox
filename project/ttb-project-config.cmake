@@ -2,8 +2,6 @@ set( TTB_ROOT "${CMAKE_CURRENT_LIST_DIR}/.." )
 
 cmake_policy( SET CMP0079 NEW )
 
-find_package( cmake-modules REQUIRED )
-
 list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/cmake" )
 list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/project/platforms" )
 

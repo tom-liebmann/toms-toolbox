@@ -96,14 +96,14 @@ function( ttb_add_module MODULE_NAME )
 
 endfunction()
 
-function( ttb_add_module_dependency MODULE_NAME DEPENDENCY )
+function( ttb_add_module_dependency MODULE_NAME DEPENDENCY DEP_TARGET )
     # Find dependency
     find_package( ${DEPENDENCY} REQUIRED )
 
     # Link dependency to module
-    target_link_libraries( ${MODULE_NAME} PUBLIC ${DEPENDENCY} )
+    target_link_libraries( ${MODULE_NAME} PUBLIC ${DEP_TARGET} )
 
     # Add dependency to export set
-    list( APPEND EXPORT_DEPENDENCIES "${DEPENDENCY}" )
+    list( APPEND EXPORT_DEPENDENCIES "${DEP_TARGET}" )
     set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
 endfunction()
