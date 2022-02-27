@@ -20,6 +20,8 @@ function( ttb_add_test )
         add_custom_target( check ${CMAKE_CTEST_COMMAND} )
     endif()
 
+    find_package( Catch2 REQUIRED )
+
     if( NOT TARGET test_main )
         add_library(
             test_main
@@ -27,8 +29,7 @@ function( ttb_add_test )
             ${TTB_MODULE_FUNCTIONS_DIR}/src/test_main.cpp
             )
 
-        find_package( catch2 REQUIRED )
-        target_link_libraries( test_main PRIVATE catch2 )
+        target_link_libraries( test_main PRIVATE Catch2::Catch2 )
     endif()
 
     cmake_parse_arguments(
@@ -45,7 +46,7 @@ function( ttb_add_test )
         ${ADD_TEST_SOURCES}
     )
 
-    target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE test_main catch2 ${ADD_TEST_DEPENDENCIES} )
+    target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE test_main Catch2::Catch2 ${ADD_TEST_DEPENDENCIES} )
 
     target_include_directories( ${ADD_TEST_TARGET_NAME} PRIVATE ${ADD_TEST_INCLUDES} )
 
@@ -54,6 +55,8 @@ function( ttb_add_test )
     add_test( NAME ${ADD_TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${ADD_TEST_TARGET_NAME}> )
 
     add_dependencies( check ${ADD_TEST_TARGET_NAME} )
+
+    set( TARGET_NAME ${ADD_TEST_TARGET_NAME} PARENT_SCOPE )
 
 endfunction()
 

@@ -13,6 +13,7 @@ class TomsToolboxConan(ConanFile):
         "activate_ui": [True, False],
         "activate_utils": [True, False],
         "activate_project": [True, False],
+        "build_tests": [True, False],
     }
     default_options = {
         "library_type": "SHARED",
@@ -22,6 +23,7 @@ class TomsToolboxConan(ConanFile):
         "activate_utils": True,
         "activate_project": True,
         "yaml-cpp:shared": True,
+        "build_tests": True,
     }
     generators = "cmake_find_package", "cmake_paths"
     exports_sources = "*"
@@ -30,6 +32,7 @@ class TomsToolboxConan(ConanFile):
         cmake = CMake(self)
         cmake.definitions["BUILD_PLATFORM"] = self.settings.os
         cmake.definitions["BUILD_LIBRARY_TYPE"] = self.options.library_type
+        cmake.definitions["BUILD_TESTS"] = self.options.build_tests
         cmake.definitions["ACTIVATE_ttbCore"] = self.options.activate_core
         cmake.definitions["ACTIVATE_ttbMath"] = self.options.activate_math
         cmake.definitions["ACTIVATE_ttbUi"] = self.options.activate_ui
@@ -43,6 +46,8 @@ class TomsToolboxConan(ConanFile):
             self.requires("glfw/3.3.6")
             self.requires("opengl/system")
             self.requires("glew/2.2.0")
+        if self.options.build_tests:
+            self.requires("catch2/2.13.8")
 
     def package(self):
         if self.options.activate_core:
@@ -71,15 +76,23 @@ class TomsToolboxConan(ConanFile):
 
         if self.options.activate_core:
             self.cpp_info.components["core"].requires = ["yaml-cpp::yaml-cpp", "glfw::glfw", "opengl::opengl", "glew::glew"]
+            if self.options.build_tests:
+                self.cpp_info.components["core"].requires.append("catch2::catch2")
             self.cpp_info.components["core"].libdirs = ["lib"]
             self.cpp_info.components["core"].libs = ["ttbCore"]
         if self.options.activate_math:
+            if self.options.build_tests:
+                self.cpp_info.components["math"].requires.append("catch2::catch2")
             self.cpp_info.components["math"].libdirs = ["lib"]
             self.cpp_info.components["math"].libs = ["ttbMath"]
         if self.options.activate_ui:
+            if self.options.build_tests:
+                self.cpp_info.components["ui"].requires.append("catch2::catch2")
             self.cpp_info.components["ui"].libdirs = ["lib"]
             self.cpp_info.components["ui"].libs = ["ttbUi"]
         if self.options.activate_utils:
+            if self.options.build_tests:
+                self.cpp_info.components["utils"].requires.append("catch2::catch2")
             self.cpp_info.components["utils"].libdirs = ["lib"]
             self.cpp_info.components["utils"].libs = ["ttbUtils"]
         if self.options.activate_project:
