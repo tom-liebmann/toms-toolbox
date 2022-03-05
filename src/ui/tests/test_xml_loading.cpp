@@ -16,9 +16,9 @@ TEST_CASE( "Empty document", "[ui][xml]" )
 TEST_CASE( "Single element", "" )
 {
     char data[] =
-        "<center>"
-        "  <margin>"
-        "    <rectangle />"
+        "<center h='center' v='middle'>"
+        "  <margin value='10'>"
+        "    <rectangle color='#F00' />"
         "  </margin>"
         "</center>";
 

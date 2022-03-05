@@ -22,6 +22,8 @@ namespace ttb::ui
     public:
         Element* loadElement( Framework& framework, rapidxml::xml_node<> const& node );
 
+        static char const* attrValue( rapidxml::xml_node<> const& node, std::string const& name );
+
     private:
         XmlLoader( XmlElement& parent );
 

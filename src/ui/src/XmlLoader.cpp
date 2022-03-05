@@ -31,6 +31,19 @@ namespace ttb::ui
         return childPtr;
     }
 
+    char const* XmlLoader::attrValue( rapidxml::xml_node<> const& node, std::string const& name )
+    {
+        for( auto attr = node.first_attribute(); attr; attr = attr->next_attribute() )
+        {
+            if( name == attr->name() )
+            {
+                return attr->value();
+            }
+        }
+
+        return nullptr;
+    }
+
     XmlLoader::XmlLoader( XmlElement& parent ) : m_parent{ parent }
     {
     }

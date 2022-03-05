@@ -5,9 +5,16 @@
 #include <ttb/ui/XmlFactory.hpp>
 
 
-namespace
+namespace ttb::ui
 {
-    auto const factory = ttb::ui::XmlFactory< ttb::ui::Center >{ "center" };
+    namespace
+    {
+        auto const factory = XmlFactory< Center >{ "center" };
+
+        Center::HAlignment parseHAlignment( std::string const& value );
+
+        Center::VAlignment parseVAlignment( std::string const& value );
+    }
 }
 
 
@@ -15,7 +22,19 @@ namespace ttb::ui
 {
     Center::Center( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
         : WrappedElement{ framework }
+        , m_hAlign{ HAlignment::CENTER }
+        , m_vAlign{ VAlignment::MIDDLE }
     {
+        if( auto value = loader.attrValue( node, "h" ); value )
+        {
+            m_hAlign = parseHAlignment( value );
+        }
+
+        if( auto value = loader.attrValue( node, "v" ); value )
+        {
+            m_vAlign = parseVAlignment( value );
+        }
+
         if( auto child = node.first_node(); child )
         {
             wrappedChild( loader.loadElement( framework, *child ) );
@@ -148,5 +167,52 @@ namespace ttb::ui
     auto Center::transformInv( Position const& pos ) const -> Position
     {
         return pos - m_offset;
+    }
+}
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        inline Center::HAlignment parseHAlignment( std::string const& value )
+        {
+            if( value == "left" )
+            {
+                return Center::HAlignment::LEFT;
+            }
+
+            if( value == "center" )
+            {
+                return Center::HAlignment::CENTER;
+            }
+
+            if( value == "right" )
+            {
+                return Center::HAlignment::RIGHT;
+            }
+
+            throw std::runtime_error( "Invalid alignment value" );
+        }
+
+        inline Center::VAlignment parseVAlignment( std::string const& value )
+        {
+            if( value == "top" )
+            {
+                return Center::VAlignment::TOP;
+            }
+
+            if( value == "middle" )
+            {
+                return Center::VAlignment::MIDDLE;
+            }
+
+            if( value == "bottom" )
+            {
+                return Center::VAlignment::BOTTOM;
+            }
+
+            throw std::runtime_error( "Invalid alignment value" );
+        }
     }
 }
