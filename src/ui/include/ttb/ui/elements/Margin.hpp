@@ -38,10 +38,10 @@ namespace ttb::ui
 
         Position transformInv( Position const& pos ) const;
 
-        float m_right;
-        float m_top;
-        float m_left;
-        float m_bottom;
+        float m_right{ 0.0f };
+        float m_top{ 0.0f };
+        float m_left{ 0.0f };
+        float m_bottom{ 0.0f };
 
         ttb::Matrix< float, 3, 3 > m_transform;
     };

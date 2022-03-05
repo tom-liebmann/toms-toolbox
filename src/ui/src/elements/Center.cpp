@@ -25,17 +25,17 @@ namespace ttb::ui
         , m_hAlign{ HAlignment::CENTER }
         , m_vAlign{ VAlignment::MIDDLE }
     {
-        if( auto value = loader.attrValue( node, "h" ); value )
+        if( auto const value = loader.attrValue( node, "h" ); value )
         {
             m_hAlign = parseHAlignment( value );
         }
 
-        if( auto value = loader.attrValue( node, "v" ); value )
+        if( auto const value = loader.attrValue( node, "v" ); value )
         {
             m_vAlign = parseVAlignment( value );
         }
 
-        if( auto child = node.first_node(); child )
+        if( auto const child = node.first_node(); child )
         {
             wrappedChild( loader.loadElement( framework, *child ) );
         }
