@@ -4,6 +4,8 @@
 
 #include <rapidxml/rapidxml.hpp>
 
+#include <map>
+
 
 namespace ttb::ui
 {
@@ -18,8 +20,13 @@ namespace ttb::ui
     public:
         XmlElement( Framework& framework, rapidxml::xml_node<> const& node );
 
+        Element* getElementById( std::string const& id );
+
+#ifndef TEST
     private:
+#endif
         std::vector< std::unique_ptr< Element > > m_elements;
+        std::unordered_map< std::string, Element* > m_elementIdIndex;
 
         friend XmlLoader;
     };

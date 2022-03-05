@@ -1,6 +1,9 @@
 #include <catch2/catch.hpp>
 
 #include "FrameworkMock.hpp"
+#include <ttb/ui/elements/Center.hpp>
+#include <ttb/ui/elements/Margin.hpp>
+#include <ttb/ui/elements/Rectangle.hpp>
 #include <ttb/ui/elements/XmlElement.hpp>
 
 
@@ -11,6 +14,8 @@ TEST_CASE( "Empty document", "[ui][xml]" )
     rapidxml::xml_document<> doc;
 
     auto const element = ttb::ui::XmlElement{ framework, doc };
+
+    REQUIRE( element.m_elements.empty() );
 }
 
 TEST_CASE( "Single element", "" )
@@ -18,7 +23,7 @@ TEST_CASE( "Single element", "" )
     char data[] =
         "<center h='center' v='middle'>"
         "  <margin value='10 3'>"
-        "    <rectangle color='#F00' />"
+        "    <rectangle id='rect' color='#F00' />"
         "  </margin>"
         "</center>";
 
@@ -27,5 +32,14 @@ TEST_CASE( "Single element", "" )
     rapidxml::xml_document<> doc;
     doc.parse< 0 >( data );
 
-    auto const element = ttb::ui::XmlElement{ framework, doc };
+    auto element = ttb::ui::XmlElement{ framework, doc };
+
+    REQUIRE( element.m_elements.size() == 3 );
+
+    REQUIRE( dynamic_cast< ttb::ui::Rectangle* >( element.m_elements[ 0 ].get() ) != nullptr );
+    REQUIRE( dynamic_cast< ttb::ui::Margin* >( element.m_elements[ 1 ].get() ) != nullptr );
+    REQUIRE( dynamic_cast< ttb::ui::Center* >( element.m_elements[ 2 ].get() ) != nullptr );
+
+    REQUIRE( element.getElementById( "rect" ) == element.m_elements[ 0 ].get() );
+    REQUIRE( element.getElementById( "invalid id" ) == nullptr );
 }

@@ -28,6 +28,11 @@ namespace ttb::ui
         auto const childPtr = child.get();
         m_parent.m_elements.push_back( std::move( child ) );
 
+        if( auto id = attrValue( node, "id" ); id )
+        {
+            m_parent.m_elementIdIndex.insert( { id, childPtr } );
+        }
+
         return childPtr;
     }
 

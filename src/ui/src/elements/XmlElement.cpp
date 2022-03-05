@@ -25,4 +25,11 @@ namespace ttb::ui
 
         wrappedChild( loader.loadElement( framework, *firstChild ) );
     }
+
+    Element* XmlElement::getElementById( std::string const& id )
+    {
+        auto const iter = m_elementIdIndex.find( id );
+
+        return iter == std::end( m_elementIdIndex ) ? nullptr : iter->second;
+    }
 }
