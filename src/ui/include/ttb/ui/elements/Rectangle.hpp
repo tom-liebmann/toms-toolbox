@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/ui/Element.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/Color.hpp>
 
 
@@ -17,6 +18,8 @@ namespace ttb::ui
     {
     public:
         Rectangle( Framework& framework, ColorRgb const& color );
+
+        Rectangle( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Rectangle();
 

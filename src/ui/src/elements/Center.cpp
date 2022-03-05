@@ -2,10 +2,26 @@
 
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+
+namespace
+{
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Center >{ "center" };
+}
 
 
 namespace ttb::ui
 {
+    Center::Center( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ framework }
+    {
+        if( auto child = node.first_node(); child )
+        {
+            wrappedChild( loader.loadElement( framework, *child ) );
+        }
+    }
+
     Center::Center( Framework& framework, HAlignment hAlign, VAlignment vAlign )
         : WrappedElement{ framework }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {

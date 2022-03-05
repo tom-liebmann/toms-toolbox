@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 
 
 namespace ttb::ui
@@ -13,6 +14,8 @@ namespace ttb::ui
         Margin( Framework& framework, float hMargin, float vMargin );
 
         Margin( Framework& framework, float margin );
+
+        Margin( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 
 
 namespace ttb::ui
@@ -23,6 +24,8 @@ namespace ttb::ui
         };
 
         Center( Framework& framework, HAlignment hAlign, VAlignment vAlign );
+
+        Center( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

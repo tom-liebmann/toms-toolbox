@@ -2,6 +2,13 @@
 
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+
+namespace
+{
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Margin >{ "margin" };
+}
 
 
 namespace ttb::ui
@@ -24,6 +31,15 @@ namespace ttb::ui
     Margin::Margin( Framework& framework, float margin )
         : Margin{ framework, margin, margin, margin, margin }
     {
+    }
+
+    Margin::Margin( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ framework }
+    {
+        if( auto child = node.first_node(); child )
+        {
+            wrappedChild( loader.loadElement( framework, *child ) );
+        }
     }
 
     void Margin::child( Element* element )

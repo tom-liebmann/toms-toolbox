@@ -2,7 +2,12 @@
 
 #include <ttb/math/vector_operations.hpp>
 
+#include <ttb/ui/elements/Center.hpp>
+
+#include "rapidxml.h"
+
 #include <iostream>
+#include <map>
 
 
 namespace ttb::ui

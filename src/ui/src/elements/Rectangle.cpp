@@ -6,6 +6,13 @@
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+
+namespace
+{
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Rectangle >{ "rectangle" };
+}
 
 
 namespace ttb::ui
@@ -30,6 +37,13 @@ namespace ttb::ui
         m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
                          .attribute( "in_vertex", std::move( vertexBuffer ) )
                          .finish();
+    }
+
+    Rectangle::Rectangle( Framework& framework,
+                          rapidxml::xml_node<> const& node,
+                          XmlLoader& loader )
+        : Element{ framework }
+    {
     }
 
     Rectangle::~Rectangle() = default;
