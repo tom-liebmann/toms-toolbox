@@ -10,14 +10,14 @@ target_include_directories( ${TARGET_NAME} PUBLIC include PRIVATE src )
 
 target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath ttbUtils )
 
-ttb_add_module_dependency( ${TARGET_NAME} "yamlcpp" )
+ttb_add_module_dependency( ${TARGET_NAME} "yaml-cpp" yaml-cpp::yaml-cpp )
 
 add_subdirectory( src )
 
 if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
 
-    ttb_add_module_dependency( ${TARGET_NAME} "glew" )
-    ttb_add_module_dependency( ${TARGET_NAME} "opengl" )
+    ttb_add_module_dependency( ${TARGET_NAME} "GLEW" GLEW::GLEW )
+    ttb_add_module_dependency( ${TARGET_NAME} "opengl_system" opengl::opengl )
 
     target_compile_definitions(
         ${TARGET_NAME}

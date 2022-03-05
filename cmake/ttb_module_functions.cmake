@@ -1,58 +1,64 @@
 include_guard( GLOBAL )
 
-if( NOT ${BUILD_PLATFORM} STREQUAL "Android" )
+set( TTB_MODULE_FUNCTIONS_DIR ${CMAKE_CURRENT_LIST_DIR} )
 
-    add_custom_target( check ${CMAKE_CTEST_COMMAND} )
+macro( ttb_init_testing )
+    set( BUILD_TESTS "OFF" CACHE BOOL "Whether to build tests" )
 
-    add_library(
-        test_main
-        OBJECT
-        ${CMAKE_CURRENT_LIST_DIR}/src/test_main.cpp
-        )
+    if( ${BUILD_TESTS} )
+        enable_testing()
+    endif()
+endmacro()
 
-    find_package( catch2 REQUIRED )
-    target_link_libraries( test_main PRIVATE catch2 )
+function( ttb_add_test )
 
-    function( ttb_add_test )
+    if( NOT ${BUILD_TESTS} )
+        return()
+    endif()
 
-        set( BUILD_TESTS "OFF" CACHE BOOL "Whether to build tests" )
+    if( NOT TARGET check )
+        add_custom_target( check ${CMAKE_CTEST_COMMAND} )
+    endif()
 
-        if( ${BUILD_TESTS} )
+    find_package( Catch2 REQUIRED )
 
-            cmake_parse_arguments(
-                ADD_TEST
-                ""
-                "TARGET_NAME"
-                "SOURCES;DEPENDENCIES;INCLUDES"
-                ${ARGN}
+    if( NOT TARGET test_main )
+        add_library(
+            test_main
+            OBJECT
+            ${TTB_MODULE_FUNCTIONS_DIR}/src/test_main.cpp
             )
 
-            # Create test target
-            add_executable(
-                ${ADD_TEST_TARGET_NAME}
-                ${ADD_TEST_SOURCES}
-            )
+        target_link_libraries( test_main PRIVATE Catch2::Catch2 )
+    endif()
 
-            target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE test_main catch2 ${ADD_TEST_DEPENDENCIES} )
+    cmake_parse_arguments(
+        ADD_TEST
+        ""
+        "TARGET_NAME"
+        "SOURCES;DEPENDENCIES;INCLUDES"
+        ${ARGN}
+    )
 
-            target_include_directories( ${ADD_TEST_TARGET_NAME} PRIVATE ${ADD_TEST_INCLUDES} )
+    # Create test target
+    add_executable(
+        ${ADD_TEST_TARGET_NAME}
+        ${ADD_TEST_SOURCES}
+    )
 
-            target_compile_definitions( ${ADD_TEST_TARGET_NAME} PRIVATE -DTEST )
+    target_link_libraries( ${ADD_TEST_TARGET_NAME} PRIVATE test_main Catch2::Catch2 ${ADD_TEST_DEPENDENCIES} )
 
-            add_test( NAME ${ADD_TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${ADD_TEST_TARGET_NAME}> )
+    target_include_directories( ${ADD_TEST_TARGET_NAME} PRIVATE ${ADD_TEST_INCLUDES} )
 
-            add_dependencies( check ${ADD_TEST_TARGET_NAME} )
+    target_compile_definitions( ${ADD_TEST_TARGET_NAME} PRIVATE -DTEST )
 
-        endif()
+    add_test( NAME ${ADD_TEST_TARGET_NAME} COMMAND $<TARGET_FILE:${ADD_TEST_TARGET_NAME}> )
 
-    endfunction()
+    add_dependencies( check ${ADD_TEST_TARGET_NAME} )
 
-else()
+    set( TARGET_NAME ${ADD_TEST_TARGET_NAME} PARENT_SCOPE )
 
-    function( ttb_add_test )
-    endfunction()
-
-endif()
+endfunction()
 
 function( ttb_add_module MODULE_NAME )
 
@@ -71,7 +77,7 @@ function( ttb_add_module MODULE_NAME )
     # ================================================================
     add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} )
 
-    target_sources( ${MODULE_NAME} PRIVATE "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/../src/dummy.cpp" )
+    target_sources( ${MODULE_NAME} PRIVATE "${TTB_MODULE_FUNCTIONS_DIR}/src/dummy.cpp" )
 
     # add compiler definitions
     # ================================================================
@@ -93,14 +99,14 @@ function( ttb_add_module MODULE_NAME )
 
 endfunction()
 
-function( ttb_add_module_dependency MODULE_NAME DEPENDENCY )
+function( ttb_add_module_dependency MODULE_NAME DEPENDENCY DEP_TARGET )
     # Find dependency
     find_package( ${DEPENDENCY} REQUIRED )
 
     # Link dependency to module
-    target_link_libraries( ${MODULE_NAME} PUBLIC ${DEPENDENCY} )
+    target_link_libraries( ${MODULE_NAME} PUBLIC ${DEP_TARGET} )
 
     # Add dependency to export set
-    list( APPEND EXPORT_DEPENDENCIES "${DEPENDENCY}" )
+    list( APPEND EXPORT_DEPENDENCIES "${DEP_TARGET}" )
     set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
 endfunction()

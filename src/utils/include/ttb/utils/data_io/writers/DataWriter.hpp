@@ -4,6 +4,7 @@
 #include "../Writer.hpp"
 
 #include <cstdint>
+#include <functional>
 
 
 namespace ttb

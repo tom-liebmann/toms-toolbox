@@ -8,6 +8,7 @@ target_sources(
 if( "${BUILD_PLATFORM}" STREQUAL "Linux" )
     add_subdirectory( platform_linux )
 elseif( "${BUILD_PLATFORM}" STREQUAL "Android" )
+    message("Adding android window")
     add_subdirectory( platform_android )
 elseif( "${BUILD_PLATFORM}" STREQUAL "Browser" )
     add_subdirectory( platform_browser )

@@ -5,34 +5,31 @@ set( TTB_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." )
 cmake_policy( SET CMP0076 NEW ) # allow relative target_sources
 cmake_policy( SET CMP0079 NEW ) # allow out-of-tree linkage
 
-find_package( cmake-modules REQUIRED )
-
 project( ${PROJECT_NAME} )
 
 set( TARGET_NAME ${PROJECT_NAME} )
 
 add_library( ${TARGET_NAME} SHARED )
 
-add_subdirectory( ${PROJECT_CMAKE_FILE} ${PROJECT_NAME} )
+target_compile_features( ${TARGET_NAME} PUBLIC cxx_std_20 )
+target_compile_definitions( ${TARGET_NAME} PUBLIC PLATFORM_ANDROID )
 
-set( ACTIVATE_ttbCore "ON" )
-set( ACTIVATE_ttbUtils "ON" )
-set( ACTIVATE_ttbMath "ON" )
-set( ACTIVATE_ttbUi "ON" )
-set( IMPORT_STRATEGY_YAMLCPP "GIT Fetch" )
-add_subdirectory( "${TTB_ROOT}" toms-toolbox )
+find_package( ttb REQUIRED )
+
+add_subdirectory( ${PROJECT_CMAKE_FILE} ${PROJECT_NAME} )
 
 add_subdirectory( "${TTB_ROOT}/project/src" ttb_project )
 
 target_link_libraries(
     ${TARGET_NAME}
     PRIVATE
+        GLESv2
         android
         log
-        ttbCore
-        ttbUtils
-        ttbMath
-        ttbUi
+        ttb::core
+        ttb::utils
+        ttb::math
+        ttb::ui
 )
 
 install( TARGETS ${TARGET_NAME} )

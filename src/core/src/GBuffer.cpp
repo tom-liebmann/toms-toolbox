@@ -13,6 +13,12 @@ namespace
     void checkFramebufferStatus();
 }
 
+#ifdef PLATFORM_ANDROID
+void glFramebufferTexture( GLenum, GLenum, GLuint, GLint )
+{
+}
+#endif
+
 
 namespace ttb
 {

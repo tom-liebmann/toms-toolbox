@@ -1,15 +1,16 @@
 cmake_minimum_required( VERSION 3.15 )
 
-find_package( cmake-modules REQUIRED )
-
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
+include( ${CMAKE_BINARY_DIR}/conan_paths.cmake )
 include( ttb_general )
 include( ttb_module_functions )
 
 request_build_platform( BUILD_PLATFORM )
 
 request_build_type()
+
+ttb_init_testing()
 
 if( PROJECT_HAS_PARENT )
 
@@ -28,7 +29,7 @@ else()
 
         if( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
-            set( REQUIRED_GCC_VERSION "9.0.0" )
+            set( REQUIRED_GCC_VERSION "8.0.0" )
 
             if( CMAKE_CXX_COMPILER_VERSION VERSION_LESS ${REQUIRED_GCC_VERSION})
 

@@ -16,7 +16,10 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
     add_executable( ${TARGET_NAME} )
 
     find_package( ttb REQUIRED )
-    target_link_libraries( ${TARGET_NAME} PRIVATE ttbCore ttbUtils ttbUi ttbMath )
+    target_link_libraries( ${TARGET_NAME} PRIVATE ttb::core ttb::utils ttb::ui ttb::math )
+
+    string( TOUPPER ${BUILD_PLATFORM} BUILD_PLATFORM_UPPER )
+    target_compile_definitions( ${TARGET_NAME} PUBLIC PLATFORM_${BUILD_PLATFORM_UPPER} )
 
     add_subdirectory( ${PROJECT_CMAKE_FILE} _target_${PROJECT_NAME} )
 
