@@ -43,9 +43,10 @@ class TomsToolboxConan(ConanFile):
     def requirements(self):
         if self.options.activate_core:
             self.requires("yaml-cpp/0.6.3")
-            self.requires("glfw/3.3.6")
-            self.requires("opengl/system")
-            self.requires("glew/2.2.0")
+            if self.settings.os != "Android":
+                self.requires("glfw/3.3.6")
+                self.requires("opengl/system")
+                self.requires("glew/2.2.0")
         if self.options.build_tests:
             self.requires("catch2/2.13.8")
 
@@ -75,7 +76,9 @@ class TomsToolboxConan(ConanFile):
         self.cpp_info.name = "ttb"
 
         if self.options.activate_core:
-            self.cpp_info.components["core"].requires = ["yaml-cpp::yaml-cpp", "glfw::glfw", "opengl::opengl", "glew::glew"]
+            self.cpp_info.components["core"].requires = ["yaml-cpp::yaml-cpp"]
+            if self.settings.os != "Android":
+                self.cpp_info.components["core"].requires.extend(["glfw::glfw", "opengl::opengl", "glew::glew"])
             if self.options.build_tests:
                 self.cpp_info.components["core"].requires.append("catch2::catch2")
             self.cpp_info.components["core"].libdirs = ["lib"]

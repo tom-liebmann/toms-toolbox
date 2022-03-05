@@ -98,7 +98,7 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
             -DPROJECT_NAME=${LIBRARY_NAME}
             -DPROJECT_CMAKE_FILE=${PROJECT_CMAKE_FILE}
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
-            -Dcmake-modules_DIR=${cmake-modules_DIR}
+            -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_BINARY_DIR}
             ${_USER_ARGS}
     )
 
