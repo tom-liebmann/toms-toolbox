@@ -22,12 +22,13 @@ namespace ttb::ui
     public:
         Element* loadElement( Framework& framework, rapidxml::xml_node<> const& node );
 
-        static char const* attrValue( rapidxml::xml_node<> const& node, std::string const& name );
+        static std::optional< std::string_view > attrValue( rapidxml::xml_node<> const& node,
+                                                            std::string_view const& name );
 
     private:
         XmlLoader( XmlElement& parent );
 
-        static void registerFactory( std::string const& name, XmlFactoryBase* factory );
+        static void registerFactory( std::string_view const& name, XmlFactoryBase* factory );
 
         XmlElement& m_parent;
 

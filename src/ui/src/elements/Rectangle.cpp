@@ -44,6 +44,10 @@ namespace ttb::ui
                           XmlLoader& loader )
         : Element{ framework }
     {
+        if( auto const value = loader.attrValue( node, "color" ); value )
+        {
+            m_color = ColorRgb::createHexStr( value.value() ).value();
+        }
     }
 
     Rectangle::~Rectangle() = default;
@@ -51,6 +55,11 @@ namespace ttb::ui
     void Rectangle::color( ColorRgb const& value )
     {
         m_color = value;
+    }
+
+    ColorRgb const& Rectangle::color() const
+    {
+        return m_color;
     }
 
     void Rectangle::render( ttb::State& state ) const

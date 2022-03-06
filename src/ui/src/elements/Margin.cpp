@@ -14,7 +14,7 @@ namespace ttb::ui
         auto const factory = XmlFactory< Margin >{ "margin" };
 
         void parseMargins(
-            std::string const& value, float& right, float& top, float& left, float& bottom );
+            std::string_view const& value, float& right, float& top, float& left, float& bottom );
     }
 }
 
@@ -46,7 +46,7 @@ namespace ttb::ui
     {
         if( auto const value = loader.attrValue( node, "value" ); value )
         {
-            parseMargins( value, m_right, m_top, m_left, m_bottom );
+            parseMargins( *value, m_right, m_top, m_left, m_bottom );
         }
 
         std::cout << "Margins: " << m_right << " " << m_top << " " << m_left << " " << m_bottom
@@ -178,7 +178,7 @@ namespace ttb::ui
     namespace
     {
         void parseMargins(
-            std::string const& value, float& right, float& top, float& left, float& bottom )
+            std::string_view const& value, float& right, float& top, float& left, float& bottom )
         {
             static auto const PATTERN_4 = std::regex{
                 R"pat(\s*([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s*)pat"
@@ -189,9 +189,11 @@ namespace ttb::ui
 
             static auto const PATTERN_1 = std::regex{ R"pat(\s*([\d\-\+\.eE]+)\s*)pat" };
 
-            auto match = std::smatch{};
+            using svmatch = std::match_results< std::string_view::const_iterator >;
 
-            if( std::regex_match( value, match, PATTERN_4 ) )
+            auto match = svmatch{};
+
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_4 ) )
             {
                 right = std::stof( match[ 1 ] );
                 top = std::stof( match[ 2 ] );
@@ -200,7 +202,7 @@ namespace ttb::ui
                 return;
             }
 
-            if( std::regex_match( value, match, PATTERN_2 ) )
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_2 ) )
             {
                 right = std::stof( match[ 1 ] );
                 left = right;
@@ -209,7 +211,7 @@ namespace ttb::ui
                 return;
             }
 
-            if( std::regex_match( value, match, PATTERN_1 ) )
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_1 ) )
             {
                 right = std::stof( match[ 1 ] );
                 top = right;

@@ -23,7 +23,7 @@ TEST_CASE( "Single element", "" )
     char data[] =
         "<center h='center' v='middle'>"
         "  <margin value='10 3'>"
-        "    <rectangle id='rect' color='#F00' />"
+        "    <rectangle id='rect' color='#f00' />"
         "  </margin>"
         "</center>";
 

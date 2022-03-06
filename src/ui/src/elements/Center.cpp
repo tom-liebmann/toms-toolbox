@@ -11,9 +11,9 @@ namespace ttb::ui
     {
         auto const factory = XmlFactory< Center >{ "center" };
 
-        Center::HAlignment parseHAlignment( std::string const& value );
+        Center::HAlignment parseHAlignment( std::string_view const& value );
 
-        Center::VAlignment parseVAlignment( std::string const& value );
+        Center::VAlignment parseVAlignment( std::string_view const& value );
     }
 }
 
@@ -27,12 +27,12 @@ namespace ttb::ui
     {
         if( auto const value = loader.attrValue( node, "h" ); value )
         {
-            m_hAlign = parseHAlignment( value );
+            m_hAlign = parseHAlignment( *value );
         }
 
         if( auto const value = loader.attrValue( node, "v" ); value )
         {
-            m_vAlign = parseVAlignment( value );
+            m_vAlign = parseVAlignment( *value );
         }
 
         if( auto const child = node.first_node(); child )
@@ -175,7 +175,7 @@ namespace ttb::ui
 {
     namespace
     {
-        inline Center::HAlignment parseHAlignment( std::string const& value )
+        inline Center::HAlignment parseHAlignment( std::string_view const& value )
         {
             if( value == "left" )
             {
@@ -195,7 +195,7 @@ namespace ttb::ui
             throw std::runtime_error( "Invalid alignment value" );
         }
 
-        inline Center::VAlignment parseVAlignment( std::string const& value )
+        inline Center::VAlignment parseVAlignment( std::string_view const& value )
         {
             if( value == "top" )
             {

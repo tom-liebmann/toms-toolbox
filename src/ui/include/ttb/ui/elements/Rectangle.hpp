@@ -25,6 +25,8 @@ namespace ttb::ui
 
         void color( ColorRgb const& value );
 
+        ColorRgb const& color() const;
+
         virtual void render( ttb::State& state ) const override;
 
     private:
