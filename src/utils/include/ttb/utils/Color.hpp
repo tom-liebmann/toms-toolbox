@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <optional>
 
 
 namespace ttb
@@ -21,6 +22,8 @@ namespace ttb
         static constexpr ColorRgb createF( float r, float g, float b );
 
         static constexpr ColorRgb createI( uint8_t r, uint8_t g, uint8_t b );
+
+        static std::optional< ColorRgb > createHexStr( std::string_view value );
 
         constexpr ColorRgb();
 
@@ -47,6 +50,8 @@ namespace ttb
     };
 
     std::ostream& operator<<( std::ostream& stream, ColorRgb const& color );
+
+    constexpr bool operator==( ColorRgb const& lhs, ColorRgb const& rhs );
 
 
     class ColorHsl
@@ -262,5 +267,11 @@ namespace ttb
     inline std::ostream& operator<<( std::ostream& stream, ColorHsl const& color )
     {
         return stream << "hsl(" << color.h() << ", " << color.s() << ", " << color.l() << ')';
+    }
+
+
+    inline constexpr bool operator==( ColorRgb const& lhs, ColorRgb const& rhs )
+    {
+        return lhs.rI() == rhs.rI() && lhs.gI() == rhs.gI() && lhs.bI() == rhs.bI();
     }
 }
