@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/WrappedElement.hpp>
 #include <ttb/ui/XmlLoader.hpp>
 
@@ -34,15 +35,11 @@ namespace ttb::ui
         virtual bool onEvent( ttb::Event const& event ) override;
 
     private:
-        Position transform( Position const& pos ) const;
-
-        Position transformInv( Position const& pos ) const;
-
         float m_right{ 0.0f };
         float m_top{ 0.0f };
         float m_left{ 0.0f };
         float m_bottom{ 0.0f };
 
-        ttb::Matrix< float, 3, 3 > m_transform;
+        ttb::Matrix< float, 3, 3 > m_transform{ ttb::mat::identity< float, 3 >() };
     };
 }

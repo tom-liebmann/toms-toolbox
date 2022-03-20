@@ -27,7 +27,6 @@ namespace ttb::ui
         , m_top{ top }
         , m_left{ left }
         , m_bottom{ bottom }
-        , m_transform{ ttb::mat::identity< float, 3 >() }
     {
     }
 
@@ -49,9 +48,6 @@ namespace ttb::ui
             parseMargins( *value, m_right, m_top, m_left, m_bottom );
         }
 
-        std::cout << "Margins: " << m_right << " " << m_top << " " << m_left << " " << m_bottom
-                  << std::endl;
-
         if( auto child = node.first_node(); child )
         {
             wrappedChild( loader.loadElement( framework, *child ) );
@@ -60,16 +56,7 @@ namespace ttb::ui
 
     void Margin::child( Element* element )
     {
-        wrappedChild(
-            element,
-            [ this ]( auto const& pos )
-            {
-                return transform( pos );
-            },
-            [ this ]( auto const& pos )
-            {
-                return transformInv( pos );
-            } );
+        wrappedChild( element );
     }
 
     void Margin::right( float value, bool isLastChange )
@@ -159,16 +146,6 @@ namespace ttb::ui
         }
 
         return result;
-    }
-
-    auto Margin::transform( Position const& pos ) const -> Position
-    {
-        return { pos( 0 ) + m_left, pos( 1 ) + m_top };
-    }
-
-    auto Margin::transformInv( Position const& pos ) const -> Position
-    {
-        return { pos( 0 ) - m_left, pos( 1 ) - m_top };
     }
 }
 

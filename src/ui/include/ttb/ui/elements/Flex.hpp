@@ -1,6 +1,8 @@
 #pragma once
 
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Element.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 
 #include <vector>
 
@@ -25,6 +27,8 @@ namespace ttb::ui
         };
 
         Flex( Framework& framework, Direction direction );
+
+        Flex( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         //! @copydoc Element::fit(Size const&)
         virtual Size fit( Size const& space ) override;
@@ -52,10 +56,6 @@ namespace ttb::ui
         void slotValue( size_t slot, float value, bool isLastChange = true );
 
     private:
-        Position transform( size_t slot, Position const& pos ) const;
-
-        Position transformInv( size_t slot, Position const& pos ) const;
-
         size_t dirDim() const;
 
         struct Slot
@@ -70,6 +70,6 @@ namespace ttb::ui
         Direction m_direction;
         std::vector< Slot > m_slots;
 
-        ttb::Matrix< float, 3, 3 > m_transform;
+        ttb::Matrix< float, 3, 3 > m_transform{ ttb::mat::identity< float, 3 >() };
     };
 }
