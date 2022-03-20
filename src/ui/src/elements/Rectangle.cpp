@@ -20,23 +20,7 @@ namespace ttb::ui
     Rectangle::Rectangle( Framework& framework, ColorRgb const& color )
         : Element{ framework }, m_color( color )
     {
-        m_program = framework.resourceManager().get< ttb::Program >( "ui_rect" );
-
-        auto vertexBuffer = ttb::VertexBuffer::create(
-            [ & ]( auto& c )
-            {
-                c.attribute( GL_FLOAT, 2 );  //
-            } );
-
-        vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
-        vertexBuffer->push_back().set( 0, 0.0f, 1.0f );
-        vertexBuffer->push_back().set( 0, 1.0f, 0.0f );
-        vertexBuffer->push_back().set( 0, 1.0f, 1.0f );
-        vertexBuffer->flush();
-
-        m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
-                         .attribute( "in_vertex", std::move( vertexBuffer ) )
-                         .finish();
+        initGeometry();
     }
 
     Rectangle::Rectangle( Framework& framework,
@@ -48,6 +32,8 @@ namespace ttb::ui
         {
             m_color = ColorRgb::createHexStr( value.value() ).value();
         }
+
+        initGeometry();
     }
 
     Rectangle::~Rectangle() = default;
@@ -73,5 +59,26 @@ namespace ttb::ui
             {
                 state.draw( *m_geometry );
             } );
+    }
+
+    void Rectangle::initGeometry()
+    {
+        m_program = framework().resourceManager().get< ttb::Program >( "ui_rect" );
+
+        auto vertexBuffer = ttb::VertexBuffer::create(
+            [ & ]( auto& c )
+            {
+                c.attribute( GL_FLOAT, 2 );  //
+            } );
+
+        vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
+        vertexBuffer->push_back().set( 0, 0.0f, 1.0f );
+        vertexBuffer->push_back().set( 0, 1.0f, 0.0f );
+        vertexBuffer->push_back().set( 0, 1.0f, 1.0f );
+        vertexBuffer->flush();
+
+        m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
+                         .attribute( "in_vertex", std::move( vertexBuffer ) )
+                         .finish();
     }
 }

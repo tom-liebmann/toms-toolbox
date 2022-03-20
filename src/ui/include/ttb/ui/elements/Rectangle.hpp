@@ -30,6 +30,8 @@ namespace ttb::ui
         virtual void render( ttb::State& state ) const override;
 
     private:
+        void initGeometry();
+
         ColorRgb m_color;
 
         std::shared_ptr< ttb::Program const > m_program;
