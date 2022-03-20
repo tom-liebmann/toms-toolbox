@@ -54,5 +54,5 @@ TEST_CASE( "Load from source", "" )
 
     REQUIRE( element.m_elements.size() == 1 );
     REQUIRE( dynamic_cast< ttb::ui::Rectangle* >( element.m_elements[ 0 ].get() ) != nullptr );
-    REQUIRE( element.getElementById( "rect" ) == element.m_elements[ 0 ].get() );
+    REQUIRE( element.getTypeById< ttb::ui::Rectangle >( "rect" ) == element.m_elements[ 0 ].get() );
 }

@@ -24,6 +24,9 @@ namespace ttb::ui
 
         Element* getElementById( std::string const& id );
 
+        template < typename TType >
+        TType* getTypeById( std::string const& id );
+
 #ifndef TEST
     private:
 #endif
@@ -32,4 +35,14 @@ namespace ttb::ui
 
         friend XmlLoader;
     };
+}
+
+
+namespace ttb::ui
+{
+    template < typename TType >
+    inline TType* XmlElement::getTypeById( std::string const& id )
+    {
+        return dynamic_cast< TType* >( getElementById( id ) );
+    }
 }
