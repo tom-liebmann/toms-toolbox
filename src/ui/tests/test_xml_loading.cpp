@@ -43,3 +43,16 @@ TEST_CASE( "Single element", "" )
     REQUIRE( element.getElementById( "rect" ) == element.m_elements[ 0 ].get() );
     REQUIRE( element.getElementById( "invalid id" ) == nullptr );
 }
+
+TEST_CASE( "Load from source", "" )
+{
+    char const data[] = "<rectangle id='rect' color='#f00' />";
+
+    auto framework = ttb::ui::test::FrameworkMock{};
+
+    auto element = ttb::ui::XmlElement{ framework, data };
+
+    REQUIRE( element.m_elements.size() == 1 );
+    REQUIRE( dynamic_cast< ttb::ui::Rectangle* >( element.m_elements[ 0 ].get() ) != nullptr );
+    REQUIRE( element.getElementById( "rect" ) == element.m_elements[ 0 ].get() );
+}

@@ -20,6 +20,8 @@ namespace ttb::ui
     public:
         XmlElement( Framework& framework, rapidxml::xml_node<> const& node );
 
+        XmlElement( Framework& framework, char const* source );
+
         Element* getElementById( std::string const& id );
 
 #ifndef TEST
