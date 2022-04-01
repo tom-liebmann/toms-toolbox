@@ -15,13 +15,7 @@ namespace ttb::ui::test
             return m_resourceManager;
         }
 
-        virtual ttb::EventManager& eventManager() override
-        {
-            return m_eventManager;
-        }
-
     private:
         ttb::resources::Manager m_resourceManager;
-        ttb::EventManager m_eventManager;
     };
 }

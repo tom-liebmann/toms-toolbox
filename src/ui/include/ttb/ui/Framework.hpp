@@ -6,9 +6,9 @@ namespace ttb::resources
     class Manager;
 }
 
-namespace ttb
+namespace ttb::ui
 {
-    class EventManager;
+    class Root;
 }
 
 
@@ -21,6 +21,11 @@ namespace ttb::ui
 
         virtual ttb::resources::Manager& resourceManager() = 0;
 
-        virtual ttb::EventManager& eventManager() = 0;
+        Root* getRoot();
+
+        void setRoot( Root& value );
+
+    private:
+        Root* m_root{ nullptr };
     };
 }

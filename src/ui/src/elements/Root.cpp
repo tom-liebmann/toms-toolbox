@@ -12,37 +12,9 @@ namespace ttb::ui
     Root::Root( Framework& framework, Size const& size )
         : Element{ framework }, m_transform{ ttb::mat::identity< float, 3 >() }
     {
-        auto& eventMngr = framework.eventManager();
-
-        using namespace ttb::event;
-        eventMngr.addListener( type::POINTER_DOWN, prio::ROOT, *this );
-        eventMngr.addListener( type::POINTER_UP, prio::ROOT, *this );
-        eventMngr.addListener( type::POINTER_PRESS_START, prio::ROOT, *this );
-        eventMngr.addListener( type::POINTER_PRESS_END, prio::ROOT, *this );
-        eventMngr.addListener( type::POINTER_PRESS_ABORT, prio::ROOT, *this );
-        eventMngr.addListener( type::DRAG_START, prio::ROOT, *this );
-        eventMngr.addListener( type::DRAG_END, prio::ROOT, *this );
-        eventMngr.addListener( type::DRAG_MOVE, prio::ROOT, *this );
-        eventMngr.addListener( type::ZOOM, prio::ROOT, *this );
+        framework.setRoot( *this );
 
         Element::fit( size );
-    }
-
-    Root::~Root()
-    {
-        auto& eventMngr = framework().eventManager();
-
-        using namespace ttb::event;
-
-        eventMngr.removeListener( type::POINTER_DOWN, *this );
-        eventMngr.removeListener( type::POINTER_UP, *this );
-        eventMngr.removeListener( type::POINTER_PRESS_START, *this );
-        eventMngr.removeListener( type::POINTER_PRESS_END, *this );
-        eventMngr.removeListener( type::POINTER_PRESS_ABORT, *this );
-        eventMngr.removeListener( type::DRAG_START, *this );
-        eventMngr.removeListener( type::DRAG_END, *this );
-        eventMngr.removeListener( type::DRAG_MOVE, *this );
-        eventMngr.removeListener( type::ZOOM, *this );
     }
 
     void Root::destroy()
@@ -69,6 +41,16 @@ namespace ttb::ui
         }
     }
 
+    void Root::setPriorityListener( EventListener* listener )
+    {
+        m_priorityListener = listener;
+    }
+
+    EventListener* Root::getPriorityListener() const
+    {
+        return m_priorityListener;
+    }
+
     void Root::update( float timeDiff )
     {
         if( m_child )
@@ -79,6 +61,14 @@ namespace ttb::ui
 
     bool Root::onEvent( Event const& event )
     {
+        if( m_priorityListener )
+        {
+            if( m_priorityListener->onEvent( event ) )
+            {
+                return true;
+            }
+        }
+
         if( m_child )
         {
             return m_child->onEvent( event );

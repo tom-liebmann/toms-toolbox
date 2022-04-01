@@ -69,10 +69,7 @@ namespace ttb::ui
                     eventPos( 1 ) < size()( 1 ) )
                 {
                     m_pointerId = ev.pointerId();
-                    m_prioListener =
-                        std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                    m_prioListener->addType( type::POINTER_MOVE );
-                    m_prioListener->addType( type::POINTER_UP );
+                    m_prioListener = std::make_unique< PriorityListener >( framework(), *this );
                     m_callback( Action::START, *this );
                     return true;
                 }
