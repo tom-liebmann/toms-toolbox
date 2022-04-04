@@ -115,6 +115,11 @@ namespace ttb::ui
         return *this;
     }
 
+    auto QuadRenderer::Handle::color( ttb::ColorRgb const& value ) const -> Handle const&
+    {
+        return color( value.rF(), value.gF(), value.bF() );
+    }
+
     auto QuadRenderer::Handle::depth( float value ) const -> Handle const&
     {
         for( size_t i = 0; i < 16; ++i )

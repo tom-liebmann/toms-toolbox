@@ -3,6 +3,7 @@
 #include <ttb/core/State.hpp>
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/resources/Manager.hpp>
+#include <ttb/utils/Color.hpp>
 
 
 namespace ttb::ui
@@ -45,6 +46,8 @@ namespace ttb::ui
         using Color = ttb::Vector< float, 3 >;
 
         Handle const& color( Color const& value ) const;
+
+        Handle const& color( ttb::ColorRgb const& value ) const;
 
         Handle const& depth( float value ) const;
 

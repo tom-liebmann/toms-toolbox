@@ -41,6 +41,8 @@ namespace ttb
 
         constexpr uint8_t bI() const;
 
+        constexpr ColorRgb lighten( float value ) const;
+
     private:
         constexpr ColorRgb( uint8_t r, uint8_t g, uint8_t b );
 
@@ -178,6 +180,11 @@ namespace ttb
     inline constexpr uint8_t ColorRgb::bI() const
     {
         return m_b;
+    }
+
+    inline constexpr ColorRgb ColorRgb::lighten( float value ) const
+    {
+        return ColorRgb{ ColorHsl{ *this }.lighten( value ) };
     }
 
     inline constexpr ColorRgb::ColorRgb( uint8_t r, uint8_t g, uint8_t b )
