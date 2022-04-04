@@ -7,9 +7,9 @@
 #include <vector>
 
 
-namespace ttb
+namespace ttb::ui
 {
-    class EventManager;
+    class Framework;
 }
 
 
@@ -18,18 +18,16 @@ namespace ttb::ui
     class PriorityListener : public EventListener
     {
     public:
-        PriorityListener( EventManager& manager, EventListener& listener );
+        PriorityListener( Framework& framework, EventListener& listener );
 
         ~PriorityListener();
-
-        void addType( uint32_t type );
 
         virtual bool onEvent( Event const& event ) override;
 
     private:
-        std::reference_wrapper< EventManager > m_manager;
+        std::reference_wrapper< Framework > m_framework;
         std::reference_wrapper< EventListener > m_listener;
 
-        std::vector< uint32_t > m_types;
+        EventListener* m_oldListener;
     };
 }

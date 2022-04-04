@@ -1,5 +1,6 @@
 #include <catch2/catch.hpp>
 
+#include "FrameworkMock.hpp"
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/ui/Framework.hpp>
 #include <ttb/ui/elements/Center.hpp>
@@ -42,30 +43,12 @@ namespace
         bool m_fixedHeight;
         float m_height;
     };
-
-    class Framework : public ttb::ui::Framework
-    {
-    public:
-        virtual ttb::resources::Manager& resourceManager() override
-        {
-            return m_resourceManager;
-        }
-
-        virtual ttb::EventManager& eventManager() override
-        {
-            return m_eventManager;
-        }
-
-    private:
-        ttb::resources::Manager m_resourceManager;
-        ttb::EventManager m_eventManager;
-    };
 }
 
 
 TEST_CASE( "Center", "[ui][elements]" )
 {
-    auto framework = Framework{};
+    auto framework = ttb::ui::test::FrameworkMock{};
 
     SECTION( "Centered" )
     {

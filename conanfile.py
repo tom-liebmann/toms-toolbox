@@ -47,6 +47,8 @@ class TomsToolboxConan(ConanFile):
                 self.requires("glfw/3.3.6")
                 self.requires("opengl/system")
                 self.requires("glew/2.2.0")
+        if self.options.activate_ui:
+            self.requires("rapidxml/1.13")
         if self.options.build_tests:
             self.requires("catch2/2.13.8")
 
@@ -89,6 +91,7 @@ class TomsToolboxConan(ConanFile):
             self.cpp_info.components["math"].libdirs = ["lib"]
             self.cpp_info.components["math"].libs = ["ttbMath"]
         if self.options.activate_ui:
+            self.cpp_info.components["ui"].requires.append("rapidxml::rapidxml")
             if self.options.build_tests:
                 self.cpp_info.components["ui"].requires.append("catch2::catch2")
             self.cpp_info.components["ui"].libdirs = ["lib"]

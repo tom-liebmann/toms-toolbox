@@ -48,6 +48,12 @@ namespace ttb::resources
         if( iter == std::end( m_resources ) )
         {
             auto result = m_loader->load( name );
+
+            if( !result )
+            {
+                throw std::runtime_error( "Unable to load " + name );
+            }
+
             m_resources[ name ] = result;
             return result;
         }

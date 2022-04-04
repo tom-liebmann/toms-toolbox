@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/EventListener.hpp>
 
 
@@ -25,6 +26,8 @@ namespace ttb::ui
         using ClickCallback = std::function< void( Action, Element& ) >;
 
         Clickable( Framework& framework );
+
+        Clickable( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Clickable();
 

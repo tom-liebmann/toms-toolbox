@@ -6,6 +6,8 @@ target_sources(
         CombinedElement.cpp
         WrappedElement.cpp
         Framework.cpp
+        XmlFactory.cpp
+        XmlLoader.cpp
 )
 
 add_subdirectory( elements )

@@ -4,6 +4,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <optional>
 
 
 namespace ttb
@@ -22,6 +23,8 @@ namespace ttb
 
         static constexpr ColorRgb createI( uint8_t r, uint8_t g, uint8_t b );
 
+        static std::optional< ColorRgb > createHexStr( std::string_view value );
+
         constexpr ColorRgb();
 
         constexpr explicit ColorRgb( ColorHsl const& rhs );
@@ -38,6 +41,8 @@ namespace ttb
 
         constexpr uint8_t bI() const;
 
+        constexpr ColorRgb lighten( float value ) const;
+
     private:
         constexpr ColorRgb( uint8_t r, uint8_t g, uint8_t b );
 
@@ -47,6 +52,8 @@ namespace ttb
     };
 
     std::ostream& operator<<( std::ostream& stream, ColorRgb const& color );
+
+    constexpr bool operator==( ColorRgb const& lhs, ColorRgb const& rhs );
 
 
     class ColorHsl
@@ -175,6 +182,11 @@ namespace ttb
         return m_b;
     }
 
+    inline constexpr ColorRgb ColorRgb::lighten( float value ) const
+    {
+        return ColorRgb{ ColorHsl{ *this }.lighten( value ) };
+    }
+
     inline constexpr ColorRgb::ColorRgb( uint8_t r, uint8_t g, uint8_t b )
         : m_r{ r }, m_g{ g }, m_b{ b }
     {
@@ -262,5 +274,11 @@ namespace ttb
     inline std::ostream& operator<<( std::ostream& stream, ColorHsl const& color )
     {
         return stream << "hsl(" << color.h() << ", " << color.s() << ", " << color.l() << ')';
+    }
+
+
+    inline constexpr bool operator==( ColorRgb const& lhs, ColorRgb const& rhs )
+    {
+        return lhs.rI() == rhs.rI() && lhs.gI() == rhs.gI() && lhs.bI() == rhs.bI();
     }
 }

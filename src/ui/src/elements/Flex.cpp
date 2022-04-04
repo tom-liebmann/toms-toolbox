@@ -1,16 +1,56 @@
 #include <ttb/ui/elements/Flex.hpp>
 
 #include <ttb/core/uniform.hpp>
-#include <ttb/math/matrix_operations.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        auto const factory = XmlFactory< Flex >{ "flex" };
+
+        Flex::Direction parseDirection( std::string_view const& value );
+
+        Flex::SlotType parseSlotType( std::string_view const& value );
+    }
+}
 
 
 namespace ttb::ui
 {
     Flex::Flex( Framework& framework, Direction direction )
-        : Element{ framework }
-        , m_direction{ direction }
-        , m_transform( ttb::mat::identity< float, 3 >() )
+        : Element{ framework }, m_direction{ direction }
     {
+    }
+
+    Flex::Flex( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : Element{ framework }, m_direction{ Direction::HORIZONTAL }
+    {
+        if( auto const value = loader.attrValue( node, "direction" ); value )
+        {
+            m_direction = parseDirection( *value );
+        }
+
+        for( auto child = node.first_node(); child; child = child->next_sibling() )
+        {
+            auto element = loader.loadElement( framework, *child );
+
+            auto slotType = SlotType::FLEX;
+            auto slotValue = 1.0f;
+
+            if( auto const value = loader.attrValue( *child, "flex_type" ); value )
+            {
+                slotType = parseSlotType( *value );
+            }
+
+            if( auto const value = loader.attrValue( *child, "flex_value" ); value )
+            {
+                slotValue = std::stof( std::string{ *value } );
+            }
+
+            addSlot( slotType, slotValue, element, false );
+        }
     }
 
     auto Flex::fit( Size const& size ) -> Size
@@ -215,16 +255,7 @@ namespace ttb::ui
 
     size_t Flex::addSlot( SlotType type, float value, Element* element, bool isLastChange )
     {
-        element->parent(
-            this,
-            [ this, slot = m_slots.size() ]( auto const& pos )
-            {
-                return transform( slot, pos );
-            },
-            [ this, slot = m_slots.size() ]( auto const& pos )
-            {
-                return transformInv( slot, pos );
-            } );
+        element->parent( this );
 
         m_slots.push_back( Slot{ type, value, 0.0f, 0.0f, element } );
 
@@ -238,16 +269,7 @@ namespace ttb::ui
 
     void Flex::child( size_t slot, Element* element, bool isLastChange )
     {
-        element->parent(
-            this,
-            [ this, slot ]( auto const& pos )
-            {
-                return transform( slot, pos );
-            },
-            [ this, slot ]( auto const& pos )
-            {
-                return transformInv( slot, pos );
-            } );
+        element->parent( this );
 
         m_slots.at( slot ).child = element;
 
@@ -267,22 +289,55 @@ namespace ttb::ui
         }
     }
 
-    auto Flex::transform( size_t slot, Position const& pos ) const -> Position
-    {
-        auto result = pos;
-        result( dirDim() ) += m_slots[ slot ].offset;
-        return result;
-    }
-
-    auto Flex::transformInv( size_t slot, Position const& pos ) const -> Position
-    {
-        auto result = pos;
-        result( dirDim() ) -= m_slots[ slot ].offset;
-        return result;
-    }
-
     size_t Flex::dirDim() const
     {
         return m_direction == Direction::HORIZONTAL ? 0 : 1;
+    }
+}
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        Flex::Direction parseDirection( std::string_view const& value )
+        {
+            if( value == "h" )
+            {
+                return Flex::Direction::HORIZONTAL;
+            }
+
+            if( value == "v" )
+            {
+                return Flex::Direction::VERTICAL;
+            }
+
+            throw std::runtime_error( "Unable to parse flex direction" );
+        }
+
+        Flex::SlotType parseSlotType( std::string_view const& value )
+        {
+            if( value == "fixed" )
+            {
+                return Flex::SlotType::FIXED;
+            }
+
+            if( value == "flex" )
+            {
+                return Flex::SlotType::FLEX;
+            }
+
+            if( value == "fit" )
+            {
+                return Flex::SlotType::FIT;
+            }
+
+            if( value == "fit_infinity" )
+            {
+                return Flex::SlotType::FIT_INFINITY;
+            }
+
+            throw std::runtime_error( "Unable to parse slot type" );
+        }
     }
 }

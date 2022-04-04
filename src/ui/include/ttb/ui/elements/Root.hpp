@@ -21,9 +21,11 @@ namespace ttb::ui
     public:
         Root( Framework& framework, Size const& size );
 
-        ~Root();
-
         void child( Element* child );
+
+        void setPriorityListener( EventListener* listener );
+
+        EventListener* getPriorityListener() const;
 
         virtual void destroy() override;
 
@@ -39,5 +41,6 @@ namespace ttb::ui
         ttb::Matrix< float, 3, 3 > m_transform;
 
         Element* m_child{ nullptr };
+        EventListener* m_priorityListener{ nullptr };
     };
 }

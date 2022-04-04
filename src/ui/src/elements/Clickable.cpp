@@ -2,14 +2,35 @@
 
 #include "PriorityListener.hpp"
 #include <ttb/ui/Framework.hpp>
+#include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/EventManager.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
 
 namespace ttb::ui
 {
+    namespace
+    {
+        auto const factory = XmlFactory< Clickable >{ "clickable" };
+    }
+}
+
+
+namespace ttb::ui
+{
     Clickable::Clickable( Framework& framework ) : WrappedElement{ framework }
     {
+    }
+
+    Clickable::Clickable( Framework& framework,
+                          rapidxml::xml_node<> const& node,
+                          XmlLoader& loader )
+        : WrappedElement{ framework }
+    {
+        if( auto child = node.first_node(); child )
+        {
+            wrappedChild( loader.loadElement( framework, *child ) );
+        }
     }
 
     Clickable::~Clickable() = default;
@@ -48,10 +69,7 @@ namespace ttb::ui
                     eventPos( 1 ) < size()( 1 ) )
                 {
                     m_pointerId = ev.pointerId();
-                    m_prioListener =
-                        std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                    m_prioListener->addType( type::POINTER_MOVE );
-                    m_prioListener->addType( type::POINTER_UP );
+                    m_prioListener = std::make_unique< PriorityListener >( framework(), *this );
                     m_callback( Action::START, *this );
                     return true;
                 }

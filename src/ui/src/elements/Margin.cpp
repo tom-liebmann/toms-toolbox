@@ -2,6 +2,21 @@
 
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+#include <regex>
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        auto const factory = XmlFactory< Margin >{ "margin" };
+
+        void parseMargins(
+            std::string_view const& value, float& right, float& top, float& left, float& bottom );
+    }
+}
 
 
 namespace ttb::ui
@@ -12,7 +27,6 @@ namespace ttb::ui
         , m_top{ top }
         , m_left{ left }
         , m_bottom{ bottom }
-        , m_transform{ ttb::mat::identity< float, 3 >() }
     {
     }
 
@@ -26,18 +40,23 @@ namespace ttb::ui
     {
     }
 
+    Margin::Margin( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ framework }
+    {
+        if( auto const value = loader.attrValue( node, "value" ); value )
+        {
+            parseMargins( *value, m_right, m_top, m_left, m_bottom );
+        }
+
+        if( auto child = node.first_node(); child )
+        {
+            wrappedChild( loader.loadElement( framework, *child ) );
+        }
+    }
+
     void Margin::child( Element* element )
     {
-        wrappedChild(
-            element,
-            [ this ]( auto const& pos )
-            {
-                return transform( pos );
-            },
-            [ this ]( auto const& pos )
-            {
-                return transformInv( pos );
-            } );
+        wrappedChild( element );
     }
 
     void Margin::right( float value, bool isLastChange )
@@ -128,14 +147,57 @@ namespace ttb::ui
 
         return result;
     }
+}
 
-    auto Margin::transform( Position const& pos ) const -> Position
-    {
-        return { pos( 0 ) + m_left, pos( 1 ) + m_top };
-    }
 
-    auto Margin::transformInv( Position const& pos ) const -> Position
+namespace ttb::ui
+{
+    namespace
     {
-        return { pos( 0 ) - m_left, pos( 1 ) - m_top };
+        void parseMargins(
+            std::string_view const& value, float& right, float& top, float& left, float& bottom )
+        {
+            static auto const PATTERN_4 = std::regex{
+                R"pat(\s*([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s*)pat"
+            };
+
+            static auto const PATTERN_2 =
+                std::regex{ R"pat(\s*([\d\-\+\.eE]+)\s+([\d\-\+\.eE]+)\s*)pat" };
+
+            static auto const PATTERN_1 = std::regex{ R"pat(\s*([\d\-\+\.eE]+)\s*)pat" };
+
+            using svmatch = std::match_results< std::string_view::const_iterator >;
+
+            auto match = svmatch{};
+
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_4 ) )
+            {
+                right = std::stof( match[ 1 ] );
+                top = std::stof( match[ 2 ] );
+                left = std::stof( match[ 3 ] );
+                bottom = std::stof( match[ 4 ] );
+                return;
+            }
+
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_2 ) )
+            {
+                right = std::stof( match[ 1 ] );
+                left = right;
+                top = std::stof( match[ 2 ] );
+                bottom = top;
+                return;
+            }
+
+            if( std::regex_match( std::begin( value ), std::end( value ), match, PATTERN_1 ) )
+            {
+                right = std::stof( match[ 1 ] );
+                top = right;
+                left = right;
+                bottom = right;
+                return;
+            }
+
+            throw std::runtime_error( "Invalid margin value" );
+        }
     }
 }

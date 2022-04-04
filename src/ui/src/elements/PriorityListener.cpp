@@ -1,28 +1,24 @@
 #include "PriorityListener.hpp"
 
+#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/elements/Root.hpp>
 #include <ttb/utils/EventManager.hpp>
 
 
 namespace ttb::ui
 {
-    PriorityListener::PriorityListener( EventManager& manager, EventListener& listener )
-        : m_manager{ manager }, m_listener{ listener }
+    PriorityListener::PriorityListener( Framework& framework, EventListener& listener )
+        : m_framework{ framework }, m_listener{ listener }
     {
-    }
+        auto const root = m_framework.get().getRoot();
 
-    void PriorityListener::addType( uint32_t type )
-    {
-        m_manager.get().addListener( type, ttb::event::prio::PRIO, *this );
-
-        m_types.push_back( type );
+        m_oldListener = root->getPriorityListener();
+        root->setPriorityListener( &m_listener.get() );
     }
 
     PriorityListener::~PriorityListener()
     {
-        for( auto const& type : m_types )
-        {
-            m_manager.get().removeListener( type, *this );
-        }
+        m_framework.get().getRoot()->setPriorityListener( m_oldListener );
     }
 
     bool PriorityListener::onEvent( Event const& event )

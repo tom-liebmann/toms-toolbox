@@ -6,6 +6,13 @@
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
+#include <ttb/ui/XmlFactory.hpp>
+
+
+namespace
+{
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Rectangle >{ "rectangle" };
+}
 
 
 namespace ttb::ui
@@ -13,7 +20,50 @@ namespace ttb::ui
     Rectangle::Rectangle( Framework& framework, ColorRgb const& color )
         : Element{ framework }, m_color( color )
     {
-        m_program = framework.resourceManager().get< ttb::Program >( "ui_rect" );
+        initGeometry();
+    }
+
+    Rectangle::Rectangle( Framework& framework,
+                          rapidxml::xml_node<> const& node,
+                          XmlLoader& loader )
+        : Element{ framework }
+    {
+        if( auto const value = loader.attrValue( node, "color" ); value )
+        {
+            m_color = ColorRgb::createHexStr( value.value() ).value();
+        }
+
+        initGeometry();
+    }
+
+    Rectangle::~Rectangle() = default;
+
+    void Rectangle::color( ColorRgb const& value )
+    {
+        m_color = value;
+    }
+
+    ColorRgb const& Rectangle::color() const
+    {
+        return m_color;
+    }
+
+    void Rectangle::render( ttb::State& state ) const
+    {
+        state.with(
+            *m_program,
+            ttb::UniformBinder{ "u_transform", ttb::mat::scale( size() ) },
+            ttb::UniformBinder{
+                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
+            [ & ]
+            {
+                state.draw( *m_geometry );
+            } );
+    }
+
+    void Rectangle::initGeometry()
+    {
+        m_program = framework().resourceManager().get< ttb::Program >( "ui_rect" );
 
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )
@@ -30,25 +80,5 @@ namespace ttb::ui
         m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
                          .attribute( "in_vertex", std::move( vertexBuffer ) )
                          .finish();
-    }
-
-    Rectangle::~Rectangle() = default;
-
-    void Rectangle::color( ColorRgb const& value )
-    {
-        m_color = value;
-    }
-
-    void Rectangle::render( ttb::State& state ) const
-    {
-        state.with(
-            *m_program,
-            ttb::UniformBinder{ "u_transform", ttb::mat::scale( size() ) },
-            ttb::UniformBinder{
-                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
-            [ & ]
-            {
-                state.draw( *m_geometry );
-            } );
     }
 }

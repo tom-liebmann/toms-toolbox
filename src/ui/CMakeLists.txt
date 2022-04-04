@@ -6,9 +6,10 @@ if( NOT TARGET ${TARGET_NAME} )
     return()
 endif()
 
+find_package( rapidxml REQUIRED )
 target_include_directories( ${TARGET_NAME} PUBLIC include PRIVATE src )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbCore ttbMath ttbUtils )
+target_link_libraries( ${TARGET_NAME} PUBLIC rapidxml::rapidxml ttbCore ttbMath ttbUtils )
 
 add_subdirectory( src )
 add_subdirectory( tests )

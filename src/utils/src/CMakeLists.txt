@@ -10,6 +10,7 @@ target_sources(
         EventManager.cpp
         UnionFind.cpp
         Event.cpp
+        Color.cpp
 )
 
 add_subdirectory( data_io )

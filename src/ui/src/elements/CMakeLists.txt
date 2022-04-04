@@ -20,4 +20,5 @@ target_sources(
         # ScrollArea.cpp
         PriorityListener.cpp
         ScaleToFit.cpp
+        XmlElement.cpp
 )
