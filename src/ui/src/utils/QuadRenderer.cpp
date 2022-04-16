@@ -103,21 +103,15 @@ namespace ttb::ui
         m_indexBuffer->flush();
     }
 
-
-    auto QuadRenderer::Handle::color( Color const& value ) const -> Handle const&
+    auto QuadRenderer::Handle::color( ttb::ColorRgb const& value ) const -> Handle const&
     {
         for( size_t i = 0; i < 16; ++i )
         {
             ( *m_renderer.m_vertexBuffer )[ m_index * 16 + i ].set(
-                1, value( 0 ), value( 1 ), value( 2 ) );
+                1, value.rF(), value.gF(), value.bF() );
         }
 
         return *this;
-    }
-
-    auto QuadRenderer::Handle::color( ttb::ColorRgb const& value ) const -> Handle const&
-    {
-        return color( value.rF(), value.gF(), value.bF() );
     }
 
     auto QuadRenderer::Handle::depth( float value ) const -> Handle const&

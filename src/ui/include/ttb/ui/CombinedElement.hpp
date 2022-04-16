@@ -18,6 +18,9 @@ namespace ttb::ui
         //! @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
 
+        //! @copydoc Element::size( Size const& )
+        virtual void size( Size const& value ) override;
+
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
 
@@ -28,10 +31,7 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
     protected:
-        void add( Element* child,
-                  bool considerSize = true,
-                  Transform transform = {},
-                  Transform transformInv = {} );
+        void add( Element* child, bool considerSize = true );
 
     private:
         struct Slot

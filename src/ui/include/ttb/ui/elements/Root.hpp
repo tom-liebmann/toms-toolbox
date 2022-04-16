@@ -3,6 +3,7 @@
 #include <ttb/ui/Element.hpp>
 
 #include <ttb/math/Range.hpp>
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/utils/EventListener.hpp>
 
 #include <memory>
@@ -38,8 +39,6 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
     private:
-        ttb::Matrix< float, 3, 3 > m_transform;
-
         Element* m_child{ nullptr };
         EventListener* m_priorityListener{ nullptr };
     };

@@ -1,5 +1,6 @@
 #include <ttb/ui/utils/SingleQuad.hpp>
 
+#include <ttb/core/uniform.hpp>
 #include <ttb/ui/Framework.hpp>
 
 
@@ -8,21 +9,19 @@ namespace ttb::ui
     SingleQuad::SingleQuad( Framework& framework, ColorRgb const& color, float radius )
         : Element{ framework }, m_quadRenderer{ framework.resourceManager() }
     {
-        m_quadRenderer.add().radius( radius ).color( { color.rF(), color.gF(), color.bF() } );
+        m_quadRenderer.add().radius( radius ).color( color );
     }
 
     void SingleQuad::color( ColorRgb const& value )
     {
-        m_quadRenderer.get( 0 ).color( { value.rF(), value.gF(), value.bF() } );
+        m_quadRenderer.get( 0 ).color( value );
     }
 
-    auto SingleQuad::fit( Size const& size ) -> Size
+    void SingleQuad::offset( Offset const& value )
     {
-        auto const result = Element::fit( size );
-
-        m_quadRenderer.get( 0 ).min( 0.0f, 0.0f ).max( size( 0 ), size( 1 ) );
-
-        return result;
+        m_quadRenderer.get( 0 )
+            .min( value( 0 ), value( 1 ) )
+            .max( value( 0 ) + size()( 0 ), value( 1 ) + size()( 1 ) );
     }
 
     void SingleQuad::render( ttb::State& state ) const

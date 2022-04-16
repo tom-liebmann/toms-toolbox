@@ -43,10 +43,6 @@ namespace ttb::ui
     class QuadRenderer::Handle
     {
     public:
-        using Color = ttb::Vector< float, 3 >;
-
-        Handle const& color( Color const& value ) const;
-
         Handle const& color( ttb::ColorRgb const& value ) const;
 
         Handle const& depth( float value ) const;

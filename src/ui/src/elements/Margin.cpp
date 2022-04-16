@@ -106,46 +106,30 @@ namespace ttb::ui
             auto const childSize =
                 child->fit( { size( 0 ) - m_left - m_right, size( 1 ) - m_top - m_bottom } );
 
-            m_transform( 0, 2 ) = m_left;
-            m_transform( 1, 2 ) = m_top;
-
-            return Element::fit(
-                { childSize( 0 ) + m_left + m_right, childSize( 1 ) + m_top + m_bottom } );
+            return { childSize( 0 ) + m_left + m_right, childSize( 1 ) + m_top + m_bottom };
         }
 
-        return Element::fit( { 0.0f, 0.0f } );
+        return size;
     }
 
-    void Margin::render( ttb::State& state ) const
+    void Margin::offset( Offset const& value )
     {
-        if( auto const child = wrappedChild(); child )
-        {
-            state.with( ttb::UniformBinder{ "u_transform", m_transform },
-                        [ & ]
-                        {
-                            child->render( state );
-                        } );
-        }
-    }
-
-    bool Margin::onEvent( ttb::Event const& event )
-    {
-        auto result = false;
+        Element::offset( value );
 
         if( auto const child = wrappedChild(); child )
         {
-            event.transform(
-                [ this ]( auto const& v ) -> ttb::Vector< float, 2 >
-                {
-                    return { v( 0 ) - m_left, v( 1 ) - m_top };
-                },
-                [ &result, &child ]( auto const& event )
-                {
-                    result = child->onEvent( event );
-                } );
+            child->offset( { value( 0 ) + m_left, value( 1 ) + m_top } );
         }
+    }
 
-        return result;
+    void Margin::size( Size const& value )
+    {
+        Element::size( value );
+
+        if( auto const child = wrappedChild(); child )
+        {
+            child->size( { value( 0 ) - m_left - m_right, value( 1 ) - m_top - m_bottom } );
+        }
     }
 }
 

@@ -27,23 +27,24 @@ namespace ttb::ui
         return m_parent;
     }
 
-    void Element::parent( Element* parent, Transform transform, Transform transformInv )
+    void Element::parent( Element* parent )
     {
         m_parent = parent;
-        m_transform = std::move( transform );
-        m_transformInv = std::move( transformInv );
-    }
-
-    auto Element::size() const -> Size const&
-    {
-        return m_size;
     }
 
     auto Element::fit( Size const& size ) -> Size
     {
-        m_size = size;
+        return size;
+    }
 
-        return m_size;
+    void Element::offset( Offset const& value )
+    {
+        m_offset = value;
+    }
+
+    void Element::size( Size const& value )
+    {
+        m_size = value;
     }
 
     void Element::update( float /* timeDiff */ )
@@ -68,20 +69,19 @@ namespace ttb::ui
         }
     }
 
-    ttb::Vector< float, 2 > Element::localToScreen( ttb::Vector< float, 2 > const& vec ) const
-    {
-        auto const v = m_transform ? m_transform( vec ) : vec;
-        return m_parent ? m_parent->localToScreen( v ) : v;
-    }
-
-    ttb::Vector< float, 2 > Element::screenToLocal( ttb::Vector< float, 2 > const& vec ) const
-    {
-        auto const v = m_parent ? m_parent->screenToLocal( vec ) : vec;
-        return m_transformInv ? m_transformInv( v ) : v;
-    }
-
     void Element::onChildChanged( Element& /* child */ )
     {
         changed();
+    }
+
+    auto Element::transform() const -> Transform
+    {
+        // clang-format off
+        return Transform{
+            m_size( 0 ), 0.0f       , m_offset( 0 ),
+            0.0f       , m_size( 1 ), m_offset( 1 ),
+            0.0f       , 0.0f       , 1.0f
+        };
+        // clang-format on
     }
 }

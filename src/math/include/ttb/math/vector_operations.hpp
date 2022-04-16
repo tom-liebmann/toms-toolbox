@@ -264,7 +264,8 @@ namespace ttb
     {
         using std::min;
 
-        using ResultType = decltype( min( std::declval< TType1 >(), std::declval< TType2 >() ) );
+        using ResultType =
+            std::decay_t< decltype( min( std::declval< TType1 >(), std::declval< TType2 >() ) ) >;
 
         Vector< ResultType, TDim > result;
         for( size_t i = 0; i < lhs.size; ++i )

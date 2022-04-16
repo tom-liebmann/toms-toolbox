@@ -10,23 +10,13 @@
 
 namespace ttb::ui
 {
-    ScaleToFit::ScaleToFit( Framework& framework )
-        : WrappedElement{ framework }, m_transform{ ttb::mat::identity< float, 3 >() }
+    ScaleToFit::ScaleToFit( Framework& framework ) : WrappedElement{ framework }
     {
     }
 
     void ScaleToFit::child( Element* element )
     {
-        wrappedChild(
-            element,
-            [ this ]( auto const& pos )
-            {
-                return transform( pos );
-            },
-            [ this ]( auto const& pos )
-            {
-                return transformInv( pos );
-            } );
+        wrappedChild( element );
     }
 
     auto ScaleToFit::fit( Size const& size ) -> Size
@@ -35,9 +25,6 @@ namespace ttb::ui
         {
             auto const childSpace = child->fit( { 0.0f, 0.0f } );
             m_factor = std::min( size( 0 ) / childSpace( 0 ), size( 1 ) / childSpace( 1 ) );
-
-            m_transform( 0, 0 ) = m_factor;
-            m_transform( 1, 1 ) = m_factor;
 
             return Element::fit( { childSpace( 0 ) * m_factor, childSpace( 1 ) * m_factor } );
         }
@@ -49,21 +36,7 @@ namespace ttb::ui
     {
         if( auto const child = wrappedChild(); child )
         {
-            state.with( ttb::UniformBinder{ "u_transform", m_transform },
-                        [ & ]
-                        {
-                            child->render( state );
-                        } );
+            child->render( state );
         }
-    }
-
-    auto ScaleToFit::transform( Position const& pos ) const -> Position
-    {
-        return { pos( 0 ) * m_factor, pos( 1 ) * m_factor };
-    }
-
-    auto ScaleToFit::transformInv( Position const& pos ) const -> Position
-    {
-        return { pos( 0 ) / m_factor, pos( 1 ) / m_factor };
     }
 }

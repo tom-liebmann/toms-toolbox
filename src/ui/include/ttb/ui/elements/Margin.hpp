@@ -30,16 +30,18 @@ namespace ttb::ui
 
         virtual Size fit( Size const& size ) override;
 
-        virtual void render( ttb::State& state ) const override;
+        virtual void offset( Offset const& value ) override;
 
-        virtual bool onEvent( ttb::Event const& event ) override;
+        using Element::offset;
+
+        virtual void size( Size const& value ) override;
+
+        using Element::size;
 
     private:
         float m_right{ 0.0f };
         float m_top{ 0.0f };
         float m_left{ 0.0f };
         float m_bottom{ 0.0f };
-
-        ttb::Matrix< float, 3, 3 > m_transform{ ttb::mat::identity< float, 3 >() };
     };
 }

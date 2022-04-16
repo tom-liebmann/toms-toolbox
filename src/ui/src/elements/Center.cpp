@@ -2,6 +2,7 @@
 
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
+#include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 
 
@@ -48,16 +49,7 @@ namespace ttb::ui
 
     void Center::child( Element* element )
     {
-        wrappedChild(
-            element,
-            [ this ]( auto const& pos )
-            {
-                return transform( pos );
-            },
-            [ this ]( auto const& pos )
-            {
-                return transformInv( pos );
-            } );
+        wrappedChild( element );
     }
 
     auto Center::fit( Size const& size ) -> Size
@@ -66,107 +58,103 @@ namespace ttb::ui
         {
             auto const childSize = child->fit( size );
 
-            auto result = size;
-            m_offset = { 0.0f, 0.0f };
+            auto result = Size{};
+
+            switch( m_hAlign )
             {
-                switch( m_hAlign )
-                {
-                    case HAlignment::LEFT:
-                        result( 0 ) = childSize( 0 );
-                        break;
+                case HAlignment::LEFT:
+                    result( 0 ) = childSize( 0 );
+                    break;
 
-                    case HAlignment::CENTER:
-                        result( 0 ) = ( size( 0 ) + childSize( 0 ) ) / 2.0f;
-                        m_offset( 0 ) = ( size( 0 ) - childSize( 0 ) ) / 2.0f;
-                        break;
-
-                    case HAlignment::RIGHT:
-                        result( 0 ) = size( 0 );
-                        m_offset( 0 ) = size( 0 ) - childSize( 0 );
-                        break;
-                }
-
-                switch( m_vAlign )
-                {
-                    case VAlignment::TOP:
-                        result( 1 ) = childSize( 1 );
-                        break;
-
-                    case VAlignment::MIDDLE:
-                        result( 1 ) = ( size( 1 ) + childSize( 1 ) ) / 2.0f;
-                        m_offset( 1 ) = ( size( 1 ) - childSize( 1 ) ) / 2.0f;
-                        break;
-
-                    case VAlignment::BOTTOM:
-                        result( 1 ) = size( 1 );
-                        m_offset( 1 ) = size( 1 ) - childSize( 1 );
-                        break;
-                }
+                case HAlignment::CENTER:
+                case HAlignment::RIGHT:
+                    result( 0 ) = size( 0 );
+                    break;
             }
 
-            if( childSize( 0 ) > result( 0 ) )
+            switch( m_vAlign )
             {
-                result( 0 ) = childSize( 0 );
-                m_offset( 0 ) = 0.0f;
+                case VAlignment::TOP:
+                    result( 1 ) = childSize( 1 );
+                    break;
+
+                case VAlignment::MIDDLE:
+                case VAlignment::BOTTOM:
+                    result( 1 ) = size( 1 );
+                    break;
             }
 
-            if( childSize( 1 ) > result( 1 ) )
-            {
-                result( 1 ) = childSize( 1 );
-                m_offset( 1 ) = 0.0f;
-            }
-
-            return Element::fit( result );
+            return min( result, size );
         }
 
-        return Element::fit( size );
+        return size;
+    }
+
+    void Center::offset( Offset const& value )
+    {
+        Element::offset( value );
+
+        if( auto const child = wrappedChild(); child )
+        {
+            child->offset( value + m_childOffset );
+        }
+    }
+
+    void Center::size( Size const& value )
+    {
+        Element::size( value );
+
+        if( auto const child = wrappedChild(); child )
+        {
+            auto const childSize = child->fit( value );
+
+            switch( m_hAlign )
+            {
+                case HAlignment::LEFT:
+                    m_childOffset( 0 ) = 0.0f;
+                    break;
+
+                case HAlignment::CENTER:
+                    m_childOffset( 0 ) = ( value( 0 ) - childSize( 0 ) ) / 2.0f;
+                    break;
+
+                case HAlignment::RIGHT:
+                    m_childOffset( 0 ) = value( 0 ) - childSize( 0 );
+                    break;
+            }
+
+            switch( m_vAlign )
+            {
+                case VAlignment::TOP:
+                    m_childOffset( 1 ) = 0.0f;
+                    break;
+
+                case VAlignment::MIDDLE:
+                    m_childOffset( 1 ) = ( value( 1 ) - childSize( 1 ) ) / 2.0f;
+                    break;
+
+                case VAlignment::BOTTOM:
+                    m_childOffset( 1 ) = value( 1 ) - childSize( 1 );
+                    break;
+            }
+
+            // The child always gets the size it wants. Center just aligns it accordingly using the
+            // offset.
+            child->size( childSize );
+        }
     }
 
     void Center::render( ttb::State& state ) const
     {
         if( auto const child = wrappedChild(); child )
         {
-            state.with( ttb::UniformBinder( "u_transform", ttb::mat::translation( m_offset ) ),
-                        [ & ]
-                        {
-                            child->render( state );  //
-                        } );
+            child->render( state );
         }
     }
 
     std::string Center::info() const
     {
         return "Center";
-    }
-
-    bool Center::onEvent( ttb::Event const& event )
-    {
-        auto result = false;
-
-        if( auto const child = wrappedChild(); child )
-        {
-            event.transform(
-                [ this ]( auto const& v )
-                {
-                    return v - m_offset;
-                },
-                [ &child, &result ]( auto const& event )
-                {
-                    result = child->onEvent( event );
-                } );
-        }
-
-        return result;
-    }
-
-    auto Center::transform( Position const& pos ) const -> Position
-    {
-        return pos + m_offset;
-    }
-
-    auto Center::transformInv( Position const& pos ) const -> Position
-    {
-        return pos - m_offset;
     }
 }
 

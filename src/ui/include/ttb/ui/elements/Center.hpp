@@ -29,23 +29,25 @@ namespace ttb::ui
 
         void child( Element* element );
 
-        /// @copydoc WrappedElement::fit( Size const& )
+        //! @copydoc WrappedElement::fit( Size const& )
         virtual Size fit( Size const& size ) override;
+
+        virtual void offset( Offset const& value ) override;
+
+        using Element::offset;
+
+        virtual void size( Size const& value ) override;
+
+        using Element::size;
 
         virtual void render( ttb::State& state ) const override;
 
         virtual std::string info() const override;
 
-        virtual bool onEvent( ttb::Event const& event ) override;
-
     private:
-        Position transform( Position const& pos ) const;
-
-        Position transformInv( Position const& pos ) const;
-
         HAlignment m_hAlign;
         VAlignment m_vAlign;
 
-        Position m_offset{ 0.0f, 0.0f };
+        Offset m_childOffset{};
     };
 }
