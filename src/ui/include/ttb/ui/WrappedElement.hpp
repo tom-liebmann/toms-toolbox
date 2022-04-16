@@ -13,10 +13,18 @@ namespace ttb::ui
         //! @copydoc Element::destroy()
         virtual void destroy() override;
 
-        using Element::size;
-
         //! @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
+
+        //! @copydoc Element::offset( Offset const& )
+        virtual void offset( Offset const& value ) override;
+
+        using Element::offset;
+
+        //! @copydoc Element::size( Size const& )
+        virtual void size( Size const& value ) override;
+
+        using Element::size;
 
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
@@ -28,7 +36,7 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
     protected:
-        void wrappedChild( Element* child, Transform transform = {}, Transform transformInv = {} );
+        void wrappedChild( Element* child );
 
         Element* wrappedChild();
 

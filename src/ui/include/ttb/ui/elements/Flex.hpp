@@ -33,6 +33,14 @@ namespace ttb::ui
         //! @copydoc Element::fit(Size const&)
         virtual Size fit( Size const& space ) override;
 
+        virtual void offset( Offset const& value ) override;
+
+        using Element::offset;
+
+        virtual void size( Size const& value ) override;
+
+        using Element::size;
+
         //! @copydoc Element::update(float)
         virtual void update( float timeDiff ) override;
 
@@ -41,9 +49,6 @@ namespace ttb::ui
 
         //! @copydoc Element::onEvent(Event const&)
         virtual bool onEvent( Event const& event ) override;
-
-        //! @copydoc Element::onChildChanged(Element&)
-        virtual void onChildChanged( Element& child ) override;
 
         virtual std::string info() const override;
 
@@ -58,11 +63,12 @@ namespace ttb::ui
     private:
         size_t dirDim() const;
 
+        size_t codirDim() const;
+
         struct Slot
         {
             SlotType type;
             float value;
-            float offset{ 0.0f };
             float width{ 0.0f };
             Element* child;
         };

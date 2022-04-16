@@ -15,25 +15,19 @@ namespace ttb::ui
         , m_thickness{ thickness }
         , m_quadRenderer{ framework.resourceManager() }
     {
-        m_quadRenderer.add()
-            .radius( outerRadius )
-            .color( ttb::ColorRgb::createF( outerColor.rF(), outerColor.gF(), outerColor.bF() ) );
+        m_quadRenderer.add().radius( outerRadius ).color( outerColor );
 
-        m_quadRenderer.add()
-            .radius( innerRadius )
-            .color( ttb::ColorRgb::createF( innerColor.rF(), innerColor.gF(), innerColor.bF() ) );
+        m_quadRenderer.add().radius( innerRadius ).color( innerColor );
     }
 
     void DoubleQuad::outerColor( ColorRgb const& color )
     {
-        m_quadRenderer.get( 0 ).color(
-            ttb::ColorRgb::createF( color.rF(), color.gF(), color.bF() ) );
+        m_quadRenderer.get( 0 ).color( color );
     }
 
     void DoubleQuad::innerColor( ColorRgb const& color )
     {
-        m_quadRenderer.get( 1 ).color(
-            ttb::ColorRgb::createF( color.rF(), color.gF(), color.bF() ) );
+        m_quadRenderer.get( 1 ).color( color );
     }
 
     auto DoubleQuad::fit( Size const& size ) -> Size

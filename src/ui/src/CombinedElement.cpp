@@ -3,6 +3,8 @@
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
 
+#include <numeric>
+
 
 namespace ttb::ui
 {
@@ -20,19 +22,28 @@ namespace ttb::ui
 
     auto CombinedElement::fit( Size const& size ) -> Size
     {
-        auto maxSize = Size{ 0.0f, 0.0f };
+        return std::accumulate( std::begin( m_children ),
+                                std::end( m_children ),
+                                Size{},
+                                [ &size ]( auto const& maxSize, auto const& child )
+                                {
+                                    if( child.considerSize )
+                                    {
+                                        return max( maxSize, child.element->fit( size ) );
+                                    }
+
+                                    return size;
+                                } );
+    }
+
+    void CombinedElement::size( Size const& value )
+    {
+        Element::size( value );
 
         for( auto const& child : m_children )
         {
-            auto const childSize = child.element->fit( size );
-
-            if( child.considerSize )
-            {
-                maxSize = max( maxSize, childSize );
-            }
+            child.element->size( value );
         }
-
-        return Element::fit( maxSize );
     }
 
     void CombinedElement::update( float timeDiff )
@@ -53,23 +64,17 @@ namespace ttb::ui
 
     bool CombinedElement::onEvent( Event const& event )
     {
-        for( auto const& child : m_children )
-        {
-            if( child.element->onEvent( event ) )
-            {  // cppcheck-suppress useStlAlgorithm // raw loop much cleaner than using std::any_of
-                return true;
-            }
-        }
-
-        return false;
+        return std::any_of( std::begin( m_children ),
+                            std::end( m_children ),
+                            [ &event ]( auto const& child )
+                            {
+                                return child.element->onEvent( event );
+                            } );
     }
 
-    void CombinedElement::add( Element* child,
-                               bool considerSize,
-                               Transform transform,
-                               Transform transformInv )
+    void CombinedElement::add( Element* child, bool considerSize )
     {
-        child->parent( this, std::move( transform ), std::move( transformInv ) );
+        child->parent( this );
         m_children.push_back( Slot{ considerSize, child } );
         changed();
     }

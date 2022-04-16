@@ -52,7 +52,7 @@ namespace ttb::ui
     {
         state.with(
             *m_program,
-            ttb::UniformBinder{ "u_transform", ttb::mat::scale( size() ) },
+            ttb::UniformBinder{ "u_transform", transform() },
             ttb::UniformBinder{
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
             [ & ]

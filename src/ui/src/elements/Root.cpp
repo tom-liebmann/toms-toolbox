@@ -9,12 +9,10 @@
 
 namespace ttb::ui
 {
-    Root::Root( Framework& framework, Size const& size )
-        : Element{ framework }, m_transform{ ttb::mat::identity< float, 3 >() }
+    Root::Root( Framework& framework, Size const& size ) : Element{ framework }
     {
         framework.setRoot( *this );
-
-        Element::fit( size );
+        this->size( size );
     }
 
     void Root::destroy()
@@ -37,7 +35,8 @@ namespace ttb::ui
         if( m_child )
         {
             m_child->parent( this );
-            m_child->fit( size() );
+            m_child->size( m_child->fit( size() ) );
+            m_child->offset( {} );
         }
     }
 
@@ -83,11 +82,7 @@ namespace ttb::ui
         {
             glDisable( GL_DEPTH_TEST );
 
-            state.with( ttb::UniformBinder{ "u_transform", m_transform },
-                        [ & ]
-                        {
-                            m_child->render( state );
-                        } );
+            m_child->render( state );
 
             glEnable( GL_DEPTH_TEST );
         }
@@ -95,6 +90,7 @@ namespace ttb::ui
 
     void Root::onChildChanged( Element& /* child */ )
     {
-        m_child->fit( size() );
+        m_child->size( m_child->fit( size() ) );
+        m_child->offset( {} );
     }
 }

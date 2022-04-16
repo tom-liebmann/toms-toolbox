@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ttb/core/State.hpp>
-#include <ttb/math/Range.hpp>
+#include <ttb/math/matrix_operations.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
 
@@ -18,8 +18,8 @@ namespace ttb::ui
     {
     public:
         using Size = ttb::Vector< float, 2 >;
-        using Position = ttb::Vector< float, 2 >;
-        using Transform = std::function< Position( Position const& ) >;
+        using Offset = ttb::Vector< float, 2 >;
+        using Transform = ttb::Matrix< float, 3, 3 >;
 
         Element( Framework& framework );
 
@@ -27,9 +27,15 @@ namespace ttb::ui
 
         virtual void destroy();
 
-        Size const& size() const;
-
         virtual Size fit( Size const& space );
+
+        virtual void offset( Offset const& value );
+
+        Offset const& offset() const;
+
+        virtual void size( Size const& value );
+
+        Size const& size() const;
 
         virtual void render( ttb::State& state ) const = 0;
 
@@ -41,13 +47,11 @@ namespace ttb::ui
 
         Element* parent() const;
 
-        void parent( Element* parent, Transform transform = {}, Transform transformInv = {} );
+        void parent( Element* parent );
 
         virtual void onChildChanged( Element& child );
 
-        ttb::Vector< float, 2 > localToScreen( ttb::Vector< float, 2 > const& vec ) const;
-
-        ttb::Vector< float, 2 > screenToLocal( ttb::Vector< float, 2 > const& vec ) const;
+        Transform transform() const;
 
     protected:
         void changed();
@@ -57,13 +61,8 @@ namespace ttb::ui
     private:
         Element* m_parent{ nullptr };
 
-        Size m_size{ 0.0f, 0.0f };
-
-        /// Transforms local coordinates to parent coordinates
-        Transform m_transform;
-
-        /// Transforms parent coordinates to local coordinates
-        Transform m_transformInv;
+        Size m_size{};
+        Offset m_offset{};
 
         Framework& m_framework;
     };
@@ -75,5 +74,15 @@ namespace ttb::ui
     inline Framework& Element::framework() const
     {
         return m_framework;
+    }
+
+    inline auto Element::offset() const -> Offset const&
+    {
+        return m_offset;
+    }
+
+    inline auto Element::size() const -> Size const&
+    {
+        return m_size;
     }
 }

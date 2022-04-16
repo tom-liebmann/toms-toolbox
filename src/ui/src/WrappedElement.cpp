@@ -20,7 +20,32 @@ namespace ttb::ui
 
     auto WrappedElement::fit( Size const& size ) -> Size
     {
-        return Element::fit( m_child ? m_child->fit( size ) : Size{ 0.0f, 0.0f } );
+        if( m_child )
+        {
+            return m_child->fit( size );
+        }
+
+        return size;
+    }
+
+    void WrappedElement::offset( Offset const& value )
+    {
+        Element::offset( value );
+
+        if( m_child )
+        {
+            m_child->offset( value );
+        }
+    }
+
+    void WrappedElement::size( Size const& value )
+    {
+        Element::size( value );
+
+        if( m_child )
+        {
+            m_child->size( value );
+        }
     }
 
     void WrappedElement::update( float timeDiff )
@@ -49,7 +74,7 @@ namespace ttb::ui
         return false;
     }
 
-    void WrappedElement::wrappedChild( Element* child, Transform transform, Transform transformInv )
+    void WrappedElement::wrappedChild( Element* child )
     {
         if( m_child )
         {
@@ -60,7 +85,7 @@ namespace ttb::ui
 
         if( m_child )
         {
-            m_child->parent( this, std::move( transform ), std::move( transformInv ) );
+            m_child->parent( this );
         }
 
         changed();

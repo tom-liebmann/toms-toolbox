@@ -15,7 +15,8 @@ namespace ttb::ui
 
         void color( ColorRgb const& value );
 
-        virtual Size fit( Size const& size ) override;
+        virtual void offset( Offset const& value ) override;
+
         virtual void render( ttb::State& state ) const override;
 
     private:
