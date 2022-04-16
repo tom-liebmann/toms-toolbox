@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/math/utils.hpp>
+#include <ttb/utils/hints.hpp>
 
 #include <cmath>
 #include <iostream>
@@ -28,6 +29,10 @@ namespace ttb
         constexpr ColorRgb();
 
         constexpr explicit ColorRgb( ColorHsl const& rhs );
+
+        constexpr ColorRgb( Hint< float >, float r, float g, float b );
+
+        constexpr ColorRgb( Hint< std::uint8_t >, uint8_t r, uint8_t g, uint8_t b );
 
         constexpr float rF() const;
 
@@ -84,17 +89,27 @@ namespace ttb
 
     inline constexpr ColorRgb ColorRgb::createF( float r, float g, float b )
     {
-        return { static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, r * 255.0f ) ) ),
-                 static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, g * 255.0f ) ) ),
-                 static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, b * 255.0f ) ) ) };
+        return { use_float, r, g, b };
     }
 
     inline constexpr ColorRgb ColorRgb::createI( uint8_t r, uint8_t g, uint8_t b )
     {
-        return { r, g, b };
+        return { use_uint8, r, g, b };
     }
 
     inline constexpr ColorRgb::ColorRgb() = default;
+
+    inline constexpr ColorRgb::ColorRgb( Hint< float >, float r, float g, float b )
+        : m_r{ static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, r * 255.0f ) ) ) }
+        , m_g{ static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, g * 255.0f ) ) ) }
+        , m_b{ static_cast< uint8_t >( std::min( 255.0f, std::max( 0.0f, b * 255.0f ) ) ) }
+    {
+    }
+
+    inline constexpr ColorRgb::ColorRgb( Hint< std::uint8_t >, uint8_t r, uint8_t g, uint8_t b )
+        : m_r{ r }, m_g{ g }, m_b{ b }
+    {
+    }
 
     inline constexpr ColorRgb::ColorRgb( ColorHsl const& rhs )
     {

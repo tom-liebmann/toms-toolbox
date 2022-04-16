@@ -28,8 +28,6 @@ namespace ttb::ui
             return nullptr;
         }
 
-        std::cout << "Loading: " << nodeName << std::endl;
-
         auto child = factoryIter->second->create( framework, node, *this );
         auto const childPtr = child.get();
         m_parent.m_elements.push_back( std::move( child ) );

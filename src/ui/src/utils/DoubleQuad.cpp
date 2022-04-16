@@ -17,21 +17,23 @@ namespace ttb::ui
     {
         m_quadRenderer.add()
             .radius( outerRadius )
-            .color( { outerColor.rF(), outerColor.gF(), outerColor.bF() } );
+            .color( ttb::ColorRgb::createF( outerColor.rF(), outerColor.gF(), outerColor.bF() ) );
 
         m_quadRenderer.add()
             .radius( innerRadius )
-            .color( { innerColor.rF(), innerColor.gF(), innerColor.bF() } );
+            .color( ttb::ColorRgb::createF( innerColor.rF(), innerColor.gF(), innerColor.bF() ) );
     }
 
     void DoubleQuad::outerColor( ColorRgb const& color )
     {
-        m_quadRenderer.get( 0 ).color( { color.rF(), color.gF(), color.bF() } );
+        m_quadRenderer.get( 0 ).color(
+            ttb::ColorRgb::createF( color.rF(), color.gF(), color.bF() ) );
     }
 
     void DoubleQuad::innerColor( ColorRgb const& color )
     {
-        m_quadRenderer.get( 1 ).color( { color.rF(), color.gF(), color.bF() } );
+        m_quadRenderer.get( 1 ).color(
+            ttb::ColorRgb::createF( color.rF(), color.gF(), color.bF() ) );
     }
 
     auto DoubleQuad::fit( Size const& size ) -> Size

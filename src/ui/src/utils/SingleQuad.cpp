@@ -8,12 +8,14 @@ namespace ttb::ui
     SingleQuad::SingleQuad( Framework& framework, ColorRgb const& color, float radius )
         : Element{ framework }, m_quadRenderer{ framework.resourceManager() }
     {
-        m_quadRenderer.add().radius( radius ).color( { color.rF(), color.gF(), color.bF() } );
+        m_quadRenderer.add().radius( radius ).color(
+            ttb::ColorRgb::createF( color.rF(), color.gF(), color.bF() ) );
     }
 
     void SingleQuad::color( ColorRgb const& value )
     {
-        m_quadRenderer.get( 0 ).color( { value.rF(), value.gF(), value.bF() } );
+        m_quadRenderer.get( 0 ).color(
+            ttb::ColorRgb::createF( value.rF(), value.gF(), value.bF() ) );
     }
 
     auto SingleQuad::fit( Size const& size ) -> Size
