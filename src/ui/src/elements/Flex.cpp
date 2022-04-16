@@ -103,18 +103,16 @@ namespace ttb::ui
     {
         Element::offset( value );
 
-        auto offset = 0.0f;
+        auto childOffset = value;
 
         for( auto const& slot : m_slots )
         {
             if( slot.child )
             {
-                auto childOffset = value;
-                childOffset( dirDim() ) += offset;
                 slot.child->offset( childOffset );
             }
 
-            offset += slot.width;
+            childOffset( dirDim() ) += slot.width;
         }
     }
 

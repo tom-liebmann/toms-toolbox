@@ -3,6 +3,7 @@
 #include <ttb/ui/WrappedElement.hpp>
 #include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/EventListener.hpp>
+#include <ttb/utils/gesture/events.hpp>
 
 
 namespace ttb::ui
@@ -38,6 +39,12 @@ namespace ttb::ui
     private:
         //! @copydoc Element::onEvent( Event const& )
         virtual bool onEvent( Event const& event ) override;
+
+        bool onPointerDown( ttb::events::PointerDown const& event );
+
+        bool onPointerMove( ttb::events::PointerMove const& event );
+
+        bool onPointerUp( ttb::events::PointerUp const& event );
 
         ClickCallback m_callback;
 
