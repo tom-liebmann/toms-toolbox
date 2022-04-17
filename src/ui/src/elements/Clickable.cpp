@@ -78,8 +78,8 @@ namespace ttb::ui
         auto const size = this->size();
         auto const eventPos = ttb::Vector{ event.x(), event.y() }.as< float >();
 
-        if( eventPos( 0 ) < offset( 0 ) && eventPos( 0 ) >= offset( 0 ) + size( 0 ) &&
-            eventPos( 1 ) < offset( 1 ) && eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
+        if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
+            eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
         {
             return false;
         }

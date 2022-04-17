@@ -34,7 +34,7 @@ namespace ttb::ui
     auto Label::fit( Size const& /* size */ ) -> Size
     {
         auto const fontRange = m_font->textDimensions( m_size, m_text );
-        return Element::fit( fontRange.extent() );
+        return fontRange.extent();
     }
 
     void Label::render( ttb::State& state ) const
@@ -42,11 +42,17 @@ namespace ttb::ui
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
+        auto const fontRange = m_font->textDimensions( m_size, m_text );
+
         state.with(
             *m_shader,
             ttb::UniformBinder{ "u_texture", 0 },
             ttb::UniformBinder{
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
+            ttb::UniformBinder{
+                "u_transform",
+                transform() * ttb::mat::scale( ttb::Vector{ 1.0f / fontRange.extent( 0 ),
+                                                            1.0f / fontRange.extent( 1 ) } ) },
             [ & ]
             {
                 m_texture->bind( 0 );

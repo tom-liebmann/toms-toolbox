@@ -45,17 +45,22 @@ namespace ttb::ui
 
     auto Ratio::fit( Size const& size ) -> Size
     {
+        auto const ratio = size( 0 ) / size( 1 );
+
+        return ratio > m_ratio ? Size{ size( 1 ) * m_ratio, size( 1 ) }
+                               : Size{ size( 0 ), size( 0 ) / m_ratio };
+    }
+
+    void Ratio::size( Size const& value )
+    {
+        Element::size( value );
+
         if( auto const child = wrappedChild(); child )
         {
-            auto const ratio = size( 0 ) / size( 1 );
-
-            auto const childSize =
-                child->fit( ratio > m_ratio ? Size{ size( 1 ) * m_ratio, size( 1 ) }
-                                            : Size{ size( 0 ), size( 0 ) / m_ratio } );
-
-            return Element::fit( childSize );
+            auto const ratio = value( 0 ) / value( 1 );
+            auto const childSize = ratio > m_ratio ? Size{ value( 1 ) * m_ratio, value( 1 ) }
+                                                   : Size{ value( 0 ), value( 0 ) / m_ratio };
+            child->size( childSize );
         }
-
-        return Element::fit( { 0.0f, 0.0f } );
     }
 }

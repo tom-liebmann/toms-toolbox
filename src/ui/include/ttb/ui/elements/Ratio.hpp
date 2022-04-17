@@ -19,6 +19,10 @@ namespace ttb::ui
 
         virtual Size fit( Size const& size ) override;
 
+        virtual void size( Size const& value ) override;
+
+        using Element::size;
+
     private:
         float m_ratio{ 1.0f };
     };
