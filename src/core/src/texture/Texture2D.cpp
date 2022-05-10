@@ -78,6 +78,49 @@ namespace ttb
         return m_samples > 1 ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
     }
 
+    void Texture2D::download( GLint level, std::vector< std::uint8_t >& buffer ) const
+    {
+#ifndef PLATFORM_ANDROID
+        std::size_t bytesPerPixel;
+        GLenum format;
+        GLenum outType;
+        switch( m_internalFormat )
+        {
+            case GL_R32UI:
+                bytesPerPixel = 4;
+                format = GL_RED_INTEGER;
+                outType = GL_UNSIGNED_INT;
+                break;
+
+            case GL_R32F:
+                bytesPerPixel = 4;
+                format = GL_RED;
+                outType = GL_FLOAT;
+                break;
+
+            case GL_RGB:
+                bytesPerPixel = 3;
+                format = GL_RGB;
+                outType = GL_UNSIGNED_BYTE;
+                break;
+
+            case GL_RGBA:
+            case GL_RGBA8:
+                bytesPerPixel = 4;
+                format = GL_RGBA;
+                outType = GL_UNSIGNED_BYTE;
+                break;
+
+            default:
+                throw std::runtime_error( "Unknown pixel format (" +
+                                          std::to_string( m_internalFormat ) + ")" );
+        }
+
+        buffer.resize( m_width * m_height * bytesPerPixel );
+        glGetTextureImage( object(), level, format, outType, buffer.size(), buffer.data() );
+#endif
+    }
+
     void Texture2D::initStorage()
     {
 #if defined( PLATFORM_ANDROID )
@@ -174,17 +217,15 @@ namespace ttb
         Texture2D::Modifier::download( [[maybe_unused]] size_t level,
                                        [[maybe_unused]] std::vector< uint8_t >& buffer )
     {
-        // #ifndef PLATFORM_ANDROID
-        //         GLint width, height;
-        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
-        //         glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+#ifndef PLATFORM_ANDROID
+        GLint width, height;
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
 
-        //         buffer.resize( width * height * m_texture->bytesPerPixel() );
+        buffer.resize( width * height * m_texture->colorChannel() );
 
-        //         glGetTexImage(
-        //             GL_TEXTURE_2D, level, m_texture->m_format, m_texture->m_valueType,
-        //             buffer.data() );
-        // #endif
+        glGetTexImage( GL_TEXTURE_2D, level, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data() );
+#endif
 
         return *this;
     }

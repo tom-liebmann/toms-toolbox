@@ -36,6 +36,8 @@ namespace ttb
 
         GLenum target() const;
 
+        void download( GLint level, std::vector< std::uint8_t >& buffer ) const;
+
         // Override: Texture
         virtual void bind( uint8_t slot ) const override;
 
