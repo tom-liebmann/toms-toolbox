@@ -105,6 +105,14 @@ namespace ttb
 
         VertexHandle& setComp( size_t index, size_t component, float value );
 
+        VertexHandle& get( size_t index, float& v0 );
+
+        VertexHandle& get( size_t index, float& v0, float& v1 );
+
+        VertexHandle& get( size_t index, float& v0, float& v1, float& v2 );
+
+        VertexHandle& get( size_t index, float& v0, float& v1, float& v2, float& v3 );
+
     private:
         VertexHandle( VertexBuffer& buffer, size_t index );
 
@@ -205,6 +213,44 @@ namespace ttb
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + component * 4 ] ) = value;
+        return *this;
+    }
+
+    inline auto VertexBuffer::VertexHandle::get( size_t index, float& v0 ) -> VertexHandle&
+    {
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
+        v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset ] );
+        return *this;
+    }
+
+    inline auto VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1 )
+        -> VertexHandle&
+    {
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
+        v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );
+        v1 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 4 ] );
+        return *this;
+    }
+
+    inline auto VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1, float& v2 )
+        -> VertexHandle&
+    {
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
+        v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );
+        v1 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 4 ] );
+        v2 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 8 ] );
+        return *this;
+    }
+
+    inline auto
+        VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1, float& v2, float& v3 )
+            -> VertexHandle&
+    {
+        auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
+        v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );
+        v1 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 4 ] );
+        v2 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 8 ] );
+        v3 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 12 ] );
         return *this;
     }
 
