@@ -18,7 +18,8 @@ namespace ttb
     {
         auto const location = m_locationElements.size();
 
-        auto const index = [ & ] {
+        auto const index = [ & ]
+        {
             if( m_freeElements.empty() )
             {
                 auto const index = m_elementLocations.size();

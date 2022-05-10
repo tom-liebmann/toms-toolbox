@@ -55,7 +55,7 @@ namespace ttb
 
         size_t index() const;
 
-        VertexBuffer::VertexHandle vertex( size_t offset );
+        VertexBuffer::VertexHandle vertex( size_t offset ) const;
 
         void index( size_t offset, uint32_t value );
 
@@ -88,7 +88,7 @@ namespace ttb
         return m_index;
     }
 
-    inline VertexBuffer::VertexHandle ElementBatcher::Handle::vertex( size_t offset )
+    inline VertexBuffer::VertexHandle ElementBatcher::Handle::vertex( size_t offset ) const
     {
         auto const location = m_batcher->m_elementLocations[ m_index ];
         return m_batcher->m_vertexBuffer[ location * m_batcher->m_verticesPerElement + offset ];
