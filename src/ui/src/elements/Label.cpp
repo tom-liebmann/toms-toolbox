@@ -7,6 +7,19 @@
 #include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/Framework.hpp>
 
+#include <ttb/ui/XmlFactory.hpp>
+
+#include <regex>
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        auto const factory = XmlFactory< Label >{ "label" };
+    }
+}
+
 
 namespace ttb::ui
 {
@@ -14,6 +27,33 @@ namespace ttb::ui
         : Element{ framework }, m_text( std::move( text ) ), m_size( size ), m_color( color )
     {
         auto& resMngr = framework.resourceManager();
+
+        m_shader = resMngr.get< ttb::Program >( "ui_label" );
+        m_font = resMngr.get< ttb::Font >( "simple" );
+        m_texture = resMngr.get< ttb::Texture2D >( "font_simple" );
+
+        updateGeometry();
+    }
+
+    Label::Label( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : Element{ framework }, m_size{ 1.0f }, m_color{ use_uint8, 0, 0, 0 }
+    {
+        auto& resMngr = framework.resourceManager();
+
+        if( auto const value = loader.attrValue( node, "size" ); value )
+        {
+            m_size = std::stof( std::string( *value ) );
+        }
+
+        if( auto const value = loader.attrValue( node, "color" ); value )
+        {
+            m_color = ColorRgb::createHexStr( value.value() ).value();
+        }
+
+        if( auto child = node.first_node(); child )
+        {
+            m_text = std::string( child->value(), child->value_size() );
+        }
 
         m_shader = resMngr.get< ttb::Program >( "ui_label" );
         m_font = resMngr.get< ttb::Font >( "simple" );

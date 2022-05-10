@@ -5,6 +5,7 @@
 #include <ttb/core/fonts/Font.hpp>
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/shader.hpp>
+#include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/Color.hpp>
 
 
@@ -14,6 +15,8 @@ namespace ttb::ui
     {
     public:
         Label( Framework& framework, std::string text, float size, ColorRgb const& color );
+
+        Label( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void text( std::string value );
 
