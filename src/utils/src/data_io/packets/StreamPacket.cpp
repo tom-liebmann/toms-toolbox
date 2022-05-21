@@ -11,7 +11,7 @@ namespace ttb
     {
         uint8_t const* result = nullptr;
 
-        if( m_packet.get().size() >= dstSize )
+        if( size() >= dstSize )
         {
             result = data();
             m_readHead += dstSize;
