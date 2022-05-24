@@ -194,6 +194,35 @@ TEST_CASE( "Flex", "[ui][elements]" )
     }
 }
 
+TEST_CASE( "Flex & Margin", "[ui][flex][margin]" )
+{
+    auto framework = ttb::ui::test::FrameworkMock{};
+
+    SECTION( "Fixed & Flex" )
+    {
+        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
+        auto margin = ttb::ui::Margin{ framework, 0.1f };
+        auto flex = ttb::ui::Flex{ framework, ttb::ui::Flex::Direction::VERTICAL };
+
+        auto ele1 = TestElement{ framework, {}, {} };
+        auto ele2 = TestElement{ framework, {}, {} };
+
+        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
+        flex.addSlot( ttb::ui::Flex::SlotType::FLEX, 1.0f, &ele2 );
+        margin.child( &flex );
+        root.child( &margin );
+
+        REQUIRE( ttb::Vector{ 0.8f, 0.8f } == ttb::Approx{ flex.size() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ttb::Approx{ flex.offset() } );
+
+        REQUIRE( ttb::Vector{ 0.8f, 0.1f } == ttb::Approx{ ele1.size() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ttb::Approx{ ele1.offset() } );
+
+        REQUIRE( ttb::Vector{ 0.8f, 0.7f } == ttb::Approx{ ele2.size() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ ele2.offset() } );
+    }
+}
+
 TEST_CASE( "Margin", "[ui][margin]" )
 {
     auto framework = ttb::ui::test::FrameworkMock{};

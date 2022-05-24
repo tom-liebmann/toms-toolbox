@@ -23,7 +23,7 @@ class TomsToolboxConan(ConanFile):
         "activate_utils": True,
         "activate_project": True,
         "yaml-cpp:shared": True,
-        "build_tests": True,
+        "build_tests": False,
     }
     generators = "cmake_find_package", "cmake_paths"
     exports_sources = "*"

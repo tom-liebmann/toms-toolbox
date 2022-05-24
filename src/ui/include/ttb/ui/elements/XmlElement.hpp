@@ -5,6 +5,8 @@
 #include <rapidxml/rapidxml.hpp>
 
 #include <map>
+#include <memory>
+#include <vector>
 
 
 namespace ttb::ui

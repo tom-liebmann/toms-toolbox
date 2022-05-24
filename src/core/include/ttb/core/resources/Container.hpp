@@ -51,7 +51,7 @@ namespace ttb::resources
 
             if( !result )
             {
-                throw std::runtime_error( std::string( "Unable to load " ) + name );
+                throw std::runtime_error( "Unable to load resource" );
             }
 
             m_resources[ name ] = result;
