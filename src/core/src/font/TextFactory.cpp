@@ -6,10 +6,12 @@ namespace ttb
     std::unique_ptr< ttb::Geometry >
         TextFactory::createText( float size, Font const& font, std::string const& text )
     {
-        std::shared_ptr< VertexBuffer > vertexBuffer = VertexBuffer::create( [ & ]( auto& c ) {
-            c.attribute( GL_FLOAT, 2 );
-            c.attribute( GL_FLOAT, 2 );
-        } );
+        std::shared_ptr< VertexBuffer > vertexBuffer = VertexBuffer::create(
+            [ & ]( auto& c )
+            {
+                c.attribute( GL_FLOAT, 2 );
+                c.attribute( GL_FLOAT, 2 );
+            } );
 
         // push characters
         {
@@ -29,6 +31,7 @@ namespace ttb
                 if( cId != '\n' )
                 {
                     auto const& c = font.character( text[ i ] );
+
                     // upper left triangle
                     vertexBuffer->push_back()
                         .set( 0, c.x() / width, c.y() / height )

@@ -21,6 +21,9 @@ namespace ttb::ui
         //! @copydoc Element::size( Size const& )
         virtual void size( Size const& value ) override;
 
+        //! @copydoc Element::offset( Offset const& )
+        virtual void offset( Offset const& value );
+
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
 

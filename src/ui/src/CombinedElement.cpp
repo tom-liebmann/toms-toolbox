@@ -32,7 +32,7 @@ namespace ttb::ui
                                         return max( maxSize, child.element->fit( size ) );
                                     }
 
-                                    return size;
+                                    return maxSize;
                                 } );
     }
 
@@ -43,6 +43,16 @@ namespace ttb::ui
         for( auto const& child : m_children )
         {
             child.element->size( value );
+        }
+    }
+
+    void CombinedElement::offset( Offset const& value )
+    {
+        Element::offset( value );
+
+        for( auto const& child : m_children )
+        {
+            child.element->offset( value );
         }
     }
 
