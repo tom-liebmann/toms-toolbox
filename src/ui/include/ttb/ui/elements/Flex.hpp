@@ -58,6 +58,8 @@ namespace ttb::ui
 
         void child( size_t slot, Element* element, bool isLastChange = true );
 
+        Element* getChild( std::size_t slot );
+
         void slotValue( size_t slot, float value, bool isLastChange = true );
 
     private:

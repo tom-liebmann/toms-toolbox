@@ -258,6 +258,11 @@ namespace ttb::ui
         }
     }
 
+    Element* Flex::getChild( std::size_t slot )
+    {
+        return m_slots.at( slot ).child;
+    }
+
     void Flex::slotValue( size_t slot, float value, bool isLastChange )
     {
         m_slots.at( slot ).value = value;
