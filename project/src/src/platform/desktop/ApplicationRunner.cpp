@@ -30,7 +30,9 @@ namespace ttb
     {
         auto& app = application();
 
-        ttb::Window::init( "Window Title", app.windowRequest() );
+        auto const appProperties = app.getProperties();
+
+        ttb::Window::init( "Window Title", appProperties.getWindowRequest() );
         auto& window = ttb::Window::instance();
 
         window.use();
@@ -43,11 +45,22 @@ namespace ttb
         {
             window.pollEvents();
 
-            lastTime += std::chrono::duration_cast< std::chrono::steady_clock::duration >(
-                std::chrono::duration< float >{ 1.0f / 60.0f } );
-            std::this_thread::sleep_until( lastTime );
+            if( appProperties.getLimitFps() )
+            {
+                lastTime += std::chrono::duration_cast< std::chrono::steady_clock::duration >(
+                    std::chrono::duration< float >{ 1.0f / 60.0f } );
+                std::this_thread::sleep_until( lastTime );
 
-            app.update( 1.0f / 60.0f );
+                app.update( 1.0f / 60.0f );
+            }
+            else
+            {
+                auto const now = std::chrono::steady_clock::now();
+                auto const frameTime =
+                    std::chrono::duration_cast< std::chrono::duration< float > >( now - lastTime )
+                        .count();
+                app.update( frameTime );
+            }
 
             app.draw();
         }

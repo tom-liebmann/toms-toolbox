@@ -22,7 +22,9 @@ namespace ttb
     {
         auto& app = application();
 
-        ttb::Window::init( "Window Title", app.windowRequest() );
+        auto const appProperties = app.getProperties();
+
+        ttb::Window::init( "Window Title", appProperties.getWindowRequest() );
         app.init();
     }
 

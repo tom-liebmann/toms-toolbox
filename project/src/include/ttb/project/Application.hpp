@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/core/window/WindowRequest.hpp>
+#include "ApplicationProperties.hpp"
 
 
 namespace ttb
@@ -21,7 +21,7 @@ namespace ttb
         bool stopped() const;
 
     private:
-        virtual WindowRequest windowRequest() const = 0;
+        virtual ApplicationProperties getProperties() const = 0;
 
         virtual void init() = 0;
 
