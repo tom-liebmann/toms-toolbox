@@ -184,10 +184,12 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             "${TTB_ANDROID_RES_DIR}/java_src/MainActivity.java"
             "${TTB_ANDROID_RES_DIR}/java_src/MainView.java"
             "${TTB_ANDROID_RES_DIR}/java_src/ApplicationLib.java"
+            "${TTB_ANDROID_RES_DIR}/java_src/ConnectionManager.java"
             "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
         SOURCES
             "${TTB_ANDROID_RES_DIR}/java_src/MainActivity.java"
             "${TTB_ANDROID_RES_DIR}/java_src/MainView.java"
+            "${TTB_ANDROID_RES_DIR}/java_src/ConnectionManager.java"
             "${TTB_ANDROID_RES_DIR}/java_src/ApplicationLib.java"
             "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
     )
