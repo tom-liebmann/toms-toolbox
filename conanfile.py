@@ -102,4 +102,5 @@ class TomsToolboxConan(ConanFile):
             self.cpp_info.components["utils"].libdirs = ["lib"]
             self.cpp_info.components["utils"].libs = ["ttbUtils"]
         if self.options.activate_project:
+            self.cpp_info.components["project"].includedirs = ["project/src/include"]
             self.cpp_info.components["project"].builddirs = ["project"]

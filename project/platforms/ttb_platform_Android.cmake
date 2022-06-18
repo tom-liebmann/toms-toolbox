@@ -1,5 +1,7 @@
 include_guard( GLOBAL )
 
+include( GetPrerequisites )
+
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 
@@ -87,8 +89,6 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
         "${LIBRARY_NAME}"
         PREFIX "${LIBRARY_NAME}"
         SOURCE_DIR "${TTB_ANDROID_RES_DIR}"
-        BUILD_ALWAYS TRUE
-        BUILD_BYPRODUCTS "${OUTPUT_FILE}"
         CMAKE_ARGS
             -DANDROID_PLATFORM=android-${ANDROID_SDK_VERSION_TARGET}
             -DANDROID_ABI=${ANDROID_ABI}
@@ -100,7 +100,30 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
             -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_BINARY_DIR}
             ${_USER_ARGS}
+        COMMAND ${CONAN_COMMAND} install --build=missing
+        BUILD_COMMAND ${CMAKE_COMMAND} --build
+        BUILD_ALWAYS TRUE
+        BUILD_BYPRODUCTS "${OUTPUT_FILE}"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "${OUTPUT_FILE}"
+            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/libproject_library.so"
     )
+
+    get_prerequisites( "${OUTPUT_FILE}" _DEPENDENCIES 1 1 "" "" )
+
+    foreach( _DEPENDENCY ${_DEPENDENCIES} )
+        get_filename_component( _DEPENDENCY_LIB "${_DEPENDENCY}" NAME )
+        get_filename_component( _DEPENDENCY_NAME "${_DEPENDENCY}" NAME_WE )
+
+        add_custom_target(
+            ${_DEPENDENCY_NAME}_copy
+            DEPENDS ${LIBRARY_NAME}
+            COMMAND ${CMAKE_COMMAND}
+            -E copy
+            "${_DEPENDENCY}"
+            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/${_DEPENDENCY_LIB}"
+        )
+    endforeach()
 
     add_custom_target(
        ${LIBRARY_NAME}_copy
