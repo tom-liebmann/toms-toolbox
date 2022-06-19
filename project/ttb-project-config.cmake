@@ -7,7 +7,7 @@ list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/project/platforms" )
 
 include( ttb_general )
 
-macro( ttb_add_project PROJECT_NAME PROJECT_CMAKE_FILE )
+macro( ttb_add_project PROJECT_NAME PROJECT_CONAN_FILE PROJECT_CMAKE_FILE )
 
     request_build_platform( BUILD_PLATFORM )
 
@@ -15,7 +15,7 @@ macro( ttb_add_project PROJECT_NAME PROJECT_CMAKE_FILE )
 
     include( ttb_platform_${BUILD_PLATFORM} )
 
-    _ttb_add_project_impl( ${PROJECT_NAME} ${PROJECT_CMAKE_FILE} )
+    _ttb_add_project_impl( ${PROJECT_NAME} ${PROJECT_CONAN_FILE} ${PROJECT_CMAKE_FILE} )
 
 endmacro()
 

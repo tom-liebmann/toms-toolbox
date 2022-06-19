@@ -4,6 +4,7 @@ include( GetPrerequisites )
 
 set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
+set( CONAN_COMMAND "conan" )
 
 macro( _ttb_android_request_sdk )
 
@@ -70,12 +71,26 @@ macro( _ttb_android_request_build_tools_version )
 
 endmacro()
 
-function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_DIR )
+function( _ttb_create_android_target ANDROID_ARCH ANDROID_ABI PROJECT_CONAN_FILE PROJECT_CMAKE_FILE OUTPUT_LIB_DIR )
 
     include( ExternalProject )
 
     set( LIBRARY_NAME "project_library_${ANDROID_ABI}" )
-    set( OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}/lib/lib${LIBRARY_NAME}.so" )
+
+    set( ANDROID_TOOLCHAIN_FILE "${ANDROID_SDK_DIR}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake" )
+    set( CONAN_PROFILE_FILE "${CMAKE_CURRENT_BINARY_DIR}/android/conan_profile" )
+
+    configure_file(
+        "${TTB_ANDROID_RES_DIR}/conan_profile.in"
+        "${CONAN_PROFILE_FILE}"
+        @ONLY
+    )
+
+    configure_file(
+        "${TTB_ANDROID_RES_DIR}/copy_dependencies.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/android/copy_dependencies.cmake"
+        @ONLY
+    )
 
     get_cmake_property( _CACHE_VARIABLES CACHE_VARIABLES )
     foreach( _CACHE_VARIABLE ${_CACHE_VARIABLES} )
@@ -90,9 +105,10 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
         PREFIX "${LIBRARY_NAME}"
         SOURCE_DIR "${TTB_ANDROID_RES_DIR}"
         CMAKE_ARGS
+            "${TTB_ANDROID_RES_DIR}"
             -DANDROID_PLATFORM=android-${ANDROID_SDK_VERSION_TARGET}
             -DANDROID_ABI=${ANDROID_ABI}
-            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_SDK_DIR}/ndk/${ANDROID_NDK_VERSION}/build/cmake/android.toolchain.cmake
+            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_TOOLCHAIN_FILE}
             -DBUILD_PLATFORM=Android
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DPROJECT_NAME=${LIBRARY_NAME}
@@ -100,43 +116,36 @@ function( _ttb_create_android_target ANDROID_ABI PROJECT_CMAKE_FILE OUTPUT_LIB_D
             -DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}
             -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_BINARY_DIR}
             ${_USER_ARGS}
-        COMMAND ${CONAN_COMMAND} install --build=missing
-        BUILD_COMMAND ${CMAKE_COMMAND} --build
         BUILD_ALWAYS TRUE
-        BUILD_BYPRODUCTS "${OUTPUT_FILE}"
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${OUTPUT_FILE}"
-            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/libproject_library.so"
     )
 
-    get_prerequisites( "${OUTPUT_FILE}" _DEPENDENCIES 1 1 "" "" )
-
-    foreach( _DEPENDENCY ${_DEPENDENCIES} )
-        get_filename_component( _DEPENDENCY_LIB "${_DEPENDENCY}" NAME )
-        get_filename_component( _DEPENDENCY_NAME "${_DEPENDENCY}" NAME_WE )
-
-        add_custom_target(
-            ${_DEPENDENCY_NAME}_copy
-            DEPENDS ${LIBRARY_NAME}
-            COMMAND ${CMAKE_COMMAND}
-            -E copy
-            "${_DEPENDENCY}"
-            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/${_DEPENDENCY_LIB}"
-        )
-    endforeach()
+    ExternalProject_Add_Step(
+        "${LIBRARY_NAME}"
+        build_dependencies
+        DEPENDEES download
+        DEPENDERS configure
+        COMMAND ${CONAN_COMMAND} install
+            --build=outdated
+            --install-folder "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}/src/${LIBRARY_NAME}-build"
+            "${PROJECT_CONAN_FILE}"
+            --profile "${CONAN_PROFILE_FILE}"
+    )
 
     add_custom_target(
-       ${LIBRARY_NAME}_copy
-       DEPENDS ${LIBRARY_NAME}
-       COMMAND ${CMAKE_COMMAND}
-           -E copy
-           "${OUTPUT_FILE}"
-           "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/libproject_library.so"
+        ${LIBRARY_NAME}_copy
+        DEPENDS ${LIBRARY_NAME}
+        COMMAND ${CMAKE_COMMAND}
+            -E make_directory
+            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}"
+        COMMAND ${CMAKE_COMMAND}
+            -E copy
+            "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}/lib/*"
+            "${OUTPUT_LIB_DIR}/${ANDROID_ABI}/"
     )
 
 endfunction()
 
-macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
+macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CONAN_FILE PROJECT_CMAKE_FILE )
 
     _ttb_android_request_sdk()
     _ttb_android_request_sdk_version()
@@ -203,7 +212,7 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CMAKE_FILE )
             "${CMAKE_CURRENT_BINARY_DIR}/android/java_sources"
     )
 
-    _ttb_create_android_target( "arm64-v8a" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
+    _ttb_create_android_target( "armv8" "arm64-v8a" "${PROJECT_CONAN_FILE}" "${PROJECT_CMAKE_FILE}" "${CMAKE_CURRENT_BINARY_DIR}/android/lib" )
 
     add_custom_target(
         ttb_project_initialize_asset_args
