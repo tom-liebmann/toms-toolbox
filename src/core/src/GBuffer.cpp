@@ -6,6 +6,7 @@
 #include <ttb/core/texture/Texture2D.hpp>
 
 #include <cassert>
+#include <utility>
 
 
 namespace

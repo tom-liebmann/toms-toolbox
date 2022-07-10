@@ -24,7 +24,7 @@ namespace ttb::ui
 
         ~Image();
 
-        void image( std::shared_ptr< Texture > image );
+        void image( ImageBinder const& image );
 
         /// @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;

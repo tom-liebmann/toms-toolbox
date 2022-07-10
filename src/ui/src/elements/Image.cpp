@@ -37,10 +37,9 @@ namespace ttb::ui
         m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
     }
 
-    Image::Image( Framework& framework, ImageBinder const& image )
-        : Image{ image.getBindable( TEXTURE_SLOT ) }
+    Image::Image( Framework& framework, ImageBinder const& image ) : Image{ framework }
     {
-        this->image( std::move( image ) );
+        this->image( image );
     }
 
     Image::~Image() = default;
