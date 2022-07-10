@@ -5,4 +5,5 @@ target_sources(
         Texture.cpp
         Texture2D.cpp
         TextureFactory.cpp
+        ImageBinder.cpp
 )

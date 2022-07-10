@@ -8,6 +8,12 @@
 #include <ttb/ui/Framework.hpp>
 
 
+namespace
+{
+    auto constexpr TEXTURE_SLOT = std::uint8_t{ 0 };
+}
+
+
 namespace ttb::ui
 {
     Image::Image( Framework& framework ) : Element{ framework }
@@ -31,17 +37,17 @@ namespace ttb::ui
         m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
     }
 
-    Image::Image( Framework& framework, std::shared_ptr< DynamicBindable > image )
-        : Image{ framework }
+    Image::Image( Framework& framework, ImageBinder const& image )
+        : Image{ image.getBindable( TEXTURE_SLOT ) }
     {
         this->image( std::move( image ) );
     }
 
     Image::~Image() = default;
 
-    void Image::image( std::shared_ptr< DynamicBindable > image )
+    void Image::image( ImageBinder const& image )
     {
-        m_image = std::move( image );
+        m_image = image.getBindable( TEXTURE_SLOT );
     }
 
     auto Image::fit( Size const& size ) -> Size
@@ -60,7 +66,7 @@ namespace ttb::ui
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
         state.with( ttb::UniformBinder{ "u_transform", m_transform },
-                    ttb::UniformBinder{ "u_texture", 0 },
+                    ttb::UniformBinder{ "u_texture", TEXTURE_SLOT },
                     *m_image,
                     *m_program,
                     [ & ]

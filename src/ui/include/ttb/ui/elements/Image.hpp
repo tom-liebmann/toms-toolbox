@@ -1,9 +1,9 @@
 #pragma once
 
-#include <ttb/core/Bindable.hpp>
-#include <ttb/ui/Element.hpp>
-
+#include <ttb/core/texture.hpp>
+#include <ttb/core/texture/ImageBinder.hpp>
 #include <ttb/math/Matrix.hpp>
+#include <ttb/ui/Element.hpp>
 
 
 namespace ttb
@@ -20,11 +20,11 @@ namespace ttb::ui
     public:
         Image( Framework& framework );
 
-        Image( Framework& framework, std::shared_ptr< DynamicBindable > image );
+        Image( Framework& framework, ImageBinder const& image );
 
         ~Image();
 
-        void image( std::shared_ptr< DynamicBindable > image );
+        void image( std::shared_ptr< Texture > image );
 
         /// @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
