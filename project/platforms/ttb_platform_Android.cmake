@@ -86,12 +86,6 @@ function( _ttb_create_android_target ANDROID_ARCH ANDROID_ABI PROJECT_CONAN_FILE
         @ONLY
     )
 
-    configure_file(
-        "${TTB_ANDROID_RES_DIR}/copy_dependencies.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/android/copy_dependencies.cmake"
-        @ONLY
-    )
-
     get_cmake_property( _CACHE_VARIABLES CACHE_VARIABLES )
     foreach( _CACHE_VARIABLE ${_CACHE_VARIABLES} )
       get_property( _CURRENT_HELP_STRING CACHE "${_CACHE_VARIABLE}" PROPERTY HELPSTRING )
@@ -289,6 +283,10 @@ macro( _ttb_project_assets_impl ASSET_DIR )
         COMMAND
         echo -n "-A ${ASSET_DIR} " >> "${CMAKE_CURRENT_BINARY_DIR}/android/asset_args"
         )
+
+    if( NOT TARGET android_apk_link )
+        message( FATAL_ERROR "Missing target android_apk_link" )
+    endif()
 
     add_dependencies( android_apk_link ${TTB_PROJECT_ASSET_TARGET} )
 
