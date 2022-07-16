@@ -5,3 +5,5 @@ GLEW/
 GPATH
 GRTAGS
 GTAGS
+
+*.~undo-tree~
