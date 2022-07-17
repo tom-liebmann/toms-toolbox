@@ -49,22 +49,12 @@ namespace ttb::ui
         m_image = image.getBindable( TEXTURE_SLOT );
     }
 
-    auto Image::fit( Size const& size ) -> Size
-    {
-        auto const result = Element::fit( size );
-
-        m_transform = ttb::mat::transform( Range{ Vector{ 0.0f, 0.0f }, Vector{ 1.0f, 1.0f } },
-                                           Range{ Vector{ 0.0f, 0.0f }, result } );
-
-        return result;
-    }
-
     void Image::render( ttb::State& state ) const
     {
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        state.with( ttb::UniformBinder{ "u_transform", m_transform },
+        state.with( ttb::UniformBinder{ "u_transform", transform() },
                     ttb::UniformBinder{ "u_texture", TEXTURE_SLOT },
                     *m_image,
                     *m_program,

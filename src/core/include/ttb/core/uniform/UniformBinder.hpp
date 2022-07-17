@@ -21,7 +21,7 @@ namespace ttb
         UniformBinderHandle< TType > bind( State::Data& data ) const;
 
     private:
-        std::string const& m_name;
+        std::string m_name;
         TType const& m_value;
         bool m_overwrite;
     };
@@ -39,7 +39,7 @@ namespace ttb
                              bool overwrite,
                              State::Data& data );
 
-        std::string const& m_name;
+        std::string m_name;
         State::Data& m_data;
         std::optional< TType > m_oldValue;
 
@@ -59,7 +59,7 @@ namespace ttb
                              bool overwrite,
                              State::Data& data );
 
-        std::string const& m_name;
+        std::string m_name;
         State::Data& m_data;
         std::optional< Matrix< TType, TRows, TCols > > m_oldValue;
 

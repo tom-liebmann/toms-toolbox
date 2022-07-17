@@ -26,16 +26,11 @@ namespace ttb::ui
 
         void image( ImageBinder const& image );
 
-        /// @copydoc Element::fit( Size const& )
-        virtual Size fit( Size const& size ) override;
-
         /// @copydoc Element::render( ttb::State& ) const
         virtual void render( ttb::State& state ) const override;
 
     private:
         std::shared_ptr< DynamicBindable > m_image;
-
-        ttb::Matrix< float, 3, 3 > m_transform;
 
         std::unique_ptr< ttb::Geometry > m_geometry;
         std::shared_ptr< ttb::Program > m_program;
