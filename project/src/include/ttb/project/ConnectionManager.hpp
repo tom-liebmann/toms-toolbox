@@ -19,6 +19,8 @@ namespace ttb
 
         bool isNetworkCheckEnabled() const;
 
+        bool isNetworkAvailable() const;
+
         void addListener( Listener& listener );
 
         void removeListener( Listener const& listener );

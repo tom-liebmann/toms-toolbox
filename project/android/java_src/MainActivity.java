@@ -1,23 +1,37 @@
 package toms_toolbox;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.content.Context;
 
 
 public class MainActivity extends android.app.Activity
 {
     private static final String TAG = "MainActivity";
 
+    private static MainActivity s_instance;
+
     private MainView m_view;
+    private ConnectionManager m_connectionManager;
+
+    public static MainActivity getInstance()
+    {
+        return s_instance;
+    }
 
     @Override
     protected void onCreate( final Bundle savedInstanceState )
     {
+        s_instance = this;
+
         super.onCreate( savedInstanceState );
 
         final Context context = getApplicationContext();
+
+        m_connectionManager = new ConnectionManager( context );
+
+        ApplicationLib.init();
 
         ApplicationLib.init_asset_mng( context.getAssets(), context.getFilesDir().toString() );
 
@@ -54,6 +68,11 @@ public class MainActivity extends android.app.Activity
         {
             hideUi();
         }
+    }
+
+    public ConnectionManager getConnectionManager()
+    {
+        return m_connectionManager;
     }
 
     private void hideUi()

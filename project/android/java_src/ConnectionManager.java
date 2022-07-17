@@ -2,24 +2,32 @@ package toms_toolbox;
 
 import android.content.Context;
 import android.net.ConnectivityManager;
-import android.net.NetworkRequest;
-import android.net.NetworkCapabilities;
 import android.net.Network;
+import android.net.NetworkCapabilities;
+import android.net.NetworkRequest;
+import android.util.Log;
 
 
 class ConnectionManager
 {
+    private static final String TAG = "ConnectionManager";
+
     private Context m_context;
 
     private ConnectivityManager m_connectivityManager;
 
     private boolean m_active = false;
 
+    private boolean m_isNetworkAvailable = false;
+
     public ConnectionManager( Context context )
     {
         m_context = context;
 
-        m_connectivityManager = (ConnectivityManager) m_context.getSystemService( ConnectivityManager.class );
+        m_connectivityManager =
+            (ConnectivityManager)m_context.getSystemService( ConnectivityManager.class );
+
+        Log.d( TAG, "Created" );
     }
 
     public void enableNetworkCheck()
@@ -29,11 +37,14 @@ class ConnectionManager
             return;
         }
 
-        final NetworkRequest networkRequest = new NetworkRequest.Builder()
-            .addCapability( NetworkCapabilities.NET_CAPABILITY_INTERNET )
-            .addTransportType( NetworkCapabilities.TRANSPORT_WIFI )
-            .addTransportType( NetworkCapabilities.TRANSPORT_CELLULAR )
-            .build();
+        Log.d( TAG, "Enabling network check" );
+
+        final NetworkRequest networkRequest =
+            new NetworkRequest.Builder()
+                .addCapability( NetworkCapabilities.NET_CAPABILITY_INTERNET )
+                .addTransportType( NetworkCapabilities.TRANSPORT_WIFI )
+                .addTransportType( NetworkCapabilities.TRANSPORT_CELLULAR )
+                .build();
 
         m_connectivityManager.registerNetworkCallback( networkRequest, m_networkCallback );
 
@@ -47,27 +58,40 @@ class ConnectionManager
             return;
         }
 
+        Log.d( TAG, "Disabling network check" );
+
         m_connectivityManager.unregisterNetworkCallback( m_networkCallback );
 
         m_active = false;
+        m_isNetworkAvailable = false;
     }
 
-    private ConnectivityManager.NetworkCallback m_networkCallback = new ConnectivityManager.NetworkCallback()
+    public boolean isNetworkCheckEnabled()
     {
-        @Override
-        public void onAvailable( Network network )
-        {
-            on_network_available();
-        }
+        return m_active;
+    }
 
-        @Override
-        public void onLost( Network network )
-        {
-            on_network_lost();
-        }
-    };
+    public boolean isNetworkAvailable()
+    {
+        return m_isNetworkAvailable;
+    }
 
-    private static native void on_network_available();
+    private ConnectivityManager.NetworkCallback m_networkCallback =
+        new ConnectivityManager.NetworkCallback() {
+            @Override
+            public void onAvailable( Network network )
+            {
+                Log.d( TAG, "onNetworkAvailable" );
+                m_isNetworkAvailable = true;
+                ApplicationLib.on_network_available();
+            }
 
-    private static native void on_network_lost();
+            @Override
+            public void onLost( Network network )
+            {
+                Log.d( TAG, "onNetworkLost" );
+                m_isNetworkAvailable = false;
+                ApplicationLib.on_network_lost();
+            }
+        };
 }

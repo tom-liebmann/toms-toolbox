@@ -1,5 +1,7 @@
 #include <ttb/project/ConnectionManager.hpp>
 
+#include "AndroidManager.hpp"
+
 #include <jni.h>
 
 
@@ -18,6 +20,8 @@ namespace ttb
 
         bool isNetworkCheckEnabled() const;
 
+        bool isNetworkAvailable() const;
+
         void addListener( Listener& listener );
 
         void removeListener( Listener const& listener );
@@ -28,8 +32,6 @@ namespace ttb
 
     private:
         std::vector< Listener* > m_listeners;
-
-        bool m_isNetworkCheckEnabled{ false };
     };
 }
 
@@ -55,6 +57,11 @@ namespace ttb
     bool ConnectionManager::isNetworkCheckEnabled() const
     {
         return ConnectionManagerImpl::getInstance().isNetworkCheckEnabled();
+    }
+
+    bool ConnectionManager::isNetworkAvailable() const
+    {
+        return ConnectionManagerImpl::getInstance().isNetworkAvailable();
     }
 
     void ConnectionManager::addListener( Listener& listener )
@@ -87,17 +94,22 @@ namespace ttb
 
     void ConnectionManagerImpl::enableNetworkCheck()
     {
-        // TODO: Implement
+        AndroidManager::getInstance().enableNetworkCheck();
     }
 
     void ConnectionManagerImpl::disableNetworkCheck()
     {
-        // TODO: Implement
+        AndroidManager::getInstance().disableNetworkCheck();
     }
 
     bool ConnectionManagerImpl::isNetworkCheckEnabled() const
     {
-        return m_isNetworkCheckEnabled;
+        return AndroidManager::getInstance().isNetworkCheckEnabled();
+    }
+
+    bool ConnectionManagerImpl::isNetworkAvailable() const
+    {
+        return AndroidManager::getInstance().isNetworkAvailable();
     }
 
     void ConnectionManagerImpl::addListener( Listener& listener )
@@ -129,16 +141,19 @@ namespace ttb
 }
 
 
-// cppcheck suppress unusedFunction
-JNIEXPORT void JNICALL Java_toms_1toolbox_ConnectionManager_on_1network_1available(
-    JNIEnv* /* env */, jobject /* obj */ )
+extern "C"
 {
-    ttb::ConnectionManagerImpl::getInstance().onNetworkAvailable();
-}
+    // cppcheck suppress unusedFunction
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1network_1available(
+        JNIEnv* /* env */, jclass /* cls */ )
+    {
+        ttb::ConnectionManagerImpl::getInstance().onNetworkAvailable();
+    }
 
-// cppcheck suppress unusedFunction
-JNIEXPORT void JNICALL Java_toms_1toolbox_ConnectionManager_on_1network_1lost( JNIEnv* /* env */,
-                                                                               jobject /* obj */ )
-{
-    ttb::ConnectionManagerImpl::getInstance().onNetworkLost();
+    // cppcheck suppress unusedFunction
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1network_1lost( JNIEnv* /* env */,
+                                                                                jclass /* cls */ )
+    {
+        ttb::ConnectionManagerImpl::getInstance().onNetworkLost();
+    }
 }

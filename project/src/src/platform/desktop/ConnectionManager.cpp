@@ -5,10 +5,12 @@
 
 namespace ttb
 {
-    class ConnectionManager::Impl
+    class ConnectionManagerImpl
     {
     public:
-        static Impl& getInstance();
+        using Listener = ConnectionManager::Listener;
+
+        static ConnectionManagerImpl& getInstance();
 
         void enableNetworkCheck();
 
@@ -16,12 +18,14 @@ namespace ttb
 
         bool isNetworkCheckEnabled() const;
 
+        bool isNetworkAvailable() const;
+
         void addListener( Listener& listener );
 
         void removeListener( Listener const& listener );
 
     private:
-        Impl();
+        ConnectionManagerImpl();
 
         std::vector< Listener* > m_listeners;
 
@@ -40,27 +44,32 @@ namespace ttb
 
     void ConnectionManager::enableNetworkCheck()
     {
-        Impl::getInstance().enableNetworkCheck();
+        ConnectionManagerImpl::getInstance().enableNetworkCheck();
     }
 
     void ConnectionManager::disableNetworkCheck()
     {
-        Impl::getInstance().disableNetworkCheck();
+        ConnectionManagerImpl::getInstance().disableNetworkCheck();
     }
 
     bool ConnectionManager::isNetworkCheckEnabled() const
     {
-        return Impl::getInstance().isNetworkCheckEnabled();
+        return ConnectionManagerImpl::getInstance().isNetworkCheckEnabled();
+    }
+
+    bool ConnectionManager::isNetworkAvailable() const
+    {
+        return ConnectionManagerImpl::getInstance().isNetworkAvailable();
     }
 
     void ConnectionManager::addListener( Listener& listener )
     {
-        Impl::getInstance().addListener( listener );
+        ConnectionManagerImpl::getInstance().addListener( listener );
     }
 
     void ConnectionManager::removeListener( Listener const& listener )
     {
-        Impl::getInstance().removeListener( listener );
+        ConnectionManagerImpl::getInstance().removeListener( listener );
     }
 
     ConnectionManager::ConnectionManager() = default;
@@ -75,13 +84,13 @@ namespace ttb
     }
 
 
-    auto ConnectionManager::Impl::getInstance() -> Impl&
+    auto ConnectionManagerImpl::getInstance() -> ConnectionManagerImpl&
     {
-        static auto instance = Impl{};
+        static auto instance = ConnectionManagerImpl{};
         return instance;
     }
 
-    void ConnectionManager::Impl::enableNetworkCheck()
+    void ConnectionManagerImpl::enableNetworkCheck()
     {
         m_isNetworkCheckEnabled = true;
 
@@ -91,7 +100,7 @@ namespace ttb
         }
     }
 
-    void ConnectionManager::Impl::disableNetworkCheck()
+    void ConnectionManagerImpl::disableNetworkCheck()
     {
         m_isNetworkCheckEnabled = false;
 
@@ -101,12 +110,17 @@ namespace ttb
         }
     }
 
-    bool ConnectionManager::Impl::isNetworkCheckEnabled() const
+    bool ConnectionManagerImpl::isNetworkCheckEnabled() const
     {
         return m_isNetworkCheckEnabled;
     }
 
-    void ConnectionManager::Impl::addListener( Listener& listener )
+    bool ConnectionManagerImpl::isNetworkAvailable() const
+    {
+        return m_isNetworkCheckEnabled;
+    }
+
+    void ConnectionManagerImpl::addListener( Listener& listener )
     {
         m_listeners.push_back( &listener );
 
@@ -116,11 +130,11 @@ namespace ttb
         }
     }
 
-    void ConnectionManager::Impl::removeListener( Listener const& listener )
+    void ConnectionManagerImpl::removeListener( Listener const& listener )
     {
         m_listeners.erase(
             std::find( std::begin( m_listeners ), std::end( m_listeners ), &listener ) );
     }
 
-    ConnectionManager::Impl::Impl() = default;
+    ConnectionManagerImpl::ConnectionManagerImpl() = default;
 }
