@@ -11,6 +11,7 @@ target_sources(
         UnionFind.cpp
         Event.cpp
         Color.cpp
+        TypeValueEvent.cpp
 )
 
 add_subdirectory( data_io )
