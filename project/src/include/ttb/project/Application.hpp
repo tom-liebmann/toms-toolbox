@@ -23,7 +23,7 @@ namespace ttb
     private:
         virtual ApplicationProperties getProperties() const = 0;
 
-        virtual void init() = 0;
+        virtual void init( int argc, char** argv ) = 0;
 
         virtual void destroy() = 0;
 

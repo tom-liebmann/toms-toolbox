@@ -11,14 +11,14 @@ namespace ttb
     class ApplicationRunner
     {
     public:
-        static void run();
+        static void run( int argc, char** argv );
     };
 }
 
 
-int main( int /* argc */, char** /* argv */ )
+int main( int argc, char** argv )
 {
-    ttb::ApplicationRunner::run();
+    ttb::ApplicationRunner::run( argc, argv );
 
     return EXIT_SUCCESS;
 }
@@ -26,7 +26,7 @@ int main( int /* argc */, char** /* argv */ )
 
 namespace ttb
 {
-    void ApplicationRunner::run()
+    void ApplicationRunner::run( int argc, char** argv )
     {
         auto& app = application();
 
@@ -37,7 +37,7 @@ namespace ttb
 
         window.use();
 
-        app.init();
+        app.init( argc, argv );
 
         auto lastTime = std::chrono::steady_clock::now();
 

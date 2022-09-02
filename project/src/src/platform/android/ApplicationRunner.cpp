@@ -25,7 +25,7 @@ namespace ttb
         auto const appProperties = app.getProperties();
 
         ttb::Window::init( "Window Title", appProperties.getWindowRequest() );
-        app.init();
+        app.init( 0, nullptr );
     }
 
     void ApplicationRunner::step()
