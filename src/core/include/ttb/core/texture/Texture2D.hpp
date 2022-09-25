@@ -93,6 +93,8 @@ namespace ttb
 
         Modifier& download( size_t level, std::vector< uint8_t >& buffer );
 
+        Modifier& download( size_t level, std::vector< float >& buffer );
+
         Modifier& minMagFilter( GLint minFilter, GLint magFilter );
 
         Modifier& depthMode( GLint mode );

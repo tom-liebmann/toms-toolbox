@@ -225,7 +225,24 @@ namespace ttb
 
         buffer.resize( width * height * m_texture->colorChannel() );
 
-        glGetTexImage( GL_TEXTURE_2D, level, GL_RGBA, GL_UNSIGNED_BYTE, buffer.data() );
+        glGetTexImage( GL_TEXTURE_2D, level, GL_RGB, GL_UNSIGNED_BYTE, buffer.data() );
+#endif
+
+        return *this;
+    }
+
+    Texture2D::Modifier&
+        Texture2D::Modifier::download( [[maybe_unused]] size_t level,
+                                       [[maybe_unused]] std::vector< float >& buffer )
+    {
+#ifndef PLATFORM_ANDROID
+        GLint width, height;
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_WIDTH, &width );
+        glGetTexLevelParameteriv( GL_TEXTURE_2D, level, GL_TEXTURE_HEIGHT, &height );
+
+        buffer.resize( width * height * m_texture->colorChannel() );
+
+        glGetTexImage( GL_TEXTURE_2D, level, GL_RGB, GL_FLOAT, buffer.data() );
 #endif
 
         return *this;
