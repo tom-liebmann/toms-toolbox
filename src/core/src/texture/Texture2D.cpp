@@ -31,10 +31,12 @@ namespace ttb
                 return 1;
 
             case GL_RGB:
+            case GL_RGB32F:
                 return 3;
 
             case GL_RGBA:
             case GL_RGBA8:
+            case GL_RGBA32F:
                 return 4;
 
             default:
@@ -111,6 +113,11 @@ namespace ttb
                 format = GL_RGBA;
                 outType = GL_UNSIGNED_BYTE;
                 break;
+
+            case GL_RGBA32F:
+                bytesPerPixel = 16;
+                format = GL_RGBA;
+                outType = GL_FLOAT;
 
             default:
                 throw std::runtime_error( "Unknown pixel format (" +
