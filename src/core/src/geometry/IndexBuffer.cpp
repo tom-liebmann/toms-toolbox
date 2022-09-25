@@ -80,8 +80,8 @@ namespace ttb
         else
         {
             glBufferSubData( GL_ELEMENT_ARRAY_BUFFER,
-                             m_begin * sizeof( GLuint ),
-                             ( m_end - m_begin ) * sizeof( GLuint ),
+                             m_begin * sizeof( Index ),
+                             ( m_end - m_begin ) * sizeof( Index ),
                              reinterpret_cast< GLvoid const* >( m_data.data() + m_begin ) );
         }
 
