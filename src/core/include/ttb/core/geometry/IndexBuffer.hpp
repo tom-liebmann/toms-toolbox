@@ -14,7 +14,7 @@ namespace ttb
     class IndexBuffer
     {
     public:
-        using Index = GLushort;
+        using Index = GLuint;
 
         static std::shared_ptr< IndexBuffer > create();
 
