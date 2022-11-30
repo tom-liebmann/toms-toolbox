@@ -3,12 +3,17 @@
 #include <ttb/math/Vector.hpp>
 #include <ttb/math/vector_operations.hpp>
 
+#include <type_traits>
+
 
 TEST_CASE( "Vector construction", "[math][vector]" )
 {
-    SECTION( "Empty" )
+    SECTION( "Zero initialization" )
     {
-        auto const vec = ttb::Vector< int, 2 >();
+        auto const vec = ttb::Vector< int, 2 >{};
+
+        REQUIRE( 0 == vec( 0 ) );
+        REQUIRE( 0 == vec( 1 ) );
     }
 
     SECTION( "Initializer list" )
@@ -36,6 +41,18 @@ TEST_CASE( "Vector construction", "[math][vector]" )
         REQUIRE( 6 == vec( 0 ) );
         REQUIRE( 7 == vec( 1 ) );
         REQUIRE( 8 == vec( 2 ) );
+    }
+
+    SECTION( "Copy" )
+    {
+        auto const vec1 = ttb::Vector{ 1, 2, 3 };
+        auto const vec2 = ttb::Vector{ vec1 };
+        static_assert( std::is_same_v< decltype( vec1 ), ttb::Vector< int, 3 > const > );
+        static_assert( std::is_same_v< decltype( vec2 ), ttb::Vector< int, 3 > const > );
+
+        REQUIRE( 1 == vec2( 0 ) );
+        REQUIRE( 2 == vec2( 1 ) );
+        REQUIRE( 3 == vec2( 2 ) );
     }
 }
 

@@ -56,17 +56,20 @@ TEST_CASE( "Matrix", "[math][matrix]" )
         {
             auto const m = ttb::Matrix< float, 1, 1 >{ 5.0f };
 
-            REQUIRE_THAT( ttb::invert( m ),
-                          MatchesMatrix( ttb::Matrix< float, 1, 1 >{ 1.0f / 5.0f } ) );
+            REQUIRE_THAT(
+                ttb::invert( m ),
+                ( MatchesMatrix< float, 1, 1 >{ ttb::Matrix< float, 1, 1 >{ 1.0f / 5.0f } } ) );
 
-            REQUIRE_THAT( ttb::invert( m ) * m, MatchesMatrix( ttb::mat::identity< float, 1 >() ) );
+            REQUIRE_THAT( ttb::invert( m ) * m,
+                          ( MatchesMatrix< float, 1, 1 >( ttb::mat::identity< float, 1 >() ) ) );
         }
 
         SECTION( "Matrix 2x2" )
         {
             auto const m = ttb::Matrix< float, 2, 2 >{ 1.0f, 2.0f, 3.0f, 4.0f };
 
-            REQUIRE_THAT( ttb::invert( m ) * m, MatchesMatrix( ttb::mat::identity< float, 2 >() ) );
+            REQUIRE_THAT( ttb::invert( m ) * m,
+                          ( MatchesMatrix< float, 2, 2 >( ttb::mat::identity< float, 2 >() ) ) );
         }
 
         SECTION( "Matrix 3x3" )
@@ -75,9 +78,10 @@ TEST_CASE( "Matrix", "[math][matrix]" )
                 ttb::Matrix< float, 3, 3 >{ 1.0f, 2.0f, 3.0f, 0.0f, 1.0f, 4.0f, 5.0f, 6.0f, 0.0f };
 
             REQUIRE_THAT( ttb::invert( m ),
-                          MatchesMatrix( ttb::Matrix< float, 3, 3 >{
-                              -24.0f, 18.0f, 5.0f, 20.0f, -15.0f, -4.0f, -5.0f, 4.0f, 1.0f } ) );
-            REQUIRE_THAT( ttb::invert( m ) * m, MatchesMatrix( ttb::mat::identity< float, 3 >() ) );
+                          ( MatchesMatrix< float, 3, 3 >( ttb::Matrix< float, 3, 3 >{
+                              -24.0f, 18.0f, 5.0f, 20.0f, -15.0f, -4.0f, -5.0f, 4.0f, 1.0f } ) ) );
+            REQUIRE_THAT( ttb::invert( m ) * m,
+                          ( MatchesMatrix< float, 3, 3 >( ttb::mat::identity< float, 3 >() ) ) );
         }
     }
 }

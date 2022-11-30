@@ -13,19 +13,27 @@ namespace ttb
     public:
         static constexpr size_t size = TDim;
 
-        Vector();
+        Vector() = default;
 
-        template < typename... TArgs,
-                   std::enable_if_t< TDim == 1 && TDim == sizeof...( TArgs ), int > = 0 >
-        explicit Vector( TArgs... values ) : m_values{ static_cast< TType >( values )... }
+        Vector( Vector const& rhs ) = default;
+
+        explicit Vector( TType const ( &values )[ TDim ] );
+
+        // clang-format off
+        template < typename TArg >
+            requires( TDim == 1 )  //
+        explicit Vector( TArg&& values )
+            : m_values{ static_cast< TType >( std::forward< TArg >( values ) ) }
         {
         }
 
-        template < typename... TArgs,
-                   std::enable_if_t< 1 < TDim && TDim == sizeof...( TArgs ), int > = 1 >
-        Vector( TArgs... values ) : m_values{ static_cast< TType >( values )... }
+        template < typename... TArgs >
+            requires( TDim != 1 && TDim == sizeof...( TArgs ) )  //
+        Vector( TArgs&&... values )
+            : m_values{ static_cast< TType >( std::forward< TArgs >( values ) )... }
         {
         }
+        // clang-format on
 
         // Access
         TType& operator[]( size_t index );
@@ -68,8 +76,9 @@ namespace ttb
 namespace ttb
 {
     template < typename TType, size_t TDim >
-    Vector< TType, TDim >::Vector() : m_values{}
+    Vector< TType, TDim >::Vector( TType const ( &values )[ TDim ] )
     {
+        std::copy( std::begin( values ), std::end( values ), std::begin( m_values ) );
     }
 
     template < typename TType, size_t TDim >
