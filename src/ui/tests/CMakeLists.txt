@@ -4,8 +4,8 @@ ttb_add_test(
     DEPENDENCIES ttbUi
     )
 
-ttb_add_test(
-    TARGET_NAME test_xml_loading
-    SOURCES test_xml_loading.cpp
-    DEPENDENCIES ttbUi
-    )
+#ttb_add_test(
+#    TARGET_NAME test_xml_loading
+#    SOURCES test_xml_loading.cpp
+#    DEPENDENCIES ttbUi
+#    )
