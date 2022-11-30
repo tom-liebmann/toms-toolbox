@@ -11,6 +11,8 @@ namespace ttb::ui
     public:
         Height( Framework& framework, float height );
 
+        Height( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+
         void child( Element* element );
 
     private:
