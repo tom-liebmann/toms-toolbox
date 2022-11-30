@@ -1,10 +1,18 @@
 from conans import ConanFile, CMake, tools
 
 
+def get_version():
+    git = tools.Git()
+    try:
+        return f"{git.get_branch()}_{git.get_revision()}"
+    except:
+        return None
+
+
 class TomsToolboxConan(ConanFile):
     name = "toms-toolbox"
-    version = "0.1"
     author = "Tom Liebmann <kontakt@liebmann-online.de>"
+    version = get_version()
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "library_type": ["SHARED", "STATIC"],
@@ -27,6 +35,7 @@ class TomsToolboxConan(ConanFile):
     }
     generators = "cmake_find_package", "cmake_paths"
     exports_sources = "*"
+
 
     def build(self):
         cmake = CMake(self)
