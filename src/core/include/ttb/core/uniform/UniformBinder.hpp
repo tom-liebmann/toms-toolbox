@@ -16,7 +16,7 @@ namespace ttb
     class UniformBinder
     {
     public:
-        UniformBinder( std::string const& name, TType const& value, bool overwrite = false );
+        UniformBinder( std::string_view name, TType const& value, bool overwrite = false );
 
         UniformBinderHandle< TType > bind( State::Data& data ) const;
 
@@ -71,7 +71,7 @@ namespace ttb
 namespace ttb
 {
     template < typename TType >
-    UniformBinder< TType >::UniformBinder( std::string const& name,
+    UniformBinder< TType >::UniformBinder( std::string_view name,
                                            TType const& value,
                                            bool overwrite )
         : m_name{ name }, m_value{ value }, m_overwrite{ overwrite }
