@@ -20,6 +20,10 @@ namespace ttb::ui
 
         void text( std::string value );
 
+        void setSize( float value );
+
+        void setColor( ColorRgb const& color );
+
         virtual Size fit( Size const& size ) override;
 
         virtual void render( ttb::State& state ) const override;

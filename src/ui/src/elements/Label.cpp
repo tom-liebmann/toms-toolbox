@@ -71,6 +71,22 @@ namespace ttb::ui
         changed();
     }
 
+    void Label::setSize( float value )
+    {
+        m_size = value;
+
+        updateGeometry();
+
+        changed();
+    }
+
+    void Label::setColor( ColorRgb const& color )
+    {
+        m_color = color;
+
+        updateGeometry();
+    }
+
     auto Label::fit( Size const& /* size */ ) -> Size
     {
         auto const fontRange = m_font->textDimensions( m_size, m_text );
