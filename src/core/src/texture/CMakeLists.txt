@@ -5,5 +5,6 @@ target_sources(
         Texture.cpp
         Texture2D.cpp
         TextureFactory.cpp
-        ImageBinder.cpp
+        TextureSlice2D.cpp
+        TextureSlice2DBinder.cpp
 )

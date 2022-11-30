@@ -3,6 +3,7 @@
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/shader.hpp>
+#include <ttb/core/texture/TextureSlice2DBinder.hpp>
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/Framework.hpp>
@@ -37,16 +38,17 @@ namespace ttb::ui
         m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
     }
 
-    Image::Image( Framework& framework, ImageBinder const& image ) : Image{ framework }
+    Image::Image( Framework& framework, std::shared_ptr< TextureSlice2D const > image )
+        : Image{ framework }
     {
         this->image( image );
     }
 
     Image::~Image() = default;
 
-    void Image::image( ImageBinder const& image )
+    void Image::image( std::shared_ptr< TextureSlice2D const > image )
     {
-        m_image = image.getBindable( TEXTURE_SLOT );
+        m_image = std::move( image );
     }
 
     void Image::render( ttb::State& state ) const
@@ -56,7 +58,7 @@ namespace ttb::ui
 
         state.with( ttb::UniformBinder{ "u_transform", transform() },
                     ttb::UniformBinder{ "u_texture", TEXTURE_SLOT },
-                    *m_image,
+                    ttb::TextureSlice2DBinder{ *m_image, "u_texTransform", TEXTURE_SLOT },
                     *m_program,
                     [ & ]
                     {
