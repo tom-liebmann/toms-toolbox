@@ -24,16 +24,15 @@ namespace ttb::ui
 
         ~ScrollArea();
 
-        using Element::range;
-
         void child( Element* element );
 
-        virtual void range( Range const& range ) override;
         virtual void destroy() override;
-        virtual void render( ttb::State& state ) const override;
-        virtual Range fit( Range const& space ) override;
+        virtual void offset( Offset const& value );
+        virtual void size( Size const& value );
+        virtual Size fit( Size const& space ) override;
         virtual void update( float timeDiff ) override;
         virtual bool onEvent( Event const& event ) override;
+        virtual void render( ttb::State& state ) const override;
         virtual void onChildChanged( Element& child ) override;
 
     private:
