@@ -26,9 +26,9 @@ namespace ttb::ui
     Height::Height( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
         : WrappedElement{ root }, m_flex{ root, Flex::Direction::VERTICAL }
     {
-        if( auto const value = loader.attrValue( node, "value" ); value )
+        if( auto const value = loader.getAttr< float >( node, "value" ) )
         {
-            m_flex.addSlot( Flex::SlotType::FIXED, std::stof( std::string{ *value } ) );
+            m_flex.addSlot( Flex::SlotType::FIXED, value.value() );
         }
 
         wrappedChild( &m_flex );

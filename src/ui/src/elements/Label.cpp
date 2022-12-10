@@ -12,12 +12,9 @@
 #include <regex>
 
 
-namespace ttb::ui
+namespace
 {
-    namespace
-    {
-        auto const factory = XmlFactory< Label >{ "label" };
-    }
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Label >{ "label" };
 }
 
 
@@ -40,17 +37,17 @@ namespace ttb::ui
     {
         auto& resMngr = root.getResourceManager();
 
-        if( auto const value = loader.attrValue( node, "size" ); value )
+        if( auto const value = loader.getAttr< float >( node, "size" ) )
         {
-            m_size = std::stof( std::string( *value ) );
+            m_size = value.value();
         }
 
-        if( auto const value = loader.attrValue( node, "color" ); value )
+        if( auto const value = loader.attrValue( node, "color" ) )
         {
             m_color = ColorRgb::createHexStr( value.value() ).value();
         }
 
-        if( auto child = node.first_node(); child )
+        if( auto child = node.first_node() )
         {
             m_text = std::string( child->value(), child->value_size() );
         }

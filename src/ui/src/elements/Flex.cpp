@@ -43,9 +43,9 @@ namespace ttb::ui
                 slotType = parseSlotType( *value );
             }
 
-            if( auto const value = loader.attrValue( *child, "flex_value" ); value )
+            if( auto const value = loader.getAttr< float >( *child, "flex_value" ) )
             {
-                slotValue = std::stof( std::string{ *value } );
+                slotValue = value.value();
             }
 
             addSlot( slotType, slotValue, element, false );
