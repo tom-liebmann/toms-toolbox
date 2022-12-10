@@ -9,9 +9,9 @@ namespace ttb::ui
     class Group : public CombinedElement
     {
     public:
-        Group( Framework& framework );
+        Group( Root& root );
 
-        Group( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void addChild( Element* child, bool considerSize = true );
     };

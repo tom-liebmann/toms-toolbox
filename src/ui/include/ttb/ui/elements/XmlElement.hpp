@@ -20,9 +20,9 @@ namespace ttb::ui
     class XmlElement : public WrappedElement
     {
     public:
-        XmlElement( Framework& framework, rapidxml::xml_node<> const& node );
+        XmlElement( Root& root, rapidxml::xml_node<> const& node );
 
-        XmlElement( Framework& framework, char const* source );
+        XmlElement( Root& root, char const* source );
 
         Element* getElementById( std::string const& id );
 

@@ -9,9 +9,9 @@ namespace ttb::ui
     class Ratio : public WrappedElement
     {
     public:
-        Ratio( Framework& framework, float ratio = 1.0f );
+        Ratio( Root& root, float ratio = 1.0f );
 
-        Ratio( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Ratio( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

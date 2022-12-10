@@ -7,13 +7,10 @@
 
 namespace ttb::ui
 {
-    class CombinedElement : public Element
+    class CombinedElement : public Element, public ElementParent
     {
     public:
-        CombinedElement( Framework& framework );
-
-        //! @copydoc Element::destroy()
-        virtual void destroy() override;
+        CombinedElement( Root& root );
 
         //! @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
@@ -32,6 +29,8 @@ namespace ttb::ui
 
         //! @copydoc Element::onEvent( Event const& )
         virtual bool onEvent( Event const& event ) override;
+
+        virtual void onChildChanged( Element& child ) override;
 
     protected:
         void add( Element* child, bool considerSize = true );

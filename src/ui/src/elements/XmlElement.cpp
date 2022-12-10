@@ -11,8 +11,7 @@ namespace
 
 namespace ttb::ui
 {
-    XmlElement::XmlElement( Framework& framework, rapidxml::xml_node<> const& node )
-        : WrappedElement{ framework }
+    XmlElement::XmlElement( Root& root, rapidxml::xml_node<> const& node ) : WrappedElement{ root }
     {
         auto firstChild = &node;
 
@@ -29,11 +28,11 @@ namespace ttb::ui
 
         auto loader = XmlLoader{ *this };
 
-        wrappedChild( loader.loadElement( framework, *firstChild ) );
+        wrappedChild( loader.loadElement( root, *firstChild ) );
     }
 
-    XmlElement::XmlElement( Framework& framework, char const* source )
-        : XmlElement{ framework, *loadSource( source ) }
+    XmlElement::XmlElement( Root& root, char const* source )
+        : XmlElement{ root, *loadSource( source ) }
     {
     }
 

@@ -8,7 +8,7 @@ namespace ttb::ui
     class ScaleToFit : public WrappedElement
     {
     public:
-        ScaleToFit( Framework& framework );
+        ScaleToFit( Root& root );
 
         void child( Element* element );
 

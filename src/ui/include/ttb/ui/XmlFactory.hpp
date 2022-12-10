@@ -12,7 +12,7 @@ namespace ttb::ui
 
     private:
         virtual std::unique_ptr< Element >
-            create( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader ) = 0;
+            create( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader ) = 0;
 
         friend XmlLoader;
     };
@@ -25,9 +25,8 @@ namespace ttb::ui
         XmlFactory( std::string const& name );
 
     private:
-        virtual std::unique_ptr< Element > create( Framework& framework,
-                                                   rapidxml::xml_node<> const& node,
-                                                   XmlLoader& loader ) override;
+        virtual std::unique_ptr< Element >
+            create( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader ) override;
     };
 }
 
@@ -41,10 +40,10 @@ namespace ttb::ui
     }
 
     template < typename TType >
-    std::unique_ptr< Element > XmlFactory< TType >::create( Framework& framework,
+    std::unique_ptr< Element > XmlFactory< TType >::create( Root& root,
                                                             rapidxml::xml_node<> const& node,
                                                             XmlLoader& loader )
     {
-        return std::make_unique< TType >( framework, node, loader );
+        return std::make_unique< TType >( root, node, loader );
     }
 }

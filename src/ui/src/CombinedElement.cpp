@@ -8,16 +8,8 @@
 
 namespace ttb::ui
 {
-    CombinedElement::CombinedElement( Framework& framework ) : Element{ framework }
+    CombinedElement::CombinedElement( Root& root ) : Element{ root }
     {
-    }
-
-    void CombinedElement::destroy()
-    {
-        for( auto const& child : m_children )
-        {
-            child.element->destroy();
-        }
     }
 
     auto CombinedElement::fit( Size const& size ) -> Size
@@ -82,9 +74,14 @@ namespace ttb::ui
                             } );
     }
 
+    void CombinedElement::onChildChanged( Element& /* child */ )
+    {
+        changed();
+    }
+
     void CombinedElement::add( Element* child, bool considerSize )
     {
-        child->parent( this );
+        child->setParent( this );
         m_children.push_back( Slot{ considerSize, child } );
         changed();
     }

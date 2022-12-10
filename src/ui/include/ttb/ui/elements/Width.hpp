@@ -9,7 +9,7 @@ namespace ttb::ui
     class Width : public WrappedElement
     {
     public:
-        Width( Framework& framework, float width );
+        Width( Root& root, float width );
 
         void child( Element* element );
 

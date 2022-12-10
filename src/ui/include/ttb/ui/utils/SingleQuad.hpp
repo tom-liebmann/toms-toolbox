@@ -11,7 +11,7 @@ namespace ttb::ui
     class SingleQuad : public Element
     {
     public:
-        SingleQuad( Framework& framework, ColorRgb const& color, float radius );
+        SingleQuad( Root& root, ColorRgb const& color, float radius );
 
         void color( ColorRgb const& value );
 

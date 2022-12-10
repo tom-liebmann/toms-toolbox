@@ -1,12 +1,10 @@
 #include <catch2/catch.hpp>
 
-#include "FrameworkMock.hpp"
 #include <ttb/core/resources/Manager.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 #include <ttb/ui/elements/Center.hpp>
 #include <ttb/ui/elements/Flex.hpp>
 #include <ttb/ui/elements/Margin.hpp>
-#include <ttb/ui/elements/Root.hpp>
 #include <ttb/utils/EventManager.hpp>
 
 
@@ -15,10 +13,10 @@ namespace
     class TestElement : public ttb::ui::Element
     {
     public:
-        TestElement( ttb::ui::Framework& framework,
+        TestElement( ttb::ui::Root& root,
                      std::optional< float > width,
                      std::optional< float > height )
-            : Element{ framework }, m_width{ width }, m_height{ height }
+            : Element{ root }, m_width{ width }, m_height{ height }
         {
         }
 
@@ -76,18 +74,18 @@ namespace ttb
 
 TEST_CASE( "Center", "[ui][elements]" )
 {
-    auto framework = ttb::ui::test::FrameworkMock{};
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
 
     SECTION( "Centered" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ framework,
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto center = ttb::ui::Center{ root,
                                        ttb::ui::Center::HAlignment::CENTER,
                                        ttb::ui::Center::VAlignment::MIDDLE };
-        auto testElement = TestElement{ framework, 0.5f, 0.5f };
+        auto testElement = TestElement{ root, 0.5f, 0.5f };
 
         center.child( &testElement );
-        root.child( &center );
+        root.setChild( &center );
 
         REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
         REQUIRE( ttb::Vector{ 0.25f, 0.25f } == testElement.offset() );
@@ -98,14 +96,14 @@ TEST_CASE( "Center", "[ui][elements]" )
 
     SECTION( "Right" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ framework,
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto center = ttb::ui::Center{ root,
                                        ttb::ui::Center::HAlignment::RIGHT,
                                        ttb::ui::Center::VAlignment::BOTTOM };
-        auto testElement = TestElement{ framework, 0.5f, 0.5f };
+        auto testElement = TestElement{ root, 0.5f, 0.5f };
 
         center.child( &testElement );
-        root.child( &center );
+        root.setChild( &center );
 
         REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
         REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.offset() );
@@ -116,14 +114,14 @@ TEST_CASE( "Center", "[ui][elements]" )
 
     SECTION( "Left" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ framework,
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto center = ttb::ui::Center{ root,
                                        ttb::ui::Center::HAlignment::LEFT,
                                        ttb::ui::Center::VAlignment::TOP };
-        auto testElement = TestElement{ framework, 0.5f, 0.5f };
+        auto testElement = TestElement{ root, 0.5f, 0.5f };
 
         center.child( &testElement );
-        root.child( &center );
+        root.setChild( &center );
 
         REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == testElement.offset() );
@@ -134,14 +132,14 @@ TEST_CASE( "Center", "[ui][elements]" )
 
     SECTION( "Min size" )
     {
-        auto root = ttb::ui::Root{ framework, { 0.0f, 0.0f } };
-        auto center = ttb::ui::Center{ framework,
+        auto root = ttb::ui::Root{ resourceManager, { 0.0f, 0.0f } };
+        auto center = ttb::ui::Center{ root,
                                        ttb::ui::Center::HAlignment::LEFT,
                                        ttb::ui::Center::VAlignment::TOP };
-        auto testElement = TestElement{ framework, 0.5f, 0.5f };
+        auto testElement = TestElement{ root, 0.5f, 0.5f };
 
         center.child( &testElement );
-        root.child( &center );
+        root.setChild( &center );
 
         REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == testElement.offset() );
@@ -153,17 +151,17 @@ TEST_CASE( "Center", "[ui][elements]" )
 
 TEST_CASE( "Flex", "[ui][elements]" )
 {
-    auto framework = ttb::ui::test::FrameworkMock{};
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
 
     SECTION( "Single fixed" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto flex = ttb::ui::Flex{ framework, ttb::ui::Flex::Direction::VERTICAL };
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
 
-        auto ele1 = TestElement{ framework, {}, {} };
+        auto ele1 = TestElement{ root, {}, {} };
 
         flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        root.child( &flex );
+        root.setChild( &flex );
 
         REQUIRE( ttb::Vector{ 1.0f, 0.1f } == flex.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
@@ -173,15 +171,15 @@ TEST_CASE( "Flex", "[ui][elements]" )
 
     SECTION( "Multiple fixed" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto flex = ttb::ui::Flex{ framework, ttb::ui::Flex::Direction::VERTICAL };
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
 
-        auto ele1 = TestElement{ framework, {}, {} };
-        auto ele2 = TestElement{ framework, {}, {} };
+        auto ele1 = TestElement{ root, {}, {} };
+        auto ele2 = TestElement{ root, {}, {} };
 
         flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
         flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.2f, &ele2 );
-        root.child( &flex );
+        root.setChild( &flex );
 
         REQUIRE( ttb::Vector{ 1.0f, 0.3f } == flex.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
@@ -196,21 +194,21 @@ TEST_CASE( "Flex", "[ui][elements]" )
 
 TEST_CASE( "Flex & Margin", "[ui][flex][margin]" )
 {
-    auto framework = ttb::ui::test::FrameworkMock{};
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
 
     SECTION( "Fixed & Flex" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto margin = ttb::ui::Margin{ framework, 0.1f };
-        auto flex = ttb::ui::Flex{ framework, ttb::ui::Flex::Direction::VERTICAL };
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto margin = ttb::ui::Margin{ root, 0.1f };
+        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
 
-        auto ele1 = TestElement{ framework, {}, {} };
-        auto ele2 = TestElement{ framework, {}, {} };
+        auto ele1 = TestElement{ root, {}, {} };
+        auto ele2 = TestElement{ root, {}, {} };
 
         flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
         flex.addSlot( ttb::ui::Flex::SlotType::FLEX, 1.0f, &ele2 );
         margin.child( &flex );
-        root.child( &margin );
+        root.setChild( &margin );
 
         REQUIRE( ttb::Vector{ 0.8f, 0.8f } == ttb::Approx{ flex.size() } );
         REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ttb::Approx{ flex.offset() } );
@@ -225,17 +223,17 @@ TEST_CASE( "Flex & Margin", "[ui][flex][margin]" )
 
 TEST_CASE( "Margin", "[ui][margin]" )
 {
-    auto framework = ttb::ui::test::FrameworkMock{};
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
 
     SECTION( "Simple margin" )
     {
-        auto root = ttb::ui::Root{ framework, { 1.0f, 1.0f } };
-        auto margin = ttb::ui::Margin{ framework, 0.1f };
+        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+        auto margin = ttb::ui::Margin{ root, 0.1f };
 
-        auto ele = TestElement{ framework, {}, {} };
+        auto ele = TestElement{ root, {}, {} };
 
         margin.child( &ele );
-        root.child( &margin );
+        root.setChild( &margin );
 
         REQUIRE( ttb::Vector{ 1.0f, 1.0f } == margin.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == margin.offset() );

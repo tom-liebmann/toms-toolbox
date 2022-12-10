@@ -20,7 +20,7 @@ namespace ttb::ui
     class XmlLoader
     {
     public:
-        Element* loadElement( Framework& framework, rapidxml::xml_node<> const& node );
+        Element* loadElement( Root& root, rapidxml::xml_node<> const& node );
 
         static std::optional< std::string_view > attrValue( rapidxml::xml_node<> const& node,
                                                             std::string_view const& name );

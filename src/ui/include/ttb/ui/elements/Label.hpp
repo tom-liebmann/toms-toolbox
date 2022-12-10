@@ -14,9 +14,9 @@ namespace ttb::ui
     class Label : public Element
     {
     public:
-        Label( Framework& framework, std::string text, float size, ColorRgb const& color );
+        Label( Root& root, std::string text, float size, ColorRgb const& color );
 
-        Label( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Label( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void text( std::string value );
 

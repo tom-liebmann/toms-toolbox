@@ -23,9 +23,9 @@ namespace ttb::ui
             BOTTOM,
         };
 
-        Center( Framework& framework, HAlignment hAlign, VAlignment vAlign );
+        Center( Root& root, HAlignment hAlign, VAlignment vAlign );
 
-        Center( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Center( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

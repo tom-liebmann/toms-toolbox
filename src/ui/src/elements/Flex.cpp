@@ -19,13 +19,12 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Flex::Flex( Framework& framework, Direction direction )
-        : Element{ framework }, m_direction{ direction }
+    Flex::Flex( Root& root, Direction direction ) : Element{ root }, m_direction{ direction }
     {
     }
 
-    Flex::Flex( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ framework }, m_direction{ Direction::HORIZONTAL }
+    Flex::Flex( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : Element{ root }, m_direction{ Direction::HORIZONTAL }
     {
         if( auto const value = loader.attrValue( node, "direction" ); value )
         {
@@ -34,7 +33,7 @@ namespace ttb::ui
 
         for( auto child = node.first_node(); child; child = child->next_sibling() )
         {
-            auto element = loader.loadElement( framework, *child );
+            auto element = loader.loadElement( root, *child );
 
             auto slotType = SlotType::FLEX;
             auto slotValue = 1.0f;
@@ -220,6 +219,11 @@ namespace ttb::ui
         return "Flex";
     }
 
+    void Flex::onChildChanged( Element& /* child */ )
+    {
+        changed();
+    }
+
     size_t Flex::addSlot( SlotType type, float value, bool isLastChange )
     {
         m_slots.push_back( Slot{ type, value, 0.0f, {} } );
@@ -234,7 +238,7 @@ namespace ttb::ui
 
     size_t Flex::addSlot( SlotType type, float value, Element* element, bool isLastChange )
     {
-        element->parent( this );
+        element->setParent( this );
 
         m_slots.push_back( Slot{ type, value, 0.0f, element } );
 
@@ -248,7 +252,7 @@ namespace ttb::ui
 
     void Flex::child( size_t slot, Element* element, bool isLastChange )
     {
-        element->parent( this );
+        element->setParent( this );
 
         m_slots.at( slot ).child = element;
 

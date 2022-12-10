@@ -3,8 +3,8 @@
 
 namespace ttb::ui
 {
-    Size::Size( Framework& framework, float width, float height )
-        : WrappedElement{ framework }, m_width{ width }, m_height{ height }
+    Size::Size( Root& root, float width, float height )
+        : WrappedElement{ root }, m_width{ width }, m_height{ height }
     {
     }
 

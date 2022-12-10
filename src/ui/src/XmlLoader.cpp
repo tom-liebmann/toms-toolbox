@@ -14,7 +14,7 @@ namespace
 
 namespace ttb::ui
 {
-    Element* XmlLoader::loadElement( Framework& framework, rapidxml::xml_node<> const& node )
+    Element* XmlLoader::loadElement( Root& root, rapidxml::xml_node<> const& node )
     {
         // Using string_view here is not possible due to unordered_map not allowing heterogenious
         // lookup
@@ -28,7 +28,7 @@ namespace ttb::ui
             return nullptr;
         }
 
-        auto child = factoryIter->second->create( framework, node, *this );
+        auto child = factoryIter->second->create( root, node, *this );
         auto const childPtr = child.get();
         m_parent.m_elements.push_back( std::move( child ) );
 

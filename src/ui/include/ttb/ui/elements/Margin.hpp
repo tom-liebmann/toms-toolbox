@@ -10,13 +10,13 @@ namespace ttb::ui
     class Margin : public WrappedElement
     {
     public:
-        Margin( Framework& framework, float right, float top, float left, float bottom );
+        Margin( Root& root, float right, float top, float left, float bottom );
 
-        Margin( Framework& framework, float hMargin, float vMargin );
+        Margin( Root& root, float hMargin, float vMargin );
 
-        Margin( Framework& framework, float margin );
+        Margin( Root& root, float margin );
 
-        Margin( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Margin( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

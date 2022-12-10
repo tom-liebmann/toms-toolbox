@@ -12,25 +12,11 @@
 
 namespace ttb::ui
 {
-    Element::Element( Framework& framework ) : m_framework{ framework }
+    Element::Element( Root& root ) : m_root{ root }
     {
     }
 
     Element::~Element() = default;
-
-    void Element::destroy()
-    {
-    }
-
-    Element* Element::parent() const
-    {
-        return m_parent;
-    }
-
-    void Element::parent( Element* parent )
-    {
-        m_parent = parent;
-    }
 
     auto Element::fit( Size const& size ) -> Size
     {
@@ -67,11 +53,6 @@ namespace ttb::ui
         {
             m_parent->onChildChanged( *this );
         }
-    }
-
-    void Element::onChildChanged( Element& /* child */ )
-    {
-        changed();
     }
 
     auto Element::transform() const -> Transform

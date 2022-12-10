@@ -9,7 +9,7 @@
 
 namespace ttb::ui
 {
-    class Flex : public Element
+    class Flex : public Element, public ElementParent
     {
     public:
         enum class SlotType
@@ -26,9 +26,9 @@ namespace ttb::ui
             VERTICAL,
         };
 
-        Flex( Framework& framework, Direction direction );
+        Flex( Root& root, Direction direction );
 
-        Flex( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Flex( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         //! @copydoc Element::fit(Size const&)
         virtual Size fit( Size const& space ) override;
@@ -51,6 +51,8 @@ namespace ttb::ui
         virtual bool onEvent( Event const& event ) override;
 
         virtual std::string info() const override;
+
+        virtual void onChildChanged( Element& child ) override;
 
         size_t addSlot( SlotType type, float value, bool isLastChange = true );
 

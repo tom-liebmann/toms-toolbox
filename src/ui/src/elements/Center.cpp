@@ -21,10 +21,8 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Center::Center( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ framework }
-        , m_hAlign{ HAlignment::CENTER }
-        , m_vAlign{ VAlignment::MIDDLE }
+    Center::Center( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }, m_hAlign{ HAlignment::CENTER }, m_vAlign{ VAlignment::MIDDLE }
     {
         if( auto const value = loader.attrValue( node, "h" ); value )
         {
@@ -38,12 +36,12 @@ namespace ttb::ui
 
         if( auto const child = node.first_node(); child )
         {
-            wrappedChild( loader.loadElement( framework, *child ) );
+            wrappedChild( loader.loadElement( root, *child ) );
         }
     }
 
-    Center::Center( Framework& framework, HAlignment hAlign, VAlignment vAlign )
-        : WrappedElement{ framework }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
+    Center::Center( Root& root, HAlignment hAlign, VAlignment vAlign )
+        : WrappedElement{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {
     }
 

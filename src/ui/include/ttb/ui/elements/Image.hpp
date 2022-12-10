@@ -18,9 +18,9 @@ namespace ttb::ui
     class Image : public Element
     {
     public:
-        Image( Framework& framework );
+        Image( Root& root );
 
-        Image( Framework& framework, std::shared_ptr< TextureSlice2D const > image );
+        Image( Root& root, std::shared_ptr< TextureSlice2D const > image );
 
         ~Image();
 

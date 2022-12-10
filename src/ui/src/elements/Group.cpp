@@ -16,16 +16,16 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Group::Group( Framework& framework ) : CombinedElement{ framework }
+    Group::Group( Root& root ) : CombinedElement{ root }
     {
     }
 
-    Group::Group( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : CombinedElement{ framework }
+    Group::Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : CombinedElement{ root }
     {
         for( auto child = node.first_node(); child; child = child->next_sibling() )
         {
-            auto element = loader.loadElement( framework, *child );
+            auto element = loader.loadElement( root, *child );
 
             auto considerSize = true;
 

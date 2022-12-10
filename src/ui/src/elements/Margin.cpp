@@ -21,27 +21,22 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Margin::Margin( Framework& framework, float right, float top, float left, float bottom )
-        : WrappedElement{ framework }
-        , m_right{ right }
-        , m_top{ top }
-        , m_left{ left }
-        , m_bottom{ bottom }
+    Margin::Margin( Root& root, float right, float top, float left, float bottom )
+        : WrappedElement{ root }, m_right{ right }, m_top{ top }, m_left{ left }, m_bottom{ bottom }
     {
     }
 
-    Margin::Margin( Framework& framework, float hMargin, float vMargin )
-        : Margin{ framework, hMargin, vMargin, hMargin, vMargin }
+    Margin::Margin( Root& root, float hMargin, float vMargin )
+        : Margin{ root, hMargin, vMargin, hMargin, vMargin }
     {
     }
 
-    Margin::Margin( Framework& framework, float margin )
-        : Margin{ framework, margin, margin, margin, margin }
+    Margin::Margin( Root& root, float margin ) : Margin{ root, margin, margin, margin, margin }
     {
     }
 
-    Margin::Margin( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ framework }
+    Margin::Margin( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }
     {
         if( auto const value = loader.attrValue( node, "value" ); value )
         {
@@ -50,7 +45,7 @@ namespace ttb::ui
 
         if( auto child = node.first_node(); child )
         {
-            wrappedChild( loader.loadElement( framework, *child ) );
+            wrappedChild( loader.loadElement( root, *child ) );
         }
     }
 

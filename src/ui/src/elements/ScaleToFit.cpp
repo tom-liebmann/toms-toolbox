@@ -10,7 +10,7 @@
 
 namespace ttb::ui
 {
-    ScaleToFit::ScaleToFit( Framework& framework ) : WrappedElement{ framework }
+    ScaleToFit::ScaleToFit( Root& root ) : WrappedElement{ root }
     {
     }
 

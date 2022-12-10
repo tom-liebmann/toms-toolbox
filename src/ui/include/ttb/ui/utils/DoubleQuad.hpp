@@ -13,7 +13,7 @@ namespace ttb::ui
     class DoubleQuad : public Element
     {
     public:
-        DoubleQuad( Framework& framework,
+        DoubleQuad( Root& root,
                     ColorRgb const& outerColor,
                     float outerRadius,
                     ColorRgb const& innerColor,

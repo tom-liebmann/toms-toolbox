@@ -3,7 +3,7 @@
 
 namespace ttb::ui
 {
-    Switch::Switch( Framework& framework ) : Element{ framework }
+    Switch::Switch( Root& root ) : Element{ root }
     {
     }
 
@@ -11,12 +11,12 @@ namespace ttb::ui
     {
         if( child )
         {
-            child->parent( this );
+            child->setParent( this );
 
             auto const iter = m_children.find( index );
             if( iter != std::end( m_children ) )
             {
-                iter->second->destroy();
+                iter->second->setParent( nullptr );
             }
 
             if( index == m_activeIndex )
@@ -36,7 +36,7 @@ namespace ttb::ui
             auto const iter = m_children.find( index );
             if( iter != std::end( m_children ) )
             {
-                iter->second->destroy();
+                iter->second->setParent( nullptr );
                 m_children.erase( iter );
             }
         }
@@ -63,14 +63,6 @@ namespace ttb::ui
         }
 
         changed();
-    }
-
-    void Switch::destroy()
-    {
-        if( m_activeChild )
-        {
-            m_activeChild->destroy();
-        }
     }
 
     auto Switch::fit( Size const& size ) -> Size

@@ -26,9 +26,9 @@ namespace ttb::ui
 
         using ClickCallback = std::function< void( Action, Element& ) >;
 
-        Clickable( Framework& framework );
+        Clickable( Root& root );
 
-        Clickable( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Clickable( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Clickable();
 

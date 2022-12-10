@@ -19,9 +19,7 @@ namespace ttb::ui
     class MonoImage : public Element
     {
     public:
-        MonoImage( Framework& framework,
-                   std::shared_ptr< Texture2D const > image,
-                   ColorRgb const& color );
+        MonoImage( Root& root, std::shared_ptr< Texture2D const > image, ColorRgb const& color );
 
         ~MonoImage();
 

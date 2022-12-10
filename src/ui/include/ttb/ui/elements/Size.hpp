@@ -10,7 +10,7 @@ namespace ttb::ui
     class Size : public WrappedElement
     {
     public:
-        Size( Framework& framework, float width, float height );
+        Size( Root& root, float width, float height );
 
         void child( Element* element );
 

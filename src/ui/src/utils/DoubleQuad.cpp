@@ -1,19 +1,17 @@
 #include <ttb/ui/utils/DoubleQuad.hpp>
 
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 
 
 namespace ttb::ui
 {
-    DoubleQuad::DoubleQuad( Framework& framework,
+    DoubleQuad::DoubleQuad( Root& root,
                             ColorRgb const& outerColor,
                             float outerRadius,
                             ColorRgb const& innerColor,
                             float innerRadius,
                             float thickness )
-        : Element{ framework }
-        , m_thickness{ thickness }
-        , m_quadRenderer{ framework.resourceManager() }
+        : Element{ root }, m_thickness{ thickness }, m_quadRenderer{ root.getResourceManager() }
     {
         m_quadRenderer.add().radius( outerRadius ).color( outerColor );
 

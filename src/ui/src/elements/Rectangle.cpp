@@ -5,7 +5,7 @@
 #include <ttb/core/shader.hpp>
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 
 
@@ -17,16 +17,13 @@ namespace
 
 namespace ttb::ui
 {
-    Rectangle::Rectangle( Framework& framework, ColorRgb const& color )
-        : Element{ framework }, m_color( color )
+    Rectangle::Rectangle( Root& root, ColorRgb const& color ) : Element{ root }, m_color( color )
     {
         initGeometry();
     }
 
-    Rectangle::Rectangle( Framework& framework,
-                          rapidxml::xml_node<> const& node,
-                          XmlLoader& loader )
-        : Element{ framework }
+    Rectangle::Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : Element{ root }
     {
         if( auto const value = loader.attrValue( node, "color" ); value )
         {
@@ -63,7 +60,7 @@ namespace ttb::ui
 
     void Rectangle::initGeometry()
     {
-        m_program = framework().resourceManager().get< ttb::Program >( "ui_rect" );
+        m_program = getRoot().getResourceManager().get< ttb::Program >( "ui_rect" );
 
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )

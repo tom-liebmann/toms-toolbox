@@ -2,13 +2,14 @@
 
 #include <ttb/core/State.hpp>
 #include <ttb/math/matrix_operations.hpp>
+#include <ttb/ui/ElementParent.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
 
 
 namespace ttb::ui
 {
-    class Framework;
+    class Root;
 }
 
 
@@ -21,11 +22,9 @@ namespace ttb::ui
         using Offset = ttb::Vector< float, 2 >;
         using Transform = ttb::Matrix< float, 3, 3 >;
 
-        Element( Framework& framework );
+        Element( Root& root );
 
         virtual ~Element();
-
-        virtual void destroy();
 
         virtual Size fit( Size const& space );
 
@@ -45,35 +44,33 @@ namespace ttb::ui
 
         virtual std::string info() const;
 
-        Element* parent() const;
+        ElementParent* getParent() const;
 
-        void parent( Element* parent );
-
-        virtual void onChildChanged( Element& child );
+        void setParent( ElementParent* parent );
 
         Transform transform() const;
 
     protected:
         void changed();
 
-        Framework& framework() const;
+        Root& getRoot() const;
 
     private:
-        Element* m_parent{ nullptr };
+        ElementParent* m_parent{ nullptr };
 
         Size m_size{};
         Offset m_offset{};
 
-        Framework& m_framework;
+        Root& m_root;
     };
 }
 
 
 namespace ttb::ui
 {
-    inline Framework& Element::framework() const
+    inline Root& Element::getRoot() const
     {
-        return m_framework;
+        return m_root;
     }
 
     inline auto Element::offset() const -> Offset const&
@@ -84,5 +81,15 @@ namespace ttb::ui
     inline auto Element::size() const -> Size const&
     {
         return m_size;
+    }
+
+    inline ElementParent* Element::getParent() const
+    {
+        return m_parent;
+    }
+
+    inline void Element::setParent( ElementParent* parent )
+    {
+        m_parent = parent;
     }
 }

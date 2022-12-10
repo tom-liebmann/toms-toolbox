@@ -9,9 +9,9 @@ namespace ttb::ui
     class Height : public WrappedElement
     {
     public:
-        Height( Framework& framework, float height );
+        Height( Root& root, float height );
 
-        Height( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Height( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

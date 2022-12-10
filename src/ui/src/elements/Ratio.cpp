@@ -13,13 +13,12 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Ratio::Ratio( Framework& framework, float ratio )
-        : WrappedElement{ framework }, m_ratio{ ratio }
+    Ratio::Ratio( Root& root, float ratio ) : WrappedElement{ root }, m_ratio{ ratio }
     {
     }
 
-    Ratio::Ratio( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ framework }
+    Ratio::Ratio( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }
     {
         if( auto const value = loader.attrValue( node, "value" ); value )
         {
@@ -28,7 +27,7 @@ namespace ttb::ui
 
         if( auto child = node.first_node(); child )
         {
-            wrappedChild( loader.loadElement( framework, *child ) );
+            wrappedChild( loader.loadElement( root, *child ) );
         }
     }
 

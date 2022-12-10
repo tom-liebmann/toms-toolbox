@@ -17,9 +17,9 @@ namespace ttb::ui
     class Rectangle : public Element
     {
     public:
-        Rectangle( Framework& framework, ColorRgb const& color );
+        Rectangle( Root& root, ColorRgb const& color );
 
-        Rectangle( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Rectangle();
 

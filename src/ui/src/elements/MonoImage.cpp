@@ -6,15 +6,15 @@
 #include <ttb/core/texture.hpp>
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 
 
 namespace ttb::ui
 {
-    MonoImage::MonoImage( Framework& framework,
+    MonoImage::MonoImage( Root& root,
                           std::shared_ptr< Texture2D const > image,
                           ColorRgb const& color )
-        : Element{ framework }, m_color( color )
+        : Element{ root }, m_color( color )
     {
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )
@@ -32,7 +32,7 @@ namespace ttb::ui
                          .attribute( "in_vertex", std::move( vertexBuffer ), 0 )
                          .finish();
 
-        framework.resourceManager().get< ttb::Program >( "ui_mono_image" );
+        root.getResourceManager().get< ttb::Program >( "ui_mono_image" );
 
         this->image( std::move( image ) );
     }

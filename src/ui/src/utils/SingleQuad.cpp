@@ -1,13 +1,13 @@
 #include <ttb/ui/utils/SingleQuad.hpp>
 
 #include <ttb/core/uniform.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 
 
 namespace ttb::ui
 {
-    SingleQuad::SingleQuad( Framework& framework, ColorRgb const& color, float radius )
-        : Element{ framework }, m_quadRenderer{ framework.resourceManager() }
+    SingleQuad::SingleQuad( Root& root, ColorRgb const& color, float radius )
+        : Element{ root }, m_quadRenderer{ root.getResourceManager() }
     {
         m_quadRenderer.add().radius( radius ).color( color );
     }

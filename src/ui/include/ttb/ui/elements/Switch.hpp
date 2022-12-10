@@ -7,18 +7,17 @@
 
 namespace ttb::ui
 {
-    class Switch : public Element
+    class Switch : public Element, public ElementParent
     {
     public:
         using Index = uint32_t;
 
-        Switch( Framework& framework );
+        Switch( Root& root );
 
         void set( Index index, Element* child );
 
         void activate( Index index );
 
-        virtual void destroy() override;
         virtual Size fit( Size const& size ) override;
         virtual void update( float timeDiff ) override;
         virtual void render( ttb::State& state ) const override;

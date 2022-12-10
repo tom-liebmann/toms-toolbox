@@ -6,7 +6,7 @@
 #include <ttb/core/texture/TextureSlice2DBinder.hpp>
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 
 
 namespace
@@ -17,7 +17,7 @@ namespace
 
 namespace ttb::ui
 {
-    Image::Image( Framework& framework ) : Element{ framework }
+    Image::Image( Root& root ) : Element{ root }
     {
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )
@@ -35,11 +35,10 @@ namespace ttb::ui
                          .attribute( "in_vertex", std::move( vertexBuffer ), 0 )
                          .finish();
 
-        m_program = framework.resourceManager().get< ttb::Program >( "ui_image" );
+        m_program = root.getResourceManager().get< ttb::Program >( "ui_image" );
     }
 
-    Image::Image( Framework& framework, std::shared_ptr< TextureSlice2D const > image )
-        : Image{ framework }
+    Image::Image( Root& root, std::shared_ptr< TextureSlice2D const > image ) : Image{ root }
     {
         this->image( image );
     }

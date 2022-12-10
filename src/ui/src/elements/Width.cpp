@@ -5,8 +5,8 @@
 
 namespace ttb::ui
 {
-    Width::Width( Framework& framework, float width )
-        : WrappedElement{ framework }, m_flex{ framework, Flex::Direction::HORIZONTAL }
+    Width::Width( Root& root, float width )
+        : WrappedElement{ root }, m_flex{ root, Flex::Direction::HORIZONTAL }
     {
         m_flex.addSlot( Flex::SlotType::FIXED, width );
 

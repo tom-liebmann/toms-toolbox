@@ -9,7 +9,7 @@
 
 namespace ttb::ui
 {
-    class Framework;
+    class Root;
 }
 
 
@@ -18,14 +18,14 @@ namespace ttb::ui
     class PriorityListener : public EventListener
     {
     public:
-        PriorityListener( Framework& framework, EventListener& listener );
+        PriorityListener( Root& root, EventListener& listener );
 
         ~PriorityListener();
 
         virtual bool onEvent( Event const& event ) override;
 
     private:
-        std::reference_wrapper< Framework > m_framework;
+        std::reference_wrapper< Root > m_root;
         std::reference_wrapper< EventListener > m_listener;
 
         EventListener* m_oldListener;

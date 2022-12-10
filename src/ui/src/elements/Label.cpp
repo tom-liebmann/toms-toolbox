@@ -5,7 +5,7 @@
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 
 #include <ttb/ui/XmlFactory.hpp>
 
@@ -23,10 +23,10 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Label::Label( Framework& framework, std::string text, float size, ColorRgb const& color )
-        : Element{ framework }, m_text( std::move( text ) ), m_size( size ), m_color( color )
+    Label::Label( Root& root, std::string text, float size, ColorRgb const& color )
+        : Element{ root }, m_text( std::move( text ) ), m_size( size ), m_color( color )
     {
-        auto& resMngr = framework.resourceManager();
+        auto& resMngr = root.getResourceManager();
 
         m_shader = resMngr.get< ttb::Program >( "ui_label" );
         m_font = resMngr.get< ttb::Font >( "simple" );
@@ -35,10 +35,10 @@ namespace ttb::ui
         updateGeometry();
     }
 
-    Label::Label( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ framework }, m_size{ 1.0f }, m_color{ use_uint8, 0, 0, 0 }
+    Label::Label( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : Element{ root }, m_size{ 1.0f }, m_color{ use_uint8, 0, 0, 0 }
     {
-        auto& resMngr = framework.resourceManager();
+        auto& resMngr = root.getResourceManager();
 
         if( auto const value = loader.attrValue( node, "size" ); value )
         {

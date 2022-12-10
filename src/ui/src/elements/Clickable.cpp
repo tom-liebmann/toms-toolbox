@@ -1,7 +1,7 @@
 #include <ttb/ui/elements/Clickable.hpp>
 
 #include "PriorityListener.hpp"
-#include <ttb/ui/Framework.hpp>
+#include <ttb/ui/Root.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/EventManager.hpp>
 
@@ -17,18 +17,16 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Clickable::Clickable( Framework& framework ) : WrappedElement{ framework }
+    Clickable::Clickable( Root& root ) : WrappedElement{ root }
     {
     }
 
-    Clickable::Clickable( Framework& framework,
-                          rapidxml::xml_node<> const& node,
-                          XmlLoader& loader )
-        : WrappedElement{ framework }
+    Clickable::Clickable( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }
     {
         if( auto child = node.first_node(); child )
         {
-            wrappedChild( loader.loadElement( framework, *child ) );
+            wrappedChild( loader.loadElement( root, *child ) );
         }
     }
 
@@ -85,7 +83,7 @@ namespace ttb::ui
         }
 
         m_pointerId = event.pointerId();
-        m_prioListener = std::make_unique< PriorityListener >( framework(), *this );
+        m_prioListener = std::make_unique< PriorityListener >( getRoot(), *this );
         m_callback( Action::START, *this );
 
         return true;

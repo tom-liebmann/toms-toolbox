@@ -15,16 +15,16 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Height::Height( Framework& framework, float height )
-        : WrappedElement{ framework }, m_flex{ framework, Flex::Direction::VERTICAL }
+    Height::Height( Root& root, float height )
+        : WrappedElement{ root }, m_flex{ root, Flex::Direction::VERTICAL }
     {
         m_flex.addSlot( Flex::SlotType::FIXED, height );
 
         wrappedChild( &m_flex );
     }
 
-    Height::Height( Framework& framework, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ framework }, m_flex{ framework, Flex::Direction::VERTICAL }
+    Height::Height( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }, m_flex{ root, Flex::Direction::VERTICAL }
     {
         if( auto const value = loader.attrValue( node, "value" ); value )
         {

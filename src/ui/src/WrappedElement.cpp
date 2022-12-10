@@ -6,16 +6,8 @@
 
 namespace ttb::ui
 {
-    WrappedElement::WrappedElement( Framework& framework ) : Element{ framework }
+    WrappedElement::WrappedElement( Root& root ) : Element{ root }
     {
-    }
-
-    void WrappedElement::destroy()
-    {
-        if( m_child )
-        {
-            m_child->destroy();
-        }
     }
 
     auto WrappedElement::fit( Size const& size ) -> Size
@@ -74,18 +66,23 @@ namespace ttb::ui
         return false;
     }
 
+    void WrappedElement::onChildChanged( Element& /* child */ )
+    {
+        changed();
+    }
+
     void WrappedElement::wrappedChild( Element* child )
     {
         if( m_child )
         {
-            m_child->destroy();
+            m_child->setParent( nullptr );
         }
 
         m_child = child;
 
         if( m_child )
         {
-            m_child->parent( this );
+            m_child->setParent( this );
         }
 
         changed();
