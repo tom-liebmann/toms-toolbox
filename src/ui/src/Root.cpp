@@ -67,7 +67,9 @@ namespace ttb::ui
 
     bool Root::onEvent( Event const& event )
     {
-        for( auto const listener : m_priorityListeners )
+        // Make a copy to allow concurrent editing
+        auto const priorityListeners = m_priorityListeners;
+        for( auto const listener : priorityListeners )
         {
             if( listener->onEvent( event ) )
             {
