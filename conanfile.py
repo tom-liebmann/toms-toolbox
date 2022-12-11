@@ -21,6 +21,7 @@ class TomsToolboxConan(ConanFile):
         "activate_ui": [True, False],
         "activate_utils": [True, False],
         "activate_project": [True, False],
+        "build_type": ["Release", "Debug"],
         "build_tests": [True, False],
     }
     default_options = {
@@ -30,6 +31,7 @@ class TomsToolboxConan(ConanFile):
         "activate_ui": True,
         "activate_utils": True,
         "activate_project": True,
+        "build_type": "Release",
         "yaml-cpp:shared": True,
         "build_tests": False,
     }
@@ -46,6 +48,7 @@ class TomsToolboxConan(ConanFile):
         cmake.definitions["ACTIVATE_ttbMath"] = self.options.activate_math
         cmake.definitions["ACTIVATE_ttbUi"] = self.options.activate_ui
         cmake.definitions["ACTIVATE_ttbUtils"] = self.options.activate_utils
+        cmake.definitions["CMAKE_BUILD_TYPE"] = self.options.build_type
         cmake.configure()
         cmake.build()
 
