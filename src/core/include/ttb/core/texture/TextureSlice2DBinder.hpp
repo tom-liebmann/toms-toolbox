@@ -46,7 +46,7 @@ namespace ttb
         TextureSlice2DBinder const& m_parent;
         State::Data& m_data;
 
-        std::optional< UniformBinder< Transform > > m_transform;
+        std::optional< UniformBinderHandle< Transform > > m_transform;
 
         friend Bindable;
     };

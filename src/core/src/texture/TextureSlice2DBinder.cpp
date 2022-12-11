@@ -32,9 +32,11 @@ namespace ttb
 
         if( !m_parent.m_transformName.empty() )
         {
-            m_transform.emplace( m_parent.m_transformName,
-                                 ttb::mat::transform( { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
-                                                      m_parent.m_slice.getRange() ) );
+            m_transform.emplace( ttb::UniformBinder< Transform >{
+                m_parent.m_transformName,
+                ttb::mat::transform( { { 0.0f, 0.0f }, { 1.0f, 1.0f } },
+                                     m_parent.m_slice.getRange() ) }
+                                     .bind( data ) );
         }
     }
 }
