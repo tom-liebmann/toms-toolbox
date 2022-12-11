@@ -2,9 +2,11 @@
 
 #include <ttb/core/State.hpp>
 #include <ttb/math/Matrix.hpp>
+#include <ttb/math/matrix_operations.hpp>
 
 #include <optional>
 #include <string>
+#include <utility>
 
 
 namespace ttb
@@ -33,6 +35,12 @@ namespace ttb
     public:
         ~UniformBinderHandle();
 
+        UniformBinderHandle( UniformBinderHandle&& rhs );
+        UniformBinderHandle& operator=( UniformBinderHandle&& rhs );
+
+        UniformBinderHandle( UniformBinderHandle const& rhs ) = delete;
+        UniformBinderHandle& operator=( UniformBinderHandle const& rhs ) = delete;
+
     private:
         UniformBinderHandle( std::string const& name,
                              TType const& value,
@@ -44,26 +52,6 @@ namespace ttb
         std::optional< TType > m_oldValue;
 
         friend UniformBinder< TType >;
-    };
-
-
-    template < typename TType, size_t TRows, size_t TCols >
-    class UniformBinderHandle< Matrix< TType, TRows, TCols > >
-    {
-    public:
-        ~UniformBinderHandle();
-
-    private:
-        UniformBinderHandle( std::string const& name,
-                             Matrix< TType, TRows, TCols > const& value,
-                             bool overwrite,
-                             State::Data& data );
-
-        std::string m_name;
-        State::Data& m_data;
-        std::optional< Matrix< TType, TRows, TCols > > m_oldValue;
-
-        friend UniformBinder< Matrix< TType, TRows, TCols > >;
     };
 }
 
@@ -88,6 +76,11 @@ namespace ttb
     template < typename TType >
     UniformBinderHandle< TType >::~UniformBinderHandle()
     {
+        if( m_name.empty() )
+        {
+            return;
+        }
+
         if( m_oldValue.has_value() )
         {
             auto& holder =
@@ -102,9 +95,27 @@ namespace ttb
     }
 
     template < typename TType >
+    UniformBinderHandle< TType >::UniformBinderHandle( UniformBinderHandle&& rhs )
+        : m_name{ std::exchange( rhs.m_name, {} ) }
+        , m_data{ rhs.m_data }
+        , m_oldValue{ rhs.m_oldValue }
+    {
+    }
+
+    template < typename TType >
+    auto UniformBinderHandle< TType >::operator=( UniformBinderHandle&& rhs )
+        -> UniformBinderHandle&
+    {
+        m_name = std::exchange( rhs.m_name, {} );
+        m_data = rhs.m_data;
+        m_oldValue = rhs.m_oldValue;
+        return *this;
+    }
+
+    template < typename TType >
     UniformBinderHandle< TType >::UniformBinderHandle( std::string const& name,
                                                        TType const& value,
-                                                       bool /* overwrite */,
+                                                       bool overwrite,
                                                        State::Data& data )
         : m_name{ name }, m_data{ data }
     {
@@ -114,63 +125,27 @@ namespace ttb
         {
             auto& holder = static_cast< TypedUniformHolder< TType >& >( *iter->second );
             m_oldValue = holder.value();
-            holder.value( value );
+
+            if constexpr( ttb::is_matrix_v< TType > )
+            {
+                if( overwrite )
+                {
+                    holder.value( value );
+                }
+                else
+                {
+                    holder.value( holder.value() * value );
+                }
+            }
+            else
+            {
+                holder.value( value );
+            }
         }
         else
         {
             m_data.uniforms.insert(
                 { m_name, std::make_unique< TypedUniformHolder< TType > >( value ) } );
-        }
-    }
-
-
-    template < typename TType, size_t TRows, size_t TCols >
-    UniformBinderHandle< Matrix< TType, TRows, TCols > >::~UniformBinderHandle()
-    {
-        if( m_oldValue.has_value() )
-        {
-            auto& holder = static_cast< TypedUniformHolder< Matrix< TType, TRows, TCols > >& >(
-                *m_data.uniforms[ m_name ] );
-
-            holder.value( m_oldValue.value() );
-        }
-        else
-        {
-            m_data.uniforms.erase( m_name );
-        }
-    }
-
-    template < typename TType, size_t TRows, size_t TCols >
-    UniformBinderHandle< Matrix< TType, TRows, TCols > >::UniformBinderHandle(
-        std::string const& name,
-        Matrix< TType, TRows, TCols > const& value,
-        bool overwrite,
-        State::Data& data )
-        : m_name{ name }, m_data{ data }
-    {
-        auto const iter = m_data.uniforms.find( m_name );
-
-        if( iter != std::end( m_data.uniforms ) )
-        {
-            auto& holder = static_cast< TypedUniformHolder< Matrix< TType, TRows, TCols > >& >(
-                *iter->second );
-            m_oldValue = holder.value();
-
-            if( overwrite )
-            {
-                holder.value( value );
-            }
-            else
-            {
-                holder.value( holder.value() * value );
-            }
-        }
-        else
-        {
-            m_data.uniforms.insert(
-                { m_name,
-                  std::make_unique< TypedUniformHolder< Matrix< TType, TRows, TCols > > >(
-                      value ) } );
         }
     }
 }
