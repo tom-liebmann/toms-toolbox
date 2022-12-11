@@ -106,6 +106,19 @@ namespace ttb
                                          Vector< TType, 3 > const& to,
                                          Vector< TType, 3 > const& up );
     }
+
+    template < typename TType >
+    struct is_matrix : public std::false_type
+    {
+    };
+
+    template < typename TType, std::size_t TRows, std::size_t TCols >
+    struct is_matrix< Matrix< TType, TRows, TCols > > : public std::true_type
+    {
+    };
+
+    template < typename TType >
+    constexpr auto is_matrix_v = is_matrix< TType >::value;
 }
 
 
