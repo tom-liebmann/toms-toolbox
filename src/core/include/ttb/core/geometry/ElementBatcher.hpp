@@ -4,6 +4,7 @@
 #include "VertexBuffer.hpp"
 
 #include <cstdlib>
+#include <limits>
 #include <list>
 #include <utility>
 
@@ -25,6 +26,8 @@ namespace ttb
         Handle element( size_t index );
 
     private:
+        static constexpr auto INVALID_INDEX = std::numeric_limits< std::size_t >::max();
+
         /** Maps each element index to the location in the packed geometry buffers. */
         std::vector< size_t > m_elementLocations;
 
@@ -53,6 +56,8 @@ namespace ttb
         Handle( Handle&& rhs );
 
         void destroy();
+
+        bool isValid() const;
 
         size_t index() const;
 

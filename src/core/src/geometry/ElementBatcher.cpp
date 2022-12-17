@@ -1,3 +1,4 @@
+#include <fstream>
 #include <ttb/core/geometry/ElementBatcher.hpp>
 
 
@@ -86,9 +87,27 @@ namespace ttb
                                              m_batcher->m_indicesPerElement );
 
             m_batcher->m_freeElements.push_back( m_index );
+            m_batcher->m_elementLocations[ m_index ] = INVALID_INDEX;
 
             m_batcher = nullptr;
             m_index = 0;
         }
+    }
+
+    bool ElementBatcher::Handle::isValid() const
+    {
+        if( !m_batcher )
+        {
+            // Handle was destroyed
+            return false;
+        }
+
+        if( m_batcher->m_elementLocations[ m_index ] == INVALID_INDEX )
+        {
+            // Handle points to an empty element
+            return false;
+        }
+
+        return true;
     }
 }
