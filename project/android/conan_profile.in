@@ -5,12 +5,14 @@ android_ndk=/home/tom/libraries/android_sdk/ndk/@ANDROID_NDK_VERSION@
 arch=@ANDROID_ARCH@
 build_type=Release
 compiler=clang
-compiler.libcxx=libc++
-compiler.version=9
+compiler.libcxx=c++_static
+compiler.version=14
 os=Android
 os.api_level=21
 
 [options]
 [build_requires]
+[conf]
+tools.android:ndk_path=/home/tom/libraries/android_sdk/ndk/@ANDROID_NDK_VERSION@
 [env]
 CONAN_CMAKE_TOOLCHAIN_FILE=@ANDROID_TOOLCHAIN_FILE@
