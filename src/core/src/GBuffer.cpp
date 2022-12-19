@@ -48,7 +48,9 @@ namespace ttb
 
     auto GBuffer::viewport() const -> Viewport
     {
-        return { { 0, 0 }, { m_drawBuffers[ 0 ]->width(), m_drawBuffers[ 0 ]->height() } };
+        return { { 0, 0 },
+                 { static_cast< unsigned int >( m_drawBuffers[ 0 ]->width() ),
+                   static_cast< unsigned int >( m_drawBuffers[ 0 ]->height() ) } };
     }
 
     void GBuffer::begin( State::Data& data ) const
