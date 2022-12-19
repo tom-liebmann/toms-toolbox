@@ -12,4 +12,8 @@ namespace ttb
     };
 
     template struct fromStringView< float >;
+
+    template struct fromStringView< int >;
+
+    template struct fromStringView< std::string >;
 }
