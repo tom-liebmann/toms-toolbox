@@ -35,6 +35,8 @@ namespace ttb
         }
         // clang-format on
 
+        Vector& operator=( Vector const& rhs ) = default;
+
         // Access
         TType& operator[]( size_t index );
 
