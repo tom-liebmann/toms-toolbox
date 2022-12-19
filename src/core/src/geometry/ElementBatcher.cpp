@@ -51,47 +51,49 @@ namespace ttb
 
     void ElementBatcher::Handle::destroy()
     {
-        if( m_batcher )
+        if( !m_batcher )
         {
-            auto const newLocation = m_batcher->m_elementLocations[ m_index ];
-            auto const oldLocation = m_batcher->m_locationElements.size() - 1;
-            auto const index = m_batcher->m_locationElements.back();
-
-            m_batcher->m_elementLocations[ index ] = newLocation;
-            m_batcher->m_locationElements[ newLocation ] = index;
-            m_batcher->m_locationElements.pop_back();
-
-            // Copy indices to empty slot
-            for( size_t i = 0; i < m_batcher->m_indicesPerElement; ++i )
-            {
-                auto& newIndex =
-                    m_batcher->m_indexBuffer[ newLocation * m_batcher->m_indicesPerElement + i ];
-                auto const oldIndex =
-                    m_batcher->m_indexBuffer[ oldLocation * m_batcher->m_indicesPerElement + i ];
-                newIndex = oldIndex + newLocation - oldLocation;
-            }
-
-            // Copy vertices to empty slot
-            for( size_t i = 0; i < m_batcher->m_verticesPerElement; ++i )
-            {
-                auto newVertex =
-                    m_batcher->m_vertexBuffer[ newLocation * m_batcher->m_verticesPerElement + i ];
-                auto oldVertex =
-                    m_batcher->m_vertexBuffer[ oldLocation * m_batcher->m_verticesPerElement + i ];
-                newVertex.set( oldVertex );
-            }
-
-            m_batcher->m_vertexBuffer.resize( m_batcher->m_vertexBuffer.numVertices() -
-                                              m_batcher->m_verticesPerElement );
-            m_batcher->m_indexBuffer.resize( m_batcher->m_indexBuffer.numIndices() -
-                                             m_batcher->m_indicesPerElement );
-
-            m_batcher->m_freeElements.push_back( m_index );
-            m_batcher->m_elementLocations[ m_index ] = INVALID_INDEX;
-
-            m_batcher = nullptr;
-            m_index = 0;
+            return;
         }
+
+        auto const newLocation = m_batcher->m_elementLocations[ m_index ];
+        auto const oldLocation = m_batcher->m_locationElements.size() - 1;
+        auto const index = m_batcher->m_locationElements.back();
+
+        m_batcher->m_elementLocations[ index ] = newLocation;
+        m_batcher->m_locationElements[ newLocation ] = index;
+        m_batcher->m_locationElements.pop_back();
+
+        // Copy indices to empty slot
+        for( size_t i = 0; i < m_batcher->m_indicesPerElement; ++i )
+        {
+            auto& newIndex =
+                m_batcher->m_indexBuffer[ newLocation * m_batcher->m_indicesPerElement + i ];
+            auto const oldIndex =
+                m_batcher->m_indexBuffer[ oldLocation * m_batcher->m_indicesPerElement + i ];
+            newIndex = oldIndex + ( newLocation - oldLocation ) * m_batcher->m_verticesPerElement;
+        }
+
+        // Copy vertices to empty slot
+        for( size_t i = 0; i < m_batcher->m_verticesPerElement; ++i )
+        {
+            auto newVertex =
+                m_batcher->m_vertexBuffer[ newLocation * m_batcher->m_verticesPerElement + i ];
+            auto oldVertex =
+                m_batcher->m_vertexBuffer[ oldLocation * m_batcher->m_verticesPerElement + i ];
+            newVertex.set( oldVertex );
+        }
+
+        m_batcher->m_vertexBuffer.resize( m_batcher->m_vertexBuffer.numVertices() -
+                                          m_batcher->m_verticesPerElement );
+        m_batcher->m_indexBuffer.resize( m_batcher->m_indexBuffer.numIndices() -
+                                         m_batcher->m_indicesPerElement );
+
+        m_batcher->m_freeElements.push_back( m_index );
+        m_batcher->m_elementLocations[ m_index ] = INVALID_LOCATION;
+
+        m_batcher = nullptr;
+        m_index = 0;
     }
 
     bool ElementBatcher::Handle::isValid() const
@@ -102,7 +104,13 @@ namespace ttb
             return false;
         }
 
-        if( m_batcher->m_elementLocations[ m_index ] == INVALID_INDEX )
+        if( m_index >= m_batcher->m_elementLocations.size() )
+        {
+            // Index outside valid range
+            return false;
+        }
+
+        if( m_batcher->m_elementLocations[ m_index ] == INVALID_LOCATION )
         {
             // Handle points to an empty element
             return false;
