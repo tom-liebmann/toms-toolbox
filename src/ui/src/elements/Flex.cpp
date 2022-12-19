@@ -33,8 +33,6 @@ namespace ttb::ui
 
         for( auto child = node.first_node(); child; child = child->next_sibling() )
         {
-            auto element = loader.loadElement( root, *child );
-
             auto slotType = SlotType::FLEX;
             auto slotValue = 1.0f;
 
@@ -48,7 +46,17 @@ namespace ttb::ui
                 slotValue = value.value();
             }
 
-            addSlot( slotType, slotValue, element, false );
+            auto const childName = std::string{ child->name(), child->name_size() };
+
+            if( childName == "slot" )
+            {
+                addSlot( slotType, slotValue, false );
+            }
+            else
+            {
+                auto element = loader.loadElement( root, *child );
+                addSlot( slotType, slotValue, element, false );
+            }
         }
     }
 
