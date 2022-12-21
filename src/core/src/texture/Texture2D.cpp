@@ -118,6 +118,7 @@ namespace ttb
                 bytesPerPixel = 16;
                 format = GL_RGBA;
                 outType = GL_FLOAT;
+                break;
 
             default:
                 throw std::runtime_error( "Unknown pixel format (" +
