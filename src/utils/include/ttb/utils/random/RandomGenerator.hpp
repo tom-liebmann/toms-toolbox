@@ -25,6 +25,9 @@ namespace ttb
         template < typename TType >
         TType getUniform( TType min, TType max );
 
+        template < typename TType >
+        TType getNormal( TType mean, TType stddev );
+
         bool getBool( double probability );
 
     private:
@@ -67,6 +70,13 @@ namespace ttb
             auto dist = std::uniform_real_distribution< TType >{ min, max };
             return dist( m_generator );
         }
+    }
+
+    template < typename TType >
+    inline TType RandomGenerator::getNormal( TType mean, TType stddev )
+    {
+        auto dist = std::normal_distribution< TType >{ mean, stddev };
+        return dist( m_generator );
     }
 
     inline bool RandomGenerator::getBool( double probability )
