@@ -10,7 +10,11 @@ namespace ttb
     class RandomGenerator
     {
     public:
+        using Generator = std::mt19937;
+
         RandomGenerator();
+
+        Generator& getGenerator();
 
         // template < std::integral TType >
         // TType getUniform( TType min, TType max );
@@ -24,13 +28,18 @@ namespace ttb
         bool getBool( double probability );
 
     private:
-        std::mt19937 m_generator;
+        Generator m_generator;
     };
 }
 
 
 namespace ttb
 {
+    inline auto RandomGenerator::getGenerator() -> Generator&
+    {
+        return m_generator;
+    }
+
     // template < std::integral TType >
     // inline TType RandomGenerator::getUniform( TType min, TType max )
     // {
