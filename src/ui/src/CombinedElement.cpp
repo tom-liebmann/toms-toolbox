@@ -79,6 +79,34 @@ namespace ttb::ui
         changed();
     }
 
+    void CombinedElement::remove( Element& child )
+    {
+        auto const newEnd = std::remove_if( std::begin( m_children ),
+                                            std::end( m_children ),
+                                            [ &child ]( auto const& slot )
+                                            {
+                                                return slot.element == &child;
+                                            } );
+
+        if( newEnd == std::end( m_children ) )
+        {
+            return;
+        }
+
+        child.setParent( nullptr );
+
+        m_children.erase( newEnd, std::end( m_children ) );
+        changed();
+    }
+
+    void CombinedElement::insert( std::size_t position, Element* child, bool considerSize )
+    {
+        child->setParent( this );
+        m_children.insert( std::next( std::begin( m_children ), position ),
+                           Slot{ considerSize, child } );
+        changed();
+    }
+
     void CombinedElement::add( Element* child, bool considerSize )
     {
         child->setParent( this );

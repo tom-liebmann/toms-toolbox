@@ -14,5 +14,9 @@ namespace ttb::ui
         Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void addChild( Element* child, bool considerSize = true );
+
+        void insertChild( std::size_t position, Element* child, bool considerSize = true );
+
+        void removeChild( Element& child );
     };
 }

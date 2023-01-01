@@ -42,4 +42,14 @@ namespace ttb::ui
     {
         CombinedElement::add( child, considerSize );
     }
+
+    void Group::insertChild( std::size_t position, Element* child, bool considerSize )
+    {
+        CombinedElement::insert( position, child, considerSize );
+    }
+
+    void Group::removeChild( Element& child )
+    {
+        CombinedElement::remove( child );
+    }
 }

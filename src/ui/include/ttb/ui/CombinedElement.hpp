@@ -33,6 +33,10 @@ namespace ttb::ui
         virtual void onChildChanged( Element& child ) override;
 
     protected:
+        void remove( Element& child );
+
+        void insert( std::size_t position, Element* child, bool considerSize = true );
+
         void add( Element* child, bool considerSize = true );
 
     private:
