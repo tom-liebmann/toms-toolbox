@@ -12,22 +12,56 @@
 namespace
 {
     auto const factory = ttb::ui::XmlFactory< ttb::ui::Rectangle >{ "rectangle" };
+
+    constexpr auto SOURCE_FRAG = R"(
+        #version 100
+
+        precision mediump float;
+
+        uniform vec4 u_color;
+
+        void main()
+        {
+            gl_FragColor = u_color;
+        }
+    )";
+
+    constexpr auto SOURCE_VERT = R"(
+        #version 100
+
+        precision mediump float;
+
+        uniform mat3 u_transform;
+
+        attribute vec2 in_vertex;
+
+        void main()
+        {
+            gl_Position = vec4( u_transform * vec3( in_vertex.xy, 1.0 ), 1.0 );
+        }
+    )";
 }
 
 
 namespace ttb::ui
 {
-    Rectangle::Rectangle( Root& root, ColorRgb const& color ) : Element{ root }, m_color( color )
+    Rectangle::Rectangle( Root& root, ColorRgb const& color, float opacity )
+        : Element{ root }, m_color( color ), m_opacity{ opacity }
     {
         initGeometry();
     }
 
     Rectangle::Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ root }
+        : Element{ root }, m_color{ ttb::use_float, 1.0f, 1.0f, 1.0f }, m_opacity{ 1.0f }
     {
-        if( auto const value = loader.attrValue( node, "color" ); value )
+        if( auto const value = loader.attrValue( node, "color" ) )
         {
             m_color = ColorRgb::createHexStr( value.value() ).value();
+        }
+
+        if( auto const value = loader.getAttr< float >( node, "opacity" ) )
+        {
+            m_opacity = value.value();
         }
 
         initGeometry();
@@ -35,32 +69,51 @@ namespace ttb::ui
 
     Rectangle::~Rectangle() = default;
 
-    void Rectangle::color( ColorRgb const& value )
+    void Rectangle::setColor( ColorRgb const& value )
     {
         m_color = value;
     }
 
-    ColorRgb const& Rectangle::color() const
+    void Rectangle::setOpacity( float value )
+    {
+        m_opacity = value;
+    }
+
+    ColorRgb const& Rectangle::getColor() const
     {
         return m_color;
     }
 
+    float Rectangle::getOpacity() const
+    {
+        return m_opacity;
+    }
+
     void Rectangle::render( ttb::State& state ) const
     {
-        state.with(
-            *m_program,
-            ttb::UniformBinder{ "u_transform", transform() },
-            ttb::UniformBinder{
-                "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
-            [ & ]
-            {
-                state.draw( *m_geometry );
-            } );
+        glEnable( GL_BLEND );
+        glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+        state.with( *m_program,
+                    ttb::UniformBinder{ "u_transform", transform() },
+                    ttb::UniformBinder{ "u_color",
+                                        ttb::Vector< float, 4 >{
+                                            m_color.rF(), m_color.gF(), m_color.bF(), m_opacity } },
+                    [ & ]
+                    {
+                        state.draw( *m_geometry );
+                    } );
     }
 
     void Rectangle::initGeometry()
     {
-        m_program = getRoot().getResourceManager().get< ttb::Program >( "ui_rect" );
+        m_program = ttb::Program::create(
+            []( auto& c )
+            {
+                c.attachShader(
+                    ttb::Shader::fromSource( ttb::Shader::Type::FRAGMENT, SOURCE_FRAG ) );
+                c.attachShader( ttb::Shader::fromSource( ttb::Shader::Type::VERTEX, SOURCE_VERT ) );
+            } );
 
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )

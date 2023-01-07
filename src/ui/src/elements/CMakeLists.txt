@@ -20,4 +20,5 @@ target_sources(
         PriorityListener.cpp
         ScaleToFit.cpp
         XmlElement.cpp
+        EventBlocker.cpp
 )

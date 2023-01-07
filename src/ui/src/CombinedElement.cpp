@@ -66,8 +66,8 @@ namespace ttb::ui
 
     bool CombinedElement::onEvent( Event const& event )
     {
-        return std::any_of( std::begin( m_children ),
-                            std::end( m_children ),
+        return std::any_of( std::rbegin( m_children ),
+                            std::rend( m_children ),
                             [ &event ]( auto const& child )
                             {
                                 return child.element->onEvent( event );

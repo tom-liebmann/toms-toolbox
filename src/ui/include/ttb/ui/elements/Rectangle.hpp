@@ -17,15 +17,19 @@ namespace ttb::ui
     class Rectangle : public Element
     {
     public:
-        Rectangle( Root& root, ColorRgb const& color );
+        Rectangle( Root& root, ColorRgb const& color, float opacity );
 
         Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Rectangle();
 
-        void color( ColorRgb const& value );
+        void setColor( ColorRgb const& value );
 
-        ColorRgb const& color() const;
+        void setOpacity( float value );
+
+        ColorRgb const& getColor() const;
+
+        float getOpacity() const;
 
         virtual void render( ttb::State& state ) const override;
 
@@ -33,6 +37,7 @@ namespace ttb::ui
         void initGeometry();
 
         ColorRgb m_color;
+        float m_opacity;
 
         std::shared_ptr< ttb::Program const > m_program;
         std::unique_ptr< ttb::Geometry const > m_geometry;
