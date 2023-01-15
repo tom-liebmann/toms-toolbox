@@ -103,6 +103,12 @@ namespace ttb
     std::ostream& operator<<( std::ostream& stream, Vector< TType, TDim > const& vec );
 }
 
+template < typename TType, std::size_t TDim >
+struct std::hash< ttb::Vector< TType, TDim > >
+{
+    std::size_t operator()( ttb::Vector< TType, TDim > const& value ) const noexcept;
+};
+
 
 // Definitions
 //=============================================================================
@@ -390,4 +396,19 @@ namespace ttb
 
         return stream;
     }
+}
+
+
+template < typename TType, std::size_t TDim >
+inline std::size_t std::hash< ttb::Vector< TType, TDim > >::operator()(
+    ttb::Vector< TType, TDim > const& value ) const noexcept
+{
+    auto result = std::size_t{ 0 };
+
+    for( std::size_t i = 0; i < TDim; ++i )
+    {
+        result ^= std::hash< TType >{}( value( i ) ) + ( result << 6 ) + ( result >> 2 );
+    }
+
+    return result;
 }
