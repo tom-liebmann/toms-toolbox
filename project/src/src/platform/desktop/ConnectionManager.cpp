@@ -123,11 +123,6 @@ namespace ttb
     void ConnectionManagerImpl::addListener( Listener& listener )
     {
         m_listeners.push_back( &listener );
-
-        if( m_isNetworkCheckEnabled )
-        {
-            listener.onNetworkAvailable();
-        }
     }
 
     void ConnectionManagerImpl::removeListener( Listener const& listener )
