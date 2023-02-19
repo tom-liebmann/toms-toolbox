@@ -27,6 +27,10 @@ namespace ttb::co
                    Callback< TType > callback,
                    ExceptionCallback exceptionCallback );
 
+        void push( Coroutine< void > coroutine );
+
+        std::size_t getCoroutineCount() const;
+
     private:
         class Slot;
 
@@ -81,6 +85,18 @@ namespace ttb::co
         {
             m_slots.push_back( std::move( slot ) );
         }
+    }
+
+    inline void CoroutineRunner::push( Coroutine< void > coroutine )
+    {
+        push(
+            std::move( coroutine ),
+            []
+            {
+            },
+            []( auto )
+            {
+            } );
     }
 
 

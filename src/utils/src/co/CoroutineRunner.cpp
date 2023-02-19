@@ -18,6 +18,11 @@ namespace ttb::co
         }
     }
 
+    std::size_t CoroutineRunner::getCoroutineCount() const
+    {
+        return m_slots.size();
+    }
+
 
     CoroutineRunner::Slot::~Slot() = default;
 }

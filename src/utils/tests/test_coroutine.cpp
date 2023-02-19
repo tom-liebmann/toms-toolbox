@@ -180,6 +180,25 @@ TEST_CASE( "Exception transformation", "[utils][coroutine]" )
     REQUIRE_THROWS_WITH( handle.rethrowException(), "Outer Exception" );
 }
 
+TEST_CASE( "Run single coroutine without callbacks", "[utils][coroutine]" )
+{
+    auto const coroutine = []() -> ttb::co::Coroutine< void >
+    {
+        co_await co::suspend_always{};
+        co_await co::suspend_always{};
+    };
+
+    auto runner = ttb::co::CoroutineRunner{};
+
+    runner.push( coroutine() );
+
+    REQUIRE( runner.getCoroutineCount() == 1 );
+    runner.run();
+    REQUIRE( runner.getCoroutineCount() == 1 );
+    runner.run();
+    REQUIRE( runner.getCoroutineCount() == 0 );
+}
+
 TEST_CASE( "Run single coroutine", "[utils][coroutine]" )
 {
     auto const coroutine = []() -> ttb::co::Coroutine< void >
