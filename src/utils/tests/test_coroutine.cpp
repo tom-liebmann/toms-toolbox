@@ -239,3 +239,54 @@ TEST_CASE( "Run single coroutine with result", "[utils][coroutine]" )
     REQUIRE( result.value() == 3 );
     REQUIRE( !exception );
 }
+
+TEST_CASE( "Run multiple coroutines with result", "[utils][coroutine]" )
+{
+    auto const coroutine = []( int returnValue ) -> ttb::co::Coroutine< int >
+    {
+        co_await std::suspend_always{};
+
+        co_return returnValue;
+    };
+
+    auto runner = ttb::co::CoroutineRunner{};
+
+    auto result1 = std::optional< int >{};
+    auto result2 = std::optional< int >{};
+    auto exception1 = std::exception_ptr{};
+    auto exception2 = std::exception_ptr{};
+
+    runner.push(
+        coroutine( 3 ),
+        [ &result1 ]( int resultValue )
+        {
+            result1 = resultValue;
+        },
+        [ &exception1 ]( auto exceptionPtr )
+        {
+            exception1 = exceptionPtr;
+        } );
+
+    runner.push(
+        coroutine( 4 ),
+        [ &result2 ]( int resultValue )
+        {
+            result2 = resultValue;
+        },
+        [ &exception2 ]( auto exceptionPtr )
+        {
+            exception2 = exceptionPtr;
+        } );
+
+    REQUIRE( !result1.has_value() );
+    REQUIRE( !result2.has_value() );
+
+    runner.run();
+
+    REQUIRE( result1.has_value() );
+    REQUIRE( result2.has_value() );
+    REQUIRE( result1.value() == 3 );
+    REQUIRE( result2.value() == 4 );
+    REQUIRE( !exception1 );
+    REQUIRE( !exception2 );
+}
