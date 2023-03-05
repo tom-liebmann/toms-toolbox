@@ -89,14 +89,10 @@ namespace
     {
         m_javaVm = javaVm;
 
-        ttb::logger( 'E' ) << "initializing" << std::endl;
-
         auto const env = getEnv();
 
         auto const activityClass = findClass( *env, "toms_toolbox/MainActivity" );
         auto const connectionManagerClass = findClass( *env, "toms_toolbox/ConnectionManager" );
-
-        ttb::logger( 'E' ) << "got classes" << std::endl;
 
         // Get activity object
         {
@@ -107,8 +103,6 @@ namespace
                 env->CallStaticObjectMethod( activityClass, activityGetInstanceMethod ) );
         }
 
-        ttb::logger( 'E' ) << "got activity" << std::endl;
-
         // Get connection manager
         {
             auto const activityGetConnectionManagerMethod = findMethod(
@@ -117,8 +111,6 @@ namespace
             m_connectionManager = env->NewGlobalRef(
                 env->CallObjectMethod( m_activity, activityGetConnectionManagerMethod ) );
         }
-
-        ttb::logger( 'E' ) << "got connection manager" << std::endl;
 
         // Get methods
         {
@@ -134,8 +126,6 @@ namespace
             m_isNetworkAvailableMethod =
                 findMethod( *env, connectionManagerClass, "isNetworkAvailable", "()Z" );
         }
-
-        ttb::logger( 'E' ) << "got methods" << std::endl;
     }
 
     void AndroidManagerImpl::destroy()
