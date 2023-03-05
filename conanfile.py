@@ -53,6 +53,8 @@ class TomsToolboxConan(ConanFile):
         cmake.build()
 
     def requirements(self):
+        if self.options.activate_utils:
+            self.requires("fmt/8.1.1")
         if self.options.activate_core:
             self.requires("yaml-cpp/0.6.3")
             if self.settings.os != "Android":
@@ -109,6 +111,7 @@ class TomsToolboxConan(ConanFile):
             self.cpp_info.components["ui"].libdirs = ["lib"]
             self.cpp_info.components["ui"].libs = ["ttbUi"]
         if self.options.activate_utils:
+            self.cpp_info.components["utils"].requires.append("fmt::fmt")
             if self.options.build_tests:
                 self.cpp_info.components["utils"].requires.append("catch2::catch2")
             self.cpp_info.components["utils"].libdirs = ["lib"]
