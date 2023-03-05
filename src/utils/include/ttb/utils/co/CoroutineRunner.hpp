@@ -16,7 +16,7 @@ namespace ttb::co
     {
     public:
         template < typename TType >
-        using Callback = helper::CallbackType< TType >::type;
+        using Callback = typename helper::CallbackType< TType >::type;
 
         using ExceptionCallback = std::function< void( std::exception_ptr ) >;
 

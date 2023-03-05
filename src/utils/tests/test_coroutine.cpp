@@ -231,6 +231,42 @@ TEST_CASE( "Run single coroutine", "[utils][coroutine]" )
     REQUIRE( !exception );
 }
 
+TEST_CASE( "Run nested loop", "[utils][coroutine]" )
+{
+    auto const coroutine1 = []() -> ttb::co::Coroutine< void >
+    {
+        co_return;
+    };
+
+    auto const coroutine2 = [ &coroutine1 ]() -> ttb::co::Coroutine< void >
+    {
+        for( int i = 0; i < 10; ++i )
+        {
+            co_await coroutine1();
+        }
+    };
+
+    auto runner = ttb::co::CoroutineRunner{};
+
+    auto done = false;
+    auto exception = std::exception_ptr{};
+
+    runner.push(
+        coroutine2(),
+        [ &done ]
+        {
+            done = true;
+        },
+        [ &exception ]( auto exceptionPtr )
+        {
+            exception = exceptionPtr;
+        } );
+
+    REQUIRE( done );
+    REQUIRE( !exception );
+}
+
+
 TEST_CASE( "Run single coroutine with result", "[utils][coroutine]" )
 {
     auto const coroutine = []() -> ttb::co::Coroutine< int >
