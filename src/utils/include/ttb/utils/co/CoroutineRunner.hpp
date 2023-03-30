@@ -25,9 +25,10 @@ namespace ttb::co
         template < typename TType >
         void push( Coroutine< TType > coroutine,
                    Callback< TType > callback,
-                   ExceptionCallback exceptionCallback );
+                   ExceptionCallback exceptionCallback,
+                   bool runImmediately = true );
 
-        void push( Coroutine< void > coroutine );
+        void push( Coroutine< void > coroutine, bool runImmediately = true );
 
         std::size_t getCoroutineCount() const;
 
@@ -76,18 +77,19 @@ namespace ttb::co
     template < typename TType >
     void CoroutineRunner::push( Coroutine< TType > coroutine,
                                 Callback< TType > callback,
-                                ExceptionCallback exceptionCallback )
+                                ExceptionCallback exceptionCallback,
+                                bool runImmediately )
     {
         auto slot = std::make_unique< TypedSlot< TType > >(
             std::move( coroutine ), std::move( callback ), std::move( exceptionCallback ) );
 
-        if( slot->run() )
+        if( !runImmediately || slot->run() )
         {
             m_slots.push_back( std::move( slot ) );
         }
     }
 
-    inline void CoroutineRunner::push( Coroutine< void > coroutine )
+    inline void CoroutineRunner::push( Coroutine< void > coroutine, bool runImmediately )
     {
         push(
             std::move( coroutine ),
@@ -96,7 +98,8 @@ namespace ttb::co
             },
             []( auto )
             {
-            } );
+            },
+            runImmediately );
     }
 
 
