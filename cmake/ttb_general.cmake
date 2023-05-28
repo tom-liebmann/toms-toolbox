@@ -21,6 +21,8 @@ macro( request_build_platform PARAMETER_NAME )
         message( FATAL_ERROR "Build platform must be specified" )
     endif()
 
+    string( TOUPPER ${BUILD_PLATFORM} BUILD_PLATFORM_UPPER )
+
 endmacro()
 
 
