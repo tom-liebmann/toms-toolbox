@@ -6,6 +6,20 @@ set( TTB_ROOT_DIR "${CMAKE_CURRENT_LIST_DIR}/../.." )
 set( TTB_ANDROID_RES_DIR "${TTB_ROOT_DIR}/project/android" )
 set( CONAN_COMMAND "conan" )
 
+ttb_define_map( ANDROID_ABI_ARCH
+    "arm64-v8a"   "armv8"
+    "armeabi-v7a" "armv7"
+    "x86"         "x86"
+    "x86_64"      "x86_64"
+)
+
+ttb_define_map( ANDROID_ABI_COMPILER_PREFIX
+    "arm64-v8a"   "aarch64-linux-android"
+    "armeabi-v7a" "armv7a-linux-androideabi"
+    "x86"         "i686-linux-android"
+    "x86_64"      "x86_64-linux-android"
+)
+
 function( _ttb_project_finish PROJECT_NAME )
 
     _ttb_android_request_sdk()
@@ -44,6 +58,7 @@ function( _ttb_project_finish PROJECT_NAME )
 
     get_property( _PROJECT_CONAN_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_CONAN_FILE )
     get_property( _PROJECT_CMAKE_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_CMAKE_FILE )
+    get_property( _PROJECT_ANDROID_ABI TARGET ${PROJECT_NAME} PROPERTY TTB_ANDROID_ABI )
 
     _ttb_project_android_build_java_src(
         OUTPUT_TARGET ${PROJECT_NAME}_build_java_src
@@ -57,15 +72,23 @@ function( _ttb_project_finish PROJECT_NAME )
             "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
     )
 
-    _ttb_project_android_build_arch(
-        OUTPUT_TARGET ${PROJECT_NAME}_build_lib_armv8
-        OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib/arm64-v8a"
-        ARCH "armv8"
-        ABI "arm64-v8a"
-        CONAN_FILE ${_PROJECT_CONAN_FILE}
-        CMAKE_FILE ${_PROJECT_CMAKE_FILE}
-        BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_lib_armv8"
-    )
+    set( _ARCH_DEPENDENCIES )
+    foreach( _ABI ${_PROJECT_ANDROID_ABI} )
+        set( _ARCH ${ANDROID_ABI_ARCH_${_ABI}} )
+        set( _COMPILER_PREFIX ${ANDROID_ABI_COMPILER_PREFIX_${_ABI}} )
+
+        _ttb_project_android_build_arch(
+            OUTPUT_TARGET ${PROJECT_NAME}_build_lib_${_ARCH}
+            OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib/${_ABI}"
+            ARCH ${_ARCH}
+            ABI ${_ABI}
+            COMPILER_PREFIX ${_COMPILER_PREFIX}
+            CONAN_FILE ${_PROJECT_CONAN_FILE}
+            CMAKE_FILE ${_PROJECT_CMAKE_FILE}
+            BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_lib_${_ARCH}"
+        )
+        list( APPEND _ARCH_DEPENDENCIES ${PROJECT_NAME}_build_lib_${_ARCH} )
+    endforeach()
 
     _ttb_project_android_build_bundle(
         OUTPUT_TARGET ${PROJECT_NAME}_build_bundle
@@ -76,7 +99,7 @@ function( _ttb_project_finish PROJECT_NAME )
         LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib"
         DEPENDS
             ${PROJECT_NAME}_build_java_src
-            ${PROJECT_NAME}_build_lib_armv8
+            ${_ARCH_DEPENDENCIES}
     )
 
     add_dependencies( ${PROJECT_NAME} ${PROJECT_NAME}_build_bundle )
@@ -153,6 +176,7 @@ function( _ttb_project_android_build_arch )
         "OUTPUT_DIR"
         "ARCH"
         "ABI"
+        "COMPILER_PREFIX"
         "CONAN_FILE"
         "CMAKE_FILE"
         "BUILD_DIR"
@@ -194,6 +218,7 @@ function( _ttb_project_android_build_arch )
 
     ExternalProject_Add(
         ${_ARGS_OUTPUT_TARGET}
+        DEPENDS ${_ARGS_OUTPUT_TARGET}_conan
         PREFIX "${_ARGS_BUILD_DIR}"
         SOURCE_DIR "${TTB_ANDROID_RES_DIR}"
         CMAKE_ARGS
@@ -209,7 +234,6 @@ function( _ttb_project_android_build_arch )
             -DPROJECT_CONAN_PATHS=${_ARGS_BUILD_DIR}/conan/conan_paths.cmake
             ${_USER_ARGS}
         BUILD_ALWAYS TRUE
-        DEPENDS ${_ARGS_OUTPUT_TARGET}_conan
     )
 
 endfunction()

@@ -35,6 +35,14 @@ function( ttb_project_set_cmake_file PROJECT_NAME CMAKE_FILE )
     )
 endfunction()
 
+function( ttb_project_add_android_abi PROJECT_NAME ABI )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        APPEND
+        PROPERTY TTB_ANDROID_ABI ${ABI}
+    )
+endfunction()
+
 function( ttb_project_add_assets PROJECT_NAME ASSET_DIR )
     set_property(
         TARGET ${PROJECT_NAME}
