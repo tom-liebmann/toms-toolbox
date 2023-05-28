@@ -2,7 +2,7 @@ include(default)
 android_ndk=/home/tom/libraries/android_sdk/ndk/@ANDROID_NDK_VERSION@
 
 [settings]
-arch=@ANDROID_ARCH@
+arch=@_ARGS_ARCH@
 build_type=Release
 compiler=clang
 compiler.libcxx=c++_static

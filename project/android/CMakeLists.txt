@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 3.10 )
 
+include( "${PROJECT_CONAN_PATHS}" )
+
 set( TTB_ROOT "${CMAKE_CURRENT_LIST_DIR}/../.." )
 
 cmake_policy( SET CMP0076 NEW ) # allow relative target_sources
@@ -38,7 +40,6 @@ function( collect_link_libraries TARGET OUT_VAR )
     get_target_property( _LINK_LIBRARIES ${TARGET} INTERFACE_LINK_LIBRARIES )
 
     foreach( _LINK_LIBRARY ${_LINK_LIBRARIES} )
-
         if( NOT TARGET ${_LINK_LIBRARY} )
             continue()
         endif()
@@ -46,19 +47,27 @@ function( collect_link_libraries TARGET OUT_VAR )
         get_target_property( _TARGET_TYPE ${_LINK_LIBRARY} TYPE )
         get_target_property( _TARGET_LOCATION ${_LINK_LIBRARY} LOCATION )
 
+        if( _LINK_LIBRARY STREQUAL TARGET )
+            continue()
+        endif()
+
         if( _TARGET_TYPE STREQUAL "INTERFACE_LIBRARY" )
             collect_link_libraries( ${_LINK_LIBRARY} ${OUT_VAR} )
             continue()
         endif()
 
-        get_target_property( _TARGET_LOCATION ${_LINK_LIBRARY} LOCATION )
-
-        if( _TARGET_LOCATION )
-            message( STATUS "Found dependency: ${_TARGET_LOCATION}" )
-            list( APPEND ${OUT_VAR} ${_TARGET_LOCATION} )
-        else()
-            message( ERROR "Unable to retrieve location of library ${_LINK_LIBRARY}" )
+        if( NOT _TARGET_LOCATION )
+            continue()
         endif()
+
+        get_filename_component( _EXTENSION "${_TARGET_LOCATION}" EXT )
+
+        if( NOT _EXTENSION STREQUAL ".so" )
+            continue()
+        endif()
+
+        message( STATUS "Found dependency: ${_TARGET_LOCATION}" )
+        list( APPEND ${OUT_VAR} ${_TARGET_LOCATION} )
     endforeach()
 
     set( ${OUT_VAR} ${${OUT_VAR}} PARENT_SCOPE )
@@ -67,7 +76,7 @@ endfunction()
 collect_link_libraries( ${TARGET_NAME} _LIBRARIES )
 
 foreach( _LIBRARY ${_LIBRARIES} )
-    install( FILES ${_LIBRARY} TYPE LIB )
+    install( FILES ${_LIBRARY} DESTINATION "." )
 endforeach()
 
-install( TARGETS ${TARGET_NAME} )
+install( TARGETS ${TARGET_NAME} DESTINATION "." )

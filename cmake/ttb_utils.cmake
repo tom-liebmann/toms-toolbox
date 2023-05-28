@@ -1,6 +1,6 @@
 include_guard( GLOBAL )
 
-function( define_target_property )
+function( ttb_define_target_property )
     cmake_parse_arguments( ARGS
         "REQUIRED"                              # Options
         "TARGET;PROPERTY;BRIEF_DOCS;FULL_DOCS"  # One value keywords
