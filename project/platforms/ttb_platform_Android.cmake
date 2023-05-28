@@ -58,6 +58,7 @@ function( _ttb_project_finish PROJECT_NAME )
 
     get_property( _PROJECT_CONAN_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_CONAN_FILE )
     get_property( _PROJECT_CMAKE_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_CMAKE_FILE )
+    get_property( _PROJECT_ASSET_DIRS TARGET ${PROJECT_NAME} PROPERTY TTB_ASSET_DIRECTORIES )
     get_property( _PROJECT_ANDROID_ABI TARGET ${PROJECT_NAME} PROPERTY TTB_ANDROID_ABI )
 
     _ttb_project_android_build_java_src(
@@ -97,6 +98,7 @@ function( _ttb_project_finish PROJECT_NAME )
         BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_bundle"
         DEX_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex"
         LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib"
+        ASSET_DIRS "${_PROJECT_ASSET_DIRS}"
         DEPENDS
             ${PROJECT_NAME}_build_java_src
             ${_ARCH_DEPENDENCIES}
@@ -251,6 +253,7 @@ function( _ttb_project_android_build_bundle )
     )
     set( _MULTI_KEYWORDS
         "DEPENDS"
+        "ASSET_DIRS"
     )
     cmake_parse_arguments( _ARGS "${_OPTIONS}" "${_SINGLE_KEYWORDS}" "${_MULTI_KEYWORDS}" ${ARGN} )
 
@@ -260,8 +263,6 @@ function( _ttb_project_android_build_bundle )
     #    -o "${CMAKE_CURRENT_BINARY_DIR}/android/app_res.zip"
     #
     # Add them to linking command
-
-    # TODO Implement asset directories
 
     set( _REQUIRED_DIRECTORIES
         "${_ARGS_BUILD_DIR}"
@@ -299,6 +300,14 @@ function( _ttb_project_android_build_bundle )
             -d "${_ARGS_BUILD_DIR}/linked_files"
     )
 
+    foreach( _ASSET_DIR ${_ARGS_ASSET_DIRS} )
+        list( APPEND _ASSET_COMMANDS
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${_ASSET_DIR}"
+            "${_ARGS_BUILD_DIR}/bundle_files/assets"
+        )
+    endforeach()
+
     add_custom_command(
         OUTPUT "${_ARGS_BUILD_DIR}/bundle.zip"
         DEPENDS
@@ -306,6 +315,7 @@ function( _ttb_project_android_build_bundle )
             "${_ARGS_BUILD_DIR}/linked_files/resources.pb"
             "${_ARGS_BUILD_DIR}/linked_files/AndroidManifest.xml"
         WORKING_DIRECTORY "${_ARGS_BUILD_DIR}/bundle_files"
+        ${_ASSET_COMMANDS}
         COMMAND ${CMAKE_COMMAND} -E copy
             "${_ARGS_BUILD_DIR}/linked_files/AndroidManifest.xml"
             "${_ARGS_BUILD_DIR}/bundle_files/manifest/"
