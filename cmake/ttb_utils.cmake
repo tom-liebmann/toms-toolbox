@@ -1,5 +1,18 @@
 include_guard( GLOBAL )
 
+macro( ttb_define_map MAP_NAME )
+    set( _ITEMS "${ARGN}" )
+    list( LENGTH _ITEMS _LEN )
+    math( EXPR _LEN "${_LEN}-1" )
+
+    foreach( _INDEX RANGE 0 ${_LEN} 2 )
+        math( EXPR _INDEX2 "${_INDEX}+1" )
+        list( GET _ITEMS ${_INDEX} _KEY )
+        list( GET _ITEMS ${_INDEX2} _VALUE )
+        set( "${MAP_NAME}_${_KEY}" "${_VALUE}" )
+    endforeach()
+endmacro()
+
 function( ttb_define_target_property )
     cmake_parse_arguments( ARGS
         "REQUIRED"                              # Options
