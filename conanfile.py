@@ -4,7 +4,8 @@ from conans import ConanFile, CMake, tools
 def get_version():
     git = tools.Git()
     try:
-        return f"{git.get_branch()}_{git.get_revision()}"
+        revision = git.get_revision()
+        return str(revision)
     except:
         return None
 
