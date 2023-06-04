@@ -65,6 +65,18 @@ function( ttb_project_sign_key PROJECT_NAME KEYSTORE_FILE KEYSTORE_PWD_FILE )
     )
 endfunction()
 
+function( ttb_project_set_version PROJECT_NAME VERSION_NR VERSION_NAME )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_VERSION_NUMBER ${VERSION_NR}
+    )
+
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_VERSION_NAME ${VERSION_NAME}
+    )
+endfunction()
+
 function( _ttb_project_check_required_property TARGET PROPERTY )
     get_property(
         _PROPERTY_VALUE

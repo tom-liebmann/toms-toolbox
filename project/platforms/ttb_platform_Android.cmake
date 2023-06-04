@@ -22,6 +22,12 @@ ttb_define_map( ANDROID_ABI_COMPILER_PREFIX
 
 function( _ttb_project_finish PROJECT_NAME )
 
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_ANDROID_ABI )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_KEYSTORE_FILE )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_KEYSTORE_PWD_FILE )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_VERSION_NUMBER )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_VERSION_NAME )
+
     _ttb_android_request_sdk()
     _ttb_android_request_sdk_version()
     _ttb_android_request_ndk_version()
@@ -32,18 +38,6 @@ function( _ttb_project_finish PROJECT_NAME )
     if( NOT ANDROID_PACKAGE_NAME )
         message( FATAL_ERROR "ANDROID_PACKAGE_NAME not set" )
     endif()
-
-    configure_file(
-        "${TTB_ANDROID_RES_DIR}/templates/AppActivity.java.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
-        @ONLY
-    )
-
-    configure_file(
-        "${TTB_ANDROID_RES_DIR}/templates/AndroidManifest.xml.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
-        @ONLY
-    )
 
     set( ANDROID_PLATFORM_DIR "${ANDROID_SDK_DIR}/platforms/android-${ANDROID_SDK_VERSION_TARGET}" )
     set( ANDROID_TOOLS_DIR "${ANDROID_SDK_DIR}/build-tools/${ANDROID_TOOLS_VERSION}")
@@ -62,6 +56,20 @@ function( _ttb_project_finish PROJECT_NAME )
     get_property( _PROJECT_ANDROID_ABI TARGET ${PROJECT_NAME} PROPERTY TTB_ANDROID_ABI )
     get_property( _PROJECT_KEYSTORE_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_KEYSTORE_FILE )
     get_property( _PROJECT_KEYSTORE_PWD_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_KEYSTORE_PWD_FILE )
+    get_property( _PROJECT_VERSION_NR TARGET ${PROJECT_NAME} PROPERTY TTB_VERSION_NUMBER )
+    get_property( _PROJECT_VERSION_NAME TARGET ${PROJECT_NAME} PROPERTY TTB_VERSION_NAME )
+
+    configure_file(
+        "${TTB_ANDROID_RES_DIR}/templates/AppActivity.java.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
+        @ONLY
+    )
+
+    configure_file(
+        "${TTB_ANDROID_RES_DIR}/templates/AndroidManifest.xml.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
+        @ONLY
+    )
 
     _ttb_project_android_build_java_src(
         OUTPUT_TARGET ${PROJECT_NAME}_build_java_src
