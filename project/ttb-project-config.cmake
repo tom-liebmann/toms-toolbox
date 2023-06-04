@@ -53,6 +53,18 @@ function( ttb_project_add_assets PROJECT_NAME ASSET_DIR )
     )
 endfunction()
 
+function( ttb_project_sign_key PROJECT_NAME KEYSTORE_FILE KEYSTORE_PWD_FILE )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_KEYSTORE_FILE ${KEYSTORE_FILE}
+    )
+
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_KEYSTORE_PWD_FILE ${KEYSTORE_PWD_FILE}
+    )
+endfunction()
+
 function( _ttb_project_check_required_property TARGET PROPERTY )
     get_property(
         _PROPERTY_VALUE

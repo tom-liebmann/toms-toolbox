@@ -60,6 +60,8 @@ function( _ttb_project_finish PROJECT_NAME )
     get_property( _PROJECT_CMAKE_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_CMAKE_FILE )
     get_property( _PROJECT_ASSET_DIRS TARGET ${PROJECT_NAME} PROPERTY TTB_ASSET_DIRECTORIES )
     get_property( _PROJECT_ANDROID_ABI TARGET ${PROJECT_NAME} PROPERTY TTB_ANDROID_ABI )
+    get_property( _PROJECT_KEYSTORE_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_KEYSTORE_FILE )
+    get_property( _PROJECT_KEYSTORE_PWD_FILE TARGET ${PROJECT_NAME} PROPERTY TTB_KEYSTORE_PWD_FILE )
 
     _ttb_project_android_build_java_src(
         OUTPUT_TARGET ${PROJECT_NAME}_build_java_src
@@ -99,6 +101,8 @@ function( _ttb_project_finish PROJECT_NAME )
         DEX_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex"
         LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib"
         ASSET_DIRS "${_PROJECT_ASSET_DIRS}"
+        KEYSTORE_FILE "${_PROJECT_KEYSTORE_FILE}"
+        KEYSTORE_PWD_FILE "${_PROJECT_KEYSTORE_PWD_FILE}"
         DEPENDS
             ${PROJECT_NAME}_build_java_src
             ${_ARCH_DEPENDENCIES}
@@ -260,6 +264,8 @@ function( _ttb_project_android_build_bundle )
         "LIB_DIR"
         "DEX_DIR"
         "MANIFEST"
+        "KEYSTORE_FILE"
+        "KEYSTORE_PWD_FILE"
     )
     set( _MULTI_KEYWORDS
         "DEPENDS"
@@ -345,14 +351,25 @@ function( _ttb_project_android_build_bundle )
     )
 
     add_custom_command(
-        OUTPUT "${_ARGS_OUTPUT_FILE}"
+        OUTPUT "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
         DEPENDS
             "${_ARGS_BUILD_DIR}/bundle.zip"
         COMMAND ${ANDROID_BUNDLETOOL}
             build-bundle
             --modules="${_ARGS_BUILD_DIR}/bundle.zip"
-            --output="${_ARGS_OUTPUT_FILE}"
+            --output="${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
             --overwrite
+    )
+
+    add_custom_command(
+        OUTPUT "${_ARGS_OUTPUT_FILE}"
+        DEPENDS "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
+        COMMAND ${ANDROID_APK_SIGNER} sign
+            --ks "${_ARGS_KEYSTORE_FILE}"
+            --ks-pass file:${_ARGS_KEYSTORE_PWD_FILE}
+            --min-sdk-version ${ANDROID_SDK_VERSION_MIN}
+            --out "${_ARGS_OUTPUT_FILE}"
+            "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
     )
 
     add_custom_target( ${_ARGS_OUTPUT_TARGET} DEPENDS "${_ARGS_OUTPUT_FILE}" )
