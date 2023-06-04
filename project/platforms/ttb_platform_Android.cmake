@@ -242,7 +242,7 @@ function( _ttb_project_android_build_arch )
     add_custom_target(
         ${_ARGS_OUTPUT_TARGET}
         DEPENDS ${_ARGS_OUTPUT_TARGET}_external
-        COMMAND ${TTB_ANDROID_RES_DIR}/copy_dep_libraries.sh
+        COMMAND sh ${TTB_ANDROID_RES_DIR}/copy_dep_libraries.sh
             ${_ARGS_OUTPUT_DIR}/libproject_library.so
             ${_ARGS_BUILD_DIR}/lib_path.txt
             ${_ARGS_OUTPUT_DIR}
