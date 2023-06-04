@@ -16,6 +16,8 @@ function( ttb_project_finish PROJECT_NAME )
     _ttb_project_check_required_property( ${PROJECT_NAME} TTB_CMAKE_FILE )
     _ttb_project_check_required_property( ${PROJECT_NAME} TTB_CONAN_FILE )
 
+    request_build_platform( BUILD_PLATFORM )
+
     include( ttb_platform_${BUILD_PLATFORM} )
 
     _ttb_project_finish( ${PROJECT_NAME} )

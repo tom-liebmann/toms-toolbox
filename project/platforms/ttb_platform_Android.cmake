@@ -206,36 +206,46 @@ function( _ttb_project_android_build_arch )
     endforeach()
 
     add_custom_command(
-        OUTPUT ${_ARGS_BUILD_DIR}/conan/conan_paths.cmake
+        OUTPUT ${_ARGS_BUILD_DIR}/conan/conan_toolchain.cmake
         COMMAND ${CONAN_COMMAND} install
-            --build=outdated
-            --install-folder "${_ARGS_BUILD_DIR}/conan"
+            --build=missing
+            --output-folder "${_ARGS_BUILD_DIR}/conan"
             --profile "${CONAN_PROFILE_FILE}"
             "${_ARGS_CONAN_FILE}"
         DEPENDS
             ${_ARGS_CONAN_FILE}
     )
 
-    add_custom_target( ${_ARGS_OUTPUT_TARGET}_conan DEPENDS ${_ARGS_BUILD_DIR}/conan/conan_paths.cmake )
+    add_custom_target( ${_ARGS_OUTPUT_TARGET}_conan DEPENDS ${_ARGS_BUILD_DIR}/conan/conan_toolchain.cmake )
 
     ExternalProject_Add(
-        ${_ARGS_OUTPUT_TARGET}
+        ${_ARGS_OUTPUT_TARGET}_external
         DEPENDS ${_ARGS_OUTPUT_TARGET}_conan
         PREFIX "${_ARGS_BUILD_DIR}"
         SOURCE_DIR "${TTB_ANDROID_RES_DIR}"
         CMAKE_ARGS
             "${TTB_ANDROID_RES_DIR}"
-            -DCMAKE_TOOLCHAIN_FILE=${ANDROID_TOOLCHAIN_FILE}
+            -DCMAKE_TOOLCHAIN_FILE=${_ARGS_BUILD_DIR}/conan/conan_toolchain.cmake
             -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
             -DCMAKE_INSTALL_PREFIX=${_ARGS_OUTPUT_DIR}
             -DANDROID_PLATFORM=android-${ANDROID_SDK_VERSION_TARGET}
             -DANDROID_ABI=${_ARGS_ABI}
             -DBUILD_PLATFORM=Android
-            -DPROJECT_NAME=${_ARGS_OUTPUT_TARGET}
+            -DPROJECT_NAME=${_ARGS_OUTPUT_TARGET}_external
             -DPROJECT_CMAKE_FILE=${_ARGS_CMAKE_FILE}
-            -DPROJECT_CONAN_PATHS=${_ARGS_BUILD_DIR}/conan/conan_paths.cmake
+            -DPROJECT_CONAN_DIR=${_ARGS_BUILD_DIR}/conan
+            -DPROJECT_LIB_PATH_FILE=${_ARGS_BUILD_DIR}/lib_path.txt
             ${_USER_ARGS}
         BUILD_ALWAYS TRUE
+    )
+
+    add_custom_target(
+        ${_ARGS_OUTPUT_TARGET}
+        DEPENDS ${_ARGS_OUTPUT_TARGET}_external
+        COMMAND ${TTB_ANDROID_RES_DIR}/copy_dep_libraries.sh
+            ${_ARGS_OUTPUT_DIR}/libproject_library.so
+            ${_ARGS_BUILD_DIR}/lib_path.txt
+            ${_ARGS_OUTPUT_DIR}
     )
 
 endfunction()

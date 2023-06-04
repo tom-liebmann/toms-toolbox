@@ -1,19 +1,13 @@
-from conans import ConanFile, CMake, tools
-
-
-def get_version():
-    git = tools.Git()
-    try:
-        revision = git.get_revision()
-        return str(revision)
-    except:
-        return None
+from conan import ConanFile
+from conan.tools.files import copy
+from conan.tools.cmake import CMakeToolchain, CMake, CMakeDeps
+from os.path import join
 
 
 class TomsToolboxConan(ConanFile):
     name = "toms-toolbox"
     author = "Tom Liebmann <kontakt@liebmann-online.de>"
-    version = get_version()
+    version = "0.1"
     settings = "os", "compiler", "build_type", "arch"
     options = {
         "library_type": ["SHARED", "STATIC"],
@@ -33,23 +27,30 @@ class TomsToolboxConan(ConanFile):
         "activate_utils": True,
         "activate_project": True,
         "build_type": "Release",
-        "yaml-cpp:shared": True,
+        "yaml-cpp/*:shared": True,
         "build_tests": False,
     }
-    generators = "cmake_find_package", "cmake_paths"
     exports_sources = "*"
 
+    def generate(self):
+        toolchain = CMakeToolchain(self)
+        toolchain.cache_variables["BUILD_PLATFORM"] = str(self.settings.os)
+        toolchain.cache_variables["BUILD_LIBRARY_TYPE"] = str(self.options.library_type)
+        toolchain.cache_variables["BUILD_TESTS"] = str(self.options.build_tests)
+        toolchain.cache_variables["ACTIVATE_ttbCore"] = str(self.options.activate_core)
+        toolchain.cache_variables["ACTIVATE_ttbMath"] = str(self.options.activate_math)
+        toolchain.cache_variables["ACTIVATE_ttbUi"] = str(self.options.activate_ui)
+        toolchain.cache_variables["ACTIVATE_ttbUtils"] = str(self.options.activate_utils)
+        toolchain.cache_variables["CMAKE_BUILD_TYPE"] = str(self.options.build_type)
+        toolchain.generate()
+
+        deps = CMakeDeps(self)
+        for require, dependency in self.dependencies.items():
+            deps.set_property(dependency.ref.name, "cmake_find_mode", "config")
+        deps.generate()
 
     def build(self):
         cmake = CMake(self)
-        cmake.definitions["BUILD_PLATFORM"] = self.settings.os
-        cmake.definitions["BUILD_LIBRARY_TYPE"] = self.options.library_type
-        cmake.definitions["BUILD_TESTS"] = self.options.build_tests
-        cmake.definitions["ACTIVATE_ttbCore"] = self.options.activate_core
-        cmake.definitions["ACTIVATE_ttbMath"] = self.options.activate_math
-        cmake.definitions["ACTIVATE_ttbUi"] = self.options.activate_ui
-        cmake.definitions["ACTIVATE_ttbUtils"] = self.options.activate_utils
-        cmake.definitions["CMAKE_BUILD_TYPE"] = self.options.build_type
         cmake.configure()
         cmake.build()
 
@@ -69,54 +70,64 @@ class TomsToolboxConan(ConanFile):
 
     def package(self):
         if self.options.activate_core:
-            self.copy("*", dst="include", src="src/core/include")
-            self.copy("*.so", dst="lib", src="src/core")
-            self.copy("*.a", dst="lib", src="src/core")
+            copy(self, "*", join(self.build_folder, "src/core/include"), join(self.package_folder, "include"), keep_path=True)
+            copy(self, "*.so", join(self.build_folder, "src/core"), join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.a", join(self.build_folder, "src/core"), join(self.package_folder, "lib"), keep_path=False)
         if self.options.activate_math:
-            self.copy("*", dst="include", src="src/math/include")
-            self.copy("*.so", dst="lib", src="src/math")
-            self.copy("*.a", dst="lib", src="src/math")
+            copy(self, "*", join(self.build_folder, "src/math/include"), join(self.package_folder, "include"), keep_path=True)
+            copy(self, "*.so", join(self.build_folder, "src/math"), join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.a", join(self.build_folder, "src/math"), join(self.package_folder, "lib"), keep_path=False)
         if self.options.activate_ui:
-            self.copy("*", dst="include", src="src/ui/include")
-            self.copy("*.so", dst="lib", src="src/ui")
-            self.copy("*.a", dst="lib", src="src/ui")
+            copy(self, "*", join(self.build_folder, "src/ui/include"), join(self.package_folder, "include"), keep_path=True)
+            copy(self, "*.so", join(self.build_folder, "src/ui"), join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.a", join(self.build_folder, "src/ui"), join(self.package_folder, "lib"), keep_path=False)
         if self.options.activate_utils:
-            self.copy("*", dst="include", src="src/utils/include")
-            self.copy("*.so", dst="lib", src="src/utils")
-            self.copy("*.a", dst="lib", src="src/utils")
+            copy(self, "*", join(self.build_folder, "src/utils/include"), join(self.package_folder, "include"), keep_path=True)
+            copy(self, "*.so", join(self.build_folder, "src/utils"), join(self.package_folder, "lib"), keep_path=False)
+            copy(self, "*.a", join(self.build_folder, "src/utils"), join(self.package_folder, "lib"), keep_path=False)
         if self.options.activate_project:
-            self.copy("*", dst="project", src="project")
-            self.copy("*", dst="cmake", src="cmake")
+            copy(self, "*", join(self.build_folder, "project"), join(self.package_folder, "project"), keep_path=True)
+            copy(self, "*", join(self.build_folder, "cmake"), join(self.package_folder, "cmake"), keep_path=True)
 
     def package_info(self):
-        self.cpp_info.includedirs = ["include"]
-        self.cpp_info.name = "ttb"
+        self.cpp_info.set_property("cmake_file_name", "ttb")
+        self.cpp_info.set_property("cmake_target_name", "ttb::ttb")
 
         if self.options.activate_core:
-            self.cpp_info.components["core"].requires = ["yaml-cpp::yaml-cpp"]
+            comp = self.cpp_info.components["core"]
+            comp.set_property("cmake_target_name", "ttb::core")
+            comp.requires = ["yaml-cpp::yaml-cpp"]
             if self.settings.os != "Android":
-                self.cpp_info.components["core"].requires.extend(["glfw::glfw", "opengl::opengl", "glew::glew"])
+                comp.requires.extend(["glfw::glfw", "opengl::opengl", "glew::glew"])
             if self.options.build_tests:
-                self.cpp_info.components["core"].requires.append("catch2::catch2")
-            self.cpp_info.components["core"].libdirs = ["lib"]
-            self.cpp_info.components["core"].libs = ["ttbCore"]
+                comp.requires.extend(["catch2::catch2"])
+            comp.libs = ["ttbCore"]
+
         if self.options.activate_math:
+            comp = self.cpp_info.components["math"]
+            comp.set_property("cmake_target_name", "ttb::math")
             if self.options.build_tests:
-                self.cpp_info.components["math"].requires.append("catch2::catch2")
-            self.cpp_info.components["math"].libdirs = ["lib"]
-            self.cpp_info.components["math"].libs = ["ttbMath"]
+                comp.requires.exend(["catch2::catch2"])
+            comp.libs = ["ttbMath"]
+
         if self.options.activate_ui:
-            self.cpp_info.components["ui"].requires.append("rapidxml::rapidxml")
+            comp = self.cpp_info.components["ui"]
+            comp.set_property("cmake_target_name", "ttb::ui")
+            comp.requires.append("rapidxml::rapidxml")
             if self.options.build_tests:
-                self.cpp_info.components["ui"].requires.append("catch2::catch2")
-            self.cpp_info.components["ui"].libdirs = ["lib"]
-            self.cpp_info.components["ui"].libs = ["ttbUi"]
+                comp.requires.append("catch2")
+            comp.libs = ["ttbUi"]
+
         if self.options.activate_utils:
-            self.cpp_info.components["utils"].requires.append("fmt::fmt")
+            comp = self.cpp_info.components["utils"]
+            comp.set_property("cmake_target_name", "ttb::utils")
+            comp.requires.extend(["fmt::fmt"])
             if self.options.build_tests:
-                self.cpp_info.components["utils"].requires.append("catch2::catch2")
-            self.cpp_info.components["utils"].libdirs = ["lib"]
-            self.cpp_info.components["utils"].libs = ["ttbUtils"]
+                comp.requires.exend("catch2::catch2")
+            comp.libs = ["ttbUtils"]
+
         if self.options.activate_project:
-            self.cpp_info.components["project"].includedirs = ["project/src/include"]
-            self.cpp_info.components["project"].builddirs = ["project"]
+            comp = self.cpp_info.components["project"]
+            comp.includedirs = ["project/src/include"]
+            comp.set_property("cmake_find_mode", "both")
+            comp.builddirs.extend(["project"])

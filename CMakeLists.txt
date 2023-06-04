@@ -2,7 +2,6 @@ cmake_minimum_required( VERSION 3.15 )
 
 list( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 
-include( ${CMAKE_BINARY_DIR}/conan_paths.cmake )
 include( ttb_general )
 include( ttb_module_functions )
 

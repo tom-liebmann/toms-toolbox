@@ -6,11 +6,11 @@ if( NOT TARGET ${TARGET_NAME} )
     return()
 endif()
 
-find_package( fmt REQUIRED )
+ttb_add_module_dependency( ${TARGET_NAME} fmt fmt::fmt )
 
 target_include_directories( ${TARGET_NAME} PUBLIC include )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath fmt::fmt )
+target_link_libraries( ${TARGET_NAME} PUBLIC ttbMath )
 
 add_subdirectory( src )
 add_subdirectory( tests )
