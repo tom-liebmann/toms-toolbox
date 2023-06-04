@@ -49,7 +49,7 @@ function( ttb_project_add_assets PROJECT_NAME ASSET_DIR )
     set_property(
         TARGET ${PROJECT_NAME}
         APPEND
-        PROPERTY TTB_ASSET_DIRECTORIES ${ASSERT_DIR}
+        PROPERTY TTB_ASSET_DIRECTORIES ${ASSET_DIR}
     )
 endfunction()
 
