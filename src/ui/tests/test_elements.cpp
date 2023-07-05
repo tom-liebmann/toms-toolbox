@@ -278,4 +278,58 @@ TEST_CASE( "Scroll", "[ui][scroll]" )
         REQUIRE( ttb::Vector{ 1.0f, 0.5f } == child.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == child.offset() );
     }
+
+    SECTION( "Simple scroll" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 5.0f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.4f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -0.1f } == ttb::Approx{ child.offset() } );
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.45f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -0.05f } == ttb::Approx{ child.offset() } );
+
+        // Scroll to end
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -3.5f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -4.0f } == ttb::Approx{ child.offset() } );
+    }
+
+    SECTION( "Overscroll" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 5.0f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 1.5f } } );
+
+        REQUIRE( ttb::Vector{ 0.0f, 0.05f } == ttb::Approx{ child.offset() } );
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -4.5f } } );
+
+        REQUIRE( ttb::Vector{ 0.0f, -4.05f } == child.offset() );
+    }
 }

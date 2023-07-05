@@ -55,10 +55,10 @@ namespace ttb::ui
             // TODO Handle direction
             auto childSpace = space;
             childSpace( 1 ) = std::numeric_limits< float >::infinity();
-            m_childSize = child->fit( childSpace );
+            auto const childSize = child->fit( childSpace );
 
-            auto mySize = m_childSize;
-            mySize( 1 ) = std::min( space( 1 ), m_childSize( 1 ) );
+            auto mySize = childSize;
+            mySize( 1 ) = std::min( space( 1 ), childSize( 1 ) );
             return mySize;
         }
 
@@ -71,8 +71,29 @@ namespace ttb::ui
 
         if( auto const child = wrappedChild(); child )
         {
+            auto const childSize = child->size();
+
             // TODO Handle direction
-            child->offset( { value( 0 ), value( 1 ) + m_offset } );
+            auto const childOffset = [ & ]
+            {
+                auto const minOffset = 0.0f;
+                auto const maxOffset = childSize( 1 ) - size()( 1 );
+
+                if( m_offset < minOffset )
+                {
+                    return m_overScroll * ( 1.0f / ( minOffset - m_offset + 1.0f ) - 1.0f );
+                }
+
+                if( m_offset > maxOffset )
+                {
+                    return maxOffset +
+                           m_overScroll * ( 1.0f - 1.0f / ( m_offset - maxOffset + 1.0f ) );
+                }
+
+                return m_offset;
+            }();
+
+            child->offset( { value( 0 ), value( 1 ) - childOffset } );
         }
     }
 
@@ -82,8 +103,9 @@ namespace ttb::ui
 
         if( auto const child = wrappedChild(); child )
         {
+            auto const childSpace = child->fit( value );
             auto childSize = value;
-            childSize( 1 ) = m_childSize( 1 );
+            childSize( 1 ) = childSpace( 1 );
             child->size( childSize );
         }
     }
@@ -109,6 +131,25 @@ namespace ttb::ui
 
     void ScrollArea::update( float timeDiff )
     {
+        if( !m_prioListener )
+        {
+            if( auto const child = wrappedChild(); child )
+            {
+                auto const minOffset = 0.0f;
+                auto const maxOffset = child->size()( 1 ) - size()( 1 );  // TODO Handle direction
+
+                if( m_offset < minOffset )
+                {
+                    setScrollOffset( m_offset * std::pow( m_overScrollFactor, timeDiff ) );
+                }
+                else if( m_offset > maxOffset )
+                {
+                    setScrollOffset( maxOffset + ( m_offset - maxOffset ) *
+                                                     std::pow( m_overScrollFactor, timeDiff ) );
+                }
+            }
+        }
+
         WrappedElement::update( timeDiff );
     }
 
@@ -181,7 +222,7 @@ namespace ttb::ui
         if( m_prioListener )
         {
             // TODO consider direction
-            setScrollOffset( m_offset + event.position()( 1 ) - m_dragPos( 1 ) );
+            setScrollOffset( m_offset + m_dragPos( 1 ) - event.position()( 1 ) );
             m_dragPos = event.position();
             return true;
         }

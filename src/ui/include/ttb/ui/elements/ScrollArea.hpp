@@ -52,7 +52,9 @@ namespace ttb::ui
 
         Direction m_direction;
         float m_offset{ 0.0f };
-        Size m_childSize;
         ttb::Vector< float, 2 > m_dragPos;
+
+        float m_overScroll{ 0.1f };
+        float m_overScrollFactor{ 0.1f };
     };
 }
