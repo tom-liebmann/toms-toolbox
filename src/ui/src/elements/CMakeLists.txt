@@ -16,7 +16,7 @@ target_sources(
         # RowLayout.cpp
         Clickable.cpp
         Switch.cpp
-        # ScrollArea.cpp
+        ScrollArea.cpp
         PriorityListener.cpp
         ScaleToFit.cpp
         XmlElement.cpp
