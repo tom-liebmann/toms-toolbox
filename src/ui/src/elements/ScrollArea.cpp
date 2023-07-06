@@ -131,21 +131,57 @@ namespace ttb::ui
 
     void ScrollArea::update( float timeDiff )
     {
-        if( !m_prioListener )
+        if( auto const child = wrappedChild(); child )
         {
-            if( auto const child = wrappedChild(); child )
+            if( m_prioListener )
+            {
+                m_velocity *= std::pow( 0.05f, timeDiff );
+            }
+            else
             {
                 auto const minOffset = 0.0f;
                 auto const maxOffset = child->size()( 1 ) - size()( 1 );  // TODO Handle direction
 
+                // Handle overscroll
                 if( m_offset < minOffset )
                 {
+                    m_velocity = 0.0f;
                     setScrollOffset( m_offset * std::pow( m_overScrollFactor, timeDiff ) );
                 }
                 else if( m_offset > maxOffset )
                 {
+                    m_velocity = 0.0f;
                     setScrollOffset( maxOffset + ( m_offset - maxOffset ) *
                                                      std::pow( m_overScrollFactor, timeDiff ) );
+                }
+
+                // Apply velocity
+                if( std::abs( m_velocity ) > 1e-5f )
+                {
+                    auto newOffset = m_offset + m_velocity * timeDiff;
+
+                    if( newOffset > maxOffset )
+                    {
+                        newOffset = maxOffset;
+                        m_velocity = 0.0f;
+                    }
+
+                    if( newOffset < minOffset )
+                    {
+                        newOffset = minOffset;
+                        m_velocity = 0.0f;
+                    }
+
+                    setScrollOffset( newOffset );
+                }
+
+                if( m_velocity > 0.0f )
+                {
+                    m_velocity = std::max( 0.0f, m_velocity - 5.0f * timeDiff );
+                }
+                else if( m_velocity < 0.0f )
+                {
+                    m_velocity = std::min( 0.0f, m_velocity + 5.0f * timeDiff );
                 }
             }
         }
@@ -182,6 +218,8 @@ namespace ttb::ui
 
     bool ScrollArea::onPointerPressStart( ttb::events::PointerPressStart const& event )
     {
+        m_velocity = 0.0f;
+
         return WrappedElement::onEvent( event );
     }
 
@@ -219,8 +257,14 @@ namespace ttb::ui
     {
         if( m_prioListener )
         {
+            auto const dragAmount = m_dragPos( 1 ) - event.position()( 1 );
+            if( std::signbit( dragAmount ) != std::signbit( m_velocity ) )
+            {
+                m_velocity *= -1.0f;
+            }
+            m_velocity += std::exp( 8.0f * dragAmount ) - 1.0f;
             // TODO consider direction
-            setScrollOffset( m_offset + m_dragPos( 1 ) - event.position()( 1 ) );
+            setScrollOffset( m_offset + dragAmount );
             m_dragPos = event.position();
             return true;
         }
