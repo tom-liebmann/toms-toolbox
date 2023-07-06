@@ -54,7 +54,7 @@ namespace ttb::ui
         float m_offset{ 0.0f };
         ttb::Vector< float, 2 > m_dragPos;
 
-        float m_overScroll{ 0.1f };
-        float m_overScrollFactor{ 0.1f };
+        float m_overScroll{ 0.15f };
+        float m_overScrollFactor{ 0.02f };
     };
 }
