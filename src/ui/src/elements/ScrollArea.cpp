@@ -157,29 +157,27 @@ namespace ttb::ui
     {
         auto const& window = ttb::Window::instance();
         auto const windowTransform = ttb::mat::transform< float, 2 >(
-            { { 0.0f, 0.0f },
-              { static_cast< float >( window.viewport().max( 0 ) ),
-                static_cast< float >( window.viewport().max( 1 ) ) } },
-            { { -1.0f, 1.0f }, { 1.0f, -1.0f } } );
-        auto const& transform = *state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" );
+            { { -1.0f, 1.0f }, { 1.0f, -1.0f } },
+            { { 0.0f, 0.0f }, window.viewport().max().as< float >() } );
+        auto const& transform =
+            windowTransform * ( *state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ) );
 
         auto const offset = this->offset();
         auto const size = this->size();
 
-        auto const screenTl =
-            windowTransform * transform * ttb::Vector{ offset( 0 ), offset( 1 ), 1.0f };
-        auto const screenBr = windowTransform * transform *
-                              ttb::Vector{ offset( 0 ) + size( 0 ), offset( 1 ) + size( 1 ), 1.0f };
+        auto const screenTl = transform * ttb::Vector{ offset( 0 ), offset( 1 ), 1.0f };
+        auto const screenBr =
+            transform * ttb::Vector{ offset( 0 ) + size( 0 ), offset( 1 ) + size( 1 ), 1.0f };
 
-        // glEnable( GL_SCISSOR_TEST );
-        // glScissor( screenTl( 0 ),
-        //            screenTl( 1 ),
-        //            screenBr( 0 ) - screenTl( 0 ),
-        //            screenBr( 1 ) - screenTl( 1 ) );
+        glEnable( GL_SCISSOR_TEST );
+        glScissor( screenTl( 0 ),
+                   window.viewport().max( 1 ) - screenBr( 1 ),
+                   screenBr( 0 ) - screenTl( 0 ),
+                   screenBr( 1 ) - screenTl( 1 ) );
 
         WrappedElement::render( state );
 
-        // glDisable( GL_SCISSOR_TEST );
+        glDisable( GL_SCISSOR_TEST );
     }
 
     bool ScrollArea::onPointerPressStart( ttb::events::PointerPressStart const& event )
