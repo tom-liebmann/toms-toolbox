@@ -28,7 +28,7 @@ class TomsToolboxConan(ConanFile):
         "activate_project": True,
         "build_type": "Release",
         "yaml-cpp/*:shared": True,
-        "build_tests": False,
+        "build_tests": True,
     }
     exports_sources = "*"
 
