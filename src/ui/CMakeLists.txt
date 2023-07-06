@@ -1,6 +1,6 @@
 set( TARGET_NAME ttbUi )
 
-ttb_add_module( ${TARGET_NAME} )
+ttb_add_module( ${TARGET_NAME} ttb::ui )
 
 if( NOT TARGET ${TARGET_NAME} )
     return()
@@ -10,7 +10,7 @@ ttb_add_module_dependency( ${TARGET_NAME} rapidxml rapidxml::rapidxml )
 
 target_include_directories( ${TARGET_NAME} PUBLIC include PRIVATE src )
 
-target_link_libraries( ${TARGET_NAME} PUBLIC ttbCore ttbMath ttbUtils )
+target_link_libraries( ${TARGET_NAME} PUBLIC ttb::core ttb::math ttb::utils )
 
 add_subdirectory( src )
 add_subdirectory( tests )
