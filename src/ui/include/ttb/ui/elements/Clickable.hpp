@@ -40,11 +40,11 @@ namespace ttb::ui
         //! @copydoc Element::onEvent( Event const& )
         virtual bool onEvent( Event const& event ) override;
 
-        bool onPointerDown( ttb::events::PointerDown const& event );
+        bool onPointerPressStart( ttb::events::PointerPressStart const& event );
 
-        bool onPointerMove( ttb::events::PointerMove const& event );
+        bool onPointerPressAbort( ttb::events::PointerPressAbort const& event );
 
-        bool onPointerUp( ttb::events::PointerUp const& event );
+        bool onPointerPressEnd( ttb::events::PointerPressEnd const& event );
 
         ClickCallback m_callback;
 

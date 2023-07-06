@@ -51,21 +51,24 @@ namespace ttb::ui
 
         switch( event.type() )
         {
-            case ttb::event::type::POINTER_DOWN:
-                return onPointerDown( static_cast< ttb::events::PointerDown const& >( event ) );
+            case ttb::event::type::POINTER_PRESS_START:
+                return onPointerPressStart(
+                    static_cast< ttb::events::PointerPressStart const& >( event ) );
 
-            case ttb::event::type::POINTER_MOVE:
-                return onPointerMove( static_cast< ttb::events::PointerMove const& >( event ) );
+            case ttb::event::type::POINTER_PRESS_ABORT:
+                return onPointerPressAbort(
+                    static_cast< ttb::events::PointerPressAbort const& >( event ) );
 
-            case ttb::event::type::POINTER_UP:
-                return onPointerUp( static_cast< ttb::events::PointerUp const& >( event ) );
+            case ttb::event::type::POINTER_PRESS_END:
+                return onPointerPressEnd(
+                    static_cast< ttb::events::PointerPressEnd const& >( event ) );
 
             default:
                 return false;
         }
     }
 
-    bool Clickable::onPointerDown( ttb::events::PointerDown const& event )
+    bool Clickable::onPointerPressStart( ttb::events::PointerPressStart const& event )
     {
         if( m_prioListener )
         {
@@ -74,7 +77,7 @@ namespace ttb::ui
 
         auto const offset = this->offset();
         auto const size = this->size();
-        auto const eventPos = ttb::Vector{ event.x(), event.y() }.as< float >();
+        auto const& eventPos = event.position();
 
         if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
             eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
@@ -89,7 +92,7 @@ namespace ttb::ui
         return true;
     }
 
-    bool Clickable::onPointerMove( ttb::events::PointerMove const& event )
+    bool Clickable::onPointerPressAbort( ttb::events::PointerPressAbort const& event )
     {
         if( !m_prioListener )
         {
@@ -101,21 +104,13 @@ namespace ttb::ui
             return false;
         }
 
-        auto const offset = this->offset();
-        auto const size = this->size();
-        auto const eventPos = ttb::Vector{ event.x(), event.y() }.as< float >();
-
-        if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
-            eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
-        {
-            m_callback( Action::ABORT, *this );
-            m_prioListener.reset();
-        }
+        m_callback( Action::ABORT, *this );
+        m_prioListener.reset();
 
         return false;
     }
 
-    bool Clickable::onPointerUp( ttb::events::PointerUp const& event )
+    bool Clickable::onPointerPressEnd( ttb::events::PointerPressEnd const& event )
     {
         if( !m_prioListener )
         {
@@ -129,7 +124,7 @@ namespace ttb::ui
 
         auto const offset = this->offset();
         auto const size = this->size();
-        auto const eventPos = ttb::Vector{ event.x(), event.y() }.as< float >();
+        auto const& eventPos = event.position();
 
         if( eventPos( 0 ) >= offset( 0 ) && eventPos( 0 ) < offset( 0 ) + size( 0 ) &&
             eventPos( 1 ) >= offset( 1 ) && eventPos( 1 ) < offset( 1 ) + size( 1 ) )
