@@ -19,21 +19,18 @@ namespace ttb
 
         explicit Vector( TType const ( &values )[ TDim ] );
 
-        // clang-format off
-        template < typename TArg >
-            requires( TDim == 1 )  //
+        template < typename TArg, typename = std::enable_if_t< TDim == 1, TArg > >
         explicit Vector( TArg&& values )
             : m_values{ static_cast< TType >( std::forward< TArg >( values ) ) }
         {
         }
 
-        template < typename... TArgs >
-            requires( TDim != 1 && TDim == sizeof...( TArgs ) )  //
+        template < typename... TArgs,
+                   typename = std::enable_if_t< TDim != 1 && TDim == sizeof...( TArgs ) > >
         Vector( TArgs&&... values )
             : m_values{ static_cast< TType >( std::forward< TArgs >( values ) )... }
         {
         }
-        // clang-format on
 
         Vector& operator=( Vector const& rhs ) = default;
 
