@@ -30,3 +30,32 @@ function( ttb_define_target_property )
         add_dependencies( ${ARGS_TARGET} check_property_${ARGS_PROPERTY}_${ARGS_TARGET})
     endif()
 endfunction()
+
+function( ttb_eval_j2_template )
+    cmake_parse_arguments( ARGS
+        ""                                    # Options
+        "TEMPLATE_FILE;DATA_FILE;OUTPUT_FILE" # One value keywords
+        ""                                    # Mult value keywords
+        ${ARGN}
+    )
+
+    # Create temporary file to store data to
+    execute_process(
+        COMMAND mktemp
+        OUTPUT_VARIABLE _TMP_DATA_FILE
+        OUTPUT_STRIP_TRAILING_WHITESPACE 
+    )
+
+    # Generate data file
+    configure_file(
+        ${ARGS_DATA_FILE}
+        ${_TMP_DATA_FILE}
+        @ONLY
+    )
+
+    # Evaluate Jinja2 template
+    execute_process(
+        COMMAND j2 -f yaml -o ${ARGS_OUTPUT_FILE} ${ARGS_TEMPLATE_FILE} ${_TMP_DATA_FILE}
+        COMMAND_ECHO STDOUT
+    )
+endfunction()
