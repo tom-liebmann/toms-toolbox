@@ -5,6 +5,7 @@
 #include <ttb/ui/elements/Center.hpp>
 #include <ttb/ui/elements/Flex.hpp>
 #include <ttb/ui/elements/Margin.hpp>
+#include <ttb/ui/elements/ScrollArea.hpp>
 #include <ttb/utils/EventManager.hpp>
 
 
@@ -240,5 +241,95 @@ TEST_CASE( "Margin", "[ui][margin]" )
 
         REQUIRE( ttb::Vector{ 0.8f, 0.8f } == ttb::Approx{ ele.size() } );
         REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ele.offset() );
+    }
+}
+
+TEST_CASE( "Scroll", "[ui][scroll]" )
+{
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
+    auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+
+    SECTION( "Simple scroll" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 5.0f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == child.offset() );
+    }
+
+    SECTION( "Fit child" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 0.5f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.5f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.5f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == child.offset() );
+    }
+
+    SECTION( "Simple scroll" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 5.0f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.4f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -0.1f } == ttb::Approx{ child.offset() } );
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.45f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -0.05f } == ttb::Approx{ child.offset() } );
+
+        // Scroll to end
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -3.5f } } );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
+        REQUIRE( ttb::Vector{ 0.0f, -4.0f } == ttb::Approx{ child.offset() } );
+    }
+
+    SECTION( "Overscroll" )
+    {
+        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
+        auto child = TestElement{ root, {}, 5.0f };
+
+        scroll.setChild( &child );
+        root.setChild( &scroll );
+
+        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 1.5f } } );
+
+        REQUIRE( ttb::Vector{ 0.0f, 0.05f } == ttb::Approx{ child.offset() } );
+
+        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -4.5f } } );
+
+        REQUIRE( ttb::Vector{ 0.0f, -4.05f } == child.offset() );
     }
 }

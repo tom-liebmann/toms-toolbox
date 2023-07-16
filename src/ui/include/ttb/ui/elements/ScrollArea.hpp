@@ -1,6 +1,8 @@
 #pragma once
 
-#include <ttb/ui/Element.hpp>
+#include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/XmlLoader.hpp>
+#include <ttb/utils/gesture/events.hpp>
 
 
 namespace ttb::ui
@@ -11,7 +13,7 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    class ScrollArea : public Element
+    class ScrollArea : public WrappedElement
     {
     public:
         enum class Direction
@@ -20,33 +22,41 @@ namespace ttb::ui
             VERTICAL,
         };
 
-        ScrollArea( Framework& framework, Direction direction );
+        ScrollArea( Root& root, Direction direction );
+
+        ScrollArea( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~ScrollArea();
 
-        void child( Element* element );
+        void setChild( Element* element );
 
-        virtual void destroy() override;
-        virtual void offset( Offset const& value );
-        virtual void size( Size const& value );
+        void setScrollOffset( float value );
+
         virtual Size fit( Size const& space ) override;
-        virtual void update( float timeDiff ) override;
+        virtual void offset( Offset const& value ) override;
+        virtual void size( Size const& value ) override;
         virtual bool onEvent( Event const& event ) override;
+        virtual void update( float timeDiff ) override;
         virtual void render( ttb::State& state ) const override;
-        virtual void onChildChanged( Element& child ) override;
+
+        using Element::offset;
+        using Element::size;
 
     private:
-        class ScrollableArea;
+        bool onPointerPressStart( ttb::events::PointerPressStart const& event );
+        bool onDragStart( ttb::events::DragStart const& event );
+        bool onDragEnd( ttb::events::DragEnd const& event );
+        bool onDragMove( ttb::events::DragMove const& event );
 
         std::unique_ptr< PriorityListener > m_prioListener;
 
-        void offset( float value );
-
         Direction m_direction;
-        float m_offset{ -0.25f };
+        float m_offset{ 0.0f };
         ttb::Vector< float, 2 > m_dragPos;
 
-        std::unique_ptr< ScrollableArea > m_child;
-        ttb::Matrix< float, 3, 3 > m_transform;
+        float m_velocity{ 0.0f };
+
+        float m_overScroll{ 0.15f };
+        float m_overScrollFactor{ 0.02f };
     };
 }

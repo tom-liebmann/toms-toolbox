@@ -1,98 +1,113 @@
 #include <ttb/ui/elements/ScrollArea.hpp>
 
+#include <fmt/core.h>
+
 #include "PriorityListener.hpp"
 #include <ttb/core/window.hpp>
 #include <ttb/math/matrix_operations.hpp>
-#include <ttb/ui/Framework.hpp>
 #include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
 
 namespace ttb::ui
 {
-    class ScrollArea::ScrollableArea : public WrappedElement
+    namespace
     {
-    public:
-        explicit ScrollableArea( Framework& framework );
-
-        void child( Element* element );
-    };
+        auto const factory = XmlFactory< ScrollArea >{ "scroll" };
+    }
 }
 
 
 namespace ttb::ui
 {
-    ScrollArea::ScrollArea( Framework& framework, Direction direction )
-        : Element{ framework }
-        , m_direction{ direction }
-        , m_child{ std::make_unique< ScrollableArea >( framework ) }
-        , m_transform( ttb::mat::identity< float, 3 >() )
+    ScrollArea::ScrollArea( Root& root, Direction direction )
+        : WrappedElement{ root }, m_direction{ direction }
     {
-        m_child->parent( this );
+    }
+
+    ScrollArea::ScrollArea( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }
+    {
+        if( auto child = node.first_node(); child )
+        {
+            wrappedChild( loader.loadElement( root, *child ) );
+        }
     }
 
     ScrollArea::~ScrollArea() = default;
 
-    void ScrollArea::child( Element* element )
+    void ScrollArea::setChild( Element* element )
     {
-        m_child->child( element );
+        wrappedChild( element );
     }
 
-    void ScrollArea::range( Range const& range )
+    void ScrollArea::setScrollOffset( float value )
     {
-        Element::range( range );
-        m_transform( 0, 2 ) = range.min( 0 );
-        m_transform( 1, 2 ) = range.min( 1 );
+        m_offset = value;
+        offset( offset() );
+    }
 
-        if( !m_child )
+    auto ScrollArea::fit( Size const& space ) -> Size
+    {
+        if( auto const child = wrappedChild(); child )
         {
-            return;
+            // TODO Handle direction
+            auto childSpace = space;
+            childSpace( 1 ) = std::numeric_limits< float >::infinity();
+            auto const childSize = child->fit( childSpace );
+
+            auto mySize = childSize;
+            mySize( 1 ) = std::min( space( 1 ), childSize( 1 ) );
+            return mySize;
         }
 
-        offset( m_offset );
-    }
-
-    void ScrollArea::destroy()
-    {
-        m_child->destroy();
-    }
-
-    void ScrollArea::render( ttb::State& state ) const
-    {
-        auto const& windowSize = Window::instance().size();
-
-        auto const& range = this->range();
-        auto min = localToScreen( range.min() );
-        auto max = localToScreen( range.max() );
-        min( 0 ) = min( 0 ) * windowSize( 0 );
-        min( 1 ) = min( 1 ) * windowSize( 0 );
-        max( 0 ) = max( 0 ) * windowSize( 0 );
-        max( 1 ) = max( 1 ) * windowSize( 0 );
-        auto const viewport = ttb::Viewport{ static_cast< GLint >( min( 0 ) ),
-                                             windowSize( 1 ) - static_cast< GLint >( max( 1 ) ),
-                                             static_cast< GLsizei >( max( 0 ) - min( 0 ) ),
-                                             static_cast< GLsizei >( max( 1 ) - min( 1 ) ) };
-
-        glEnable( GL_SCISSOR_TEST );
-        glScissor( viewport.getX(), viewport.getY(), viewport.getWidth(), viewport.getHeight() );
-        {
-            state.with( ttb::UniformBinder( "u_transform", m_transform ),
-                        [ & ]
-                        {
-                            m_child->render( state );
-                        } );
-        }
-        glDisable( GL_SCISSOR_TEST );
-    }
-
-    auto ScrollArea::fit( Range const& space ) -> Range
-    {
         return space;
     }
 
-    void ScrollArea::update( float timeDiff )
+    void ScrollArea::offset( Offset const& value )
     {
-        m_child->update( timeDiff );
+        Element::offset( value );
+
+        if( auto const child = wrappedChild(); child )
+        {
+            auto const childSize = child->size();
+
+            // TODO Handle direction
+            auto const childOffset = [ & ]
+            {
+                auto const minOffset = 0.0f;
+                auto const maxOffset = childSize( 1 ) - size()( 1 );
+
+                if( m_offset < minOffset )
+                {
+                    return m_overScroll * ( 1.0f / ( minOffset - m_offset + 1.0f ) - 1.0f );
+                }
+
+                if( m_offset > maxOffset )
+                {
+                    return maxOffset +
+                           m_overScroll * ( 1.0f - 1.0f / ( m_offset - maxOffset + 1.0f ) );
+                }
+
+                return m_offset;
+            }();
+
+            child->offset( { value( 0 ), value( 1 ) - childOffset } );
+        }
+    }
+
+    void ScrollArea::size( Size const& value )
+    {
+        Element::size( value );
+
+        if( auto const child = wrappedChild(); child )
+        {
+            auto const childSpace = child->fit( value );
+            auto childSize = value;
+            childSize( 1 ) = childSpace( 1 );
+            child->size( childSize );
+        }
     }
 
     bool ScrollArea::onEvent( Event const& event )
@@ -101,99 +116,159 @@ namespace ttb::ui
         switch( event.type() )
         {
             case type::POINTER_PRESS_START:
-            {
-                auto& ev = static_cast< ttb::events::PointerPressStart const& >( event );
-
-                auto const localPos = screenToLocal( ev.position() );
-                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= 1.0f || localPos( 1 ) < 0.0f ||
-                    localPos( 1 ) >= 1.0f )
-                {
-                    return false;
-                }
-
-                return m_child->onEvent( event );
-            }
-
+                return onPointerPressStart(
+                    static_cast< ttb::events::PointerPressStart const& >( event ) );
             case type::DRAG_START:
-            {
-                auto& ev = static_cast< ttb::events::DragStart const& >( event );
-
-                auto const localPos = screenToLocal( ev.position() );
-                if( localPos( 0 ) < 0.0f || localPos( 0 ) >= 1.0f || localPos( 1 ) < 0.0f ||
-                    localPos( 1 ) >= 1.0f )
-                {
-                    return false;
-                }
-
-                m_dragPos = ev.position();
-
-                m_prioListener =
-                    std::make_unique< PriorityListener >( framework().eventManager(), *this );
-                m_prioListener->addType( type::DRAG_END );
-                m_prioListener->addType( type::DRAG_MOVE );
-
-                return true;
-            }
-
+                return onDragStart( static_cast< ttb::events::DragStart const& >( event ) );
             case type::DRAG_END:
-            {
-                if( m_prioListener )
-                {
-                    m_prioListener.reset();
-                    return true;
-                }
-
-                return false;
-            }
-
+                return onDragEnd( static_cast< ttb::events::DragEnd const& >( event ) );
             case type::DRAG_MOVE:
-            {
-                if( m_prioListener )
-                {
-                    auto& ev = static_cast< ttb::events::DragMove const& >( event );
-                    offset( m_offset + ev.position()( 1 ) - m_dragPos( 1 ) );
-                    m_dragPos = ev.position();
-                    return true;
-                }
-
-                return false;
-            }
-
+                return onDragMove( static_cast< ttb::events::DragMove const& >( event ) );
             default:
-                return m_child->onEvent( event );
+                return WrappedElement::onEvent( event );
         }
     }
 
-
-    void ScrollArea::onChildChanged( Element& /* child */ )
+    void ScrollArea::update( float timeDiff )
     {
-        range( range() );
+        if( auto const child = wrappedChild(); child )
+        {
+            if( m_prioListener )
+            {
+                m_velocity *= std::pow( 0.05f, timeDiff );
+            }
+            else
+            {
+                auto const minOffset = 0.0f;
+                auto const maxOffset = child->size()( 1 ) - size()( 1 );  // TODO Handle direction
+
+                // Handle overscroll
+                if( m_offset < minOffset )
+                {
+                    m_velocity = 0.0f;
+                    setScrollOffset( m_offset * std::pow( m_overScrollFactor, timeDiff ) );
+                }
+                else if( m_offset > maxOffset )
+                {
+                    m_velocity = 0.0f;
+                    setScrollOffset( maxOffset + ( m_offset - maxOffset ) *
+                                                     std::pow( m_overScrollFactor, timeDiff ) );
+                }
+
+                // Apply velocity
+                if( std::abs( m_velocity ) > 1e-5f )
+                {
+                    auto newOffset = m_offset + m_velocity * timeDiff;
+
+                    if( newOffset > maxOffset )
+                    {
+                        newOffset = maxOffset;
+                        m_velocity = 0.0f;
+                    }
+
+                    if( newOffset < minOffset )
+                    {
+                        newOffset = minOffset;
+                        m_velocity = 0.0f;
+                    }
+
+                    setScrollOffset( newOffset );
+                }
+
+                if( m_velocity > 0.0f )
+                {
+                    m_velocity = std::max( 0.0f, m_velocity - 5.0f * timeDiff );
+                }
+                else if( m_velocity < 0.0f )
+                {
+                    m_velocity = std::min( 0.0f, m_velocity + 5.0f * timeDiff );
+                }
+            }
+        }
+
+        WrappedElement::update( timeDiff );
     }
 
-    void ScrollArea::offset( float value )
+    void ScrollArea::render( ttb::State& state ) const
     {
-        auto const& range = this->range();
-        m_offset = value;
+        auto const& window = ttb::Window::instance();
+        auto const windowTransform = ttb::mat::transform< float, 2 >(
+            { { -1.0f, 1.0f }, { 1.0f, -1.0f } },
+            { { 0.0f, 0.0f }, window.viewport().max().as< float >() } );
+        auto const& transform =
+            windowTransform * ( *state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ) );
 
-        auto const childSpace = m_child->fit( { { 0.0f, 0.0f }, range.extent() } );
+        auto const offset = this->offset();
+        auto const size = this->size();
 
-        m_offset = std::max( range.extent( 1 ) - childSpace.extent( 1 ), m_offset );
-        m_offset = std::min( 0.0f, m_offset );
+        auto const screenTl = transform * ttb::Vector{ offset( 0 ), offset( 1 ), 1.0f };
+        auto const screenBr =
+            transform * ttb::Vector{ offset( 0 ) + size( 0 ), offset( 1 ) + size( 1 ), 1.0f };
 
-        m_child->range(
-            { { 0.0f, m_offset }, { childSpace.extent( 0 ), childSpace.extent( 1 ) + m_offset } } );
+        glEnable( GL_SCISSOR_TEST );
+        glScissor( screenTl( 0 ),
+                   window.viewport().max( 1 ) - screenBr( 1 ),
+                   screenBr( 0 ) - screenTl( 0 ),
+                   screenBr( 1 ) - screenTl( 1 ) );
+
+        WrappedElement::render( state );
+
+        glDisable( GL_SCISSOR_TEST );
     }
-}
 
-
-namespace ttb::ui
-{
-    ScrollArea::ScrollableArea::ScrollableArea( Framework& framework ) : WrappedElement{ framework }
+    bool ScrollArea::onPointerPressStart( ttb::events::PointerPressStart const& event )
     {
+        m_velocity = 0.0f;
+
+        return WrappedElement::onEvent( event );
     }
 
-    void ScrollArea::ScrollableArea::child( Element* element )
+    bool ScrollArea::onDragStart( ttb::events::DragStart const& event )
     {
-        wrappedChild( element );
+        auto const offset = this->offset();
+        auto const size = this->size();
+        auto const eventPos = event.position();
+
+        if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
+            eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
+        {
+            return WrappedElement::onEvent( event );
+        }
+
+        m_dragPos = event.position();
+
+        m_prioListener = std::make_unique< PriorityListener >( getRoot(), *this );
+
+        return true;
+    }
+
+    bool ScrollArea::onDragEnd( ttb::events::DragEnd const& event )
+    {
+        if( m_prioListener )
+        {
+            m_prioListener.reset();
+            return true;
+        }
+
+        return WrappedElement::onEvent( event );
+    }
+
+    bool ScrollArea::onDragMove( ttb::events::DragMove const& event )
+    {
+        if( m_prioListener )
+        {
+            auto const dragAmount = m_dragPos( 1 ) - event.position()( 1 );
+            if( std::signbit( dragAmount ) != std::signbit( m_velocity ) )
+            {
+                m_velocity *= -1.0f;
+            }
+            m_velocity += std::exp( 8.0f * dragAmount ) - 1.0f;
+            // TODO consider direction
+            setScrollOffset( m_offset + dragAmount );
+            m_dragPos = event.position();
+            return true;
+        }
+
+        return WrappedElement::onEvent( event );
     }
 }
