@@ -6,25 +6,87 @@ list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/cmake" )
 list( APPEND CMAKE_MODULE_PATH "${TTB_ROOT}/project/platforms" )
 
 include( ttb_general )
+include( ttb_utils )
 
-macro( ttb_add_project PROJECT_NAME PROJECT_CONAN_FILE PROJECT_CMAKE_FILE )
+function( ttb_project_create PROJECT_NAME )
+    add_custom_target( ${PROJECT_NAME} ALL )
+endfunction()
 
-    request_build_platform( BUILD_PLATFORM )
-
-    request_build_type()
-
-    include( ttb_platform_${BUILD_PLATFORM} )
-
-    _ttb_add_project_impl( ${PROJECT_NAME} ${PROJECT_CONAN_FILE} ${PROJECT_CMAKE_FILE} )
-
-endmacro()
-
-macro( ttb_project_assets ASSET_DIR )
+function( ttb_project_finish PROJECT_NAME )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_CMAKE_FILE )
+    _ttb_project_check_required_property( ${PROJECT_NAME} TTB_CONAN_FILE )
 
     request_build_platform( BUILD_PLATFORM )
 
     include( ttb_platform_${BUILD_PLATFORM} )
 
-    _ttb_project_assets_impl( ${ASSET_DIR} )
+    _ttb_project_finish( ${PROJECT_NAME} )
+endfunction()
 
-endmacro()
+function( ttb_project_set_conan_file PROJECT_NAME CONAN_FILE )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_CONAN_FILE ${CONAN_FILE}
+    )
+endfunction()
+
+function( ttb_project_set_cmake_file PROJECT_NAME CMAKE_FILE )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_CMAKE_FILE ${CMAKE_FILE}
+    )
+endfunction()
+
+function( ttb_project_add_android_abi PROJECT_NAME ABI )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        APPEND
+        PROPERTY TTB_ANDROID_ABI ${ABI}
+    )
+endfunction()
+
+function( ttb_project_add_assets PROJECT_NAME ASSET_DIR )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        APPEND
+        PROPERTY TTB_ASSET_DIRECTORIES ${ASSET_DIR}
+    )
+endfunction()
+
+function( ttb_project_sign_key PROJECT_NAME KEYSTORE_FILE KEYSTORE_PWD_FILE )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_KEYSTORE_FILE ${KEYSTORE_FILE}
+    )
+
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_KEYSTORE_PWD_FILE ${KEYSTORE_PWD_FILE}
+    )
+endfunction()
+
+function( ttb_project_set_version PROJECT_NAME VERSION_NR VERSION_NAME )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_VERSION_NUMBER ${VERSION_NR}
+    )
+
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_VERSION_NAME ${VERSION_NAME}
+    )
+endfunction()
+
+function( _ttb_project_check_required_property TARGET PROPERTY )
+    get_property(
+        _PROPERTY_VALUE
+        TARGET ${TARGET}
+        PROPERTY ${PROPERTY}
+    )
+
+    message( STATUS "${_PROPERTY_VALUE}" )
+
+    if( "${_PROPERTY_VALUE}" STREQUAL "" )
+        message( FATAL_ERROR "Property ${PROPERTY} missing for target ${TARGET}" )
+    endif()
+endfunction()

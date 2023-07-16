@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="@_PROJECT_VERSION_NR@"
+    android:versionName="@_PROJECT_VERSION_NAME@"
     package="@ANDROID_PACKAGE_NAME@">
 
     <uses-permission
@@ -23,7 +25,8 @@
             android:configChanges="orientation|keyboardHidden"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

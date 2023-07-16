@@ -60,7 +60,7 @@ function( ttb_add_test )
 
 endfunction()
 
-function( ttb_add_module MODULE_NAME )
+function( ttb_add_module MODULE_NAME MODULE_ALIAS )
 
     # add cache option for enabling/disabling module
     # ================================================================
@@ -76,6 +76,7 @@ function( ttb_add_module MODULE_NAME )
     # create the module target
     # ================================================================
     add_library( ${MODULE_NAME} ${BUILD_LIBRARY_TYPE} )
+    add_library( ${MODULE_ALIAS} ALIAS ${MODULE_NAME} )
 
     target_sources( ${MODULE_NAME} PRIVATE "${TTB_MODULE_FUNCTIONS_DIR}/src/dummy.cpp" )
 
@@ -90,7 +91,11 @@ function( ttb_add_module MODULE_NAME )
 
     target_compile_features( ${MODULE_NAME} PUBLIC cxx_std_20 )
 
-    set_target_properties( ${MODULE_NAME} PROPERTIES POSITION_INDEPENDENT_CODE ON )
+    set_target_properties(
+        ${MODULE_NAME} PROPERTIES
+        POSITION_INDEPENDENT_CODE ON
+        EXPORT_NAME ${MODULE_ALIAS}
+    )
 
     # link module to main target
     # ================================================================
@@ -99,14 +104,14 @@ function( ttb_add_module MODULE_NAME )
 
 endfunction()
 
-function( ttb_add_module_dependency MODULE_NAME DEPENDENCY DEP_TARGET )
+macro( ttb_add_module_dependency MODULE_NAME DEP_MODULE DEP_TARGET )
     # Find dependency
-    find_package( ${DEPENDENCY} REQUIRED )
+    find_package( ${DEP_MODULE} CONFIG REQUIRED GLOBAL )
 
     # Link dependency to module
     target_link_libraries( ${MODULE_NAME} PUBLIC ${DEP_TARGET} )
 
     # Add dependency to export set
-    list( APPEND EXPORT_DEPENDENCIES "${DEP_TARGET}" )
+    list( APPEND EXPORT_DEPENDENCIES "${DEP_MODULE}" )
     set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
-endfunction()
+endmacro()

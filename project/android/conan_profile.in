@@ -1,18 +1,18 @@
 include(default)
-android_ndk=/home/tom/libraries/android_sdk/ndk/@ANDROID_NDK_VERSION@
 
 [settings]
-arch=@ANDROID_ARCH@
+arch=@_ARGS_ARCH@
 build_type=Release
 compiler=clang
 compiler.libcxx=c++_static
 compiler.version=14
 os=Android
-os.api_level=21
+os.api_level=@ANDROID_SDK_VERSION_MIN@
 
 [options]
-[build_requires]
 [conf]
-tools.android:ndk_path=/home/tom/libraries/android_sdk/ndk/@ANDROID_NDK_VERSION@
-[env]
+tools.android:ndk_path=@ANDROID_SDK_DIR@/ndk/@ANDROID_NDK_VERSION@
+[buildenv]
 CONAN_CMAKE_TOOLCHAIN_FILE=@ANDROID_TOOLCHAIN_FILE@
+CC=@ANDROID_SDK_DIR@/ndk/@ANDROID_NDK_VERSION@/toolchains/llvm/prebuilt/linux-x86_64/bin/@_ARGS_COMPILER_PREFIX@@ANDROID_SDK_VERSION_MIN@-clang
+CXX=@ANDROID_SDK_DIR@/ndk/@ANDROID_NDK_VERSION@/toolchains/llvm/prebuilt/linux-x86_64/bin/@_ARGS_COMPILER_PREFIX@@ANDROID_SDK_VERSION_MIN@-clang++

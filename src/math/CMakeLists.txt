@@ -1,6 +1,6 @@
 set( TARGET_NAME ttbMath )
 
-ttb_add_module( ${TARGET_NAME} )
+ttb_add_module( ${TARGET_NAME} ttb::math )
 
 if( NOT TARGET ${TARGET_NAME} )
     return()
