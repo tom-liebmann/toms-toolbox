@@ -138,6 +138,7 @@ function( _ttb_project_android_build_java_src )
     )
 
     set( _CLASS_DIR "${_ARGS_BUILD_DIR}/java_class" )
+    set( _DEPENDENCY_JAR_DIR "${_ARGS_BUILD_DIR}/dependency_jars" )
 
     add_custom_command(
         OUTPUT ${_CLASS_DIR}
@@ -145,9 +146,19 @@ function( _ttb_project_android_build_java_src )
     )
 
     add_custom_target(
+        ${_ARGS_PREFIX}_dep_download
+        COMMAND sh ${TTB_ANDROID_RES_DIR}/download_java_deps.sh
+            ${TTB_ANDROID_RES_DIR}/pom.xml
+            ${_DEPENDENCY_JAR_DIR}
+    )
+
+    file( GLOB _DEPENDENCY_JARS ${_DEPENDENCY_JAR_DIR}/*.jar )
+    list( JOIN _DEPENDENCY_JARS ":" _DEPENDENCY_CLASSPATH )
+
+    add_custom_target(
         ${_ARGS_PREFIX}_class
         COMMAND ${JAVA_COMPILER}
-            -classpath "${ANDROID_JAR}"
+            -classpath "${ANDROID_JAR}:${_DEPENDENCY_CLASSPATH}"
             -Xlint:deprecation
             -source 1.8
             -target 1.8
@@ -173,6 +184,7 @@ function( _ttb_project_android_build_java_src )
             --dex
             --output="${_ARGS_OUTPUT_FILE}"
             ${_CLASS_DIR}
+            ${_DEPENDENCY_JARS}
         DEPENDS
             ${_ARGS_PREFIX}_class
             "${_OUTPUT_DIR}"
