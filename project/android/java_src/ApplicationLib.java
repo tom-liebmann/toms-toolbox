@@ -46,4 +46,12 @@ public class ApplicationLib
     public static native void on_network_available();
 
     public static native void on_network_lost();
+
+    // ================ AdMob
+
+    public static native void on_ad_init_complete();
+
+    public static native void on_ad_load_failed();
+
+    public static native void on_ad_reward_earned( int amount, String type );
 }
