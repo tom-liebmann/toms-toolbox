@@ -1,5 +1,20 @@
 package toms_toolbox;
 
+import android.app.Activity;
+import androidx.annotation.NonNull;
+import android.util.Log;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.FullScreenContentCallback;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.initialization.InitializationStatus;
+
 
 class AdManager
 {
@@ -14,7 +29,7 @@ class AdManager
         m_activity = activity;
     }
 
-    public initialize()
+    public void initialize()
     {
         if( m_initialized )
         {
@@ -30,7 +45,7 @@ class AdManager
         } );
     }
 
-    public runRewardedAd()
+    public void runRewardedAd()
     {
         final AdRequest adRequest = new AdRequest.Builder().build();
 
@@ -67,7 +82,6 @@ class AdManager
                 // Called when ad is dismissed.
                 // Set the ad reference to null so you don't show the ad a second time.
                 Log.d( TAG, "Ad dismissed fullscreen content." );
-                rewardedAd = null;
             }
 
             @Override
@@ -75,7 +89,6 @@ class AdManager
             {
                 // Called when ad fails to show.
                 Log.e( TAG, "Ad failed to show fullscreen content." );
-                rewardedAd = null;
             }
 
             @Override
