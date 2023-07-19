@@ -76,6 +76,7 @@ function( _ttb_project_finish PROJECT_NAME )
         OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex/classes.dex"
         BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_java_src"
         SOURCES
+            "${TTB_ANDROID_RES_DIR}/java_src/AdManager.java"
             "${TTB_ANDROID_RES_DIR}/java_src/MainActivity.java"
             "${TTB_ANDROID_RES_DIR}/java_src/MainView.java"
             "${TTB_ANDROID_RES_DIR}/java_src/ApplicationLib.java"
@@ -137,57 +138,14 @@ function( _ttb_project_android_build_java_src )
         ${ARGN}
     )
 
-    set( _CLASS_DIR "${_ARGS_BUILD_DIR}/java_class" )
-    set( _DEPENDENCY_JAR_DIR "${_ARGS_BUILD_DIR}/dependency_jars" )
-
-    add_custom_command(
-        OUTPUT ${_CLASS_DIR}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${_CLASS_DIR}
-    )
-
-    add_custom_target(
-        ${_ARGS_PREFIX}_dep_download
-        COMMAND sh ${TTB_ANDROID_RES_DIR}/download_java_deps.sh
-            ${TTB_ANDROID_RES_DIR}/pom.xml
-            ${_DEPENDENCY_JAR_DIR}
-    )
-
-    file( GLOB _DEPENDENCY_JARS ${_DEPENDENCY_JAR_DIR}/*.jar )
-    list( JOIN _DEPENDENCY_JARS ":" _DEPENDENCY_CLASSPATH )
-
-    add_custom_target(
-        ${_ARGS_PREFIX}_class
-        COMMAND ${JAVA_COMPILER}
-            -classpath "${ANDROID_JAR}:${_DEPENDENCY_CLASSPATH}"
-            -Xlint:deprecation
-            -source 1.8
-            -target 1.8
-            -d ${_CLASS_DIR}
-            ${_ARGS_SOURCES}
-        DEPENDS
-            ${_ARGS_SOURCES}
-            ${_CLASS_DIR}
-        COMMAND_EXPAND_LISTS
-    )
-
-    get_filename_component( _OUTPUT_DIR "${_ARGS_OUTPUT_FILE}" DIRECTORY )
-
-    add_custom_command(
-        OUTPUT "${_OUTPUT_DIR}"
-        COMMAND ${CMAKE_COMMAND} -E make_directory
-            "${_OUTPUT_DIR}"
-    )
-
     add_custom_command(
         OUTPUT ${_ARGS_OUTPUT_FILE}
-        COMMAND ${ANDROID_DX}
-            --dex
-            --output="${_ARGS_OUTPUT_FILE}"
-            ${_CLASS_DIR}
-            ${_DEPENDENCY_JARS}
-        DEPENDS
-            ${_ARGS_PREFIX}_class
-            "${_OUTPUT_DIR}"
+        COMMAND sh ${TTB_ANDROID_RES_DIR}/build_classes_dex.sh
+            ${ANDROID_DX}
+            ${ANDROID_JAR}
+            ${_ARGS_BUILD_DIR}
+            ${_ARGS_OUTPUT_FILE}
+            ${_ARGS_SOURCES}
     )
 
     add_custom_target( ${_ARGS_OUTPUT_TARGET} DEPENDS ${_ARGS_OUTPUT_FILE} )
@@ -229,18 +187,15 @@ function( _ttb_project_android_build_arch )
         endif()
     endforeach()
 
-    add_custom_command(
-        OUTPUT ${_ARGS_BUILD_DIR}/conan/conan_toolchain.cmake
+    # Make sure conan is always executed to detect any changes in the fetched libraries
+    add_custom_target(
+        ${_ARGS_OUTPUT_TARGET}_conan ALL 
         COMMAND ${CONAN_COMMAND} install
             --build=missing
             --output-folder "${_ARGS_BUILD_DIR}/conan"
             --profile "${CONAN_PROFILE_FILE}"
             "${_ARGS_CONAN_FILE}"
-        DEPENDS
-            ${_ARGS_CONAN_FILE}
     )
-
-    add_custom_target( ${_ARGS_OUTPUT_TARGET}_conan DEPENDS ${_ARGS_BUILD_DIR}/conan/conan_toolchain.cmake )
 
     ExternalProject_Add(
         ${_ARGS_OUTPUT_TARGET}_external

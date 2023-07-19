@@ -10,8 +10,11 @@ os=Android
 os.api_level=@ANDROID_SDK_VERSION_MIN@
 
 [options]
+toms-toolbox/*:build_tests=False
+
 [conf]
 tools.android:ndk_path=@ANDROID_SDK_DIR@/ndk/@ANDROID_NDK_VERSION@
+
 [buildenv]
 CONAN_CMAKE_TOOLCHAIN_FILE=@ANDROID_TOOLCHAIN_FILE@
 CC=@ANDROID_SDK_DIR@/ndk/@ANDROID_NDK_VERSION@/toolchains/llvm/prebuilt/linux-x86_64/bin/@_ARGS_COMPILER_PREFIX@@ANDROID_SDK_VERSION_MIN@-clang
