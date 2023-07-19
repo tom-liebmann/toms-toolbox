@@ -1,5 +1,6 @@
 #include <ttb/ui/XmlLoader.hpp>
 
+#include <ttb/core/Logger.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 #include <ttb/ui/elements/XmlElement.hpp>
 
@@ -24,7 +25,7 @@ namespace ttb::ui
 
         if( factoryIter == std::end( elementFactories() ) )
         {
-            std::cout << "Did not find " << nodeName << std::endl;
+            ttb::Logger::error( "XmlLoader: Did not find {}\n", nodeName );
             return nullptr;
         }
 
