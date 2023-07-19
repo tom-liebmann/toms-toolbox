@@ -43,7 +43,7 @@ namespace ttb
 #elif defined( PLATFORM_ANDROID )
 
         auto const text = fmt::format( fmt, std::forward< TArgs... >( args )... );
-        __android_log_print( ANDROID_LOG_INFO, PACKAGE, text.c_str() );
+        __android_log_write( ANDROID_LOG_INFO, PACKAGE, text.c_str() );
 
 #endif
     }
@@ -58,7 +58,7 @@ namespace ttb
 #elif defined( PLATFORM_ANDROID )
 
         auto const text = fmt::format( fmt, std::forward< TArgs... >( args )... );
-        __android_log_print( ANDROID_LOG_DEBUG, PACKAGE, text.c_str() );
+        __android_log_write( ANDROID_LOG_DEBUG, PACKAGE, text.c_str() );
 
 #endif
     }
@@ -73,7 +73,7 @@ namespace ttb
 #elif defined( PLATFORM_ANDROID )
 
         auto const text = fmt::format( fmt, std::forward< TArgs... >( args )... );
-        __android_log_print( ANDROID_LOG_ERROR, PACKAGE, text.c_str() );
+        __android_log_write( ANDROID_LOG_ERROR, PACKAGE, text.c_str() );
 
 #endif
     }
