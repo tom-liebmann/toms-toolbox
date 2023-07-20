@@ -15,7 +15,11 @@ namespace ttb::ui
 
         Root( std::shared_ptr< ttb::resources::Manager > resourceManager, Size const& size );
 
+        Root( std::shared_ptr< ttb::resources::Manager > resourceManager );
+
         void setChild( Element* child );
+
+        void setSize( Size const& size );
 
         void pushPriorityListener( EventListener& listener );
 

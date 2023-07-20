@@ -13,6 +13,11 @@ namespace ttb::ui
     {
     }
 
+    Root::Root( std::shared_ptr< ttb::resources::Manager > resourceManager )
+        : Root{ std::move( resourceManager ), { 1.0f, 1.0f } }
+    {
+    }
+
     void Root::setChild( Element* child )
     {
         if( m_child )
@@ -27,6 +32,16 @@ namespace ttb::ui
             m_child->setParent( this );
             m_child->size( m_child->fit( m_size ) );
             m_child->offset( {} );
+        }
+    }
+
+    void Root::setSize( Size const& size )
+    {
+        m_size = size;
+
+        if( m_child )
+        {
+            m_child->size( m_child->fit( m_size ) );
         }
     }
 
