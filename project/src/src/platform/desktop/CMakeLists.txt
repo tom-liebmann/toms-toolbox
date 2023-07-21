@@ -3,4 +3,5 @@ target_sources(
     PRIVATE
         ApplicationRunner.cpp
         ConnectionManager.cpp
+        AdManager.cpp
 )

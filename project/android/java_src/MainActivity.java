@@ -14,6 +14,7 @@ public class MainActivity extends android.app.Activity
 
     private MainView m_view;
     private ConnectionManager m_connectionManager;
+    private AdManager m_adManager;
 
     public static MainActivity getInstance()
     {
@@ -30,6 +31,7 @@ public class MainActivity extends android.app.Activity
         final Context context = getApplicationContext();
 
         m_connectionManager = new ConnectionManager( context );
+        m_adManager = new AdManager( this );
 
         ApplicationLib.init();
 

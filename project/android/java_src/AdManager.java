@@ -1,19 +1,19 @@
 package toms_toolbox;
 
 import android.app.Activity;
-import androidx.annotation.NonNull;
 import android.util.Log;
-import com.google.android.gms.ads.rewarded.RewardedAd;
-import com.google.android.gms.ads.rewarded.RewardItem;
-import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.LoadAdError;
-import com.google.android.gms.ads.OnUserEarnedRewardListener;
-import com.google.android.gms.ads.MobileAds;
+import androidx.annotation.NonNull;
 import com.google.android.gms.ads.AdError;
+import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.FullScreenContentCallback;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.LoadAdError;
+import com.google.android.gms.ads.MobileAds;
+import com.google.android.gms.ads.OnUserEarnedRewardListener;
 import com.google.android.gms.ads.initialization.InitializationStatus;
+import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import com.google.android.gms.ads.rewarded.RewardItem;
+import com.google.android.gms.ads.rewarded.RewardedAd;
+import com.google.android.gms.ads.rewarded.RewardedAdLoadCallback;
 
 
 class AdManager
@@ -27,6 +27,11 @@ class AdManager
     public AdManager( Activity activity )
     {
         m_activity = activity;
+    }
+
+    public boolean isInitialized()
+    {
+        return m_initialized;
     }
 
     public void initialize()
@@ -45,26 +50,23 @@ class AdManager
         } );
     }
 
-    public void runRewardedAd()
+    public void runRewardedAd( String id )
     {
         final AdRequest adRequest = new AdRequest.Builder().build();
 
-        RewardedAd.load( m_activity,
-                         "ca-app-pub-3940256099942544/5224354917",
-                         adRequest,
-                         new RewardedAdLoadCallback() {
-                             @Override
-                             public void onAdFailedToLoad( @NonNull LoadAdError loadAdError )
-                             {
-                                 ApplicationLib.on_ad_load_failed();
-                             }
+        RewardedAd.load( m_activity, id, adRequest, new RewardedAdLoadCallback() {
+            @Override
+            public void onAdFailedToLoad( @NonNull LoadAdError loadAdError )
+            {
+                ApplicationLib.on_ad_load_failed();
+            }
 
-                             @Override
-                             public void onAdLoaded( @NonNull RewardedAd ad )
-                             {
-                                 showAd( ad );
-                             }
-                         } );
+            @Override
+            public void onAdLoaded( @NonNull RewardedAd ad )
+            {
+                showAd( ad );
+            }
+        } );
     }
 
     private void showAd( RewardedAd ad )

@@ -4,4 +4,5 @@ target_sources(
         ApplicationRunner.cpp
         ConnectionManager.cpp
         AndroidManager.cpp
+        AdManager.cpp
 )

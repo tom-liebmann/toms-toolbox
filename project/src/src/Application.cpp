@@ -1,5 +1,7 @@
 #include <ttb/project/Application.hpp>
 
+#include <ttb/project/AdManager.hpp>
+
 
 namespace ttb
 {

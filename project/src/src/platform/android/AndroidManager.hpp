@@ -14,6 +14,12 @@ public:
 
     bool isNetworkAvailable();
 
+    bool isAdManagerInitialized();
+
+    void initializeAdManager();
+
+    void runRewardedAd( std::string const& id );
+
 private:
     AndroidManager();
 };

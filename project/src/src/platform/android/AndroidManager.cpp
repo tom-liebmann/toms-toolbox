@@ -24,6 +24,12 @@ namespace
 
         bool isNetworkAvailable();
 
+        bool isAdManagerInitialized();
+
+        void initializeAdManager();
+
+        void runRewaredAd( std::string const& id );
+
     private:
         AndroidManagerImpl();
 
@@ -33,11 +39,16 @@ namespace
 
         jobject m_activity;
         jobject m_connectionManager;
+        jobject m_adManager;
 
         jmethodID m_enableNetworkCheckMethod;
         jmethodID m_disableNetworkCheckMethod;
         jmethodID m_isNetworkCheckEnabledMethod;
         jmethodID m_isNetworkAvailableMethod;
+
+        jmethodID m_isAdManagerInitializedMethod;
+        jmethodID m_initializeAdManagerMethod;
+        jmethodID m_runRewardedAdMethod;
     };
 
     jclass findClass( JNIEnv& env, char const* name );
@@ -74,6 +85,21 @@ bool AndroidManager::isNetworkAvailable()
     return AndroidManagerImpl::getInstance().isNetworkAvailable();
 }
 
+bool AndroidManager::isAdManagerInitialized()
+{
+    return AndroidManagerImpl::getInstance().isAdManagerInitialized();
+}
+
+void AndroidManager::initializeAdManager()
+{
+    AndroidManagerImpl::getInstance().initializeAdManager();
+}
+
+void AndroidManager::runRewardedAd( std::string const& id )
+{
+    AndroidManagerImpl::getInstance().runRewardedAd( id );
+}
+
 AndroidManager::AndroidManager() = default;
 
 
@@ -93,6 +119,7 @@ namespace
 
         auto const activityClass = findClass( *env, "toms_toolbox/MainActivity" );
         auto const connectionManagerClass = findClass( *env, "toms_toolbox/ConnectionManager" );
+        auto const adManagerClass = findClass( *env, "toms_toolbox/AdManager" );
 
         // Get activity object
         {
@@ -112,7 +139,16 @@ namespace
                 env->CallObjectMethod( m_activity, activityGetConnectionManagerMethod ) );
         }
 
-        // Get methods
+        // Get ad manager
+        {
+            auto const activityGetAdManagerMethod =
+                findMethod( *env, activityClass, "getAdManager", "()Ltoms_toolbox/AdManager;" );
+
+            m_adManager = env->NewGlobalRef(
+                env->CallObjectMethod( m_activity, activityGetAdManagerMethod ) );
+        }
+
+        // Get connection manager methods
         {
             m_enableNetworkCheckMethod =
                 findMethod( *env, connectionManagerClass, "enableNetworkCheck", "()V" );
@@ -126,6 +162,16 @@ namespace
             m_isNetworkAvailableMethod =
                 findMethod( *env, connectionManagerClass, "isNetworkAvailable", "()Z" );
         }
+
+        // Get ad manager methods
+        {
+            m_isAdManagerInitializedMethod =
+                findMethod( *env, adManagerClass, "isInitialized", "()Z" );
+
+            m_initializeAdManagerMethod = findMethod( *env, adManagerClass, "initialized", "()Z" );
+
+            m_runRewardedAdMethod = findMethod( *env, adManagerClass, "runRewardedAd", "()Z" );
+        }
     }
 
     void AndroidManagerImpl::destroy()
@@ -134,6 +180,7 @@ namespace
 
         env->DeleteGlobalRef( m_activity );
         env->DeleteGlobalRef( m_connectionManager );
+        env->DeleteGlobalRef( m_adManager );
     }
 
     void AndroidManagerImpl::enableNetworkCheck()
@@ -158,6 +205,26 @@ namespace
     {
         auto const env = getEnv();
         return env->CallBooleanMethod( m_connectionManager, m_isNetworkAvailableMethod );
+    }
+
+    bool AndroidManagerImpl::isAdManagerInitialized()
+    {
+        auto const env = getEnv();
+        return env->CallBooleanMethod( m_adManager, m_isAdManagerInitializedMethod );
+    }
+
+    void AndroidManagerImpl::initializeAdManager()
+    {
+        auto const env = getEnv();
+        env->CallVoidMethod( m_adManager, m_initializeAdManagerMethod );
+    }
+
+    void AndroidManagerImpl::runRewaredAd( std::string const& id )
+    {
+        auto const env = getEnv();
+        jId = env->NewStringUTF( id.c_str() );
+        env->CallVoidMethod( m_adManager, m_runRewardedAdMethod, jId );
+        env->DeleteLocalRef( jId );
     }
 
     AndroidManagerImpl::AndroidManagerImpl() = default;
