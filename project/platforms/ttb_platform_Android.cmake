@@ -59,30 +59,30 @@ function( _ttb_project_finish PROJECT_NAME )
     get_property( _PROJECT_VERSION_NR TARGET ${PROJECT_NAME} PROPERTY TTB_VERSION_NUMBER )
     get_property( _PROJECT_VERSION_NAME TARGET ${PROJECT_NAME} PROPERTY TTB_VERSION_NAME )
 
-    configure_file(
-        "${TTB_ANDROID_RES_DIR}/templates/AppActivity.java.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
-        @ONLY
-    )
+#    configure_file(
+#        "${TTB_ANDROID_RES_DIR}/templates/AppActivity.java.in"
+#        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
+#        @ONLY
+#    )
 
-    configure_file(
-        "${TTB_ANDROID_RES_DIR}/templates/AndroidManifest.xml.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
-        @ONLY
-    )
+#    configure_file(
+#        "${TTB_ANDROID_RES_DIR}/templates/AndroidManifest.xml.in"
+#        "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
+#        @ONLY
+#    )
 
-    _ttb_project_android_build_java_src(
-        OUTPUT_TARGET ${PROJECT_NAME}_build_java_src
-        OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex/classes.dex"
-        BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_java_src"
-        SOURCES
-            "${TTB_ANDROID_RES_DIR}/java_src/AdManager.java"
-            "${TTB_ANDROID_RES_DIR}/java_src/MainActivity.java"
-            "${TTB_ANDROID_RES_DIR}/java_src/MainView.java"
-            "${TTB_ANDROID_RES_DIR}/java_src/ApplicationLib.java"
-            "${TTB_ANDROID_RES_DIR}/java_src/ConnectionManager.java"
-            "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
-    )
+#    _ttb_project_android_build_java_src(
+#        OUTPUT_TARGET ${PROJECT_NAME}_build_java_src
+#        OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex/classes.dex"
+#        BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_java_src"
+#        SOURCES
+#            "${TTB_ANDROID_RES_DIR}/java_src/AdManager.java"
+#            "${TTB_ANDROID_RES_DIR}/java_src/MainActivity.java"
+#            "${TTB_ANDROID_RES_DIR}/java_src/MainView.java"
+#            "${TTB_ANDROID_RES_DIR}/java_src/ApplicationLib.java"
+#            "${TTB_ANDROID_RES_DIR}/java_src/ConnectionManager.java"
+#            "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AppActivity.java"
+#    )
 
     set( _ARCH_DEPENDENCIES )
     foreach( _ABI ${_PROJECT_ANDROID_ABI} )
@@ -105,15 +105,12 @@ function( _ttb_project_finish PROJECT_NAME )
     _ttb_project_android_build_bundle(
         OUTPUT_TARGET ${PROJECT_NAME}_build_bundle
         OUTPUT_FILE "${CMAKE_CURRENT_BINARY_DIR}/outputs/app_bundle.aab"
-        MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/android/tmp/AndroidManifest.xml"
         BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/build_bundle"
-        DEX_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/dex"
         LIB_DIR "${CMAKE_CURRENT_BINARY_DIR}/outputs/lib"
         ASSET_DIRS "${_PROJECT_ASSET_DIRS}"
         KEYSTORE_FILE "${_PROJECT_KEYSTORE_FILE}"
         KEYSTORE_PWD_FILE "${_PROJECT_KEYSTORE_PWD_FILE}"
         DEPENDS
-            ${PROJECT_NAME}_build_java_src
             ${_ARCH_DEPENDENCIES}
     )
 
@@ -237,8 +234,6 @@ function( _ttb_project_android_build_bundle )
         "OUTPUT_FILE"
         "BUILD_DIR"
         "LIB_DIR"
-        "DEX_DIR"
-        "MANIFEST"
         "KEYSTORE_FILE"
         "KEYSTORE_PWD_FILE"
     )
@@ -255,96 +250,82 @@ function( _ttb_project_android_build_bundle )
     #
     # Add them to linking command
 
-    set( _REQUIRED_DIRECTORIES
-        "${_ARGS_BUILD_DIR}"
-        "${_ARGS_BUILD_DIR}/bundle_files"
-        "${_ARGS_BUILD_DIR}/bundle_files/manifest"
-        "${_ARGS_BUILD_DIR}/bundle_files/dex"
-        "${_ARGS_BUILD_DIR}/bundle_files/res"
-        "${_ARGS_BUILD_DIR}/bundle_files/assets"
-        "${_ARGS_BUILD_DIR}/bundle_files/lib"
-        "${_ARGS_BUILD_DIR}/linked_files"
+    # ========= PREPARE GRADLE PROJECT DIRECTORY
+
+    file(
+        COPY
+        ${TTB_ANDROID_RES_DIR}/gradle_proj
+        DESTINATION ${_ARGS_BUILD_DIR}
     )
 
-    add_custom_command(
-        OUTPUT ${_REQUIRED_DIRECTORIES}
-        DEPENDS ${_ARGS_DEPENDS}
-        COMMAND ${CMAKE_COMMAND} -E make_directory ${_REQUIRED_DIRECTORIES}
+    set( _GRADLE_PROJ_DIR "${_ARGS_BUILD_DIR}/gradle_proj" )
+
+    file(
+        GLOB_RECURSE
+        _CONFIG_FILES
+        ${_GRADLE_PROJ_DIR}/*.in
     )
 
-    add_custom_command(
-        OUTPUT
-            "${_ARGS_BUILD_DIR}/linked_files/resources.pb"
-            "${_ARGS_BUILD_DIR}/linked_files/AndroidManifest.xml"
-        DEPENDS
-            "${_REQUIRED_DIRECTORIES}"
-            "${_ARGS_MANIFEST}"
-        COMMAND ${ANDROID_AAPT2}
-            link
-            --proto-format
-            -I "${ANDROID_JAR}"
-            --manifest "${_ARGS_MANIFEST}"
-            -o "${_ARGS_BUILD_DIR}/app_tmp.apk"
-        COMMAND unzip
-            -u
-            "${_ARGS_BUILD_DIR}/app_tmp.apk"
-            -d "${_ARGS_BUILD_DIR}/linked_files"
-    )
+    foreach( _CONFIG_FILE ${_CONFIG_FILES} )
+        get_filename_component( _CONFIG_FILE_DIR ${_CONFIG_FILE} DIRECTORY )
+        get_filename_component( _CONFIG_FILE_OUT_NAME ${_CONFIG_FILE} NAME_WLE )
+
+        configure_file(
+            ${_CONFIG_FILE}
+            ${_CONFIG_FILE_DIR}/${_CONFIG_FILE_OUT_NAME}
+            @ONLY
+        )
+
+        file(
+            REMOVE
+            ${_CONFIG_FILE}
+        )
+    endforeach()
+
+    # ========= ASSEMBLE ASSETS
 
     foreach( _ASSET_DIR ${_ARGS_ASSET_DIRS} )
         list( APPEND _ASSET_COMMANDS
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${_ASSET_DIR}"
-            "${_ARGS_BUILD_DIR}/bundle_files/assets"
+            "${_GRADLE_PROJ_DIR}/app/src/main/assets"
         )
     endforeach()
 
-    add_custom_command(
-        OUTPUT "${_ARGS_BUILD_DIR}/bundle.zip"
-        DEPENDS
-            "${_REQUIRED_DIRECTORIES}"
-            "${_ARGS_BUILD_DIR}/linked_files/resources.pb"
-            "${_ARGS_BUILD_DIR}/linked_files/AndroidManifest.xml"
-        WORKING_DIRECTORY "${_ARGS_BUILD_DIR}/bundle_files"
-        ${_ASSET_COMMANDS}
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${_ARGS_BUILD_DIR}/linked_files/AndroidManifest.xml"
-            "${_ARGS_BUILD_DIR}/bundle_files/manifest/"
-        COMMAND ${CMAKE_COMMAND} -E copy
-            "${_ARGS_BUILD_DIR}/linked_files/resources.pb"
-            "${_ARGS_BUILD_DIR}/bundle_files/"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${_ARGS_DEX_DIR}"
-            "${_ARGS_BUILD_DIR}/bundle_files/dex/"
+    # ========= COPY SHARED OBJECT FILES
+
+    add_custom_target(
+        ${_ARGS_OUTPUT_TARGET}_copy_libs
         COMMAND ${CMAKE_COMMAND} -E copy_directory
             "${_ARGS_LIB_DIR}"
-            "${_ARGS_BUILD_DIR}/bundle_files/lib/"
-        COMMAND zip
-            -r
-            "${_ARGS_BUILD_DIR}/bundle.zip"
-            "./*"
+            "${_GRADLE_PROJ_DIR}/app/src/main/jniLibs/"
+        DEPENDS
+            ${_ARGS_DEPENDS}
     )
 
+    # ========= BUILD BUNDLE WITH GRADLE
+
     add_custom_command(
-        OUTPUT "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
+        OUTPUT "${_GRADLE_PROJ_DIR}/app/build/outputs/bundle/release/app-release.aab"
         DEPENDS
-            "${_ARGS_BUILD_DIR}/bundle.zip"
-        COMMAND ${ANDROID_BUNDLETOOL}
-            build-bundle
-            --modules="${_ARGS_BUILD_DIR}/bundle.zip"
-            --output="${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
-            --overwrite
+            ${_ARGS_OUTPUT_TARGET}_copy_libs
+            ${_ASSET_COMMANDS}
+        COMMAND ${_GRADLE_PROJ_DIR}/gradlew
+            bundleRelease
+        WORKING_DIRECTORY ${_GRADLE_PROJ_DIR}
     )
+
+    # ========= SIGN BUNDLE
 
     add_custom_command(
         OUTPUT "${_ARGS_OUTPUT_FILE}"
-        DEPENDS "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
+        DEPENDS "${_GRADLE_PROJ_DIR}/app/build/outputs/bundle/release/app-release.aab"
         COMMAND ${ANDROID_APK_SIGNER} sign
             --ks "${_ARGS_KEYSTORE_FILE}"
             --ks-pass file:${_ARGS_KEYSTORE_PWD_FILE}
             --min-sdk-version ${ANDROID_SDK_VERSION_MIN}
             --out "${_ARGS_OUTPUT_FILE}"
-            "${_ARGS_BUILD_DIR}/bundle_unsigned.aab"
+            "${_GRADLE_PROJ_DIR}/app/build/outputs/bundle/release/app-release.aab"
     )
 
     add_custom_target( ${_ARGS_OUTPUT_TARGET} DEPENDS "${_ARGS_OUTPUT_FILE}" )

@@ -45,6 +45,7 @@ class AdManager
             @Override
             public void onInitializationComplete( InitializationStatus initializationStatus )
             {
+                m_initialized = true;
                 ApplicationLib.on_ad_init_complete();
             }
         } );
@@ -54,18 +55,20 @@ class AdManager
     {
         final AdRequest adRequest = new AdRequest.Builder().build();
 
-        RewardedAd.load( m_activity, id, adRequest, new RewardedAdLoadCallback() {
-            @Override
-            public void onAdFailedToLoad( @NonNull LoadAdError loadAdError )
-            {
-                ApplicationLib.on_ad_load_failed();
-            }
+        m_activity.runOnUiThread( () -> {
+            RewardedAd.load( m_activity, id, adRequest, new RewardedAdLoadCallback() {
+                @Override
+                public void onAdFailedToLoad( @NonNull LoadAdError loadAdError )
+                {
+                    ApplicationLib.on_ad_load_failed();
+                }
 
-            @Override
-            public void onAdLoaded( @NonNull RewardedAd ad )
-            {
-                showAd( ad );
-            }
+                @Override
+                public void onAdLoaded( @NonNull RewardedAd ad )
+                {
+                    showAd( ad );
+                }
+            } );
         } );
     }
 

@@ -12,10 +12,6 @@
     <uses-permission
         android:name="android.permission.INTERNET" />
 
-    <uses-sdk
-        android:minSdkVersion="@ANDROID_SDK_VERSION_MIN@"
-        android:targetSdkVersion="@ANDROID_SDK_VERSION_TARGET@" />
-
     <application
         android:allowBackup="false"
         android:fullBackupContent="false">
