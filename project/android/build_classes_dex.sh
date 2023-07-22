@@ -54,6 +54,9 @@ ${JAVA_COMPILER} \
     -d ${CLASS_DIR} \
     ${SRC_FILES[@]}
 
+OUTPUT_DIR=$(dirname ${OUTPUT_FILE})
+mkdir -p ${OUTPUT_DIR}
+
 ${ANDROID_DX} \
     --dex \
     --output=${OUTPUT_FILE} \

@@ -29,6 +29,19 @@
     <dependencies>
         <dependency>
             <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>12.0.1</version>
+            <type>aar</type>
+            <exclusions>
+                <exclusion>
+                    <groupId>androidx.work</groupId>
+                    <artifactId>work-runtime</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
             <artifactId>play-services-ads</artifactId>
             <version>22.2.0</version>
             <type>aar</type>

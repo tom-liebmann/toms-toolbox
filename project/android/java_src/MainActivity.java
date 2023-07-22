@@ -77,6 +77,11 @@ public class MainActivity extends android.app.Activity
         return m_connectionManager;
     }
 
+    public AdManager getAdManager()
+    {
+        return m_adManager;
+    }
+
     private void hideUi()
     {
         final View decorView = getWindow().getDecorView();

@@ -28,7 +28,7 @@ namespace
 
         void initializeAdManager();
 
-        void runRewaredAd( std::string const& id );
+        void runRewardedAd( std::string const& id );
 
     private:
         AndroidManagerImpl();
@@ -168,9 +168,9 @@ namespace
             m_isAdManagerInitializedMethod =
                 findMethod( *env, adManagerClass, "isInitialized", "()Z" );
 
-            m_initializeAdManagerMethod = findMethod( *env, adManagerClass, "initialized", "()Z" );
+            m_initializeAdManagerMethod = findMethod( *env, adManagerClass, "initialize", "()V" );
 
-            m_runRewardedAdMethod = findMethod( *env, adManagerClass, "runRewardedAd", "()Z" );
+            m_runRewardedAdMethod = findMethod( *env, adManagerClass, "runRewardedAd", "(Ljava/lang/String;)V" );
         }
     }
 
@@ -219,10 +219,10 @@ namespace
         env->CallVoidMethod( m_adManager, m_initializeAdManagerMethod );
     }
 
-    void AndroidManagerImpl::runRewaredAd( std::string const& id )
+    void AndroidManagerImpl::runRewardedAd( std::string const& id )
     {
         auto const env = getEnv();
-        jId = env->NewStringUTF( id.c_str() );
+        auto const jId = env->NewStringUTF( id.c_str() );
         env->CallVoidMethod( m_adManager, m_runRewardedAdMethod, jId );
         env->DeleteLocalRef( jId );
     }

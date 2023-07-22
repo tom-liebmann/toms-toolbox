@@ -1,6 +1,12 @@
 #include <ttb/project/AdManager.hpp>
 
+#include "AndroidManager.hpp"
+#include <ttb/utils/co/std_namespace.hpp>
+
+#include <jni.h>
+
 #include <mutex>
+
 
 namespace ttb
 {
@@ -34,14 +40,7 @@ namespace ttb
 
     ttb::co::Coroutine< void > AdManager::init()
     {
-        auto& android = AndroidManager::getInstance();
-
-        android.initializeAdManager();
-
-        while( !android.isAdManagerInitialized() )
-        {
-            co_await std::suspend_always;
-        }
+        return AdManagerImpl::getInstance().init();
     }
 
     ttb::co::Coroutine< bool > AdManager::playAd( std::string const& id )
@@ -54,6 +53,18 @@ namespace ttb
     {
         static AdManagerImpl instance;
         return instance;
+    }
+
+    ttb::co::Coroutine< void > AdManagerImpl::init()
+    {
+        auto& android = AndroidManager::getInstance();
+
+        android.initializeAdManager();
+
+        while( !android.isAdManagerInitialized() )
+        {
+            co_await ::co::suspend_always{};
+        }
     }
 
     ttb::co::Coroutine< bool > AdManagerImpl::playAd( std::string const& id )
@@ -76,7 +87,7 @@ namespace ttb
         while( m_adRunning )
         {
             lock.unlock();
-            co_await std::suspend_always;
+            co_await ::co::suspend_always{};
             lock.lock();
         }
 
