@@ -15,6 +15,7 @@ public class MainActivity extends android.app.Activity
     private MainView m_view;
     private ConnectionManager m_connectionManager;
     private AdManager m_adManager;
+    private SignInManager m_signInManager;
 
     public static MainActivity getInstance()
     {
@@ -32,6 +33,7 @@ public class MainActivity extends android.app.Activity
 
         m_connectionManager = new ConnectionManager( context );
         m_adManager = new AdManager( this );
+        m_signInManager = new SignInManager( context );
 
         ApplicationLib.init();
 
@@ -80,6 +82,11 @@ public class MainActivity extends android.app.Activity
     public AdManager getAdManager()
     {
         return m_adManager;
+    }
+
+    public LoginManager getSignInManager()
+    {
+        return m_signInManager;
     }
 
     private void hideUi()

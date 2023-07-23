@@ -37,9 +37,13 @@ public class ApplicationLib
 
     // ================ Google ID
 
-    public static native void on_sign_in_success( String authCode );
+    public static native void on_silent_sign_in_success( String authCode );
 
-    public static native void on_sign_in_failure();
+    public static native void on_silent_sign_in_failure();
+
+    public static native void on_explicit_sign_in_success( String authCode );
+
+    public static native void on_explicit_sign_in_failure();
 
     // ================ Networking
 

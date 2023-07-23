@@ -3,6 +3,12 @@
 #include <string>
 
 
+namespace android
+{
+    class SignInManager;
+}
+
+
 class AndroidManager
 {
 public:
@@ -21,6 +27,8 @@ public:
     void initializeAdManager();
 
     void runRewardedAd( std::string const& id );
+
+    android::SignInManager& getSignInManager();
 
 private:
     AndroidManager();

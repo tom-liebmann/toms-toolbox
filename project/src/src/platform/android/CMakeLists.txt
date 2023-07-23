@@ -5,4 +5,5 @@ target_sources(
         ConnectionManager.cpp
         AndroidManager.cpp
         AdManager.cpp
+        SignInManager.cpp
 )

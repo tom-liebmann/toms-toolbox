@@ -1,5 +1,6 @@
 #include "AndroidManager.hpp"
 
+#include "android/SignInManager.hpp"
 #include <ttb/core/Logger.hpp>
 
 #include <jni.h>
@@ -30,6 +31,8 @@ namespace
 
         void runRewardedAd( std::string const& id );
 
+        android::SignInManager& getSignInManager();
+
     private:
         AndroidManagerImpl();
 
@@ -49,6 +52,8 @@ namespace
         jmethodID m_isAdManagerInitializedMethod;
         jmethodID m_initializeAdManagerMethod;
         jmethodID m_runRewardedAdMethod;
+
+        std::unique_ptr< android::SignInManager > m_signInManager;
     };
 
     jclass findClass( JNIEnv& env, char const* name );
@@ -100,6 +105,11 @@ void AndroidManager::runRewardedAd( std::string const& id )
     AndroidManagerImpl::getInstance().runRewardedAd( id );
 }
 
+android::SignInManager& AndroidManager::getSignInManager()
+{
+    return AndroidManagerImpl::getInstancce().getSignInManager();
+}
+
 AndroidManager::AndroidManager() = default;
 
 
@@ -148,6 +158,16 @@ namespace
                 env->CallObjectMethod( m_activity, activityGetAdManagerMethod ) );
         }
 
+        // Get sign in manager
+        {
+            auto const activityGetSignInManagerMethod = findMethod(
+                *env, activityClass, "getSignInManager", "()Ltoms_toolbox/SignInManager;" );
+
+            m_signInManager = std::make_unique< android::SignInManager >(
+                m_javaVm, env->CallObjectMethod( m_activity, activityGetSignInManagerMethod ) )
+            );
+        }
+
         // Get connection manager methods
         {
             m_enableNetworkCheckMethod =
@@ -170,7 +190,8 @@ namespace
 
             m_initializeAdManagerMethod = findMethod( *env, adManagerClass, "initialize", "()V" );
 
-            m_runRewardedAdMethod = findMethod( *env, adManagerClass, "runRewardedAd", "(Ljava/lang/String;)V" );
+            m_runRewardedAdMethod =
+                findMethod( *env, adManagerClass, "runRewardedAd", "(Ljava/lang/String;)V" );
         }
     }
 
@@ -225,6 +246,11 @@ namespace
         auto const jId = env->NewStringUTF( id.c_str() );
         env->CallVoidMethod( m_adManager, m_runRewardedAdMethod, jId );
         env->DeleteLocalRef( jId );
+    }
+
+    android::SignInManager& AndroidManagerImpl::getSignInManager()
+    {
+        return *m_signInManager;
     }
 
     AndroidManagerImpl::AndroidManagerImpl() = default;
