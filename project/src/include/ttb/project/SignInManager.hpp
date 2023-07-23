@@ -2,6 +2,8 @@
 
 #include <ttb/utils/co/Coroutine.hpp>
 
+#include <string>
+
 
 namespace ttb
 {
@@ -10,9 +12,12 @@ namespace ttb
     public:
         static SignInManager& getInstance();
 
-        ttb::co::Coroutine< std::optional< std::string > > performSilentSignIn();
+        ttb::co::Coroutine< bool > performSilentSignIn();
 
-        ttb::co::Coroutine< std::optional< std::string > > performExplicitSignIn();
+        ttb::co::Coroutine< bool > performExplicitSignIn();
+
+        ttb::co::Coroutine< std::optional< std::string > >
+            generateServerToken( std::string const& serverId );
 
     private:
         SignInManager() = default;

@@ -57,7 +57,7 @@ public
             if( isAuthenticated )
             {
                 m_signedIn = true;
-                ApplicationLib.on_silent_sign_in_success( "Test" );
+                ApplicationLib.on_silent_sign_in_success();
             }
             else
             {
@@ -78,12 +78,31 @@ public
             if( isAuthenticated )
             {
                 m_signedIn = true;
-                ApplicationLib.on_explicit_sign_in_success( "Test" );
+                ApplicationLib.on_explicit_sign_in_success();
             }
             else
             {
                 ApplicationLib.on_explicit_sign_in_failure();
             }
         } );
+    }
+
+public
+    void generateServerToken( String serverId )
+    {
+        final GamesSignInClient gamesSignInClient = PlayGames.getGamesSignInClient( m_activity );
+
+        gamesSignInClient.requestServerSideAccess( serverId, /* forceRefreshToken= */ false )
+            .addOnCompleteListener( task->{
+                if( task.isSuccessful() )
+                {
+                    final String serverAuthToken = task.getResult();
+                    ApplicationLib.play_on_server_token_success( serverAuthToken );
+                }
+                else
+                {
+                    ApplicationLib.play_on_server_token_failure();
+                }
+            } );
     }
 }

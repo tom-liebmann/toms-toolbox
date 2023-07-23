@@ -12,6 +12,8 @@ namespace android
         m_isSignedInMethod = findMethod( env, cls, "isSignedIn", "()Z" );
         m_performSilentSignInMethod = findMethod( env, cls, "performSilentSignIn", "()V" );
         m_performExplicitSignInMethod = findMethod( env, cls, "performExplicitSignIn", "()V" );
+        m_generateServerTokenMethod =
+            findMethod( env, cls, "generateServerToken", "(Ljava/lang/String;)V" );
     }
 
     SignInManager::~SignInManager()
@@ -36,5 +38,13 @@ namespace android
     {
         auto& env = getEnv();
         env.CallVoidMethod( m_object, m_performExplicitSignInMethod );
+    }
+
+    void SignInManager::generateServerToken( std::string const& token )
+    {
+        auto& env = getEnv();
+        auto const jToken = env.NewStringUTF( token.c_str() );
+        env.CallVoidMethod( m_object, m_generateServerTokenMethod, jToken );
+        env.DeleteLocalRef( jToken );
     }
 }

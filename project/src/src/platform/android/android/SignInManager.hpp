@@ -2,6 +2,8 @@
 
 #include "ObjectBase.hpp"
 
+#include <string>
+
 
 namespace android
 {
@@ -22,11 +24,14 @@ namespace android
 
         void performExplicitSignIn();
 
+        void generateServerToken( std::string const& token );
+
     private:
         jobject m_object;
 
         jmethodID m_isSignedInMethod;
         jmethodID m_performSilentSignInMethod;
         jmethodID m_performExplicitSignInMethod;
+        jmethodID m_generateServerTokenMethod;
     };
 }
