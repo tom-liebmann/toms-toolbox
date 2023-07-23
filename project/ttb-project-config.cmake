@@ -77,6 +77,20 @@ function( ttb_project_set_version PROJECT_NAME VERSION_NR VERSION_NAME )
     )
 endfunction()
 
+function( ttb_project_set_google_admob_app_id PROJECT_NAME APP_ID )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_GOOGLE_ADMOB_APP_ID ${APP_ID}
+    )
+endfunction()
+
+function( ttb_project_set_google_play_app_id PROJECT_NAME APP_ID )
+    set_property(
+        TARGET ${PROJECT_NAME}
+        PROPERTY TTB_GOOGLE_PLAY_APP_ID ${APP_ID}
+    )
+endfunction()
+
 function( _ttb_project_check_required_property TARGET PROPERTY )
     get_property(
         _PROPERTY_VALUE
