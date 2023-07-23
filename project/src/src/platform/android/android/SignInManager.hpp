@@ -12,6 +12,8 @@ namespace android
 
         SignInManager( SignInManager const& ) = delete;
 
+        ~SignInManager();
+
         SignInManager& operator=( SignInManager const& ) = delete;
 
         bool isSignedIn();

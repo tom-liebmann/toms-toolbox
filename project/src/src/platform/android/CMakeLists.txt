@@ -7,3 +7,5 @@ target_sources(
         AdManager.cpp
         SignInManager.cpp
 )
+
+add_subdirectory( android )

@@ -4,25 +4,28 @@
 #include "android/SignInManager.hpp"
 
 
-namespace
+namespace ttb
 {
-    class SignInManagerImpl
+    namespace
     {
-    public:
-        static SignInManagerImpl& getInstance();
+        class SignInManagerImpl
+        {
+        public:
+            static SignInManagerImpl& getInstance();
 
-        co::Coroutine< std::optional< std::string > > performSilentSignIn();
+            ttb::co::Coroutine< std::optional< std::string > > performSilentSignIn();
 
-        co::Coroutine< std::optional< std::string > > performExplicitSignIn();
+            ttb::co::Coroutine< std::optional< std::string > > performExplicitSignIn();
 
-        void reportSignInResult( std::optional< std::string > result );
+            void reportSignInResult( std::optional< std::string > result );
 
-    private:
-        bool m_isSignInActive{ false };
-        std::optional< std::string > m_signInResult;
+        private:
+            bool m_isSignInActive{ false };
+            std::optional< std::string > m_signInResult;
 
-        std::mutex m_mutex;
-    };
+            std::mutex m_mutex;
+        };
+    }
 }
 
 
@@ -34,76 +37,87 @@ namespace ttb
         return instance;
     }
 
-    co::Coroutine< std::optional< std::string > > SignInManager::performSilentSignIn()
+    ttb::co::Coroutine< std::optional< std::string > > SignInManager::performSilentSignIn()
     {
         return SignInManagerImpl::getInstance().performSilentSignIn();
     }
 
-    co::Coroutine< std::optional< std::string > > SignInManager::performExplicitSignIn()
+    ttb::co::Coroutine< std::optional< std::string > > SignInManager::performExplicitSignIn()
     {
         return SignInManagerImpl::getInstance().performExplicitSignIn();
     }
 }
 
-
 namespace ttb
 {
-    SignInManagerImpl& SignInManagerImpl::getInstance()
+    namespace
     {
-        static SignInManagerImpl instance;
-        return instance;
-    }
-
-    co::Coroutine< std::optional< std::string > > SignInManagerImpl::performSilentSignIn()
-    {
-        auto lock = std::unique_lock{ m_mutex };
-
-        if( !m_isSignInActive )
+        SignInManagerImpl& SignInManagerImpl::getInstance()
         {
-            auto& signInManager = AndroidManager::getInstance().getSignInManager();
-            m_isSignInActive = true;
-            signInManager.performSilentSignIn();
+            static SignInManagerImpl instance;
+            return instance;
         }
 
-        while( m_isSignInActive )
+        ttb::co::Coroutine< std::optional< std::string > > SignInManagerImpl::performSilentSignIn()
         {
-            lock.unlock();
-            co_await co::suspend_always{};
-            lock.lock();
+            auto lock = std::unique_lock{ m_mutex };
+
+            if( !m_isSignInActive )
+            {
+                m_isSignInActive = true;
+
+                lock.unlock();
+                auto& signInManager = AndroidManager::getInstance().getSignInManager();
+                signInManager.performSilentSignIn();
+                lock.lock();
+            }
+
+            while( m_isSignInActive )
+            {
+                lock.unlock();
+                co_await ::co::suspend_always{};
+                lock.lock();
+            }
+
+            co_return m_signInResult;
         }
 
-        co_return m_signInResult;
-    }
-
-    co::Coroutine< std::optional< std::string > > SignInManagerImpl::performExplicitSignIn()
-    {
-        if( auto const silentSignInResult = co_await performSilentSignIn )
+        ttb::co::Coroutine< std::optional< std::string > >
+            SignInManagerImpl::performExplicitSignIn()
         {
-            co_return silentSignInResult;
+            if( auto const silentSignInResult = co_await performSilentSignIn() )
+            {
+                co_return silentSignInResult;
+            }
+
+            auto lock = std::unique_lock{ m_mutex };
+
+            if( !m_isSignInActive )
+            {
+                m_isSignInActive = true;
+
+                lock.unlock();
+                auto& signInManager = AndroidManager::getInstance().getSignInManager();
+                signInManager.performExplicitSignIn();
+                lock.lock();
+            }
+
+            while( m_isSignInActive )
+            {
+                lock.unlock();
+                co_await ::co::suspend_always{};
+                lock.lock();
+            }
+
+            co_return m_signInResult;
         }
 
-        if( !m_isSignInActive )
+        void SignInManagerImpl::reportSignInResult( std::optional< std::string > result )
         {
-            auto& signInManager = AndroidManager::getInstance().getSignInManager();
-            m_isSignInActive = true;
-            signInManager.performExplicitSignIn();
+            auto const lock = std::lock_guard{ m_mutex };
+            m_isSignInActive = false;
+            m_signInResult = std::move( result );
         }
-
-        while( m_isSignInActive )
-        {
-            lock.unlock();
-            co_await co::suspend_always{};
-            lock.lock();
-        }
-
-        co_return m_signInResult;
-    }
-
-    void SignInManagerImpl::reportSignInResult( std::optional< std::string > result )
-    {
-        auto const lock = std::lock_guard{ m_mutex };
-        m_isSignInActive = false;
-        m_signInResult = std::move( result );
     }
 }
 
@@ -111,32 +125,32 @@ namespace ttb
 extern "C"
 {
     // cppcheck suppress unusedFunction
-    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1silent_1sign_1in_success(
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1silent_1sign_1in_1success(
         JNIEnv* env, jclass /* cls */, jstring tokenId )
     {
         auto const tokenStr = std::string{ env->GetStringUTFChars( tokenId, NULL ) };
-        SignInManagerImpl::getInstance().reportSignInResult( tokenStr );
+        ttb::SignInManagerImpl::getInstance().reportSignInResult( tokenStr );
     }
 
     // cppcheck suppress unusedFunction
-    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1silent_1sign_1in_failure(
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1silent_1sign_1in_1failure(
         JNIEnv* /* env */, jclass /* cls */ )
     {
-        SignInManagerImpl::getInstance().reportSignInResult( {} );
+        ttb::SignInManagerImpl::getInstance().reportSignInResult( {} );
     }
 
     // cppcheck suppress unusedFunction
-    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1explicit_1sign_1in_success(
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1explicit_1sign_1in_1success(
         JNIEnv* env, jclass /* cls */, jstring tokenId )
     {
         auto const tokenStr = std::string{ env->GetStringUTFChars( tokenId, NULL ) };
-        SignInManagerImpl::getInstance().reportSignInResult( tokenStr );
+        ttb::SignInManagerImpl::getInstance().reportSignInResult( tokenStr );
     }
 
     // cppcheck suppress unusedFunction
-    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1explicit_1sign_1in_failure(
+    JNIEXPORT void JNICALL Java_toms_1toolbox_ApplicationLib_on_1explicit_1sign_1in_1failure(
         JNIEnv* /* env */, jclass /* cls */ )
     {
-        SignInManagerImpl::getInstance().reportSignInResult( {} );
+        ttb::SignInManagerImpl::getInstance().reportSignInResult( {} );
     }
 }

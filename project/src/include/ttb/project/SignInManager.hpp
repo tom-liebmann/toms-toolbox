@@ -10,9 +10,9 @@ namespace ttb
     public:
         static SignInManager& getInstance();
 
-        co::Coroutine< std::optional< std::string > > performSilentSignIn();
+        ttb::co::Coroutine< std::optional< std::string > > performSilentSignIn();
 
-        co::Coroutine< std::optional< std::string > > performExplicitSignIn();
+        ttb::co::Coroutine< std::optional< std::string > > performExplicitSignIn();
 
     private:
         SignInManager() = default;

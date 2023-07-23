@@ -1,0 +1,125 @@
+package toms_toolbox;
+
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.activity.result.ActivityResult;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+import android.app.Activity;
+
+// clang-format off
+import @ANDROID_PACKAGE_NAME@.R;
+// clang-format on
+
+
+class SignInManager
+{
+private
+    static final String TAG = "SignInManager";
+
+private
+    MainActivity m_activity;
+private
+    GoogleSignInClient m_signInClient;
+private
+    ActivityResultLauncher< Intent > m_activityResultLauncher;
+
+private
+    boolean m_signedIn = false;
+
+public
+    SignInManager( MainActivity activity )
+    {
+        m_activity = activity;
+        final Context context = m_activity.getApplicationContext();
+
+        // Request authCode so we can send the code to the server.
+        final String serverClientId = context.getString( R.string.server_client_id );
+
+        final GoogleSignInOptions options =
+            new GoogleSignInOptions.Builder( GoogleSignInOptions.DEFAULT_SIGN_IN )
+                .requestProfile()
+                .requestServerAuthCode( serverClientId )
+                .build();
+
+        m_signInClient = GoogleSignIn.getClient( context, options );
+
+        m_activityResultLauncher = m_activity.registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(), result->{
+                if( result.getResultCode() == Activity.RESULT_OK )
+                {
+                    final Intent intent = result.getData();
+                    final Task< GoogleSignInAccount > task =
+                        GoogleSignIn.getSignedInAccountFromIntent( intent );
+
+                    try
+                    {
+                        final GoogleSignInAccount account = task.getResult( ApiException.class );
+                        final String authCode = account.getServerAuthCode();
+
+                        Log.i( TAG, "Profile URL: " + account.getPhotoUrl() );
+
+                        m_signedIn = true;
+                        ApplicationLib.on_explicit_sign_in_success( authCode );
+                    }
+                    catch( ApiException apiException )
+                    {
+                        ApplicationLib.on_explicit_sign_in_failure();
+                    }
+                }
+                else
+                {
+                    Log.e( TAG,
+                           "Login failed: " +
+                               ActivityResult.resultCodeToString( result.getResultCode() ) );
+                    ApplicationLib.on_explicit_sign_in_failure();
+                }
+            } );
+    }
+
+public
+    boolean isSignedIn()
+    {
+        return m_signedIn;
+    }
+
+public
+    void performSilentSignIn()
+    {
+        m_signInClient.silentSignIn().addOnCompleteListener(
+            m_activity, task->{
+                if( task.isSuccessful() )
+                {
+                    final GoogleSignInAccount account = task.getResult();
+                    final String authCode = account.getServerAuthCode();
+
+                    if( authCode != null )
+                    {
+                        m_signedIn = true;
+                        ApplicationLib.on_silent_sign_in_success( authCode );
+                    }
+                    else
+                    {
+                        ApplicationLib.on_silent_sign_in_failure();
+                    }
+                }
+                else
+                {
+                    ApplicationLib.on_silent_sign_in_failure();
+                }
+            } );
+    }
+
+public
+    void performExplicitSignIn()
+    {
+        m_activityResultLauncher.launch( m_signInClient.getSignInIntent() );
+    }
+}

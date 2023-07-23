@@ -107,7 +107,7 @@ void AndroidManager::runRewardedAd( std::string const& id )
 
 android::SignInManager& AndroidManager::getSignInManager()
 {
-    return AndroidManagerImpl::getInstancce().getSignInManager();
+    return AndroidManagerImpl::getInstance().getSignInManager();
 }
 
 AndroidManager::AndroidManager() = default;
@@ -164,8 +164,9 @@ namespace
                 *env, activityClass, "getSignInManager", "()Ltoms_toolbox/SignInManager;" );
 
             m_signInManager = std::make_unique< android::SignInManager >(
-                m_javaVm, env->CallObjectMethod( m_activity, activityGetSignInManagerMethod ) )
-            );
+                m_javaVm,
+                env->NewGlobalRef(
+                    env->CallObjectMethod( m_activity, activityGetSignInManagerMethod ) ) );
         }
 
         // Get connection manager methods
@@ -202,6 +203,8 @@ namespace
         env->DeleteGlobalRef( m_activity );
         env->DeleteGlobalRef( m_connectionManager );
         env->DeleteGlobalRef( m_adManager );
+
+        m_signInManager.reset();
     }
 
     void AndroidManagerImpl::enableNetworkCheck()

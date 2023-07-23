@@ -15,7 +15,7 @@ namespace android
 
         jclass findClass( JNIEnv& env, char const* name );
 
-        jmethodID findMethod( JNIEnvt& env, jclass cls, char const* name, char const* signature );
+        jmethodID findMethod( JNIEnv& env, jclass cls, char const* name, char const* signature );
 
         jmethodID
             findStaticMethod( JNIEnv& env, jclass cls, char const* name, char const* signature );

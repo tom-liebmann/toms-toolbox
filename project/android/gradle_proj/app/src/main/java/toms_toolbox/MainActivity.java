@@ -4,9 +4,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import androidx.activity.ComponentActivity;
 
 
-public class MainActivity extends android.app.Activity
+public class MainActivity extends ComponentActivity
 {
     private static final String TAG = "MainActivity";
 
@@ -33,7 +34,7 @@ public class MainActivity extends android.app.Activity
 
         m_connectionManager = new ConnectionManager( context );
         m_adManager = new AdManager( this );
-        m_signInManager = new SignInManager( context );
+        m_signInManager = new SignInManager( this );
 
         ApplicationLib.init();
 
@@ -84,7 +85,7 @@ public class MainActivity extends android.app.Activity
         return m_adManager;
     }
 
-    public LoginManager getSignInManager()
+    public SignInManager getSignInManager()
     {
         return m_signInManager;
     }

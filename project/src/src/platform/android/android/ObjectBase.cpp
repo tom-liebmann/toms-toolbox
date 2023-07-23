@@ -1,5 +1,8 @@
 #include "ObjectBase.hpp"
 
+#include <stdexcept>
+#include <string>
+
 
 namespace android
 {
@@ -11,14 +14,14 @@ namespace android
     {
         JNIEnv* env;
 
-        switch( m_javaVm->GetEnv( (void**)&env, JNI_VERSION_1_6 ) )
+        switch( m_vm->GetEnv( (void**)&env, JNI_VERSION_1_6 ) )
         {
             case JNI_OK:
                 break;
 
             case JNI_EDETACHED:
             {
-                if( m_javaVm->AttachCurrentThread( &env, NULL ) != 0 )
+                if( m_vm->AttachCurrentThread( &env, NULL ) != 0 )
                 {
                     throw std::runtime_error( "Attachment failed" );
                 }
@@ -45,7 +48,7 @@ namespace android
     }
 
     jmethodID
-        ObjectBase::findMethod( JNIEnvt& env, jclass cls, char const* name, char const* signature )
+        ObjectBase::findMethod( JNIEnv& env, jclass cls, char const* name, char const* signature )
     {
         auto const mtd = env.GetMethodID( cls, name, signature );
 
