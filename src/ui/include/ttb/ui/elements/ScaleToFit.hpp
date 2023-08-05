@@ -2,6 +2,8 @@
 
 #include <ttb/ui/WrappedElement.hpp>
 
+#include <ttb/ui/XmlLoader.hpp>
+
 
 namespace ttb::ui
 {
@@ -9,6 +11,8 @@ namespace ttb::ui
     {
     public:
         ScaleToFit( Root& root );
+
+        ScaleToFit( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         void child( Element* element );
 

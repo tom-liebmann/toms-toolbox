@@ -4,14 +4,30 @@
 #include <ttb/math/Range.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
+#include <ttb/ui/XmlFactory.hpp>
 
 #include <iostream>
+
+
+namespace
+{
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::ScaleToFit >{ "scale" };
+}
 
 
 namespace ttb::ui
 {
     ScaleToFit::ScaleToFit( Root& root ) : WrappedElement{ root }
     {
+    }
+
+    ScaleToFit::ScaleToFit( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+        : WrappedElement{ root }
+    {
+        if( auto child = node.first_node() )
+        {
+            wrappedChild( loader.loadElement( root, *child ) );
+        }
     }
 
     void ScaleToFit::child( Element* element )
