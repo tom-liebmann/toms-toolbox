@@ -68,6 +68,26 @@ namespace ttb::ui
 
         auto& sizeSum = result( dirDim() );
 
+        auto fitSum = 0.0f;
+        auto fixedSize = 0.0f;
+
+        for( auto& slot : m_slots )
+        {
+            switch( slot.type )
+            {
+                case SlotType::FIXED:
+                    fixedSize += slot.value;
+                    break;
+
+                case SlotType::FIT_INFINITY:
+                    fitSum += slot.value;
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
         for( auto& slot : m_slots )
         {
             switch( slot.type )
@@ -84,7 +104,8 @@ namespace ttb::ui
                     if( slot.child )
                     {
                         auto childSize = size;
-                        childSize( dirDim() ) = std::numeric_limits< float >::infinity();
+                        childSize( dirDim() ) =
+                            ( size( dirDim() ) - fixedSize ) * slot.value / fitSum;
                         childSize = slot.child->fit( childSize );
                         sizeSum += childSize( dirDim() );
                     }
@@ -128,6 +149,7 @@ namespace ttb::ui
         Element::size( value );
 
         auto flexSum = 0.0f;
+        auto fitSum = 0.0f;
         auto fixedSize = 0.0f;
 
         for( auto& slot : m_slots )
@@ -144,14 +166,7 @@ namespace ttb::ui
                     break;
 
                 case SlotType::FIT_INFINITY:
-                    if( slot.child )
-                    {
-                        auto childSize = value;
-                        childSize( dirDim() ) = std::numeric_limits< float >::infinity();
-                        childSize = slot.child->fit( childSize );
-                        slot.width = childSize( dirDim() );
-                        fixedSize += slot.width;
-                    }
+                    fitSum += slot.value;
                     break;
 
                 case SlotType::FIT:
@@ -164,6 +179,21 @@ namespace ttb::ui
                         fixedSize += slot.width;
                     }
                     break;
+            }
+        }
+
+        for( auto& slot : m_slots )
+        {
+            if( slot.type == SlotType::FIT_INFINITY )
+            {
+                if( slot.child )
+                {
+                    auto childSize = value;
+                    childSize( dirDim() ) = ( value( dirDim() ) - fixedSize ) * slot.value / fitSum;
+                    childSize = slot.child->fit( childSize );
+                    slot.width = childSize( dirDim() );
+                    fixedSize += slot.width;
+                }
             }
         }
 

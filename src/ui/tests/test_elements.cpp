@@ -8,6 +8,8 @@
 #include <ttb/ui/elements/ScrollArea.hpp>
 #include <ttb/utils/EventManager.hpp>
 
+#include <fmt/core.h>
+
 
 namespace
 {
@@ -153,12 +155,11 @@ TEST_CASE( "Center", "[ui][elements]" )
 TEST_CASE( "Flex", "[ui][elements]" )
 {
     auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
+    auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+    auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
 
     SECTION( "Single fixed" )
     {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
-
         auto ele1 = TestElement{ root, {}, {} };
 
         flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
@@ -172,9 +173,6 @@ TEST_CASE( "Flex", "[ui][elements]" )
 
     SECTION( "Multiple fixed" )
     {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
-
         auto ele1 = TestElement{ root, {}, {} };
         auto ele2 = TestElement{ root, {}, {} };
 
@@ -190,6 +188,49 @@ TEST_CASE( "Flex", "[ui][elements]" )
 
         REQUIRE( ttb::Vector{ 1.0f, 0.2f } == ele2.size() );
         REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
+    }
+
+    SECTION( "Fixed and fit" )
+    {
+        auto ele1 = TestElement{ root, {}, {} };
+        auto ele2 = TestElement{ root, {}, {} };
+
+        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
+        flex.addSlot( ttb::ui::Flex::SlotType::FIT_INFINITY, 1.0f, &ele2 );
+        root.setChild( &flex );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == flex.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.9f } == ele2.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
+    }
+
+    SECTION( "Fixed, fit, and flex" )
+    {
+        auto ele1 = TestElement{ root, {}, {} };
+        auto ele2 = TestElement{ root, {}, 0.2f };
+        auto ele3 = TestElement{ root, {}, {} };
+
+        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
+        flex.addSlot( ttb::ui::Flex::SlotType::FIT_INFINITY, 1.0f, &ele2 );
+        flex.addSlot( ttb::ui::Flex::SlotType::FLEX, 1.0f, &ele3 );
+        root.setChild( &flex );
+
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == flex.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.2f } == ele2.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
+
+        REQUIRE( ttb::Vector{ 1.0f, 0.7f } == ele3.size() );
+        REQUIRE( ttb::Vector{ 0.0f, 0.3f } == ele3.offset() );
     }
 }
 
@@ -326,10 +367,10 @@ TEST_CASE( "Scroll", "[ui][scroll]" )
         scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
         scroll.onEvent( ttb::events::DragMove{ { 0.5f, 1.5f } } );
 
-        REQUIRE( ttb::Vector{ 0.0f, 0.05f } == ttb::Approx{ child.offset() } );
+        REQUIRE( ttb::Vector{ 0.0f, 0.075f } == ttb::Approx{ child.offset() } );
 
         scroll.onEvent( ttb::events::DragMove{ { 0.5f, -4.5f } } );
 
-        REQUIRE( ttb::Vector{ 0.0f, -4.05f } == child.offset() );
+        REQUIRE( ttb::Vector{ 0.0f, -4.075f } == child.offset() );
     }
 }
