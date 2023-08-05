@@ -4,12 +4,13 @@ target_sources(
     PRIVATE
         Element.cpp
         ElementParent.cpp
-        CombinedElement.cpp
-        WrappedElement.cpp
+        #CombinedElement.cpp
+        #WrappedElement.cpp
         XmlFactory.cpp
         XmlLoader.cpp
         Root.cpp
         fromStringView.cpp
+        Extent.cpp
 )
 
 add_subdirectory( elements )

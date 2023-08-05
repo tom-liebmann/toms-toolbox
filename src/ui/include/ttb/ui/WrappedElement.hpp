@@ -13,15 +13,11 @@ namespace ttb::ui
         //! @copydoc Element::fit( Size const& )
         virtual Size fit( Size const& size ) override;
 
-        //! @copydoc Element::offset( Offset const& )
-        virtual void offset( Offset const& value ) override;
+        //! @copydoc Element::setPosition( Position const& )
+        virtual void setPosition( Position const& value ) override;
 
-        using Element::offset;
-
-        //! @copydoc Element::size( Size const& )
-        virtual void size( Size const& value ) override;
-
-        using Element::size;
+        //! @copydoc Element::setSize( Size const& )
+        virtual void setSize( Size const& value ) override;
 
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;

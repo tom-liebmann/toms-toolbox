@@ -3,6 +3,7 @@
 #include <ttb/core/State.hpp>
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/ElementParent.hpp>
+#include <ttb/ui/Extent.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
 
@@ -19,22 +20,40 @@ namespace ttb::ui
     {
     public:
         using Size = ttb::Vector< float, 2 >;
-        using Offset = ttb::Vector< float, 2 >;
+        using Position = ttb::Vector< float, 2 >;
         using Transform = ttb::Matrix< float, 3, 3 >;
 
         Element( Root& root );
+
+        Element( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         virtual ~Element();
 
         virtual Size fit( Size const& space );
 
-        virtual void offset( Offset const& value );
+        virtual void setPosition( Position const& value );
 
-        Offset const& offset() const;
+        Position const& getPosition() const;
 
-        virtual void size( Size const& value );
+        virtual void setSize( Size const& value );
 
-        Size const& size() const;
+        Size const& getSize() const;
+
+        void setRight( std::optional< float > value );
+        void setTop( std::optional< float > value );
+        void setLeft( std::optional< float > value );
+        void setBottom( std::optional< float > value );
+
+        std::optional< float > const& getRight() const;
+        std::optional< float > const& getTop() const;
+        std::optional< float > const& getLeft() const;
+        std::optional< float > const& getBottom() const;
+
+        void setWidth( Extent value );
+        void setHeight( Extent value );
+
+        Extent getWidth() const;
+        Extent getHeight() const;
 
         virtual void render( ttb::State& state ) const = 0;
 
@@ -59,7 +78,15 @@ namespace ttb::ui
         ElementParent* m_parent{ nullptr };
 
         Size m_size{};
-        Offset m_offset{};
+        Position m_position{};
+
+        std::optional< float > m_right;
+        std::optional< float > m_top;
+        std::optional< float > m_left;
+        std::optional< float > m_bottom;
+
+        Extent m_width;
+        Extent m_height;
 
         Root& m_root;
     };
@@ -73,12 +100,12 @@ namespace ttb::ui
         return m_root;
     }
 
-    inline auto Element::offset() const -> Offset const&
+    inline auto Element::getPosition() const -> Position const&
     {
-        return m_offset;
+        return m_position;
     }
 
-    inline auto Element::size() const -> Size const&
+    inline auto Element::getSize() const -> Size const&
     {
         return m_size;
     }
@@ -91,5 +118,71 @@ namespace ttb::ui
     inline void Element::setParent( ElementParent* parent )
     {
         m_parent = parent;
+    }
+
+    inline void Element::setRight( std::optional< float > value )
+    {
+        m_right = value;
+        changed();
+    }
+
+    inline void Element::setTop( std::optional< float > value )
+    {
+        m_top = value;
+        changed();
+    }
+
+    inline void Element::setLeft( std::optional< float > value )
+    {
+        m_left = value;
+        changed();
+    }
+
+    inline void Element::setBottom( std::optional< float > value )
+    {
+        m_bottom = value;
+        changed();
+    }
+
+    inline std::optional< float > const& Element::getRight() const
+    {
+        return m_right;
+    }
+
+    inline std::optional< float > const& Element::getTop() const
+    {
+        return m_top;
+    }
+
+    inline std::optional< float > const& Element::getLeft() const
+    {
+        return m_left;
+    }
+
+    inline std::optional< float > const& Element::getBottom() const
+    {
+        return m_bottom;
+    }
+
+    inline void Element::setWidth( Extent value )
+    {
+        m_width = value;
+        changed();
+    }
+
+    inline void Element::setHeight( Extent value )
+    {
+        m_height = value;
+        changed();
+    }
+
+    inline Extent Element::getWidth() const
+    {
+        return m_width;
+    }
+
+    inline Extent Element::getHeight() const
+    {
+        return m_height;
     }
 }

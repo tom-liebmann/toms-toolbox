@@ -2,8 +2,6 @@
 
 #include <ttb/math/vector_operations.hpp>
 
-#include <ttb/ui/elements/Center.hpp>
-
 #include "rapidxml.h"
 
 #include <iostream>
@@ -16,6 +14,39 @@ namespace ttb::ui
     {
     }
 
+    Element::Element( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
+    {
+        if( auto const value = loader.attrValue( node, "width" ) )
+        {
+            m_width = parseExtent( value );
+        }
+
+        if( auto const value = loader.attrValue( node, "height" ) )
+        {
+            m_height = parseExtent( value );
+        }
+
+        if( auto const value = loader.attrValue( node, "right" ) )
+        {
+            m_right = parseOffset( value );
+        }
+
+        if( auto const value = loader.attrValue( node, "top" ) )
+        {
+            m_top = parseOffset( value );
+        }
+
+        if( auto const value = loader.attrValue( node, "left" ) )
+        {
+            m_left = parseOffset( value );
+        }
+
+        if( auto const value = loader.attrValue( node, "bottom" ) )
+        {
+            m_bottom = parseOffset( value );
+        }
+    }
+
     Element::~Element() = default;
 
     auto Element::fit( Size const& size ) -> Size
@@ -23,12 +54,12 @@ namespace ttb::ui
         return size;
     }
 
-    void Element::offset( Offset const& value )
+    void Element::setPosition( Position const& value )
     {
-        m_offset = value;
+        m_position = value;
     }
 
-    void Element::size( Size const& value )
+    void Element::setSize( Size const& value )
     {
         m_size = value;
     }
@@ -59,8 +90,8 @@ namespace ttb::ui
     {
         // clang-format off
         return Transform{
-            m_size( 0 ), 0.0f       , m_offset( 0 ),
-            0.0f       , m_size( 1 ), m_offset( 1 ),
+            m_size( 0 ), 0.0f       , m_position( 0 ),
+            0.0f       , m_size( 1 ), m_position( 1 ),
             0.0f       , 0.0f       , 1.0f
         };
         // clang-format on

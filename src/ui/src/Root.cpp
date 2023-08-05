@@ -30,8 +30,8 @@ namespace ttb::ui
         if( m_child )
         {
             m_child->setParent( this );
-            m_child->size( m_child->fit( m_size ) );
-            m_child->offset( {} );
+            m_child->setSize( m_child->fit( m_size ) );
+            m_child->setPosition( {} );
         }
     }
 
@@ -41,7 +41,7 @@ namespace ttb::ui
 
         if( m_child )
         {
-            m_child->size( m_child->fit( m_size ) );
+            m_child->setSize( m_child->fit( m_size ) );
         }
     }
 
@@ -102,7 +102,7 @@ namespace ttb::ui
 
     void Root::onChildChanged( Element& /* child */ )
     {
-        m_child->size( m_child->fit( m_size ) );
-        m_child->offset( {} );
+        m_child->setSize( m_child->fit( m_size ) );
+        m_child->setPosition( {} );
     }
 }
