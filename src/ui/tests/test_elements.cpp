@@ -2,10 +2,11 @@
 
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/ui/Root.hpp>
-#include <ttb/ui/elements/Center.hpp>
-#include <ttb/ui/elements/Flex.hpp>
-#include <ttb/ui/elements/Margin.hpp>
-#include <ttb/ui/elements/ScrollArea.hpp>
+#include <ttb/ui/elements/Group.hpp>
+// #include <ttb/ui/elements/Center.hpp>
+// #include <ttb/ui/elements/Flex.hpp>
+// #include <ttb/ui/elements/Margin.hpp>
+// #include <ttb/ui/elements/ScrollArea.hpp>
 #include <ttb/utils/EventManager.hpp>
 
 #include <fmt/core.h>
@@ -16,25 +17,13 @@ namespace
     class TestElement : public ttb::ui::Element
     {
     public:
-        TestElement( ttb::ui::Root& root,
-                     std::optional< float > width,
-                     std::optional< float > height )
-            : Element{ root }, m_width{ width }, m_height{ height }
+        TestElement( ttb::ui::Root& root ) : Element{ root }
         {
-        }
-
-        virtual Size fit( Size const& size ) override
-        {
-            return Size{ m_width.value_or( size( 0 ) ), m_height.value_or( size( 1 ) ) };
         }
 
         virtual void render( ttb::State& state ) const override
         {
         }
-
-    private:
-        std::optional< float > m_width;
-        std::optional< float > m_height;
     };
 }
 
@@ -65,6 +54,11 @@ namespace ttb
             return true;
         }
 
+        ttb::Vector< TType, TDim > const& getValue() const
+        {
+            return m_value;
+        }
+
     private:
         TType m_epsilon{ 1e-5 };
         ttb::Vector< TType, TDim > m_value;
@@ -72,305 +66,107 @@ namespace ttb
 
     template < typename TType, std::size_t TDim >
     Approx( ttb::Vector< TType, TDim > const& ) -> Approx< ttb::Vector< TType, TDim > >;
-}
 
 
-TEST_CASE( "Center", "[ui][elements]" )
-{
-    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
-
-    SECTION( "Centered" )
+    template < typename TType, std::size_t TDim >
+    std::ostream& operator<<( std::ostream& stream,
+                              ttb::Approx< ttb::Vector< TType, TDim > > const& vec )
     {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ root,
-                                       ttb::ui::Center::HAlignment::CENTER,
-                                       ttb::ui::Center::VAlignment::MIDDLE };
-        auto testElement = TestElement{ root, 0.5f, 0.5f };
-
-        center.child( &testElement );
-        root.setChild( &center );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
-        REQUIRE( ttb::Vector{ 0.25f, 0.25f } == testElement.offset() );
-
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == center.offset() );
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == center.size() );
-    }
-
-    SECTION( "Right" )
-    {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ root,
-                                       ttb::ui::Center::HAlignment::RIGHT,
-                                       ttb::ui::Center::VAlignment::BOTTOM };
-        auto testElement = TestElement{ root, 0.5f, 0.5f };
-
-        center.child( &testElement );
-        root.setChild( &center );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.offset() );
-
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == center.offset() );
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == center.size() );
-    }
-
-    SECTION( "Left" )
-    {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto center = ttb::ui::Center{ root,
-                                       ttb::ui::Center::HAlignment::LEFT,
-                                       ttb::ui::Center::VAlignment::TOP };
-        auto testElement = TestElement{ root, 0.5f, 0.5f };
-
-        center.child( &testElement );
-        root.setChild( &center );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == testElement.offset() );
-
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == center.offset() );
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == center.size() );
-    }
-
-    SECTION( "Min size" )
-    {
-        auto root = ttb::ui::Root{ resourceManager, { 0.0f, 0.0f } };
-        auto center = ttb::ui::Center{ root,
-                                       ttb::ui::Center::HAlignment::LEFT,
-                                       ttb::ui::Center::VAlignment::TOP };
-        auto testElement = TestElement{ root, 0.5f, 0.5f };
-
-        center.child( &testElement );
-        root.setChild( &center );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == testElement.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == testElement.offset() );
-
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == center.offset() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == center.size() );
+        return stream << vec.getValue();
     }
 }
 
-TEST_CASE( "Flex", "[ui][elements]" )
+
+TEST_CASE( "Element", "[ui][elements]" )
 {
-    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
-    auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-    auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
+    using namespace ttb::ui;
 
-    SECTION( "Single fixed" )
-    {
-        auto ele1 = TestElement{ root, {}, {} };
-
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        root.setChild( &flex );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == flex.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
-        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
-    }
-
-    SECTION( "Multiple fixed" )
-    {
-        auto ele1 = TestElement{ root, {}, {} };
-        auto ele2 = TestElement{ root, {}, {} };
-
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.2f, &ele2 );
-        root.setChild( &flex );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.3f } == flex.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.2f } == ele2.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
-    }
-
-    SECTION( "Fixed and fit" )
-    {
-        auto ele1 = TestElement{ root, {}, {} };
-        auto ele2 = TestElement{ root, {}, {} };
-
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        flex.addSlot( ttb::ui::Flex::SlotType::FIT_INFINITY, 1.0f, &ele2 );
-        root.setChild( &flex );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == flex.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.9f } == ele2.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
-    }
-
-    SECTION( "Fixed, fit, and flex" )
-    {
-        auto ele1 = TestElement{ root, {}, {} };
-        auto ele2 = TestElement{ root, {}, 0.2f };
-        auto ele3 = TestElement{ root, {}, {} };
-
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        flex.addSlot( ttb::ui::Flex::SlotType::FIT_INFINITY, 1.0f, &ele2 );
-        flex.addSlot( ttb::ui::Flex::SlotType::FLEX, 1.0f, &ele3 );
-        root.setChild( &flex );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == flex.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == flex.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.1f } == ele1.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ele1.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.2f } == ele2.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.1f } == ele2.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.7f } == ele3.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.3f } == ele3.offset() );
-    }
-}
-
-TEST_CASE( "Flex & Margin", "[ui][flex][margin]" )
-{
-    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
-
-    SECTION( "Fixed & Flex" )
-    {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto margin = ttb::ui::Margin{ root, 0.1f };
-        auto flex = ttb::ui::Flex{ root, ttb::ui::Flex::Direction::VERTICAL };
-
-        auto ele1 = TestElement{ root, {}, {} };
-        auto ele2 = TestElement{ root, {}, {} };
-
-        flex.addSlot( ttb::ui::Flex::SlotType::FIXED, 0.1f, &ele1 );
-        flex.addSlot( ttb::ui::Flex::SlotType::FLEX, 1.0f, &ele2 );
-        margin.child( &flex );
-        root.setChild( &margin );
-
-        REQUIRE( ttb::Vector{ 0.8f, 0.8f } == ttb::Approx{ flex.size() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ttb::Approx{ flex.offset() } );
-
-        REQUIRE( ttb::Vector{ 0.8f, 0.1f } == ttb::Approx{ ele1.size() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ttb::Approx{ ele1.offset() } );
-
-        REQUIRE( ttb::Vector{ 0.8f, 0.7f } == ttb::Approx{ ele2.size() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ ele2.offset() } );
-    }
-}
-
-TEST_CASE( "Margin", "[ui][margin]" )
-{
-    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
-
-    SECTION( "Simple margin" )
-    {
-        auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-        auto margin = ttb::ui::Margin{ root, 0.1f };
-
-        auto ele = TestElement{ root, {}, {} };
-
-        margin.child( &ele );
-        root.setChild( &margin );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == margin.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == margin.offset() );
-
-        REQUIRE( ttb::Vector{ 0.8f, 0.8f } == ttb::Approx{ ele.size() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.1f } == ele.offset() );
-    }
-}
-
-TEST_CASE( "Scroll", "[ui][scroll]" )
-{
     auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
     auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
 
-    SECTION( "Simple scroll" )
+    SECTION( "Unspecified width" )
     {
-        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
-        auto child = TestElement{ root, {}, 5.0f };
+        auto ele = TestElement{ root };
+        ele.setHeight( 0.5f );
 
-        scroll.setChild( &child );
-        root.setChild( &scroll );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == child.offset() );
+        REQUIRE_THROWS( root.setChild( &ele ) );
     }
 
-    SECTION( "Fit child" )
+    SECTION( "Unspecified Height" )
     {
-        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
-        auto child = TestElement{ root, {}, 0.5f };
+        auto ele = TestElement{ root };
+        ele.setWidth( 0.5f );
 
-        scroll.setChild( &child );
-        root.setChild( &scroll );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.5f } == scroll.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 0.5f } == child.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == child.offset() );
+        REQUIRE_THROWS( root.setChild( &ele ) );
     }
 
-    SECTION( "Simple scroll" )
+    SECTION( "Fixed size" )
     {
-        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
-        auto child = TestElement{ root, {}, 5.0f };
+        auto ele = TestElement{ root };
+        ele.setWidth( 0.5f );
+        ele.setHeight( 0.5f );
 
-        scroll.setChild( &child );
-        root.setChild( &scroll );
+        root.setChild( &ele );
 
-        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
-        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.4f } } );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
-        REQUIRE( ttb::Vector{ 0.0f, -0.1f } == ttb::Approx{ child.offset() } );
-
-        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 0.45f } } );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
-        REQUIRE( ttb::Vector{ 0.0f, -0.05f } == ttb::Approx{ child.offset() } );
-
-        // Scroll to end
-
-        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -3.5f } } );
-
-        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == scroll.size() );
-        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == scroll.offset() );
-
-        REQUIRE( ttb::Vector{ 1.0f, 5.0f } == child.size() );
-        REQUIRE( ttb::Vector{ 0.0f, -4.0f } == ttb::Approx{ child.offset() } );
+        REQUIRE( ttb::Vector{ 0.5f, 0.5f } == ttb::Approx{ ele.getSize() } );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ttb::Approx{ ele.getPosition() } );
     }
 
-    SECTION( "Overscroll" )
+    SECTION( "Match parent" )
     {
-        auto scroll = ttb::ui::ScrollArea{ root, ttb::ui::ScrollArea::Direction::VERTICAL };
-        auto child = TestElement{ root, {}, 5.0f };
+        auto ele = TestElement{ root };
+        ele.setWidth( Extent::Type::MATCH_PARENT );
+        ele.setHeight( Extent::Type::MATCH_PARENT );
 
-        scroll.setChild( &child );
-        root.setChild( &scroll );
+        root.setChild( &ele );
 
-        scroll.onEvent( ttb::events::DragStart{ { 0.5f, 0.5f } } );
-        scroll.onEvent( ttb::events::DragMove{ { 0.5f, 1.5f } } );
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == ttb::Approx{ ele.getSize() } );
+        REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ttb::Approx{ ele.getPosition() } );
+    }
 
-        REQUIRE( ttb::Vector{ 0.0f, 0.075f } == ttb::Approx{ child.offset() } );
+    SECTION( "Padding" )
+    {
+        auto ele = TestElement{ root };
 
-        scroll.onEvent( ttb::events::DragMove{ { 0.5f, -4.5f } } );
+        ele.setWidth( Extent::Type::MATCH_PARENT );
+        ele.setHeight( Extent::Type::MATCH_PARENT );
 
-        REQUIRE( ttb::Vector{ 0.0f, -4.075f } == child.offset() );
+        ele.setLeft( 0.1f );
+        ele.setRight( 0.2f );
+        ele.setTop( 0.3f );
+        ele.setBottom( 0.1f );
+
+        root.setChild( &ele );
+
+        REQUIRE( ttb::Vector{ 0.7f, 0.6f } == ttb::Approx{ ele.getSize() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.3f } == ttb::Approx{ ele.getPosition() } );
+    }
+}
+
+TEST_CASE( "Group", "[ui][elements]" )
+{
+    using namespace ttb::ui;
+
+    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
+    auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
+
+    SECTION( "Single child" )
+    {
+        auto group = Group{ root };
+        group.setLeft( 0.1f );
+        group.setTop( 0.2f );
+
+        auto child = TestElement{ root };
+        child.setWidth( 0.5f );
+        child.setHeight( 0.4f );
+
+        group.add( &child );
+        root.setChild( &group );
+
+        REQUIRE( ttb::Vector{ 0.5f, 0.4f } == ttb::Approx{ group.getSize() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ group.getPosition() } );
+
+        REQUIRE( ttb::Vector{ 0.5f, 0.4f } == ttb::Approx{ child.getSize() } );
+        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ child.getPosition() } );
     }
 }

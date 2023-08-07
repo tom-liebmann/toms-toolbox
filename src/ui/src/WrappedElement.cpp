@@ -10,33 +10,45 @@ namespace ttb::ui
     {
     }
 
-    auto WrappedElement::fit( Size const& size ) -> Size
+    float WrappedElement::fitWidth( float space ) const
     {
-        if( m_child )
+        if( getWidth().getType() == Extent::Type::MATCH_CHILD )
         {
-            return m_child->fit( size );
+            return ( m_child ? m_child->fitWidth( space - getLeft() - getRight() ) : 0.0f ) +
+                   getLeft() + getRight();
         }
 
-        return size;
+        return Element::fitWidth( space );
     }
 
-    void WrappedElement::offset( Offset const& value )
+    float WrappedElement::fitHeight( float space ) const
     {
-        Element::offset( value );
+        if( getHeight().getType() == Extent::Type::MATCH_CHILD )
+        {
+            return ( m_child ? m_child->fitHeight( space - getTop() - getBottom() ) : 0.0f ) +
+                   getTop() + getBottom();
+        }
+
+        return Element::fitHeight( space );
+    }
+
+    void WrappedElement::setPosition( Position const& value )
+    {
+        Element::setPosition( value );
 
         if( m_child )
         {
-            m_child->offset( value );
+            m_child->setPosition( getPosition() );
         }
     }
 
-    void WrappedElement::size( Size const& value )
+    void WrappedElement::setSize( Size const& value )
     {
-        Element::size( value );
+        Element::setSize( value );
 
         if( m_child )
         {
-            m_child->size( value );
+            m_child->setSize( getSize() );
         }
     }
 

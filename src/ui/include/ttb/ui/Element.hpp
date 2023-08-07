@@ -7,10 +7,13 @@
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
 
+#include <rapidxml/rapidxml.hpp>
+
 
 namespace ttb::ui
 {
     class Root;
+    class XmlLoader;
 }
 
 
@@ -29,7 +32,11 @@ namespace ttb::ui
 
         virtual ~Element();
 
-        virtual Size fit( Size const& space );
+        virtual float fitWidth( float space ) const;
+
+        virtual float fitHeight( float space ) const;
+
+        Size fit( Size const& space ) const;
 
         virtual void setPosition( Position const& value );
 
@@ -39,15 +46,15 @@ namespace ttb::ui
 
         Size const& getSize() const;
 
-        void setRight( std::optional< float > value );
-        void setTop( std::optional< float > value );
-        void setLeft( std::optional< float > value );
-        void setBottom( std::optional< float > value );
+        void setRight( float value );
+        void setTop( float value );
+        void setLeft( float value );
+        void setBottom( float value );
 
-        std::optional< float > const& getRight() const;
-        std::optional< float > const& getTop() const;
-        std::optional< float > const& getLeft() const;
-        std::optional< float > const& getBottom() const;
+        float getRight() const;
+        float getTop() const;
+        float getLeft() const;
+        float getBottom() const;
 
         void setWidth( Extent value );
         void setHeight( Extent value );
@@ -80,10 +87,10 @@ namespace ttb::ui
         Size m_size{};
         Position m_position{};
 
-        std::optional< float > m_right;
-        std::optional< float > m_top;
-        std::optional< float > m_left;
-        std::optional< float > m_bottom;
+        float m_right{ 0.0f };
+        float m_top{ 0.0f };
+        float m_left{ 0.0f };
+        float m_bottom{ 0.0f };
 
         Extent m_width;
         Extent m_height;
@@ -120,46 +127,46 @@ namespace ttb::ui
         m_parent = parent;
     }
 
-    inline void Element::setRight( std::optional< float > value )
+    inline void Element::setRight( float value )
     {
         m_right = value;
         changed();
     }
 
-    inline void Element::setTop( std::optional< float > value )
+    inline void Element::setTop( float value )
     {
         m_top = value;
         changed();
     }
 
-    inline void Element::setLeft( std::optional< float > value )
+    inline void Element::setLeft( float value )
     {
         m_left = value;
         changed();
     }
 
-    inline void Element::setBottom( std::optional< float > value )
+    inline void Element::setBottom( float value )
     {
         m_bottom = value;
         changed();
     }
 
-    inline std::optional< float > const& Element::getRight() const
+    inline float Element::getRight() const
     {
         return m_right;
     }
 
-    inline std::optional< float > const& Element::getTop() const
+    inline float Element::getTop() const
     {
         return m_top;
     }
 
-    inline std::optional< float > const& Element::getLeft() const
+    inline float Element::getLeft() const
     {
         return m_left;
     }
 
-    inline std::optional< float > const& Element::getBottom() const
+    inline float Element::getBottom() const
     {
         return m_bottom;
     }

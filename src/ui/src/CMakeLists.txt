@@ -5,7 +5,7 @@ target_sources(
         Element.cpp
         ElementParent.cpp
         #CombinedElement.cpp
-        #WrappedElement.cpp
+        WrappedElement.cpp
         XmlFactory.cpp
         XmlLoader.cpp
         Root.cpp

@@ -2,6 +2,8 @@
 
 #include <ttb/ui/XmlLoader.hpp>
 
+#include <memory>
+
 
 namespace ttb::ui
 {
