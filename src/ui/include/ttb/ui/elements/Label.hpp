@@ -5,6 +5,7 @@
 #include <ttb/core/fonts/Font.hpp>
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/shader.hpp>
+#include <ttb/core/texture/Texture2D.hpp>
 #include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/Color.hpp>
 

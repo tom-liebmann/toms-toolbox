@@ -1,5 +1,6 @@
 #include <ttb/core/resources/loader/FontLoader.hpp>
 
+#include <ttb/core/fonts/GlyphLoader.hpp>
 #include <ttb/core/resources/io_helper.hpp>
 
 
@@ -11,13 +12,24 @@ namespace ttb::resources
 
     std::shared_ptr< ttb::Font > FontLoader::load( YAML::Node const& node ) const
     {
-        auto const filename = node[ "file" ].as< std::string >();
-        auto const lineHeight = node[ "line_height" ].as< float >();
-        auto const width = node[ "width" ].as< uint16_t >();
-        auto const height = node[ "height" ].as< uint16_t >();
+        auto font = std::shared_ptr< Font >( new Font{} );
 
+        auto const filename = node[ "file" ].as< std::string >();
         auto const content = loadFile( rootPath() + "/" + filename );
 
-        return std::make_shared< ttb::Font >( lineHeight, width, height, content );
+        auto fontNode = YAML::Load( content );
+
+        font->m_emSize = fontNode[ "metrics" ][ "emSize" ].as< float >();
+        font->m_lineHeight = fontNode[ "metrics" ][ "lineHeight" ].as< float >();
+        font->m_texWidth = fontNode[ "atlas" ][ "width" ].as< std::uint32_t >();
+        font->m_texHeight = fontNode[ "atlas" ][ "height" ].as< std::uint32_t >();
+
+        for( auto const glyphNode : fontNode[ "glyphs" ] )
+        {
+            auto const glyph = GlyphLoader::loadFromYaml( glyphNode );
+            font->m_glyphs.insert( std::make_pair( glyph.getId(), glyph ) );
+        }
+
+        return font;
     }
 }

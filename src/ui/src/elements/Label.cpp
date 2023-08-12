@@ -9,6 +9,8 @@
 
 #include <ttb/ui/XmlFactory.hpp>
 
+#include <fmt/core.h>
+
 #include <regex>
 
 
@@ -86,7 +88,7 @@ namespace ttb::ui
 
     auto Label::fit( Size const& /* size */ ) -> Size
     {
-        auto const fontRange = m_font->textDimensions( m_size, m_text );
+        auto const fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text );
         return fontRange.extent();
     }
 
@@ -95,17 +97,22 @@ namespace ttb::ui
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        auto const fontRange = m_font->textDimensions( m_size, m_text );
+        auto const fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text );
+
+        // clang-format off
+        auto const fontTransform = ttb::Matrix< float, 3, 3 >{
+            1.0f / fontRange.extent( 0 ),                         0.0f, -fontRange.getMin( 0 ) / fontRange.extent( 0 ),
+                                    0.0f, 1.0f / fontRange.extent( 1 ), -fontRange.getMin( 1 ) / fontRange.extent( 1 ),
+                                    0.0f,                         0.0f, 1.0f,
+        };
+        // clang-format on
 
         state.with(
             *m_shader,
             ttb::UniformBinder{ "u_texture", 0 },
             ttb::UniformBinder{
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
-            ttb::UniformBinder{
-                "u_transform",
-                transform() * ttb::mat::scale( ttb::Vector{ 1.0f / fontRange.extent( 0 ),
-                                                            1.0f / fontRange.extent( 1 ) } ) },
+            ttb::UniformBinder{ "u_transform", transform() * fontTransform },
             [ & ]
             {
                 m_texture->bind( 0 );
@@ -120,6 +127,6 @@ namespace ttb::ui
 
     void Label::updateGeometry()
     {
-        m_textGeometry = ttb::TextFactory::createText( m_size, *m_font, m_text );
+        m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text );
     }
 }

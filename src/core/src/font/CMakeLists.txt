@@ -4,4 +4,5 @@ target_sources(
     PRIVATE
         Font.cpp
         TextFactory.cpp
+        GlyphLoader.cpp
 )

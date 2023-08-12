@@ -1,76 +1,68 @@
 #pragma once
 
-#include <ttb/core/texture.hpp>
-#include <ttb/math/Range.hpp>
+#include <ttb/core/fonts/Glyph.hpp>
 
-#include <iostream>
+#include <cstdint>
 #include <map>
-#include <memory>
+
+
+namespace ttb::resources
+{
+    class FontLoader;
+}
 
 
 namespace ttb
 {
+    /**
+     * Fonts can be generated with https://github.com/Chlumsky/msdf-atlas-gen
+     */
     class Font
     {
     public:
-        class Character
-        {
-        public:
-            Character( std::string const& line );
+        float getEmSize() const;
 
-            char id() const;
+        float getLineHeight() const;
 
-            float x() const;
+        std::uint32_t getTexWidth() const;
 
-            float y() const;
+        std::uint32_t getTexHeight() const;
 
-            float width() const;
-
-            float height() const;
-
-            float xOffset() const;
-
-            float yOffset() const;
-
-            float xAdvance() const;
-
-        private:
-            char m_id;
-            float m_x;
-            float m_y;
-            float m_width;
-            float m_height;
-            float m_xOffset;
-            float m_yOffset;
-            float m_xAdvance;
-        };
-
-        Font( float lineHeight,
-              uint16_t width,
-              uint16_t height,
-              std::string const& charFileContent );
-
-        Character const& character( char index ) const;
-
-        float lineHeight() const;
-
-        uint16_t width() const;
-
-        uint16_t height() const;
-
-        /**
-         * Computes the dimensions of the geometry for the given text.
-         *
-         * @param  size Size of the text to compute width for
-         * @param  text Text to compute width for
-         * @return      Dimensions of the given text
-         */
-        ttb::Range< float, 2 > textDimensions( float size, std::string const& text ) const;
+        Glyph const& getGlyph( char codePoint ) const;
 
     private:
+        Font();
+
+        float m_emSize;
         float m_lineHeight;
-        uint16_t m_width;
-        uint16_t m_height;
-        std::map< char, Character > m_characters;
+        std::uint32_t m_texWidth;
+        std::uint32_t m_texHeight;
+        std::map< char, Glyph > m_glyphs;
+
+        friend class ttb::resources::FontLoader;
     };
+}
+
+
+namespace ttb
+{
+    inline float Font::getEmSize() const
+    {
+        return m_emSize;
+    }
+
+    inline float Font::getLineHeight() const
+    {
+        return m_lineHeight;
+    }
+
+    inline std::uint32_t Font::getTexWidth() const
+    {
+        return m_texWidth;
+    }
+
+    inline std::uint32_t Font::getTexHeight() const
+    {
+        return m_texHeight;
+    }
 }
