@@ -16,7 +16,9 @@ namespace ttb
 
         float getAdvance() const;
 
+#ifndef TEST
     private:
+#endif
         Glyph();
 
         char m_id;

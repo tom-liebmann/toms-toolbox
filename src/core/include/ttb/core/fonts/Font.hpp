@@ -30,7 +30,9 @@ namespace ttb
 
         Glyph const& getGlyph( char codePoint ) const;
 
+#ifndef TEST
     private:
+#endif
         Font();
 
         float m_emSize;
