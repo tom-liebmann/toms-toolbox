@@ -5,4 +5,7 @@ target_sources(
         Font.cpp
         TextFactory.cpp
         GlyphLoader.cpp
+        TextLayout.cpp
 )
+
+add_subdirectory( text_layouts )
