@@ -1,33 +1,12 @@
 #include <catch2/catch.hpp>
 
+#include "TestFontFactory.hpp"
+
 #include <ttb/core/fonts/Font.hpp>
 #include <ttb/core/fonts/text_layouts/NormalLayout.hpp>
 
 
 using namespace ttb;
-
-
-namespace
-{
-    Glyph createTestGlyph( char id, float advance )
-    {
-        auto glyph = Glyph{};
-        glyph.m_id = id;
-        glyph.m_advance = advance;
-        return glyph;
-    }
-
-    Font createTestFont()
-    {
-        auto font = Font{};
-        font.m_emSize = 1.0f;
-        font.m_lineHeight = 1.0f;
-        font.m_texWidth = 512;
-        font.m_texHeight = 512;
-        font.m_glyphs = { { 'a', createTestGlyph( 'a', 1.0f ) } };
-        return font;
-    }
-}
 
 
 TEST_CASE( "NormalLayout", "[font][layout]" )
@@ -47,9 +26,24 @@ TEST_CASE( "NormalLayout", "[font][layout]" )
         std::vector< ResultGlyph > expectedGlyphs;
     };
 
-    auto const& testData = GENERATE( TestData{ "a", { { 'a', 0.0f, 0.0f } } } );
+    auto const& testData = GENERATE( TestData{ "a", { { 'a', 0.0f, 0.0f } } },
+                                     TestData{ "aa",
+                                               {
+                                                   { 'a', 0.0f, 0.0f },
+                                                   { 'a', 1.0f, 0.0f },
+                                               } },
+                                     TestData{ "ba",
+                                               {
+                                                   { 'b', 0.0f, 0.0f },
+                                                   { 'a', 2.0f, 0.0f },
+                                               } },
+                                     TestData{ "a\na",
+                                               {
+                                                   { 'a', 0.0f, 0.0f },
+                                                   { 'a', 0.0f, 1.0f },
+                                               } } );
 
-    auto font = createTestFont();
+    auto font = TestFontFactory::createTestFont();
 
     auto layout = ttb::font::NormalLayout{};
 

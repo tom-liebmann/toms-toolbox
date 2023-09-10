@@ -11,11 +11,24 @@ namespace ttb::font
                                       float maxWidth,
                                       CharacterCallback const& callback )
     {
+        auto const scaleFactor = size / font.getEmSize();
+        auto x = 0.0f;
+        auto y = 0.0f;
         for( auto const character : text )
         {
-            auto const& glyph = font.getGlyph( character );
+            if( character == '\n' )
+            {
+                x = 0.0f;
+                y += font.getLineHeight() * scaleFactor;
+            }
+            else
+            {
+                auto const& glyph = font.getGlyph( character );
 
-            callback( glyph, 0.0f, 0.0f );
+                callback( glyph, x, y );
+
+                x += glyph.getAdvance() * scaleFactor;
+            }
         }
     }
 }
