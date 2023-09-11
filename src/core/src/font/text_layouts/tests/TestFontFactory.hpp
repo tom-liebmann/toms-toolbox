@@ -9,7 +9,7 @@ class TestFontFactory
 public:
     TestFontFactory() = delete;
 
-    static ttb::Glyph createTestGlyph( char id, float advance );
+    static ttb::Glyph createTestGlyph( char id, float advance, float width );
 
     static ttb::Font createTestFont();
 };
