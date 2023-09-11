@@ -40,5 +40,7 @@ namespace ttb::ui
         std::shared_ptr< ttb::Font > m_font;
         std::unique_ptr< ttb::Geometry > m_textGeometry;
         std::shared_ptr< ttb::Texture2D > m_texture;
+
+        ttb::Range< float, 2 > m_fontRange;
     };
 }

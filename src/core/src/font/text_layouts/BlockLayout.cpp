@@ -5,15 +5,15 @@
 
 namespace ttb::font
 {
-    BlockLayout::BlockLayout( float minSpaceWidth ) : m_minSpaceWidth{ minSpaceWidth }
+    BlockLayout::BlockLayout( float minSpaceWidth, float maxWidth )
+        : m_minSpaceWidth{ minSpaceWidth }, m_maxWidth{ maxWidth }
     {
     }
 
     void BlockLayout::computeLayout( Font const& font,
                                      float size,
                                      std::string_view text,
-                                     float maxWidth,
-                                     CharacterCallback const& callback )
+                                     CharacterCallback const& callback ) const
     {
         auto const scaleFactor = size / font.getEmSize();
 
@@ -50,7 +50,7 @@ namespace ttb::font
 
             auto const wordWidth = computeWordWidth( font, wordStart, wordEnd ) * scaleFactor;
 
-            if( lineWordWidth + lineWordCount * m_minSpaceWidth + wordWidth > maxWidth )
+            if( lineWordWidth + lineWordCount * m_minSpaceWidth + wordWidth > m_maxWidth )
             {
                 printLine( font,
                            size,
@@ -58,7 +58,7 @@ namespace ttb::font
                            wordStart,
                            lineWordCount == 1u
                                ? 0.0f
-                               : ( maxWidth - lineWordWidth ) / ( lineWordCount - 1u ),
+                               : ( m_maxWidth - lineWordWidth ) / ( lineWordCount - 1u ),
                            y,
                            callback );
 

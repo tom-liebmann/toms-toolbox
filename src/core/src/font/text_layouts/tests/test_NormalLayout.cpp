@@ -53,7 +53,6 @@ TEST_CASE( "NormalLayout", "[font][layout]" )
         font,                // font
         1.0f,                // size
         testData.inputText,  // text
-        5.0f,                // maxWidth
         [ &resultGlyphs ]( auto const& glyph, auto x, auto y )
         {
             resultGlyphs.push_back( ResultGlyph{ glyph.getId(), x, y } );

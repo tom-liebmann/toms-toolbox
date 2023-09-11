@@ -1,6 +1,7 @@
 #include <ttb/ui/elements/Label.hpp>
 
 #include <ttb/core/fonts/TextFactory.hpp>
+#include <ttb/core/fonts/text_layouts/NormalLayout.hpp>
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/uniform.hpp>
 #include <ttb/math/matrix_operations.hpp>
@@ -88,8 +89,7 @@ namespace ttb::ui
 
     auto Label::fit( Size const& /* size */ ) -> Size
     {
-        auto const fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text );
-        return fontRange.extent();
+        return m_fontRange.extent();
     }
 
     void Label::render( ttb::State& state ) const
@@ -97,13 +97,11 @@ namespace ttb::ui
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        auto const fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text );
-
         // clang-format off
         auto const fontTransform = ttb::Matrix< float, 3, 3 >{
-            1.0f / fontRange.extent( 0 ),                         0.0f, -fontRange.getMin( 0 ) / fontRange.extent( 0 ),
-                                    0.0f, 1.0f / fontRange.extent( 1 ), -fontRange.getMin( 1 ) / fontRange.extent( 1 ),
-                                    0.0f,                         0.0f, 1.0f,
+            1.0f / m_fontRange.extent( 0 ),                         0.0f, -m_fontRange.getMin( 0 ) / m_fontRange.extent( 0 ),
+                                    0.0f, 1.0f / m_fontRange.extent( 1 ), -m_fontRange.getMin( 1 ) / m_fontRange.extent( 1 ),
+                                    0.0f,                           0.0f, 1.0f,
         };
         // clang-format on
 
@@ -127,6 +125,10 @@ namespace ttb::ui
 
     void Label::updateGeometry()
     {
-        m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text );
+        m_textGeometry =
+            ttb::TextFactory::createText( *m_font, m_size, m_text, font::NormalLayout{} );
+
+        m_fontRange =
+            ttb::TextFactory::getDimensions( *m_font, m_size, m_text, font::NormalLayout{} );
     }
 }

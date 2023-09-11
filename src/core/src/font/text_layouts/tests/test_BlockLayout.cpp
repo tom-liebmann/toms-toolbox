@@ -41,15 +41,14 @@ TEST_CASE( "BlockLayout", "[font][layout]" )
 
     auto font = TestFontFactory::createTestFont();
 
-    auto layout = ttb::font::BlockLayout{ testData.minSpaceWidth };
+    auto layout = ttb::font::BlockLayout{ testData.minSpaceWidth, testData.maxTextWidth };
 
     auto resultGlyphs = std::vector< ResultGlyph >{};
 
-    layout.computeLayout(       //
-        font,                   // font
-        1.0f,                   // size
-        testData.inputText,     // text
-        testData.maxTextWidth,  // maxWidth
+    layout.computeLayout(    //
+        font,                // font
+        1.0f,                // size
+        testData.inputText,  // text
         [ &resultGlyphs ]( auto const& glyph, auto x, auto y )
         {
             resultGlyphs.push_back( ResultGlyph{ glyph.getId(), x, y } );

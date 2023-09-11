@@ -8,15 +8,14 @@ namespace ttb::font
     class BlockLayout : public TextLayout
     {
     public:
-        BlockLayout( float minSpaceWidth );
+        BlockLayout( float minSpaceWidth, float maxWidth );
 
         //! \copydoc TextLayout::computeLayout( Font const&, float, std::string_view, float,
-        //! CharacterCallback const& )
+        //! CharacterCallback const& ) const
         virtual void computeLayout( Font const& font,
                                     float size,
                                     std::string_view text,
-                                    float maxWidth,
-                                    CharacterCallback const& callback ) override;
+                                    CharacterCallback const& callback ) const override;
 
     private:
         static bool isWhiteSpace( char character );
@@ -34,5 +33,6 @@ namespace ttb::font
                                CharacterCallback const& callback );
 
         float m_minSpaceWidth;
+        float m_maxWidth;
     };
 }

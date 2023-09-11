@@ -1,13 +1,16 @@
 #include <ttb/core/fonts/TextFactory.hpp>
 
 #include <ttb/core/fonts/Glyph.hpp>
+#include <ttb/core/fonts/TextLayout.hpp>
 
 
 namespace ttb
 {
 
-    ttb::Range< float, 2 >
-        TextFactory::getDimensions( Font const& font, float size, std::string_view text )
+    ttb::Range< float, 2 > TextFactory::getDimensions( Font const& font,
+                                                       float size,
+                                                       std::string_view text,
+                                                       TextLayout const& layout )
     {
         auto dimensions = ttb::Range< float, 2 >{
             { std::numeric_limits< float >::infinity(), std::numeric_limits< float >::infinity() },
@@ -16,42 +19,29 @@ namespace ttb
 
         auto const scaleFactor = size / font.getEmSize();
 
-        auto x = 0.0f;
-        auto y = 0.0f;
-        for( size_t i = 0; i < text.size(); ++i )
-        {
-            char cId = text[ i ];
+        layout.computeLayout( font,
+                              size,
+                              text,
+                              [ & ]( Glyph const& glyph, float x, float y )
+                              {
+                                  dimensions.expand( {
+                                      x + glyph.getRange().getMin( 0 ) * scaleFactor,
+                                      y + ( 1.0f - glyph.getRange().getMin( 1 ) ) * scaleFactor,
+                                  } );
 
-            if( cId == '\n' )
-            {
-                x = 0.0f;
-                y += font.getLineHeight() * scaleFactor;
-            }
-            else
-            {
-                auto const& glyph = font.getGlyph( text[ i ] );
-
-                dimensions.expand( {
-                    x + glyph.getRange().getMin( 0 ) * scaleFactor,
-                    y + ( 1.0f - glyph.getRange().getMin( 1 ) ) * scaleFactor,
-                    // y + ( glyph.getRange().getMin( 1 ) ) * scaleFactor,
-                } );
-
-                dimensions.expand( {
-                    x + glyph.getRange().getMax( 0 ) * scaleFactor,
-                    y + ( 1.0f - glyph.getRange().getMax( 1 ) ) * scaleFactor,
-                    // y + ( glyph.getRange().getMax( 1 ) ) * scaleFactor,
-                } );
-
-                x += glyph.getAdvance() * scaleFactor;
-            }
-        }
+                                  dimensions.expand( {
+                                      x + glyph.getRange().getMax( 0 ) * scaleFactor,
+                                      y + ( 1.0f - glyph.getRange().getMax( 1 ) ) * scaleFactor,
+                                  } );
+                              } );
 
         return dimensions;
     }
 
-    std::unique_ptr< ttb::Geometry >
-        TextFactory::createText( Font const& font, float size, std::string_view text )
+    std::unique_ptr< ttb::Geometry > TextFactory::createText( Font const& font,
+                                                              float size,
+                                                              std::string_view text,
+                                                              TextLayout const& layout )
     {
         std::shared_ptr< ttb::VertexBuffer > vertexBuffer = VertexBuffer::create(
             [ & ]( auto& c )
@@ -62,28 +52,21 @@ namespace ttb
 
         auto indexBuffer = IndexBuffer::create();
 
+        auto const scaleFactor = size / font.getEmSize();
+
         // push characters
         {
-            auto const scaleFactor = size / font.getEmSize();
-
             vertexBuffer->reserve( text.size() * 4 );
             indexBuffer->reserve( text.size() * 6 );
 
-            auto x = 0.0f;
-            auto y = 0.0f;
-            for( size_t i = 0; i < text.size(); ++i )
-            {
-                char cId = text[ i ];
+            auto i = 0;
 
-                if( cId == '\n' )
+            layout.computeLayout(
+                font,
+                size,
+                text,
+                [ & ]( Glyph const& glyph, float x, float y )
                 {
-                    x = 0.0f;
-                    y += font.getLineHeight() * scaleFactor;
-                }
-                else
-                {
-                    auto const& glyph = font.getGlyph( cId );
-
                     // Push vertices
                     vertexBuffer->push_back()
                         .set( 0,
@@ -125,9 +108,8 @@ namespace ttb
                     indexBuffer->push_back( i * 4 + 2 );
                     indexBuffer->push_back( i * 4 + 3 );
 
-                    x += glyph.getAdvance() * scaleFactor;
-                }
-            }
+                    ++i;
+                } );
 
             vertexBuffer->flush();
             indexBuffer->flush();

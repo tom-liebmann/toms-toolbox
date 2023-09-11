@@ -8,8 +8,7 @@ namespace ttb::font
     void NormalLayout::computeLayout( Font const& font,
                                       float size,
                                       std::string_view text,
-                                      float maxWidth,
-                                      CharacterCallback const& callback )
+                                      CharacterCallback const& callback ) const
     {
         auto const scaleFactor = size / font.getEmSize();
         auto x = 0.0f;
