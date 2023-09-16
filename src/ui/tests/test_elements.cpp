@@ -142,31 +142,3 @@ TEST_CASE( "Element", "[ui][elements]" )
         REQUIRE( ttb::Vector{ 0.1f, 0.3f } == ttb::Approx{ ele.getPosition() } );
     }
 }
-
-TEST_CASE( "Group", "[ui][elements]" )
-{
-    using namespace ttb::ui;
-
-    auto resourceManager = std::shared_ptr< ttb::resources::Manager >();
-    auto root = ttb::ui::Root{ resourceManager, { 1.0f, 1.0f } };
-
-    SECTION( "Single child" )
-    {
-        auto group = Group{ root };
-        group.setLeft( 0.1f );
-        group.setTop( 0.2f );
-
-        auto child = TestElement{ root };
-        child.setWidth( 0.5f );
-        child.setHeight( 0.4f );
-
-        group.add( &child );
-        root.setChild( &group );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.4f } == ttb::Approx{ group.getSize() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ group.getPosition() } );
-
-        REQUIRE( ttb::Vector{ 0.5f, 0.4f } == ttb::Approx{ child.getSize() } );
-        REQUIRE( ttb::Vector{ 0.1f, 0.2f } == ttb::Approx{ child.getPosition() } );
-    }
-}

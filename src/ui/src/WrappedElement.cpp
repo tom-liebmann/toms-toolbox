@@ -2,6 +2,7 @@
 
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
+#include <ttb/ui/exceptions/VanishingElementException.hpp>
 
 
 namespace ttb::ui
@@ -14,8 +15,17 @@ namespace ttb::ui
     {
         if( getWidth().getType() == Extent::Type::MATCH_CHILD )
         {
-            return ( m_child ? m_child->fitWidth( space - getLeft() - getRight() ) : 0.0f ) +
-                   getLeft() + getRight();
+            if( !m_child )
+            {
+                return 0.0f;
+            }
+
+            if( m_child->getWidth().getType() == Extent::Type::MATCH_PARENT )
+            {
+                throw VanishingElementException{};
+            }
+
+            return m_child->fitWidth( 0.0f ) + getLeft() + getRight();
         }
 
         return Element::fitWidth( space );
@@ -25,8 +35,17 @@ namespace ttb::ui
     {
         if( getHeight().getType() == Extent::Type::MATCH_CHILD )
         {
-            return ( m_child ? m_child->fitHeight( space - getTop() - getBottom() ) : 0.0f ) +
-                   getTop() + getBottom();
+            if( !m_child )
+            {
+                return 0.0f;
+            }
+
+            if( m_child->getHeight().getType() == Extent::Type::MATCH_PARENT )
+            {
+                throw VanishingElementException{};
+            }
+
+            return m_child->fitHeight( 0.0f ) + getTop() + getBottom();
         }
 
         return Element::fitHeight( space );

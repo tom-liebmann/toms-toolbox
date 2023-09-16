@@ -3,6 +3,7 @@
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/XmlLoader.hpp>
+#include <ttb/ui/exceptions/VanishingElementException.hpp>
 
 #include <numeric>
 
@@ -42,9 +43,14 @@ namespace ttb::ui
                                     {
                                         if( child.considerSize )
                                         {
+                                            if( child.element->getWidth().getType() ==
+                                                Extent::Type::MATCH_PARENT )
+                                            {
+                                                throw VanishingElementException{};
+                                            }
+
                                             return std::max( maxSize,
-                                                             child.element->fitWidth(
-                                                                 space - getLeft() - getRight() ) );
+                                                             child.element->fitWidth( 0.0f ) );
                                         }
 
                                         return maxSize;
@@ -66,9 +72,14 @@ namespace ttb::ui
                                     {
                                         if( child.considerSize )
                                         {
+                                            if( child.element->getWidth().getType() ==
+                                                Extent::Type::MATCH_PARENT )
+                                            {
+                                                throw VanishingElementException{};
+                                            }
+
                                             return std::max( maxSize,
-                                                             child.element->fitHeight(
-                                                                 space - getTop() - getBottom() ) );
+                                                             child.element->fitHeight( 0.0f ) );
                                         }
 
                                         return maxSize;

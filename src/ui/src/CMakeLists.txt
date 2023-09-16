@@ -15,3 +15,4 @@ target_sources(
 
 add_subdirectory( elements )
 add_subdirectory( utils )
+add_subdirectory( exceptions )
