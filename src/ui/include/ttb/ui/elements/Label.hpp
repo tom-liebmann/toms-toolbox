@@ -3,6 +3,7 @@
 #include <ttb/ui/Element.hpp>
 
 #include <ttb/core/fonts/Font.hpp>
+#include <ttb/core/fonts/TextLayout.hpp>
 #include <ttb/core/geometry.hpp>
 #include <ttb/core/shader.hpp>
 #include <ttb/core/texture/Texture2D.hpp>
@@ -40,6 +41,8 @@ namespace ttb::ui
         std::shared_ptr< ttb::Font > m_font;
         std::unique_ptr< ttb::Geometry > m_textGeometry;
         std::shared_ptr< ttb::Texture2D > m_texture;
+
+        std::unique_ptr< ttb::TextLayout > m_textLayout;
 
         ttb::Range< float, 2 > m_fontRange;
     };

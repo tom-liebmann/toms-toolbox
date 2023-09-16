@@ -1,6 +1,7 @@
 #include <ttb/ui/elements/Label.hpp>
 
 #include <ttb/core/fonts/TextFactory.hpp>
+#include <ttb/core/fonts/text_layouts/BlockLayout.hpp>
 #include <ttb/core/fonts/text_layouts/NormalLayout.hpp>
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/core/uniform.hpp>
@@ -32,6 +33,8 @@ namespace ttb::ui
         m_font = resMngr.get< ttb::Font >( "simple" );
         m_texture = resMngr.get< ttb::Texture2D >( "font_simple" );
 
+        m_textLayout = std::make_unique< ttb::font::NormalLayout >();
+
         updateGeometry();
     }
 
@@ -53,6 +56,25 @@ namespace ttb::ui
         if( auto child = node.first_node() )
         {
             m_text = std::string( child->value(), child->value_size() );
+        }
+
+        if( auto const value = loader.getAttr< std::string >( node, "layout" ) )
+        {
+            if( value == "block" )
+            {
+                auto const spaceWidth =
+                    loader.getAttr< float >( node, "spaceWidth" ).value_or( 0.1f );
+
+                auto const maxWidth = loader.getAttr< float >( node, "maxWidth" )
+                                          .value_or( std::numeric_limits< float >::infinity() );
+
+                m_textLayout = std::make_unique< ttb::font::BlockLayout >( spaceWidth, maxWidth );
+            }
+        }
+
+        if( !m_textLayout )
+        {
+            m_textLayout = std::make_unique< ttb::font::NormalLayout >();
         }
 
         m_shader = resMngr.get< ttb::Program >( "ui_label" );
@@ -125,10 +147,12 @@ namespace ttb::ui
 
     void Label::updateGeometry()
     {
-        m_textGeometry =
-            ttb::TextFactory::createText( *m_font, m_size, m_text, font::NormalLayout{} );
+        if( auto const blockLayout = dynamic_cast< ttb::font::BlockLayout* >( m_textLayout.get() ) )
+        {
+            blockLayout->setMaxWidth( size()( 0 ) );
+        }
 
-        m_fontRange =
-            ttb::TextFactory::getDimensions( *m_font, m_size, m_text, font::NormalLayout{} );
+        m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text, *m_textLayout );
+        m_fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text, *m_textLayout );
     }
 }

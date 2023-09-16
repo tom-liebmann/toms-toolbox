@@ -10,6 +10,8 @@ namespace ttb::font
     public:
         BlockLayout( float minSpaceWidth, float maxWidth );
 
+        void setMaxWidth( float value );
+
         //! \copydoc TextLayout::computeLayout( Font const&, float, std::string_view, float,
         //! CharacterCallback const& ) const
         virtual void computeLayout( Font const& font,

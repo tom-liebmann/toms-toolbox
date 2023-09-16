@@ -10,6 +10,11 @@ namespace ttb::font
     {
     }
 
+    void BlockLayout::setMaxWidth( float value )
+    {
+        m_maxWidth = value;
+    }
+
     void BlockLayout::computeLayout( Font const& font,
                                      float size,
                                      std::string_view text,
