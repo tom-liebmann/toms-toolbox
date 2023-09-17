@@ -3,12 +3,12 @@ target_sources(
     PRIVATE
          XmlElement.cpp
          Group.cpp
+         Linear.cpp
 #        Center.cpp
 #        Flex.cpp
 #        Image.cpp
 #        MonoImage.cpp
 #        Label.cpp
-#        Margin.cpp
 #        Ratio.cpp
 #        Rectangle.cpp
 #        # RowLayout.cpp

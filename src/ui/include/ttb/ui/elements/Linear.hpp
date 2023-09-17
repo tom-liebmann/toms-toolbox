@@ -2,17 +2,21 @@
 
 #include <ttb/ui/Element.hpp>
 
-#include <vector>
-
 
 namespace ttb::ui
 {
-    class Group : public Element, public ElementParent
+    class Linear : public Element, public ElementParent
     {
     public:
-        Group( Root& root );
+        enum class Direction
+        {
+            HORIZONTAL,
+            VERTICAL,
+        };
 
-        Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Linear( Root& root, Direction direction );
+
+        Linear( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         //! @copydoc Element::fitWidth( float )
         virtual float fitWidth( float space ) const override;
@@ -40,17 +44,20 @@ namespace ttb::ui
 
         void remove( Element& child );
 
-        void insert( std::size_t position, Element* child, bool considerSize = true );
+        void insert( std::size_t position, Element* child );
 
-        void add( Element* child, bool considerSize = true );
+        void add( Element* child );
 
     private:
+        Direction m_direction;
+
         struct Slot
         {
-            bool considerSize;
-            Element* element;
+            float weight;
+            float size;
+            Element* child;
         };
 
-        std::vector< Slot > m_children;
+        std::vector< Slot > m_slots;
     };
 }

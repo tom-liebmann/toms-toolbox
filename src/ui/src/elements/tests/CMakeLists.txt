@@ -6,3 +6,12 @@ ttb_add_test(
       TestElement.cpp
     DEPENDENCIES ttb::ui
 )
+
+ttb_add_test(
+    TARGET_NAME test_Linear
+    SOURCES
+    test_Linear.cpp
+    Approx.cpp
+    TestElement.cpp
+    DEPENDENCIES ttb::ui
+)
