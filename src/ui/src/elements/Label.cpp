@@ -147,11 +147,6 @@ namespace ttb::ui
 
     void Label::updateGeometry()
     {
-        if( auto const blockLayout = dynamic_cast< ttb::font::BlockLayout* >( m_textLayout.get() ) )
-        {
-            blockLayout->setMaxWidth( size()( 0 ) );
-        }
-
         m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text, *m_textLayout );
         m_fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text, *m_textLayout );
     }
