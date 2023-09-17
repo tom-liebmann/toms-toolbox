@@ -103,9 +103,9 @@ namespace ttb::ui
 
         if( auto const child = wrappedChild(); child )
         {
-            auto const childSpace = child->fit( value );
-            auto childSize = value;
-            childSize( 1 ) = childSpace( 1 );
+            auto childSpace = value;
+            childSpace( 1 ) = std::numeric_limits< float >::infinity();
+            auto const childSize = child->fit( childSpace );
             child->size( childSize );
         }
     }
