@@ -7,3 +7,5 @@ GRTAGS
 GTAGS
 
 *.~undo-tree~
+
+CMakeUserPresets.json
