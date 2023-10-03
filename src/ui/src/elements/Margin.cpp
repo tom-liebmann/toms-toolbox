@@ -54,6 +54,15 @@ namespace ttb::ui
         wrappedChild( element );
     }
 
+    void Margin::setMargin( float right, float top, float left, float bottom )
+    {
+        m_right = right;
+        m_top = top;
+        m_left = left;
+        m_bottom = bottom;
+        changed();
+    }
+
     void Margin::right( float value, bool isLastChange )
     {
         m_right = value;

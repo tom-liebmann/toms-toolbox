@@ -20,6 +20,8 @@ namespace ttb::ui
 
         void child( Element* element );
 
+        void setMargin( float right, float top, float left, float bottom );
+
         void right( float value, bool isLastChange = true );
 
         void top( float value, bool isLastChange = true );
