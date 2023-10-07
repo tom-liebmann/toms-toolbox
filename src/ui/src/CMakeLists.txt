@@ -2,6 +2,8 @@ target_sources(
     ${TARGET_NAME}
 
     PRIVATE
+        FitExtent.cpp
+        Margin.cpp
         Element.cpp
         ElementParent.cpp
         #CombinedElement.cpp

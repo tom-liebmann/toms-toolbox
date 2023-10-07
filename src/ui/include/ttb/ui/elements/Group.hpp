@@ -14,11 +14,11 @@ namespace ttb::ui
 
         Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
-        //! @copydoc Element::fitWidth( float )
-        virtual float fitWidth( float space ) const override;
+        //! @copydoc Element::fitWidth( Size const& )
+        virtual FitExtent fitWidth( Size const& space ) const override;
 
-        //! @copydoc Element::fitHeight( float )
-        virtual float fitHeight( float space ) const override;
+        //! @copydoc Element::fitHeight( Size const& )
+        virtual FitExtent fitHeight( Size const& space ) const override;
 
         //! @copydoc Element::setSize( Size const& )
         virtual void setSize( Size const& value ) override;

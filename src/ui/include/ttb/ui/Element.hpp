@@ -4,10 +4,11 @@
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/ui/ElementParent.hpp>
 #include <ttb/ui/Extent.hpp>
+#include <ttb/ui/FitExtent.hpp>
+#include <ttb/ui/Margin.hpp>
+#include <ttb/ui/xml_loading.hpp>
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
-
-#include <rapidxml/rapidxml.hpp>
 
 
 namespace ttb::ui
@@ -28,15 +29,15 @@ namespace ttb::ui
 
         Element( Root& root );
 
-        Element( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Element( Root& root, XmlNode const& node, XmlLoader& loader );
 
         virtual ~Element();
 
-        virtual float fitWidth( float space ) const;
+        virtual FitExtent fitWidth( Size const& space ) const;
 
-        virtual float fitHeight( float space ) const;
+        virtual FitExtent fitHeight( Size const& space ) const;
 
-        Size fit( Size const& space ) const;
+        Size finalFit( Size const& space ) const;
 
         virtual void setPosition( Position const& value );
 
@@ -46,15 +47,9 @@ namespace ttb::ui
 
         Size const& getSize() const;
 
-        void setRight( float value );
-        void setTop( float value );
-        void setLeft( float value );
-        void setBottom( float value );
+        void setMargin( Margin value );
 
-        float getRight() const;
-        float getTop() const;
-        float getLeft() const;
-        float getBottom() const;
+        Margin getMargin() const;
 
         void setWidth( Extent value );
         void setHeight( Extent value );
@@ -68,13 +63,11 @@ namespace ttb::ui
 
         virtual bool onEvent( Event const& event ) override;
 
-        virtual std::string info() const;
-
         ElementParent* getParent() const;
 
         void setParent( ElementParent* parent );
 
-        Transform transform() const;
+        Transform getTransform() const;
 
     protected:
         void changed();
@@ -82,20 +75,17 @@ namespace ttb::ui
         Root& getRoot() const;
 
     private:
+        Root& m_root;
+
         ElementParent* m_parent{ nullptr };
 
         Size m_size{};
         Position m_position{};
 
-        float m_right{ 0.0f };
-        float m_top{ 0.0f };
-        float m_left{ 0.0f };
-        float m_bottom{ 0.0f };
+        Margin m_margin;
 
         Extent m_width;
         Extent m_height;
-
-        Root& m_root;
     };
 }
 
@@ -127,48 +117,15 @@ namespace ttb::ui
         m_parent = parent;
     }
 
-    inline void Element::setRight( float value )
+    inline void Element::setMargin( Margin value )
     {
-        m_right = value;
+        m_margin = value;
         changed();
     }
 
-    inline void Element::setTop( float value )
+    inline Margin Element::getMargin() const
     {
-        m_top = value;
-        changed();
-    }
-
-    inline void Element::setLeft( float value )
-    {
-        m_left = value;
-        changed();
-    }
-
-    inline void Element::setBottom( float value )
-    {
-        m_bottom = value;
-        changed();
-    }
-
-    inline float Element::getRight() const
-    {
-        return m_right;
-    }
-
-    inline float Element::getTop() const
-    {
-        return m_top;
-    }
-
-    inline float Element::getLeft() const
-    {
-        return m_left;
-    }
-
-    inline float Element::getBottom() const
-    {
-        return m_bottom;
+        return m_margin;
     }
 
     inline void Element::setWidth( Extent value )

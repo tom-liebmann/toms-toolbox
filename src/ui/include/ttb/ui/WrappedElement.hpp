@@ -10,11 +10,11 @@ namespace ttb::ui
     public:
         WrappedElement( Root& root );
 
-        //! @copydoc Element::fitWidth( float )
-        virtual float fitWidth( float space ) const override;
+        //! @copydoc Element::fitWidth( Size )
+        virtual FitExtent fitWidth( Size const& space ) const override;
 
-        //! @copydoc Element::fitHeight( float )
-        virtual float fitHeight( float space ) const override;
+        //! @copydoc Element::fitHeight( Size )
+        virtual FitExtent fitHeight( Size const& space ) const override;
 
         //! @copydoc Element::setPosition( Position const& )
         virtual void setPosition( Position const& value ) override;

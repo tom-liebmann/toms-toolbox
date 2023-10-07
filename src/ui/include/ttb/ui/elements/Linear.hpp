@@ -16,13 +16,13 @@ namespace ttb::ui
 
         Linear( Root& root, Direction direction );
 
-        Linear( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Linear( Root& root, XmlNode const& node, XmlLoader& loader );
 
-        //! @copydoc Element::fitWidth( float )
-        virtual float fitWidth( float space ) const override;
+        //! @copydoc Element::fitWidth( Size const& )
+        virtual FitExtent fitWidth( Size const& space ) const override;
 
-        //! @copydoc Element::fitHeight( float )
-        virtual float fitHeight( float space ) const override;
+        //! @copydoc Element::fitHeight( Size const& )
+        virtual FitExtent fitHeight( Size const& space ) const override;
 
         //! @copydoc Element::setSize( Size const& )
         virtual void setSize( Size const& value ) override;
@@ -44,15 +44,16 @@ namespace ttb::ui
 
         void remove( Element& child );
 
-        void insert( std::size_t position, Element* child );
+        void insert( std::size_t position, Element* child, float weight );
 
-        void add( Element* child );
+        void add( Element* child, float weight );
 
     private:
         Direction m_direction;
 
         struct Slot
         {
+            bool isFixed;
             float weight;
             float size;
             Element* child;

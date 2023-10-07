@@ -14,8 +14,6 @@ namespace ttb::ui
     namespace
     {
         Extent parseExtent( std::string_view value );
-
-        float parseOffset( std::string_view value );
     }
 }
 
@@ -26,8 +24,8 @@ namespace ttb::ui
     {
     }
 
-    Element::Element( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : m_root{ root }
+    Element::Element( Root& root, XmlNode const& node, XmlLoader& loader )
+        : m_root{ root }, m_margin{ Margin::parse( node, loader ) }
     {
         if( auto const value = loader.attrValue( node, "width" ) )
         {
@@ -38,83 +36,63 @@ namespace ttb::ui
         {
             m_height = parseExtent( *value );
         }
-
-        if( auto const value = loader.attrValue( node, "right" ) )
-        {
-            m_right = parseOffset( *value );
-        }
-
-        if( auto const value = loader.attrValue( node, "top" ) )
-        {
-            m_top = parseOffset( *value );
-        }
-
-        if( auto const value = loader.attrValue( node, "left" ) )
-        {
-            m_left = parseOffset( *value );
-        }
-
-        if( auto const value = loader.attrValue( node, "bottom" ) )
-        {
-            m_bottom = parseOffset( *value );
-        }
     }
 
     Element::~Element() = default;
 
-    float Element::fitWidth( float space ) const
+    FitExtent Element::fitWidth( Size const& /* space */ ) const
     {
         switch( m_width.getType() )
         {
             case Extent::Type::MATCH_PARENT:
-                return space;
-
+                return { FitExtent::Type::MATCH_PARENT };
             case Extent::Type::FIXED:
-                return m_width.getValue() + m_left + m_right;
-
+                return { m_width.getValue() + m_margin.getRightLeft() };
             case Extent::Type::MATCH_CHILD:
                 throw std::runtime_error( "Invalid child match for non-nested element" );
-
             case Extent::Type::UNSPECIFIED:
             default:
                 throw std::runtime_error( "Element width unspecified" );
         }
     }
 
-    float Element::fitHeight( float space ) const
+    FitExtent Element::fitHeight( Size const& /* space */ ) const
     {
         switch( m_height.getType() )
         {
             case Extent::Type::MATCH_PARENT:
-                return space;
-
+                return { FitExtent::Type::MATCH_PARENT };
             case Extent::Type::FIXED:
-                return m_height.getValue() + m_top + m_bottom;
-
+                return { m_height.getValue() + m_margin.getTopBottom() };
             case Extent::Type::MATCH_CHILD:
                 throw std::runtime_error( "Invalid child match for non-nested element" );
-
             case Extent::Type::UNSPECIFIED:
             default:
-                throw std::runtime_error( "Element height unspecified" );
+                throw std::runtime_error( "Element width unspecified" );
         }
     }
 
-    auto Element::fit( Size const& space ) const -> Size
+    auto Element::finalFit( Size const& space ) const -> Size
     {
-        return { fitWidth( space( 0 ) ), fitHeight( space( 1 ) ) };
+        auto const extentH = fitWidth( space );
+        auto const extentV = fitHeight( space );
+
+        return {
+            extentH.getType() == FitExtent::Type::MATCH_PARENT ? space( 0 ) : extentH.getValue(),
+            extentV.getType() == FitExtent::Type::MATCH_PARENT ? space( 1 ) : extentV.getValue()
+        };
     }
 
     void Element::setPosition( Position const& value )
     {
-        m_position( 0 ) = value( 0 ) + m_left;
-        m_position( 1 ) = value( 1 ) + m_top;
+        m_position( 0 ) = value( 0 ) + m_margin.getLeft();
+        m_position( 1 ) = value( 1 ) + m_margin.getTop();
     }
 
     void Element::setSize( Size const& value )
     {
-        m_size( 0 ) = value( 0 ) - m_left - m_right;
-        m_size( 1 ) = value( 1 ) - m_top - m_bottom;
+        m_size( 0 ) = value( 0 ) - m_margin.getRightLeft();
+        m_size( 1 ) = value( 1 ) - m_margin.getTopBottom();
     }
 
     void Element::update( float /* timeDiff */ )
@@ -126,11 +104,6 @@ namespace ttb::ui
         return false;
     }
 
-    std::string Element::info() const
-    {
-        return "Element";
-    }
-
     void Element::changed()
     {
         if( m_parent )
@@ -139,7 +112,7 @@ namespace ttb::ui
         }
     }
 
-    auto Element::transform() const -> Transform
+    auto Element::getTransform() const -> Transform
     {
         // clang-format off
         return Transform{
@@ -169,11 +142,6 @@ namespace ttb::ui
             }
 
             return { fromStringView< float >::convert( value ) };
-        }
-
-        float parseOffset( std::string_view value )
-        {
-            return fromStringView< float >::convert( value );
         }
     }
 }

@@ -11,44 +11,50 @@ namespace ttb::ui
     {
     }
 
-    float WrappedElement::fitWidth( float space ) const
+    FitExtent WrappedElement::fitWidth( Size const& space ) const
     {
-        if( getWidth().getType() == Extent::Type::MATCH_CHILD )
+        if( getWidth().getType() != Extent::Type::MATCH_CHILD )
         {
-            if( !m_child )
-            {
-                return 0.0f;
-            }
-
-            if( m_child->getWidth().getType() == Extent::Type::MATCH_PARENT )
-            {
-                throw VanishingElementException{};
-            }
-
-            return m_child->fitWidth( 0.0f ) + getLeft() + getRight();
+            return Element::fitWidth( space );
         }
 
-        return Element::fitWidth( space );
+        auto const margin = getMargin();
+
+        auto const childFit = m_child->fitWidth(
+            { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+
+        switch( childFit.getType() )
+        {
+            case FitExtent::Type::MATCH_PARENT:
+                return childFit;
+            case FitExtent::Type::FIXED:
+                return { childFit.getValue() + margin.getRightLeft() };
+            default:
+                throw std::runtime_error( "Child extent unsupported" );
+        }
     }
 
-    float WrappedElement::fitHeight( float space ) const
+    FitExtent WrappedElement::fitHeight( Size const& space ) const
     {
-        if( getHeight().getType() == Extent::Type::MATCH_CHILD )
+        if( getHeight().getType() != Extent::Type::MATCH_CHILD )
         {
-            if( !m_child )
-            {
-                return 0.0f;
-            }
-
-            if( m_child->getHeight().getType() == Extent::Type::MATCH_PARENT )
-            {
-                throw VanishingElementException{};
-            }
-
-            return m_child->fitHeight( 0.0f ) + getTop() + getBottom();
+            return Element::fitHeight( space );
         }
 
-        return Element::fitHeight( space );
+        auto const margin = getMargin();
+
+        auto const childFit = m_child->fitHeight(
+            { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+
+        switch( childFit.getType() )
+        {
+            case FitExtent::Type::MATCH_PARENT:
+                return childFit;
+            case FitExtent::Type::FIXED:
+                return { childFit.getValue() + margin.getTopBottom() };
+            default:
+                throw std::runtime_error( "Child extent unsupported" );
+        }
     }
 
     void WrappedElement::setPosition( Position const& value )

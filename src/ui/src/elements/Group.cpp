@@ -32,62 +32,70 @@ namespace ttb::ui
         }
     }
 
-    float Group::fitWidth( float space ) const
+    FitExtent Group::fitWidth( Size const& space ) const
     {
-        if( getWidth().getType() == Extent::Type::MATCH_CHILD )
+        if( getWidth().getType() != Extent::Type::MATCH_CHILD )
         {
-            return std::accumulate( std::begin( m_children ),
-                                    std::end( m_children ),
-                                    0.0f,
-                                    [ &space, this ]( auto const& maxSize, auto const& child )
-                                    {
-                                        if( child.considerSize )
-                                        {
-                                            if( child.element->getWidth().getType() ==
-                                                Extent::Type::MATCH_PARENT )
-                                            {
-                                                throw VanishingElementException{};
-                                            }
-
-                                            return std::max( maxSize,
-                                                             child.element->fitWidth( 0.0f ) );
-                                        }
-
-                                        return maxSize;
-                                    } ) +
-                   getLeft() + getRight();
+            return Element::fitWidth( space );
         }
 
-        return Element::fitWidth( space );
+        auto const margin = getMargin();
+
+        auto maxChildExtent = FitExtent{ 0.0f };
+
+        for( auto const& child : m_children )
+        {
+            if( !child.considerSize )
+            {
+                continue;
+            }
+
+            auto const childFit = child.element->fitWidth(
+                { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+
+            if( childFit.getType() == FitExtent::Type::MATCH_PARENT )
+            {
+                return childFit;
+            }
+
+            maxChildExtent =
+                FitExtent{ std::max( maxChildExtent.getValue(), childFit.getValue() ) };
+        }
+
+        return { maxChildExtent.getValue() + margin.getRightLeft() };
     }
 
-    float Group::fitHeight( float space ) const
+    FitExtent Group::fitHeight( Size const& space ) const
     {
-        if( getHeight().getType() == Extent::Type::MATCH_CHILD )
+        if( getHeight().getType() != Extent::Type::MATCH_CHILD )
         {
-            return std::accumulate( std::begin( m_children ),
-                                    std::end( m_children ),
-                                    0.0f,
-                                    [ &space, this ]( auto const& maxSize, auto const& child )
-                                    {
-                                        if( child.considerSize )
-                                        {
-                                            if( child.element->getWidth().getType() ==
-                                                Extent::Type::MATCH_PARENT )
-                                            {
-                                                throw VanishingElementException{};
-                                            }
-
-                                            return std::max( maxSize,
-                                                             child.element->fitHeight( 0.0f ) );
-                                        }
-
-                                        return maxSize;
-                                    } ) +
-                   getTop() + getBottom();
+            return Element::fitHeight( space );
         }
 
-        return Element::fitHeight( space );
+        auto const margin = getMargin();
+
+        auto maxChildExtent = FitExtent{ 0.0f };
+
+        for( auto const& child : m_children )
+        {
+            if( !child.considerSize )
+            {
+                continue;
+            }
+
+            auto const childFit = child.element->fitHeight(
+                { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+
+            if( childFit.getType() == FitExtent::Type::MATCH_PARENT )
+            {
+                return childFit;
+            }
+
+            maxChildExtent =
+                FitExtent{ std::max( maxChildExtent.getValue(), childFit.getValue() ) };
+        }
+
+        return { maxChildExtent.getValue() + margin.getTopBottom() };
     }
 
     void Group::setSize( Size const& value )
@@ -96,7 +104,7 @@ namespace ttb::ui
 
         for( auto const& child : m_children )
         {
-            child.element->setSize( child.element->fit( getSize() ) );
+            child.element->setSize( child.element->finalFit( getSize() ) );
         }
     }
 
