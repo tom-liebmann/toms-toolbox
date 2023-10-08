@@ -44,9 +44,9 @@ namespace ttb::ui
 
         void remove( Element& child );
 
-        void insert( std::size_t position, Element* child, float weight );
+        void insert( std::size_t position, Element* child, float weight = 1.0f );
 
-        void add( Element* child, float weight );
+        void add( Element* child, float weight = 1.0f );
 
     private:
         Direction m_direction;
