@@ -3,6 +3,17 @@
 
 namespace ttb::ui
 {
+    namespace
+    {
+        auto const factory = XmlFactory< Linear >{ "linear" };
+
+        Linear::Direction parseDirection( std::string_view const& value );
+    }
+}
+
+
+namespace ttb::ui
+{
     Linear::Linear( Root& root, Direction direction ) : Element{ root }, m_direction{ direction }
     {
         setWidth( Extent::Type::MATCH_CHILD );
@@ -11,6 +22,17 @@ namespace ttb::ui
 
     Linear::Linear( Root& root, XmlNode const& node, XmlLoader& loader ) : Element{ root }
     {
+        if( auto const value = loader.attrValue( node, "direction" ) )
+        {
+            m_direction = parseDirection( *value );
+        }
+
+        for( auto child = node.first_node(); child; child = child->next_sibling() )
+        {
+            auto const weight = loader.getAttr< float >( *child, "weight" ).value_or( 1.0f );
+            auto const element = loader.loadElement( root, *child );
+            add( element, weight );
+        }
     }
 
     FitExtent Linear::fitWidth( Size const& space ) const
@@ -237,5 +259,28 @@ namespace ttb::ui
     {
         child->setParent( this );
         m_slots.push_back( Slot{ false, weight, 0.0f, child } );
+    }
+}
+
+
+
+namespace ttb::ui
+{
+    namespace
+    {
+        Linear::Direction parseDirection( std::string_view const& value )
+        {
+            if( value == "h" )
+            {
+                return Linear::Direction::HORIZONTAL;
+            }
+
+            if( value == "v" )
+            {
+                return Linear::Direction::VERTICAL;
+            }
+
+            throw std::runtime_error( "Unable to parse flex direction" );
+        }
     }
 }
