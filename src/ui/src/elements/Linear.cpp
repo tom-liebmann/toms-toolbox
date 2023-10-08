@@ -141,19 +141,15 @@ namespace ttb::ui
 
         for( auto& slot : m_slots )
         {
-            auto childSize = size;
-
             auto const dirDim = m_direction == Direction::HORIZONTAL ? 0 : 1;
 
-            if( slot.isFixed )
+            if( !slot.isFixed )
             {
-                childSize( dirDim ) = slot.size;
-            }
-            else
-            {
-                childSize( dirDim ) = ( size( dirDim ) - fixedSize ) * slot.weight / weightSum;
+                slot.size = ( size( dirDim ) - fixedSize ) * slot.weight / weightSum;
             }
 
+            auto childSize = size;
+            childSize( dirDim ) = slot.size;
             slot.child->setSize( slot.child->finalFit( childSize ) );
         }
     }
