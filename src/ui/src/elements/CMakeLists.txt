@@ -4,14 +4,11 @@ target_sources(
          XmlElement.cpp
          Group.cpp
          Linear.cpp
-#        Center.cpp
-#        Flex.cpp
 #        Image.cpp
 #        MonoImage.cpp
 #        Label.cpp
 #        Ratio.cpp
 #        Rectangle.cpp
-#        # RowLayout.cpp
 #        Clickable.cpp
 #        Switch.cpp
 #        ScrollArea.cpp

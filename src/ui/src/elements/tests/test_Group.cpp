@@ -5,7 +5,6 @@
 #include <ttb/core/resources/Manager.hpp>
 #include <ttb/ui/Root.hpp>
 #include <ttb/ui/elements/Group.hpp>
-#include <ttb/ui/exceptions/VanishingElementException.hpp>
 #include <ttb/utils/EventManager.hpp>
 
 #include <fmt/core.h>

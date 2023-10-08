@@ -6,7 +6,6 @@ target_sources(
         Margin.cpp
         Element.cpp
         ElementParent.cpp
-        #CombinedElement.cpp
         WrappedElement.cpp
         XmlFactory.cpp
         XmlLoader.cpp
@@ -17,4 +16,3 @@ target_sources(
 
 add_subdirectory( elements )
 add_subdirectory( utils )
-add_subdirectory( exceptions )

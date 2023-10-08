@@ -3,7 +3,6 @@
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
 #include <ttb/ui/XmlLoader.hpp>
-#include <ttb/ui/exceptions/VanishingElementException.hpp>
 
 #include <numeric>
 
