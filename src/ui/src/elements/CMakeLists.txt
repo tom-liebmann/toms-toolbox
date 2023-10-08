@@ -4,6 +4,7 @@ target_sources(
          XmlElement.cpp
          Group.cpp
          Linear.cpp
+         Align.cpp
 #        Image.cpp
 #        MonoImage.cpp
 #        Label.cpp

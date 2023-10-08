@@ -15,3 +15,12 @@ ttb_add_test(
     TestElement.cpp
     DEPENDENCIES ttb::ui
 )
+
+ttb_add_test(
+    TARGET_NAME test_Align
+    SOURCES
+    test_Align.cpp
+    Approx.cpp
+    TestElement.cpp
+    DEPENDENCIES ttb::ui
+)
