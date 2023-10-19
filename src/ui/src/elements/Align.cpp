@@ -10,7 +10,7 @@ namespace ttb::ui
 {
     namespace
     {
-        auto const factory = XmlFactory< Align >{ "center" };
+        auto const factory = XmlFactory< Align >{ "align" };
 
         Align::HAlignment parseHAlignment( std::string_view const& value );
 
@@ -22,7 +22,7 @@ namespace ttb::ui
 namespace ttb::ui
 {
     Align::Align( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ root }, m_hAlign{ HAlignment::CENTER }, m_vAlign{ VAlignment::MIDDLE }
+        : Slot{ root }, m_hAlign{ HAlignment::CENTER }, m_vAlign{ VAlignment::MIDDLE }
     {
         setWidth( Extent::Type::MATCH_CHILD );
         setHeight( Extent::Type::MATCH_CHILD );
@@ -39,27 +39,22 @@ namespace ttb::ui
 
         if( auto const child = node.first_node() )
         {
-            wrappedChild( loader.loadElement( root, *child ) );
+            setChild( loader.loadElement( root, *child ) );
         }
     }
 
     Align::Align( Root& root, HAlignment hAlign, VAlignment vAlign )
-        : WrappedElement{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
+        : Slot{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {
         setWidth( Extent::Type::MATCH_CHILD );
         setHeight( Extent::Type::MATCH_CHILD );
-    }
-
-    void Align::setChild( Element* element )
-    {
-        wrappedChild( element );
     }
 
     FitExtent Align::fitWidth( Size const& space ) const
     {
         if( m_hAlign == HAlignment::LEFT )
         {
-            if( auto const child = wrappedChild() )
+            if( auto const child = getChild() )
             {
                 auto const margin = getMargin();
                 return child->fitWidth(
@@ -74,7 +69,7 @@ namespace ttb::ui
     {
         if( m_vAlign == VAlignment::TOP )
         {
-            if( auto const child = wrappedChild() )
+            if( auto const child = getChild() )
             {
                 auto const margin = getMargin();
                 return child->fitHeight(
@@ -91,7 +86,7 @@ namespace ttb::ui
 
         auto const size = getSize();
 
-        if( auto const child = wrappedChild() )
+        if( auto const child = getChild() )
         {
             auto const childSize = child->finalFit( size );
 
@@ -135,7 +130,7 @@ namespace ttb::ui
     {
         Element::setPosition( value );
 
-        if( auto const child = wrappedChild() )
+        if( auto const child = getChild() )
         {
             child->setPosition( getPosition() + m_childOffset );
         }

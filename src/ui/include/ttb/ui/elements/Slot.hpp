@@ -5,10 +5,10 @@
 
 namespace ttb::ui
 {
-    class WrappedElement : public Element, public ElementParent
+    class Slot : public Element, public ElementParent
     {
     public:
-        WrappedElement( Root& root );
+        Slot( Root& root );
 
         //! @copydoc Element::fitWidth( Size )
         virtual FitExtent fitWidth( Size const& space ) const override;
@@ -33,12 +33,11 @@ namespace ttb::ui
 
         virtual void onChildChanged( Element& child ) override;
 
-    protected:
-        void wrappedChild( Element* child );
+        void setChild( Element* child );
 
-        Element* wrappedChild();
+        Element* getChild();
 
-        Element const* wrappedChild() const;
+        Element const* getChild() const;
 
     private:
         Element* m_child{ nullptr };

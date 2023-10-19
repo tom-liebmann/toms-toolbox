@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/elements/Slot.hpp>
 
 #include <rapidxml/rapidxml.hpp>
 
@@ -17,10 +17,10 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    class XmlElement : public WrappedElement
+    class XmlElement : public Slot
     {
     public:
-        XmlElement( Root& root, rapidxml::xml_node<> const& node );
+        XmlElement( Root& root, XmlNode const& node );
 
         XmlElement( Root& root, char const* source );
 

@@ -9,6 +9,15 @@
 
 namespace ttb::ui
 {
+    namespace
+    {
+        auto const factory = XmlFactory< Group >{ "group" };
+    }
+}
+
+
+namespace ttb::ui
+{
     Group::Group( Root& root ) : Element{ root }
     {
         setWidth( Extent::Type::MATCH_CHILD );

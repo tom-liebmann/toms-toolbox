@@ -5,6 +5,7 @@ target_sources(
          Group.cpp
          Linear.cpp
          Align.cpp
+         Slot.cpp
 #        Image.cpp
 #        MonoImage.cpp
 #        Label.cpp

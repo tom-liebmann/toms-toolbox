@@ -6,7 +6,6 @@ target_sources(
         Margin.cpp
         Element.cpp
         ElementParent.cpp
-        WrappedElement.cpp
         XmlFactory.cpp
         XmlLoader.cpp
         Root.cpp

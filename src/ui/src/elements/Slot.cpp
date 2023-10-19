@@ -1,4 +1,4 @@
-#include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/elements/Slot.hpp>
 
 #include <ttb/math/matrix_operations.hpp>
 #include <ttb/math/vector_operations.hpp>
@@ -6,11 +6,11 @@
 
 namespace ttb::ui
 {
-    WrappedElement::WrappedElement( Root& root ) : Element{ root }
+    Slot::Slot( Root& root ) : Element{ root }
     {
     }
 
-    FitExtent WrappedElement::fitWidth( Size const& space ) const
+    FitExtent Slot::fitWidth( Size const& space ) const
     {
         if( getWidth().getType() != Extent::Type::MATCH_CHILD )
         {
@@ -33,7 +33,7 @@ namespace ttb::ui
         }
     }
 
-    FitExtent WrappedElement::fitHeight( Size const& space ) const
+    FitExtent Slot::fitHeight( Size const& space ) const
     {
         if( getHeight().getType() != Extent::Type::MATCH_CHILD )
         {
@@ -56,7 +56,7 @@ namespace ttb::ui
         }
     }
 
-    void WrappedElement::setPosition( Position const& value )
+    void Slot::setPosition( Position const& value )
     {
         Element::setPosition( value );
 
@@ -66,7 +66,7 @@ namespace ttb::ui
         }
     }
 
-    void WrappedElement::setSize( Size const& value )
+    void Slot::setSize( Size const& value )
     {
         Element::setSize( value );
 
@@ -76,7 +76,7 @@ namespace ttb::ui
         }
     }
 
-    void WrappedElement::update( float timeDiff )
+    void Slot::update( float timeDiff )
     {
         if( m_child )
         {
@@ -84,7 +84,7 @@ namespace ttb::ui
         }
     }
 
-    void WrappedElement::render( ttb::State& state ) const
+    void Slot::render( ttb::State& state ) const
     {
         if( m_child )
         {
@@ -92,7 +92,7 @@ namespace ttb::ui
         }
     }
 
-    bool WrappedElement::onEvent( Event const& event )
+    bool Slot::onEvent( Event const& event )
     {
         if( m_child )
         {
@@ -102,12 +102,12 @@ namespace ttb::ui
         return false;
     }
 
-    void WrappedElement::onChildChanged( Element& /* child */ )
+    void Slot::onChildChanged( Element& /* child */ )
     {
         changed();
     }
 
-    void WrappedElement::wrappedChild( Element* child )
+    void Slot::setChild( Element* child )
     {
         if( m_child )
         {
@@ -124,12 +124,12 @@ namespace ttb::ui
         changed();
     }
 
-    Element* WrappedElement::wrappedChild()
+    Element* Slot::getChild()
     {
         return m_child;
     }
 
-    Element const* WrappedElement::wrappedChild() const
+    Element const* Slot::getChild() const
     {
         return m_child;
     }

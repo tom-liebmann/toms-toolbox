@@ -1,12 +1,12 @@
 #pragma once
 
-#include <ttb/ui/WrappedElement.hpp>
 #include <ttb/ui/XmlLoader.hpp>
+#include <ttb/ui/elements/Slot.hpp>
 
 
 namespace ttb::ui
 {
-    class Align : public WrappedElement
+    class Align : public Slot
     {
     public:
         enum class HAlignment
@@ -26,8 +26,6 @@ namespace ttb::ui
         Align( Root& root, HAlignment hAlign, VAlignment vAlign );
 
         Align( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
-
-        void setChild( Element* element );
 
         virtual FitExtent fitWidth( Size const& space ) const override;
 
