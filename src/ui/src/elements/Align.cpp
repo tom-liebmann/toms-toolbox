@@ -21,12 +21,19 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Align::Align( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Slot{ root }, m_hAlign{ HAlignment::CENTER }, m_vAlign{ VAlignment::MIDDLE }
+    Align::Align( Root& root ) : Align{ root, HAlignment::CENTER, VAlignment::MIDDLE }
+    {
+    }
+
+    Align::Align( Root& root, HAlignment hAlign, VAlignment vAlign )
+        : Slot{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {
         setWidth( Extent::Type::MATCH_CHILD );
         setHeight( Extent::Type::MATCH_CHILD );
+    }
 
+    void Align::parseXml( XmlNode const& node, XmlLoader& loader )
+    {
         if( auto const value = loader.attrValue( node, "h" ) )
         {
             m_hAlign = parseHAlignment( *value );
@@ -37,17 +44,7 @@ namespace ttb::ui
             m_vAlign = parseVAlignment( *value );
         }
 
-        if( auto const child = node.first_node() )
-        {
-            setChild( loader.loadElement( root, *child ) );
-        }
-    }
-
-    Align::Align( Root& root, HAlignment hAlign, VAlignment vAlign )
-        : Slot{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
-    {
-        setWidth( Extent::Type::MATCH_CHILD );
-        setHeight( Extent::Type::MATCH_CHILD );
+        Slot::parseXml( node, loader );
     }
 
     FitExtent Align::fitWidth( Size const& space ) const

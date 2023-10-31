@@ -6,8 +6,26 @@
 
 namespace ttb::ui
 {
+    namespace
+    {
+        auto const factory = XmlFactory< Slot >{ "slot" };
+    }
+}
+
+namespace ttb::ui
+{
     Slot::Slot( Root& root ) : Element{ root }
     {
+    }
+
+    void Slot::parseXml( XmlNode const& node, XmlLoader& loader )
+    {
+        Element::parseXml( node, loader );
+
+        if( auto child = node.first_node() )
+        {
+            setChild( loader.loadElement( getRoot(), *child ) );
+        }
     }
 
     FitExtent Slot::fitWidth( Size const& space ) const

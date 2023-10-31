@@ -14,14 +14,20 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
+    Linear::Linear( Root& root ) : Linear{ root, Direction::HORIZONTAL }
+    {
+    }
+
     Linear::Linear( Root& root, Direction direction ) : Element{ root }, m_direction{ direction }
     {
         setWidth( Extent::Type::MATCH_CHILD );
         setHeight( Extent::Type::MATCH_CHILD );
     }
 
-    Linear::Linear( Root& root, XmlNode const& node, XmlLoader& loader ) : Element{ root }
+    void Linear::parseXml( XmlNode const& node, XmlLoader& loader )
     {
+        Element::parseXml( node, loader );
+
         if( auto const value = loader.attrValue( node, "direction" ) )
         {
             m_direction = parseDirection( *value );
@@ -30,7 +36,7 @@ namespace ttb::ui
         for( auto child = node.first_node(); child; child = child->next_sibling() )
         {
             auto const weight = loader.getAttr< float >( *child, "weight" ).value_or( 1.0f );
-            auto const element = loader.loadElement( root, *child );
+            auto const element = loader.loadElement( getRoot(), *child );
             add( element, weight );
         }
     }

@@ -29,8 +29,6 @@ namespace ttb::ui
 
         Element( Root& root );
 
-        Element( Root& root, XmlNode const& node, XmlLoader& loader );
-
         virtual ~Element();
 
         virtual FitExtent fitWidth( Size const& space ) const;
@@ -68,6 +66,8 @@ namespace ttb::ui
         void setParent( ElementParent* parent );
 
         Transform getTransform() const;
+
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader );
 
     protected:
         void changed();

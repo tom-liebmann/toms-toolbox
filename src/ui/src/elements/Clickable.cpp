@@ -1,6 +1,6 @@
 #include <ttb/ui/elements/Clickable.hpp>
 
-#include "PriorityListener.hpp"
+#include "../utils/PriorityListener.hpp"
 #include <ttb/ui/Root.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/EventManager.hpp>
@@ -17,34 +17,30 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Clickable::Clickable( Root& root ) : WrappedElement{ root }
+    Clickable::Clickable( Root& root ) : Slot{ root }
     {
-    }
-
-    Clickable::Clickable( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ root }
-    {
-        if( auto child = node.first_node(); child )
-        {
-            wrappedChild( loader.loadElement( root, *child ) );
-        }
     }
 
     Clickable::~Clickable() = default;
 
-    void Clickable::callback( ClickCallback value )
+    void Clickable::onPressStart()
     {
-        m_callback = std::move( value );
+        // TODO: Execute callback
     }
 
-    void Clickable::child( Element* element )
+    void Clickable::onPressEnd()
     {
-        wrappedChild( std::move( element ) );
+        // TODO: Execute callback
+    }
+
+    void Clickable::onPressAbort()
+    {
+        // TODO: Execute callback
     }
 
     bool Clickable::onEvent( Event const& event )
     {
-        if( !m_callback || !wrappedChild() )
+        if( !getChild() )
         {
             return false;
         }
@@ -75,19 +71,19 @@ namespace ttb::ui
             return false;
         }
 
-        auto const offset = this->offset();
-        auto const size = this->size();
+        auto const& pos = getPosition();
+        auto const& size = getSize();
         auto const& eventPos = event.position();
 
-        if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
-            eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
+        if( eventPos( 0 ) < pos( 0 ) || eventPos( 0 ) >= pos( 0 ) + size( 0 ) ||
+            eventPos( 1 ) < pos( 1 ) || eventPos( 1 ) >= pos( 1 ) + size( 1 ) )
         {
             return false;
         }
 
         m_pointerId = event.pointerId();
         m_prioListener = std::make_unique< PriorityListener >( getRoot(), *this );
-        m_callback( Action::START, *this );
+        onPressStart();
 
         return true;
     }
@@ -104,7 +100,7 @@ namespace ttb::ui
             return false;
         }
 
-        m_callback( Action::ABORT, *this );
+        onPressAbort();
         m_prioListener.reset();
 
         return false;
@@ -122,18 +118,18 @@ namespace ttb::ui
             return false;
         }
 
-        auto const offset = this->offset();
-        auto const size = this->size();
+        auto const& pos = getPosition();
+        auto const& size = getSize();
         auto const& eventPos = event.position();
 
-        if( eventPos( 0 ) >= offset( 0 ) && eventPos( 0 ) < offset( 0 ) + size( 0 ) &&
-            eventPos( 1 ) >= offset( 1 ) && eventPos( 1 ) < offset( 1 ) + size( 1 ) )
+        if( eventPos( 0 ) >= pos( 0 ) && eventPos( 0 ) < pos( 0 ) + size( 0 ) &&
+            eventPos( 1 ) >= pos( 1 ) && eventPos( 1 ) < pos( 1 ) + size( 1 ) )
         {
-            m_callback( Action::END, *this );
+            onPressEnd();
         }
         else
         {
-            m_callback( Action::ABORT, *this );
+            onPressAbort();
         }
 
         m_prioListener.reset();

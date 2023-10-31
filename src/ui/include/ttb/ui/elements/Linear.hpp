@@ -14,9 +14,11 @@ namespace ttb::ui
             VERTICAL,
         };
 
+        Linear( Root& root );
+
         Linear( Root& root, Direction direction );
 
-        Linear( Root& root, XmlNode const& node, XmlLoader& loader );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
         //! @copydoc Element::fitWidth( Size const& )
         virtual FitExtent fitWidth( Size const& space ) const override;

@@ -6,12 +6,12 @@ target_sources(
          Linear.cpp
          Align.cpp
          Slot.cpp
+         Clickable.cpp
 #        Image.cpp
 #        MonoImage.cpp
 #        Label.cpp
 #        Ratio.cpp
 #        Rectangle.cpp
-#        Clickable.cpp
 #        Switch.cpp
 #        ScrollArea.cpp
 #        PriorityListener.cpp

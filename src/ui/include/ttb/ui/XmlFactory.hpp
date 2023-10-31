@@ -46,6 +46,8 @@ namespace ttb::ui
                                                             rapidxml::xml_node<> const& node,
                                                             XmlLoader& loader )
     {
-        return std::make_unique< TType >( root, node, loader );
+        auto element = std::make_unique< TType >( root );
+        element->parseXml( node, loader );
+        return element;
     }
 }

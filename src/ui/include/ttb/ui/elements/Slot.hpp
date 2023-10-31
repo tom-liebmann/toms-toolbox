@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ttb/ui/Element.hpp>
+#include <ttb/ui/xml_loading.hpp>
 
 
 namespace ttb::ui
@@ -9,6 +10,8 @@ namespace ttb::ui
     {
     public:
         Slot( Root& root );
+
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
         //! @copydoc Element::fitWidth( Size )
         virtual FitExtent fitWidth( Size const& space ) const override;
@@ -33,7 +36,7 @@ namespace ttb::ui
 
         virtual void onChildChanged( Element& child ) override;
 
-        void setChild( Element* child );
+        virtual void setChild( Element* child );
 
         Element* getChild();
 

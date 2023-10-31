@@ -12,7 +12,7 @@ namespace ttb::ui
     public:
         Group( Root& root );
 
-        Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
         //! @copydoc Element::fitWidth( Size const& )
         virtual FitExtent fitWidth( Size const& space ) const override;

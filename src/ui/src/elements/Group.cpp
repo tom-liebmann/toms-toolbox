@@ -24,12 +24,13 @@ namespace ttb::ui
         setHeight( Extent::Type::MATCH_CHILD );
     }
 
-    Group::Group( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ root, node, loader }
+    void Group::parseXml( XmlNode const& node, XmlLoader& loader )
     {
+        Element::parseXml( node, loader );
+
         for( auto child = node.first_node(); child; child = child->next_sibling() )
         {
-            auto element = loader.loadElement( root, *child );
+            auto element = loader.loadElement( getRoot(), *child );
             auto considerSize = true;
             if( auto const value = loader.attrValue( *child, "consider_size" ) )
             {

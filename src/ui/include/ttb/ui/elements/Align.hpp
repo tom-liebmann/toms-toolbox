@@ -23,9 +23,11 @@ namespace ttb::ui
             BOTTOM,
         };
 
+        Align( Root& root );
+
         Align( Root& root, HAlignment hAlign, VAlignment vAlign );
 
-        Align( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader );
 
         virtual FitExtent fitWidth( Size const& space ) const override;
 

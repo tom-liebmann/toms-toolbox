@@ -24,20 +24,6 @@ namespace ttb::ui
     {
     }
 
-    Element::Element( Root& root, XmlNode const& node, XmlLoader& loader )
-        : m_root{ root }, m_margin{ Margin::parse( node, loader ) }
-    {
-        if( auto const value = loader.attrValue( node, "width" ) )
-        {
-            m_width = parseExtent( *value );
-        }
-
-        if( auto const value = loader.attrValue( node, "height" ) )
-        {
-            m_height = parseExtent( *value );
-        }
-    }
-
     Element::~Element() = default;
 
     FitExtent Element::fitWidth( Size const& /* space */ ) const
@@ -121,6 +107,21 @@ namespace ttb::ui
             0.0f       , 0.0f       , 1.0f
         };
         // clang-format on
+    }
+
+    void Element::parseXml( XmlNode const& node, XmlLoader& loader )
+    {
+        m_margin = Margin::parse( node, loader );
+
+        if( auto const value = loader.attrValue( node, "width" ) )
+        {
+            m_width = parseExtent( *value );
+        }
+
+        if( auto const value = loader.attrValue( node, "height" ) )
+        {
+            m_height = parseExtent( *value );
+        }
     }
 }
 
