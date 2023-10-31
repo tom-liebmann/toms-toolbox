@@ -1,4 +1,4 @@
-#include <ttb/ui/elements/Label.hpp>
+#include <ttb/ui/elements/Text.hpp>
 
 #include <ttb/core/fonts/TextFactory.hpp>
 #include <ttb/core/fonts/text_layouts/BlockLayout.hpp>
@@ -18,13 +18,17 @@
 
 namespace
 {
-    auto const factory = ttb::ui::XmlFactory< ttb::ui::Label >{ "label" };
+    auto const factory = ttb::ui::XmlFactory< ttb::ui::Text >{ "text" };
 }
 
 
 namespace ttb::ui
 {
-    Label::Label( Root& root, std::string text, float size, ColorRgb const& color )
+    Text::Text( Root& root ) : Text{ root, "", 0.1f, { ttb::use_float, 0.0f, 0.0f, 0.0f } }
+    {
+    }
+
+    Text::Text( Root& root, std::string text, float size, ColorRgb const& color )
         : Element{ root }, m_text( std::move( text ) ), m_size( size ), m_color( color )
     {
         auto& resMngr = root.getResourceManager();
@@ -38,11 +42,8 @@ namespace ttb::ui
         updateGeometry();
     }
 
-    Label::Label( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ root }, m_size{ 1.0f }, m_color{ use_uint8, 0, 0, 0 }
+    void Text::parseXml( XmlNode const& node, XmlLoader& loader )
     {
-        auto& resMngr = root.getResourceManager();
-
         if( auto const value = loader.getAttr< float >( node, "size" ) )
         {
             m_size = value.value();
@@ -72,19 +73,10 @@ namespace ttb::ui
             }
         }
 
-        if( !m_textLayout )
-        {
-            m_textLayout = std::make_unique< ttb::font::NormalLayout >();
-        }
-
-        m_shader = resMngr.get< ttb::Program >( "ui_label" );
-        m_font = resMngr.get< ttb::Font >( "simple" );
-        m_texture = resMngr.get< ttb::Texture2D >( "font_simple" );
-
         updateGeometry();
     }
 
-    void Label::text( std::string value )
+    void Text::setText( std::string value )
     {
         m_text = std::move( value );
 
@@ -93,7 +85,7 @@ namespace ttb::ui
         changed();
     }
 
-    void Label::setSize( float value )
+    void Text::setSize( float value )
     {
         m_size = value;
 
@@ -102,37 +94,46 @@ namespace ttb::ui
         changed();
     }
 
-    void Label::setColor( ColorRgb const& color )
+    void Text::setColor( ColorRgb const& color )
     {
         m_color = color;
 
         updateGeometry();
     }
 
-    auto Label::fit( Size const& /* size */ ) -> Size
+    FitExtent Text::fitWidth( Size const& space ) const
     {
-        return m_fontRange.extent();
+        updateMaxWidth( space( 0 ) - getMargin().getRightLeft() );
+
+        return m_fontRange.extent( 0 );
     }
 
-    void Label::render( ttb::State& state ) const
+    FitExtent Text::fitHeight( Size const& space ) const
+    {
+        updateMaxWidth( space( 0 ) - getMargin().getRightLeft() );
+
+        return m_fontRange.extent( 1 );
+    }
+
+    void Text::setSize( Size const& value )
+    {
+        Element::setSize( value );
+
+        updateMaxWidth( getSize()( 0 ) );
+        m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text, *m_textLayout );
+    }
+
+    void Text::render( ttb::State& state ) const
     {
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-        // clang-format off
-        auto const fontTransform = ttb::Matrix< float, 3, 3 >{
-            1.0f / m_fontRange.extent( 0 ),                         0.0f, -m_fontRange.getMin( 0 ) / m_fontRange.extent( 0 ),
-                                    0.0f, 1.0f / m_fontRange.extent( 1 ), -m_fontRange.getMin( 1 ) / m_fontRange.extent( 1 ),
-                                    0.0f,                           0.0f, 1.0f,
-        };
-        // clang-format on
 
         state.with(
             *m_shader,
             ttb::UniformBinder{ "u_texture", 0 },
             ttb::UniformBinder{
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
-            ttb::UniformBinder{ "u_transform", transform() * fontTransform },
+            ttb::UniformBinder{ "u_transform", getTransform() },
             [ & ]
             {
                 m_texture->bind( 0 );
@@ -145,9 +146,22 @@ namespace ttb::ui
         glDisable( GL_BLEND );
     }
 
-    void Label::updateGeometry()
+    void Text::updateGeometry()
     {
         m_textGeometry = ttb::TextFactory::createText( *m_font, m_size, m_text, *m_textLayout );
         m_fontRange = ttb::TextFactory::getDimensions( *m_font, m_size, m_text, *m_textLayout );
+    }
+
+    void Text::updateMaxWidth( float value ) const
+    {
+        if( auto blockLayout = dynamic_cast< ttb::font::BlockLayout* >( m_textLayout.get() ) )
+        {
+            if( value != blockLayout->getMaxWidth() )
+            {
+                blockLayout->setMaxWidth( value );
+                m_fontRange =
+                    ttb::TextFactory::getDimensions( *m_font, m_size, m_text, *m_textLayout );
+            }
+        }
     }
 }

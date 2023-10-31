@@ -7,9 +7,9 @@ target_sources(
          Align.cpp
          Slot.cpp
          Clickable.cpp
+         Text.cpp
 #        Image.cpp
 #        MonoImage.cpp
-#        Label.cpp
 #        Ratio.cpp
 #        Rectangle.cpp
 #        Switch.cpp

@@ -15,6 +15,11 @@ namespace ttb::font
         m_maxWidth = value;
     }
 
+    float BlockLayout::getMaxWidth() const
+    {
+        return m_maxWidth;
+    }
+
     void BlockLayout::computeLayout( Font const& font,
                                      float size,
                                      std::string_view text,
