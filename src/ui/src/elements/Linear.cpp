@@ -99,7 +99,7 @@ namespace ttb::ui
         {
             if( getHeight().getType() != Extent::Type::MATCH_CHILD )
             {
-                return Element::fitWidth( space );
+                return Element::fitHeight( space );
             }
 
             auto maxChildExtent = FitExtent{ 0.0f };
