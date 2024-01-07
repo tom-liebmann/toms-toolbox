@@ -54,8 +54,11 @@ namespace ttb::ui
             if( auto const child = getChild() )
             {
                 auto const margin = getMargin();
-                return child->fitWidth(
+                auto const childFit = child->fitWidth(
                     { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+                return childFit.getType() == FitExtent::Type::FIXED
+                           ? childFit.getValue() + margin.getRightLeft()
+                           : childFit;
             }
         }
 
@@ -69,8 +72,11 @@ namespace ttb::ui
             if( auto const child = getChild() )
             {
                 auto const margin = getMargin();
-                return child->fitHeight(
+                auto const childFit = child->fitHeight(
                     { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
+                return childFit.getType() == FitExtent::Type::FIXED
+                           ? childFit.getValue() + margin.getTopBottom()
+                           : childFit;
             }
         }
 
