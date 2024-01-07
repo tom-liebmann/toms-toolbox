@@ -106,16 +106,16 @@ namespace ttb::font
                                          std::string_view::const_iterator end )
     {
         auto x = 0.0f;
-        auto width = 0.0f;
+        auto maxWidth = 0.0f;
 
         for( auto iter = start; iter != end; ++iter )
         {
             auto const& glyph = font.getGlyph( *iter );
-            width = std::max( width, x + glyph.getRange().getMax( 0 ) );
+            maxWidth = std::max( maxWidth, x + glyph.getAdvance() );
             x += glyph.getAdvance();
         }
 
-        return width;
+        return maxWidth;
     }
 
     void BlockLayout::printLine( Font const& font,

@@ -24,15 +24,9 @@ namespace ttb
                               text,
                               [ & ]( Glyph const& glyph, float x, float y )
                               {
-                                  dimensions.expand( {
-                                      x + glyph.getRange().getMin( 0 ) * scaleFactor,
-                                      y + ( 1.0f - glyph.getRange().getMin( 1 ) ) * scaleFactor,
-                                  } );
-
-                                  dimensions.expand( {
-                                      x + glyph.getRange().getMax( 0 ) * scaleFactor,
-                                      y + ( 1.0f - glyph.getRange().getMax( 1 ) ) * scaleFactor,
-                                  } );
+                                  dimensions.expand( { x, y } );
+                                  dimensions.expand( { x + glyph.getAdvance() * scaleFactor,
+                                                       y + font.getLineHeight() * scaleFactor } );
                               } );
 
         return dimensions;
