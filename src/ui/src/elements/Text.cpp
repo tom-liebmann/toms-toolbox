@@ -133,7 +133,7 @@ namespace ttb::ui
             ttb::UniformBinder{ "u_texture", 0 },
             ttb::UniformBinder{
                 "u_color", ttb::Vector< float, 3 >{ m_color.rF(), m_color.gF(), m_color.bF() } },
-            ttb::UniformBinder{ "u_transform", getTransform() },
+            ttb::UniformBinder{ "u_transform", ttb::mat::translation( getPosition() ) },
             [ & ]
             {
                 m_texture->bind( 0 );
