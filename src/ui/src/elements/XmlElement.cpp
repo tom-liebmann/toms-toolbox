@@ -13,6 +13,9 @@ namespace ttb::ui
 {
     XmlElement::XmlElement( Root& root, rapidxml::xml_node<> const& node ) : Slot{ root }
     {
+        setWidth( Extent::Type::MATCH_CHILD );
+        setHeight( Extent::Type::MATCH_CHILD );
+
         auto firstChild = &node;
 
         while( firstChild && firstChild->type() != 1 )
