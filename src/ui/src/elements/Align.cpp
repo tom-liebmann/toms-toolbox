@@ -28,8 +28,8 @@ namespace ttb::ui
     Align::Align( Root& root, HAlignment hAlign, VAlignment vAlign )
         : Slot{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {
-        setWidth( Extent::Type::MATCH_CHILD );
-        setHeight( Extent::Type::MATCH_CHILD );
+        setWidth( Extent::Type::MATCH_PARENT );
+        setHeight( Extent::Type::MATCH_PARENT );
     }
 
     void Align::parseXml( XmlNode const& node, XmlLoader& loader )
@@ -45,42 +45,6 @@ namespace ttb::ui
         }
 
         Slot::parseXml( node, loader );
-    }
-
-    FitExtent Align::fitWidth( Size const& space ) const
-    {
-        if( m_hAlign == HAlignment::LEFT )
-        {
-            if( auto const child = getChild() )
-            {
-                auto const margin = getMargin();
-                auto const childFit = child->fitWidth(
-                    { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
-                return childFit.getType() == FitExtent::Type::FIXED
-                           ? childFit.getValue() + margin.getRightLeft()
-                           : childFit;
-            }
-        }
-
-        return FitExtent::Type::MATCH_PARENT;
-    }
-
-    FitExtent Align::fitHeight( Size const& space ) const
-    {
-        if( m_vAlign == VAlignment::TOP )
-        {
-            if( auto const child = getChild() )
-            {
-                auto const margin = getMargin();
-                auto const childFit = child->fitHeight(
-                    { space( 0 ) - margin.getRightLeft(), space( 1 ) - margin.getTopBottom() } );
-                return childFit.getType() == FitExtent::Type::FIXED
-                           ? childFit.getValue() + margin.getTopBottom()
-                           : childFit;
-            }
-        }
-
-        return FitExtent::Type::MATCH_PARENT;
     }
 
     void Align::setSize( Size const& value )

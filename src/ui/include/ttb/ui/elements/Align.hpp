@@ -29,10 +29,6 @@ namespace ttb::ui
 
         virtual void parseXml( XmlNode const& node, XmlLoader& loader );
 
-        virtual FitExtent fitWidth( Size const& space ) const override;
-
-        virtual FitExtent fitHeight( Size const& space ) const override;
-
         virtual void setSize( Size const& value );
 
         virtual void setPosition( Position const& value );
