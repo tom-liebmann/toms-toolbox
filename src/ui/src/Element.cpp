@@ -54,7 +54,7 @@ namespace ttb::ui
                 throw std::runtime_error( "Invalid child match for non-nested element" );
             case Extent::Type::UNSPECIFIED:
             default:
-                throw std::runtime_error( "Element width unspecified" );
+                throw std::runtime_error( "Element height unspecified" );
         }
     }
 
