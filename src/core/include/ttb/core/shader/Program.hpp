@@ -57,6 +57,8 @@ namespace ttb
     public:
         Creator& attachShader( std::unique_ptr< Shader > shader );
 
+        ~Creator();
+
     private:
         Creator();
 

@@ -28,8 +28,6 @@ namespace ttb::ui
     Align::Align( Root& root, HAlignment hAlign, VAlignment vAlign )
         : Slot{ root }, m_hAlign{ hAlign }, m_vAlign{ vAlign }
     {
-        setWidth( Extent::Type::MATCH_PARENT );
-        setHeight( Extent::Type::MATCH_PARENT );
     }
 
     void Align::parseXml( XmlNode const& node, XmlLoader& loader )

@@ -2,10 +2,9 @@
 
 #include <fmt/core.h>
 
-#include "PriorityListener.hpp"
+#include "utils/PriorityListener.hpp"
 #include <ttb/core/window.hpp>
 #include <ttb/math/matrix_operations.hpp>
-#include <ttb/ui/WrappedElement.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
@@ -21,63 +20,58 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    ScrollArea::ScrollArea( Root& root, Direction direction )
-        : WrappedElement{ root }, m_direction{ direction }
+    ScrollArea::ScrollArea( Root& root ) : ScrollArea{ root, Direction::VERTICAL }
     {
     }
 
-    ScrollArea::ScrollArea( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ root }
+    ScrollArea::ScrollArea( Root& root, Direction direction )
+        : Slot{ root }, m_direction{ direction }
     {
-        if( auto child = node.first_node(); child )
-        {
-            wrappedChild( loader.loadElement( root, *child ) );
-        }
     }
 
     ScrollArea::~ScrollArea() = default;
 
-    void ScrollArea::setChild( Element* element )
-    {
-        wrappedChild( element );
-    }
-
     void ScrollArea::setScrollOffset( float value )
     {
         m_offset = value;
-        offset( offset() );
+        setPosition( getPosition() );
     }
 
-    auto ScrollArea::fit( Size const& space ) -> Size
+    auto ScrollArea::fitWidth( Size const& space ) const -> FitExtent
     {
-        if( auto const child = wrappedChild(); child )
+        if( m_direction == Direction::HORIZONTAL &&
+            getWidth().getType() == Extent::Type::MATCH_CHILD )
         {
-            // TODO Handle direction
-            auto childSpace = space;
-            childSpace( 1 ) = std::numeric_limits< float >::infinity();
-            auto const childSize = child->fit( childSpace );
-
-            auto mySize = childSize;
-            mySize( 1 ) = std::min( space( 1 ), childSize( 1 ) );
-            return mySize;
+            throw std::runtime_error{ "Cannot match child in scroll direction" };
         }
 
-        return space;
+        return Slot::fitWidth( space );
     }
 
-    void ScrollArea::offset( Offset const& value )
+    auto ScrollArea::fitHeight( Size const& space ) const -> FitExtent
     {
-        Element::offset( value );
-
-        if( auto const child = wrappedChild(); child )
+        if( m_direction == Direction::VERTICAL &&
+            getHeight().getType() == Extent::Type::MATCH_CHILD )
         {
-            auto const childSize = child->size();
+            throw std::runtime_error{ "Cannot match child in scroll direction" };
+        }
+
+        return Slot::fitHeight( space );
+    }
+
+    void ScrollArea::setPosition( Position const& value )
+    {
+        Slot::setPosition( value );
+
+        if( auto const child = getChild() )
+        {
+            auto const childSize = child->getSize();
 
             // TODO Handle direction
             auto const childOffset = [ & ]
             {
                 auto const minOffset = 0.0f;
-                auto const maxOffset = childSize( 1 ) - size()( 1 );
+                auto const maxOffset = childSize( 1 ) - getSize()( 1 );
 
                 if( m_offset < minOffset )
                 {
@@ -93,20 +87,27 @@ namespace ttb::ui
                 return m_offset;
             }();
 
-            child->offset( { value( 0 ), value( 1 ) - childOffset } );
+            child->setPosition( { value( 0 ), value( 1 ) - childOffset } );
         }
     }
 
-    void ScrollArea::size( Size const& value )
+    void ScrollArea::setSize( Size const& value )
     {
-        Element::size( value );
+        Element::setSize( value );
 
-        if( auto const child = wrappedChild(); child )
+        if( auto const child = getChild() )
         {
-            auto childSpace = value;
-            childSpace( 1 ) = std::numeric_limits< float >::infinity();
-            auto const childSize = child->fit( childSpace );
-            child->size( childSize );
+            auto childSpace = getSize();
+            if( m_direction == Direction::HORIZONTAL )
+            {
+                childSpace( 0 ) = std::numeric_limits< float >::infinity();
+            }
+            else
+            {
+                childSpace( 1 ) = std::numeric_limits< float >::infinity();
+            }
+            auto const childSize = child->finalFit( childSpace );
+            child->setSize( childSize );
         }
     }
 
@@ -125,13 +126,13 @@ namespace ttb::ui
             case type::DRAG_MOVE:
                 return onDragMove( static_cast< ttb::events::DragMove const& >( event ) );
             default:
-                return WrappedElement::onEvent( event );
+                return Slot::onEvent( event );
         }
     }
 
     void ScrollArea::update( float timeDiff )
     {
-        if( auto const child = wrappedChild(); child )
+        if( auto const child = getChild() )
         {
             if( m_prioListener )
             {
@@ -140,7 +141,8 @@ namespace ttb::ui
             else
             {
                 auto const minOffset = 0.0f;
-                auto const maxOffset = child->size()( 1 ) - size()( 1 );  // TODO Handle direction
+                auto const maxOffset =
+                    child->getSize()( 1 ) - getSize()( 1 );  // TODO Handle direction
 
                 // Handle overscroll
                 if( m_offset < minOffset )
@@ -186,7 +188,7 @@ namespace ttb::ui
             }
         }
 
-        WrappedElement::update( timeDiff );
+        Slot::update( timeDiff );
     }
 
     void ScrollArea::render( ttb::State& state ) const
@@ -198,8 +200,8 @@ namespace ttb::ui
         auto const& transform =
             windowTransform * ( *state.uniform< ttb::Matrix< float, 3, 3 > >( "u_transform" ) );
 
-        auto const offset = this->offset();
-        auto const size = this->size();
+        auto const offset = getPosition();
+        auto const size = getSize();
 
         auto const screenTl = transform * ttb::Vector{ offset( 0 ), offset( 1 ), 1.0f };
         auto const screenBr =
@@ -211,7 +213,7 @@ namespace ttb::ui
                    screenBr( 0 ) - screenTl( 0 ),
                    screenBr( 1 ) - screenTl( 1 ) );
 
-        WrappedElement::render( state );
+        Slot::render( state );
 
         glDisable( GL_SCISSOR_TEST );
     }
@@ -220,19 +222,19 @@ namespace ttb::ui
     {
         m_velocity = 0.0f;
 
-        return WrappedElement::onEvent( event );
+        return Slot::onEvent( event );
     }
 
     bool ScrollArea::onDragStart( ttb::events::DragStart const& event )
     {
-        auto const offset = this->offset();
-        auto const size = this->size();
+        auto const offset = getPosition();
+        auto const size = getSize();
         auto const eventPos = event.position();
 
         if( eventPos( 0 ) < offset( 0 ) || eventPos( 0 ) >= offset( 0 ) + size( 0 ) ||
             eventPos( 1 ) < offset( 1 ) || eventPos( 1 ) >= offset( 1 ) + size( 1 ) )
         {
-            return WrappedElement::onEvent( event );
+            return Slot::onEvent( event );
         }
 
         m_dragPos = event.position();
@@ -250,7 +252,7 @@ namespace ttb::ui
             return true;
         }
 
-        return WrappedElement::onEvent( event );
+        return Slot::onEvent( event );
     }
 
     bool ScrollArea::onDragMove( ttb::events::DragMove const& event )
@@ -269,6 +271,6 @@ namespace ttb::ui
             return true;
         }
 
-        return WrappedElement::onEvent( event );
+        return Slot::onEvent( event );
     }
 }

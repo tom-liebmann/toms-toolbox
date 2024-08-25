@@ -234,6 +234,11 @@ namespace ttb::ui
         changed();
     }
 
+    Element& Linear::getChild( std::size_t position )
+    {
+        return *m_slots[ position ].child;
+    }
+
     void Linear::remove( Element& child )
     {
         auto const newEnd = std::remove_if( std::begin( m_slots ),

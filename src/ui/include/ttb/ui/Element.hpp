@@ -84,8 +84,8 @@ namespace ttb::ui
 
         Margin m_margin;
 
-        Extent m_width;
-        Extent m_height;
+        Extent m_width{ Extent::Type::MATCH_PARENT };
+        Extent m_height{ Extent::Type::MATCH_PARENT };
     };
 }
 

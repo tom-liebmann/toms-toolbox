@@ -50,7 +50,7 @@ namespace ttb::ui
 
         auto const margin = getMargin();
 
-        auto maxChildExtent = FitExtent{ 0.0f };
+        auto maxChildExtent = 0.0f;
 
         for( auto const& child : m_children )
         {
@@ -64,14 +64,13 @@ namespace ttb::ui
 
             if( childFit.getType() == FitExtent::Type::MATCH_PARENT )
             {
-                return childFit;
+                return FitExtent::Type::MATCH_PARENT;
             }
 
-            maxChildExtent =
-                FitExtent{ std::max( maxChildExtent.getValue(), childFit.getValue() ) };
+            maxChildExtent = std::max( maxChildExtent, childFit.getValue() );
         }
 
-        return { maxChildExtent.getValue() + margin.getRightLeft() };
+        return { maxChildExtent + margin.getRightLeft() };
     }
 
     FitExtent Group::fitHeight( Size const& space ) const
@@ -83,7 +82,7 @@ namespace ttb::ui
 
         auto const margin = getMargin();
 
-        auto maxChildExtent = FitExtent{ 0.0f };
+        auto maxChildExtent = 0.0f;
 
         for( auto const& child : m_children )
         {
@@ -97,14 +96,13 @@ namespace ttb::ui
 
             if( childFit.getType() == FitExtent::Type::MATCH_PARENT )
             {
-                return childFit;
+                return FitExtent::Type::MATCH_PARENT;
             }
 
-            maxChildExtent =
-                FitExtent{ std::max( maxChildExtent.getValue(), childFit.getValue() ) };
+            maxChildExtent = std::max( maxChildExtent, childFit.getValue() );
         }
 
-        return { maxChildExtent.getValue() + margin.getTopBottom() };
+        return { maxChildExtent + margin.getTopBottom() };
     }
 
     void Group::setSize( Size const& value )
@@ -175,6 +173,13 @@ namespace ttb::ui
         child.setParent( nullptr );
 
         m_children.erase( newEnd, std::end( m_children ) );
+        changed();
+    }
+
+    void Group::remove( std::size_t position )
+    {
+        m_children[ position ].element->setParent( nullptr );
+        m_children.erase( std::begin( m_children ) );
         changed();
     }
 

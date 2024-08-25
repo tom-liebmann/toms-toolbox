@@ -8,15 +8,14 @@ target_sources(
          Slot.cpp
          Clickable.cpp
          Text.cpp
-#        Image.cpp
+         Ratio.cpp
+         Rectangle.cpp
+         EventBlocker.cpp
+         Image.cpp
 #        MonoImage.cpp
-#        Ratio.cpp
-#        Rectangle.cpp
 #        Switch.cpp
-#        ScrollArea.cpp
-#        PriorityListener.cpp
+         ScrollArea.cpp
 #        ScaleToFit.cpp
-#        EventBlocker.cpp
 )
 
 add_subdirectory( tests )

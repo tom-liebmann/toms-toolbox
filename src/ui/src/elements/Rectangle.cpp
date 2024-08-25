@@ -1,3 +1,4 @@
+#include "ttb/ui/XmlLoader.hpp"
 #include <ttb/ui/elements/Rectangle.hpp>
 
 #include <ttb/core/geometry.hpp>
@@ -45,15 +46,20 @@ namespace
 
 namespace ttb::ui
 {
+    Rectangle::Rectangle( Root& root ) : Rectangle{ root, { use_float, 1.0f, 1.0f, 1.0f }, 1.0f }
+    {
+    }
+
     Rectangle::Rectangle( Root& root, ColorRgb const& color, float opacity )
         : Element{ root }, m_color( color ), m_opacity{ opacity }
     {
         initGeometry();
     }
 
-    Rectangle::Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : Element{ root }, m_color{ ttb::use_float, 1.0f, 1.0f, 1.0f }, m_opacity{ 1.0f }
+    void Rectangle::parseXml( XmlNode const& node, XmlLoader& loader )
     {
+        Element::parseXml( node, loader );
+
         if( auto const value = loader.attrValue( node, "color" ) )
         {
             m_color = ColorRgb::createHexStr( value.value() ).value();
@@ -95,7 +101,7 @@ namespace ttb::ui
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
         state.with( *m_program,
-                    ttb::UniformBinder{ "u_transform", transform() },
+                    ttb::UniformBinder{ "u_transform", getTransform() },
                     ttb::UniformBinder{ "u_color",
                                         ttb::Vector< float, 4 >{
                                             m_color.rF(), m_color.gF(), m_color.bF(), m_opacity } },

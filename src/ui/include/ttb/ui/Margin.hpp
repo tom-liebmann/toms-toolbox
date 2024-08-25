@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ttb/math/Vector.hpp>
 #include <ttb/ui/xml_loading.hpp>
 
 #include <regex>
@@ -29,6 +30,8 @@ namespace ttb::ui
         constexpr Margin setTop( float value ) const;
         constexpr Margin setLeft( float value ) const;
         constexpr Margin setBottom( float value ) const;
+
+        ttb::Vector< float, 2 > shrink( ttb::Vector< float, 2 > const& vec ) const;
 
     private:
         static Margin parse( std::string_view const& value );
@@ -77,7 +80,7 @@ namespace ttb::ui
 
     inline constexpr float Margin::getTopBottom() const
     {
-    return m_top + m_bottom;
+        return m_top + m_bottom;
     }
 
     inline constexpr float Margin::getRight() const
@@ -118,6 +121,11 @@ namespace ttb::ui
     inline constexpr Margin Margin::setBottom( float value ) const
     {
         return { m_right, m_top, m_left, value };
+    }
+
+    inline ttb::Vector< float, 2 > Margin::shrink( ttb::Vector< float, 2 > const& vec ) const
+    {
+        return { vec( 0 ) - getRightLeft(), vec( 1 ) - getTopBottom() };
     }
 
     inline Margin Margin::parse( std::string_view const& value )

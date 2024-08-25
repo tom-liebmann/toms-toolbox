@@ -29,6 +29,9 @@ namespace ttb::ui
         template < typename TType >
         TType* getTypeById( std::string const& id );
 
+        template < typename TType >
+        TType& getById( std::string const& id );
+
 #ifndef TEST
     private:
 #endif
@@ -46,5 +49,16 @@ namespace ttb::ui
     inline TType* XmlElement::getTypeById( std::string const& id )
     {
         return dynamic_cast< TType* >( getElementById( id ) );
+    }
+
+    template < typename TType >
+    inline TType& XmlElement::getById( std::string const& id )
+    {
+        auto const result = getTypeById< TType >( id );
+        if( !result )
+        {
+            throw std::runtime_error( "Unable to find element with id " + id );
+        }
+        return *result;
     }
 }

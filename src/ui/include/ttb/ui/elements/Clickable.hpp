@@ -21,6 +21,17 @@ namespace ttb::ui
 
         ~Clickable();
 
+        enum class Action
+        {
+            START,
+            END,
+            ABORT,
+        };
+
+        using Callback = std::function< void( Action ) >;
+
+        void setPressCallback( Callback callback );
+
     protected:
         virtual void onPressStart();
 
@@ -40,5 +51,7 @@ namespace ttb::ui
 
         int m_pointerId{ 0 };
         std::unique_ptr< PriorityListener > m_prioListener;
+
+        Callback m_callback;
     };
 }

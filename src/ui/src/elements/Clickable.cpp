@@ -23,19 +23,33 @@ namespace ttb::ui
 
     Clickable::~Clickable() = default;
 
+    void Clickable::setPressCallback( Callback callback )
+    {
+        m_callback = std::move( callback );
+    }
+
     void Clickable::onPressStart()
     {
-        // TODO: Execute callback
+        if( m_callback )
+        {
+            m_callback( Action::START );
+        }
     }
 
     void Clickable::onPressEnd()
     {
-        // TODO: Execute callback
+        if( m_callback )
+        {
+            m_callback( Action::END );
+        }
     }
 
     void Clickable::onPressAbort()
     {
-        // TODO: Execute callback
+        if( m_callback )
+        {
+            m_callback( Action::ABORT );
+        }
     }
 
     bool Clickable::onEvent( Event const& event )

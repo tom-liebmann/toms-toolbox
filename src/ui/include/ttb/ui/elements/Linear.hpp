@@ -30,7 +30,7 @@ namespace ttb::ui
         virtual void setSize( Size const& value ) override;
 
         //! @copydoc Element::setPosition( Position const& )
-        virtual void setPosition( Position const& value );
+        virtual void setPosition( Position const& value ) override;
 
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
@@ -43,6 +43,8 @@ namespace ttb::ui
 
         //! @copydoc ElementParent::onChildChanged( Element& )
         virtual void onChildChanged( Element& child ) override;
+
+        Element& getChild( std::size_t position );
 
         void remove( Element& child );
 
