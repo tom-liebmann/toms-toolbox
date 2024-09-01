@@ -2,6 +2,8 @@
 
 #include <ttb/core/fonts/Font.hpp>
 
+#include <algorithm>
+
 
 namespace ttb::font
 {

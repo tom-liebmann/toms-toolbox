@@ -3,6 +3,8 @@
 #include <ttb/utils/Event.hpp>
 #include <ttb/utils/EventListener.hpp>
 
+#include <algorithm>
+
 
 namespace ttb
 {
