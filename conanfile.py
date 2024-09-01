@@ -100,14 +100,14 @@ class TomsToolboxConan(ConanFile):
             if self.settings.os != "Android":
                 comp.requires.extend(["glfw::glfw", "opengl::opengl", "glew::glew"])
             if self.options.build_tests:
-                comp.requires.extend(["Catch2::Catch2"])
+                comp.requires.extend(["catch2::catch2"])
             comp.libs = ["ttbCore"]
 
         if self.options.activate_math:
             comp = self.cpp_info.components["math"]
             comp.set_property("cmake_target_name", "ttb::math")
             if self.options.build_tests:
-                comp.requires.extend(["Catch2::Catch2"])
+                comp.requires.extend(["catch2::catch2"])
             comp.libs = ["ttbMath"]
 
         if self.options.activate_ui:
@@ -115,7 +115,7 @@ class TomsToolboxConan(ConanFile):
             comp.set_property("cmake_target_name", "ttb::ui")
             comp.requires.append("rapidxml::rapidxml")
             if self.options.build_tests:
-                comp.requires.extend(["Catch2::Catch2"])
+                comp.requires.extend(["catch2::catch2"])
             comp.libs = ["ttbUi"]
 
         if self.options.activate_utils:
@@ -123,7 +123,7 @@ class TomsToolboxConan(ConanFile):
             comp.set_property("cmake_target_name", "ttb::utils")
             comp.requires.extend(["fmt::fmt"])
             if self.options.build_tests:
-                comp.requires.extend(["Catch2::Catch2"])
+                comp.requires.extend(["catch2::catch2"])
             comp.libs = ["ttbUtils"]
 
         if self.options.activate_project:
