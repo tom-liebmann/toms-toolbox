@@ -9,3 +9,5 @@ GTAGS
 *.~undo-tree~
 
 CMakeUserPresets.json
+
+.cache/
