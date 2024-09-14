@@ -21,17 +21,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake make g++
 
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_PLATFORM=${{env.BUILD_PLATFORM}}
+      - name: Install conan
+        run: |
+          sudo apt-get install python3-pip
+          pip3 install conan
 
-    - name: Build
-      # Build your program with the given configuration
-      run: make
+      - name: Create and configure conan profile
+        run: |
+          conan profile new default --detect
+          conan profile update settings.compiler.libcxx=libstd++11 default
+
+      - name: Install Dependencies
+        run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
+
+      - name: Configure CMake
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DBUILD_PLATFORM=${{env.BUILD_PLATFORM}}
+
+      - name: Build
+        run: make
 
