@@ -13,22 +13,20 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    Ratio::Ratio( Root& root, float ratio ) : WrappedElement{ root }, m_ratio{ ratio }
+    Ratio::Ratio( Root& root, float ratio ) : Slot{ root }, m_ratio{ ratio }
     {
+        setWidth( Extent::Type::MATCH_CHILD );
+        setHeight( Extent::Type::MATCH_CHILD );
     }
 
-    Ratio::Ratio( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ root }
+    void Ratio::parseXml( XmlNode const& node, XmlLoader& loader )
     {
         if( auto const value = loader.attrValue( node, "value" ); value )
         {
             m_ratio = std::stof( std::string{ *value } );
         }
 
-        if( auto child = node.first_node(); child )
-        {
-            wrappedChild( loader.loadElement( root, *child ) );
-        }
+        Slot::parseXml( node, loader );
     }
 
     void Ratio::ratio( float ratio )
@@ -37,29 +35,32 @@ namespace ttb::ui
         changed();
     }
 
-    void Ratio::child( Element* element )
+    FitExtent Ratio::fitWidth( Size const& space ) const
     {
-        wrappedChild( element );
+        auto const spaceM = getMargin().shrink( space );
+        auto const ratio = spaceM( 0 ) / spaceM( 1 );
+        return ratio > m_ratio ? space( 1 ) * m_ratio : space( 0 );
     }
 
-    auto Ratio::fit( Size const& size ) -> Size
+    FitExtent Ratio::fitHeight( Size const& space ) const
     {
-        auto const ratio = size( 0 ) / size( 1 );
-
-        return ratio > m_ratio ? Size{ size( 1 ) * m_ratio, size( 1 ) }
-                               : Size{ size( 0 ), size( 0 ) / m_ratio };
+        auto const spaceM = getMargin().shrink( space );
+        auto const ratio = spaceM( 0 ) / spaceM( 1 );
+        return ratio > m_ratio ? space( 1 ) : space( 0 ) / m_ratio;
     }
 
-    void Ratio::size( Size const& value )
+    void Ratio::setSize( Size const& value )
     {
-        Element::size( value );
+        Element::setSize( value );
 
-        if( auto const child = wrappedChild(); child )
+        auto const& size = getSize();
+
+        if( auto const child = getChild() )
         {
-            auto const ratio = value( 0 ) / value( 1 );
-            auto const childSize = ratio > m_ratio ? Size{ value( 1 ) * m_ratio, value( 1 ) }
-                                                   : Size{ value( 0 ), value( 0 ) / m_ratio };
-            child->size( childSize );
+            auto const ratio = size( 0 ) / size( 1 );
+            auto const childSize = ratio > m_ratio ? Size{ size( 1 ) * m_ratio, size( 1 ) }
+                                                   : Size{ size( 0 ), size( 0 ) / m_ratio };
+            child->setSize( childSize );
         }
     }
 }

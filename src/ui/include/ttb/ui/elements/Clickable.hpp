@@ -1,7 +1,7 @@
 #pragma once
 
-#include <ttb/ui/WrappedElement.hpp>
-#include <ttb/ui/XmlLoader.hpp>
+#include <ttb/ui/elements/Slot.hpp>
+#include <ttb/ui/xml_loading.hpp>
 #include <ttb/utils/EventListener.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
@@ -14,27 +14,30 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    class Clickable : public WrappedElement
+    class Clickable : public Slot
     {
     public:
-        enum class Action
-        {
-            START,
-            ABORT,
-            END
-        };
-
-        using ClickCallback = std::function< void( Action, Element& ) >;
-
         Clickable( Root& root );
-
-        Clickable( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
         ~Clickable();
 
-        void callback( ClickCallback value );
+        enum class Action
+        {
+            START,
+            END,
+            ABORT,
+        };
 
-        void child( Element* element );
+        using Callback = std::function< void( Action ) >;
+
+        void setPressCallback( Callback callback );
+
+    protected:
+        virtual void onPressStart();
+
+        virtual void onPressEnd();
+
+        virtual void onPressAbort();
 
     private:
         //! @copydoc Element::onEvent( Event const& )
@@ -46,9 +49,9 @@ namespace ttb::ui
 
         bool onPointerPressEnd( ttb::events::PointerPressEnd const& event );
 
-        ClickCallback m_callback;
-
         int m_pointerId{ 0 };
         std::unique_ptr< PriorityListener > m_prioListener;
+
+        Callback m_callback;
     };
 }

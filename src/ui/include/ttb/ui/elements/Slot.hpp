@@ -1,30 +1,29 @@
 #pragma once
 
 #include <ttb/ui/Element.hpp>
-
-#include <vector>
+#include <ttb/ui/xml_loading.hpp>
 
 
 namespace ttb::ui
 {
-    class Group : public Element, public ElementParent
+    class Slot : public Element, public ElementParent
     {
     public:
-        Group( Root& root );
+        Slot( Root& root );
 
         virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
-        //! @copydoc Element::fitWidth( Size const& )
+        //! @copydoc Element::fitWidth( Size )
         virtual FitExtent fitWidth( Size const& space ) const override;
 
-        //! @copydoc Element::fitHeight( Size const& )
+        //! @copydoc Element::fitHeight( Size )
         virtual FitExtent fitHeight( Size const& space ) const override;
-
-        //! @copydoc Element::setSize( Size const& )
-        virtual void setSize( Size const& value ) override;
 
         //! @copydoc Element::setPosition( Position const& )
         virtual void setPosition( Position const& value ) override;
+
+        //! @copydoc Element::setSize( Size const& )
+        virtual void setSize( Size const& value ) override;
 
         //! @copydoc Element::update( float )
         virtual void update( float timeDiff ) override;
@@ -35,24 +34,15 @@ namespace ttb::ui
         //! @copydoc Element::onEvent( Event const& )
         virtual bool onEvent( Event const& event ) override;
 
-        //! @copydoc ElementParent::onChildChanged( Element& )
         virtual void onChildChanged( Element& child ) override;
 
-        void remove( Element& child );
+        virtual void setChild( Element* child );
 
-        void remove( std::size_t position );
+        Element* getChild();
 
-        void insert( std::size_t position, Element* child, bool considerSize = true );
-
-        void add( Element* child, bool considerSize = true );
+        Element const* getChild() const;
 
     private:
-        struct Slot
-        {
-            bool considerSize;
-            Element* element;
-        };
-
-        std::vector< Slot > m_children;
+        Element* m_child{ nullptr };
     };
 }

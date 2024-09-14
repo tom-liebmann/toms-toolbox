@@ -13,25 +13,33 @@
 
 namespace ttb::ui
 {
-    class Label : public Element
+    class Text : public Element
     {
     public:
-        Label( Root& root, std::string text, float size, ColorRgb const& color );
+        Text( Root& root );
 
-        Label( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        Text( Root& root, std::string text, float size, ColorRgb const& color );
 
-        void text( std::string value );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
+
+        void setText( std::string value );
 
         void setSize( float value );
 
         void setColor( ColorRgb const& color );
 
-        virtual Size fit( Size const& size ) override;
+        virtual FitExtent fitWidth( Size const& space ) const override;
+
+        virtual FitExtent fitHeight( Size const& space ) const override;
+
+        virtual void setSize( Size const& value ) override;
 
         virtual void render( ttb::State& state ) const override;
 
     private:
         void updateGeometry();
+
+        void updateMaxWidth( float value ) const;
 
         std::string m_text;
         float m_size;
@@ -44,6 +52,6 @@ namespace ttb::ui
 
         std::unique_ptr< ttb::TextLayout > m_textLayout;
 
-        ttb::Range< float, 2 > m_fontRange;
+        mutable ttb::Range< float, 2 > m_fontRange;
     };
 }

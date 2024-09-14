@@ -2,15 +2,21 @@
 
 #include <ttb/ui/Element.hpp>
 
-#include <vector>
-
 
 namespace ttb::ui
 {
-    class Group : public Element, public ElementParent
+    class Linear : public Element, public ElementParent
     {
     public:
-        Group( Root& root );
+        enum class Direction
+        {
+            HORIZONTAL,
+            VERTICAL,
+        };
+
+        Linear( Root& root );
+
+        Linear( Root& root, Direction direction );
 
         virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
@@ -38,21 +44,25 @@ namespace ttb::ui
         //! @copydoc ElementParent::onChildChanged( Element& )
         virtual void onChildChanged( Element& child ) override;
 
+        Element& getChild( std::size_t position );
+
         void remove( Element& child );
 
-        void remove( std::size_t position );
+        void insert( std::size_t position, Element* child, float weight = 1.0f );
 
-        void insert( std::size_t position, Element* child, bool considerSize = true );
-
-        void add( Element* child, bool considerSize = true );
+        void add( Element* child, float weight = 1.0f );
 
     private:
+        Direction m_direction;
+
         struct Slot
         {
-            bool considerSize;
-            Element* element;
+            bool isFixed;
+            float weight;
+            float size;
+            Element* child;
         };
 
-        std::vector< Slot > m_children;
+        std::vector< Slot > m_slots;
     };
 }

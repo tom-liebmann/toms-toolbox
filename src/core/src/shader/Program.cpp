@@ -63,6 +63,8 @@ namespace ttb
     {
     }
 
+    Program::Creator::~Creator() = default;
+
     Program::Creator& Program::Creator::attachShader( std::unique_ptr< Shader > shader )
     {
         m_shaders.push_back( std::move( shader ) );

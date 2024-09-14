@@ -1,6 +1,6 @@
 #include <ttb/ui/elements/EventBlocker.hpp>
 
-#include "PriorityListener.hpp"
+#include "../utils/PriorityListener.hpp"
 #include <ttb/ui/Root.hpp>
 #include <ttb/ui/XmlFactory.hpp>
 #include <ttb/utils/EventManager.hpp>
@@ -17,32 +17,17 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    EventBlocker::EventBlocker( Root& root ) : WrappedElement{ root }
+    EventBlocker::EventBlocker( Root& root ) : Slot{ root }
     {
-    }
-
-    EventBlocker::EventBlocker( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader )
-        : WrappedElement{ root }
-    {
-        if( auto child = node.first_node() )
-        {
-            wrappedChild( loader.loadElement( root, *child ) );
-        }
+        setWidth( Extent::Type::MATCH_CHILD );
+        setHeight( Extent::Type::MATCH_CHILD );
     }
 
     EventBlocker::~EventBlocker() = default;
 
-    void EventBlocker::child( Element* element )
-    {
-        wrappedChild( std::move( element ) );
-    }
-
     bool EventBlocker::onEvent( Event const& event )
     {
-        if( WrappedElement::onEvent( event ) )
-        {
-            return true;
-        }
+        [[maybe_unused]] auto result = Slot::onEvent( event );
 
         return true;
     }

@@ -1,18 +1,23 @@
 #pragma once
 
-#include <ttb/ui/Element.hpp>
 #include <ttb/ui/fromStringView.hpp>
 
 #include <rapidxml/rapidxml.hpp>
 
+#include <optional>
+
 
 namespace ttb::ui
 {
+    class Root;
+
     class XmlFactoryBase;
     class XmlElement;
 
     template < typename TType >
     class XmlFactory;
+
+    class Element;
 }
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <ttb/ui/WrappedElement.hpp>
+#include <ttb/ui/elements/Slot.hpp>
 #include <ttb/ui/XmlLoader.hpp>
 #include <ttb/utils/gesture/events.hpp>
 
@@ -13,7 +13,7 @@ namespace ttb::ui
 
 namespace ttb::ui
 {
-    class ScrollArea : public WrappedElement
+    class ScrollArea : public Slot
     {
     public:
         enum class Direction
@@ -22,25 +22,22 @@ namespace ttb::ui
             VERTICAL,
         };
 
-        ScrollArea( Root& root, Direction direction );
+        ScrollArea( Root& root );
 
-        ScrollArea( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        ScrollArea( Root& root, Direction direction );
 
         ~ScrollArea();
 
-        void setChild( Element* element );
-
         void setScrollOffset( float value );
 
-        virtual Size fit( Size const& space ) override;
-        virtual void offset( Offset const& value ) override;
-        virtual void size( Size const& value ) override;
+        virtual FitExtent fitWidth( Size const& space ) const override;
+        virtual FitExtent fitHeight( Size const& space ) const override;
+        virtual void setPosition( Position const& value ) override;
+        virtual void setSize( Size const& value ) override;
+
         virtual bool onEvent( Event const& event ) override;
         virtual void update( float timeDiff ) override;
         virtual void render( ttb::State& state ) const override;
-
-        using Element::offset;
-        using Element::size;
 
     private:
         bool onPointerPressStart( ttb::events::PointerPressStart const& event );

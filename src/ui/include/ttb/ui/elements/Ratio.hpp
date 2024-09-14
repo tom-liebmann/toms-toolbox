@@ -1,27 +1,27 @@
 #pragma once
 
-#include <ttb/ui/WrappedElement.hpp>
 #include <ttb/ui/XmlLoader.hpp>
+#include <ttb/ui/elements/Slot.hpp>
 
 
 namespace ttb::ui
 {
-    class Ratio : public WrappedElement
+    class Ratio : public Slot
     {
     public:
         Ratio( Root& root, float ratio = 1.0f );
 
         Ratio( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
 
-        void child( Element* element );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
         void ratio( float ratio );
 
-        virtual Size fit( Size const& size ) override;
+        virtual FitExtent fitWidth( const Size& space ) const override;
 
-        virtual void size( Size const& value ) override;
+        virtual FitExtent fitHeight( const Size& space ) const override;
 
-        using Element::size;
+        virtual void setSize( const Size& value ) override;
 
     private:
         float m_ratio{ 1.0f };

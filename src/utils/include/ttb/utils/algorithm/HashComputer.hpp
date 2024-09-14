@@ -18,6 +18,23 @@ namespace ttb
     };
 }
 
+template < typename TType >
+struct std::hash< std::vector< TType > >
+{
+    std::size_t operator()( std::vector< TType > const& values ) const noexcept
+    {
+        auto hashComputer = ttb::HashComputer{};
+        for( auto const& value : values )
+        {
+            hashComputer.push( value );
+        }
+        return hashComputer.getValue();
+    }
+};
+
+template < typename TType >
+std::size_t computeHash( TType const& value );
+
 
 namespace ttb
 {
@@ -31,4 +48,10 @@ namespace ttb
     {
         return m_value;
     }
+}
+
+template < typename TType >
+std::size_t computeHash( TType const& value )
+{
+    return std::hash< TType >{}( value );
 }

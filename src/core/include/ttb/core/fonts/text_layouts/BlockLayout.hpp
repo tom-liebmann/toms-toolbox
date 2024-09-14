@@ -12,6 +12,8 @@ namespace ttb::font
 
         void setMaxWidth( float value );
 
+        float getMaxWidth() const;
+
         //! \copydoc TextLayout::computeLayout( Font const&, float, std::string_view, float,
         //! CharacterCallback const& ) const
         virtual void computeLayout( Font const& font,

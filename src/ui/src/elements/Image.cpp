@@ -55,7 +55,7 @@ namespace ttb::ui
         glEnable( GL_BLEND );
         glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
-        state.with( ttb::UniformBinder{ "u_transform", transform() },
+        state.with( ttb::UniformBinder{ "u_transform", getTransform() },
                     ttb::UniformBinder{ "u_texture", TEXTURE_SLOT },
                     ttb::TextureSlice2DBinder{ *m_image, "u_texTransform", TEXTURE_SLOT },
                     *m_program,

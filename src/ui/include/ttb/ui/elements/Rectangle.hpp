@@ -17,9 +17,11 @@ namespace ttb::ui
     class Rectangle : public Element
     {
     public:
+        Rectangle( Root& root );
+
         Rectangle( Root& root, ColorRgb const& color, float opacity );
 
-        Rectangle( Root& root, rapidxml::xml_node<> const& node, XmlLoader& loader );
+        virtual void parseXml( XmlNode const& node, XmlLoader& loader ) override;
 
         ~Rectangle();
 
