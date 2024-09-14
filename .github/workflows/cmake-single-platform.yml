@@ -46,8 +46,12 @@ jobs:
             -B ${{github.workspace}}/build \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
             -DBUILD_PLATFORM=${{env.BUILD_PLATFORM}} \
-            -DBUILD_LIBRARY_TYPE=SHARED
+            -DBUILD_LIBRARY_TYPE=SHARED \
+            -DACTIVATE_ttbCore=ON \
+            -DACTIVATE_ttbMath=ON \
+            -DACTIVATE_ttbUi=ON \
+            -DACTIVATE_ttbUtils=ON
 
       - name: Build
-        run: make
+        run: cmake --build ${{github.workspace}}/build -- -j$(nproc)
 
