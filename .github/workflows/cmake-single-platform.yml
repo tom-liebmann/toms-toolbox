@@ -24,6 +24,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache Conan dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.conan
+          key: conan-${{ runner.os }}-${{ hashFiles('conanfile.py') }}
+          restore-keys: |
+            conan-${{ runner.os }}-
+
       - name: Install packages
         run: |
           sudo apt-get update
