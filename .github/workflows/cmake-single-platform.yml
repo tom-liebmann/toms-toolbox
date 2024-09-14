@@ -27,7 +27,7 @@ jobs:
       - name: Cache Conan dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.conan
+          path: ~/.conan2
           key: conan-${{ runner.os }}-${{ hashFiles('conanfile.py') }}
           restore-keys: |
             conan-${{ runner.os }}-
