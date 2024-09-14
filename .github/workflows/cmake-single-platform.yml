@@ -35,7 +35,7 @@ jobs:
           pip3 install conan
 
       - name: Create and configure conan profile
-        run: conan config install -t dir -sf ${{github.workspace}}/conan_profiles linux-x86_64
+        run: conan config install -t dir ${{github.workspace}}/conan_profiles/linux-x86_64
 
       - name: Install Dependencies
         run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
