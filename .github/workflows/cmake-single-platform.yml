@@ -35,9 +35,7 @@ jobs:
           pip3 install conan
 
       - name: Create and configure conan profile
-        run: |
-          conan profile new default --detect
-          conan profile update settings.compiler.libcxx=libstd++11 default
+        run: conan config install -sf ${{github.workspace}}/conan_profiles linux-x86_64
 
       - name: Install Dependencies
         run: conan install ${{github.workspace}} --output-folder=${{github.workspace}}/build --build=missing
