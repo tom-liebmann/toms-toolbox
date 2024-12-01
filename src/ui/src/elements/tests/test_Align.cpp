@@ -28,7 +28,7 @@ TEST_CASE( "Align", "[ui][elements]" )
         align.setChild( &child );
         root.setChild( &align );
 
-        REQUIRE( ttb::Vector{ 0.3f, 0.3f } == ttb::Approx{ align.getSize() } );
+        REQUIRE( ttb::Vector{ 1.0f, 1.0f } == ttb::Approx{ align.getSize() } );
         REQUIRE( ttb::Vector{ 0.0f, 0.0f } == ttb::Approx{ align.getPosition() } );
 
         REQUIRE( ttb::Vector{ 0.3f, 0.3f } == ttb::Approx{ child.getSize() } );
