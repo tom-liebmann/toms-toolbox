@@ -5,6 +5,7 @@
 
 #include <fmt/core.h>
 
+#include <cstdint>
 #include <iostream>
 #include <optional>
 #include <type_traits>
@@ -13,6 +14,12 @@
 
 namespace ttb::co
 {
+    template < typename TResult >
+    class Coroutine;
+
+    template < typename TResult >
+    auto operator==( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool;
+
     template < typename TResult >
     class Coroutine
     {
@@ -25,7 +32,7 @@ namespace ttb::co
 
         Coroutine();
 
-        explicit Coroutine( Handle handle );
+        explicit Coroutine( Handle handle, bool destroy = true );
 
         Coroutine( Coroutine const& rhs ) = delete;
         Coroutine( Coroutine&& rhs );
@@ -43,6 +50,9 @@ namespace ttb::co
 
         std::exception_ptr getException() const;
 
+        template < typename TException >
+        auto setException( TException&& e ) -> void;
+
         std::optional< TResult >& getResult();
 
         constexpr bool await_ready() const;
@@ -58,8 +68,14 @@ namespace ttb::co
                    typename = typename std::enable_if_t< std::is_void_v< U > > >
         U await_resume();
 
+        operator bool() const;
+
     private:
         Handle m_handle;
+        bool m_destroy{ false };
+
+        friend auto operator==
+            < TResult >( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool;
     };
 
 
@@ -112,12 +128,19 @@ namespace ttb::co
 
         std::exception_ptr getException() const;
 
+        template < typename TException >
+        auto setException( TException&& e ) -> void;
+
         void unhandled_exception();
 
     private:
         CoroutinePromiseBase* m_subpromise{ nullptr };
         std::exception_ptr m_exception;
     };
+
+
+    template < typename TResult >
+    auto operator==( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool;
 }  // namespace ttb::co
 
 
@@ -127,13 +150,14 @@ namespace ttb::co
     inline Coroutine< TResult >::Coroutine() = default;
 
     template < typename TResult >
-    inline Coroutine< TResult >::Coroutine( Handle handle ) : m_handle{ handle }
+    inline Coroutine< TResult >::Coroutine( Handle handle, bool destroy )
+        : m_handle{ handle }, m_destroy{ destroy }
     {
     }
 
     template < typename TResult >
     inline Coroutine< TResult >::Coroutine( Coroutine&& rhs )
-        : m_handle{ std::exchange( rhs.m_handle, Handle{} ) }
+        : m_handle{ std::exchange( rhs.m_handle, Handle{} ) }, m_destroy{ rhs.m_destroy }
     {
     }
 
@@ -142,7 +166,10 @@ namespace ttb::co
     {
         if( m_handle )
         {
-            m_handle.destroy();
+            if( m_destroy )
+            {
+                m_handle.destroy();
+            }
             m_handle = Handle{};
         }
     }
@@ -151,6 +178,7 @@ namespace ttb::co
     inline Coroutine< TResult >& Coroutine< TResult >::operator=( Coroutine&& rhs )
     {
         m_handle = std::exchange( rhs.m_handle, Handle{} );
+        m_destroy = rhs.m_destroy;
         return *this;
     }
 
@@ -163,6 +191,17 @@ namespace ttb::co
     template < typename TResult >
     inline bool Coroutine< TResult >::resume()
     {
+        fmt::print( "Resuming\n" );
+        // if( auto exceptionPtr = m_handle.promise().getException() )
+        //{
+        //     if( m_destroy )
+        //     {
+        //         m_handle.destroy();
+        //     }
+        //     m_handle = Handle{};
+        //     std::rethrow_exception( exceptionPtr );
+        // }
+
         return m_handle.promise().resume();
     }
 
@@ -182,6 +221,13 @@ namespace ttb::co
     }
 
     template < typename TResult >
+    template < typename TException >
+    auto Coroutine< TResult >::setException( TException&& e ) -> void
+    {
+        m_handle.promise().setException( std::forward< TException >( e ) );
+    }
+
+    template < typename TResult >
     std::optional< TResult >& Coroutine< TResult >::getResult()
     {
         return m_handle.promise().value();
@@ -191,13 +237,15 @@ namespace ttb::co
     inline constexpr bool Coroutine< TResult >::await_ready() const
     {
         // If the coroutine is already done, we can skip the suspension.
-        return m_handle.done();
+        //return m_handle.done();
+        return false;
     }
 
     template < typename TResult >
     template < typename TPromise >
-    inline void Coroutine< TResult >::await_suspend( ::co::coroutine_handle< TPromise > handle )
+    void Coroutine< TResult >::await_suspend( ::co::coroutine_handle< TPromise > handle )
     {
+        fmt::print( "Suspending...\n" );
         handle.promise().subpromise( m_handle.promise() );
     }
 
@@ -205,6 +253,7 @@ namespace ttb::co
     template < typename U, typename >
     U&& Coroutine< TResult >::await_resume()
     {
+        fmt::print( "Resuming...\n" );
         rethrowException();
 
         return std::move( m_handle.promise().value().value() );
@@ -214,7 +263,14 @@ namespace ttb::co
     template < typename U, typename >
     U Coroutine< TResult >::await_resume()
     {
+        fmt::print( "Resuming 2...\n" );
         rethrowException();
+    }
+
+    template < typename TResult >
+    Coroutine< TResult >::operator bool() const
+    {
+        return static_cast< bool >( m_handle );
     }
 
 
@@ -309,8 +365,22 @@ namespace ttb::co
     }
 
     template < typename TResult >
+    template < typename TException >
+    auto Coroutine< TResult >::Promise::setException( TException&& e ) -> void
+    {
+        m_exception = std::make_exception_ptr( std::forward< TException >( e ) );
+    }
+
+    template < typename TResult >
     inline void Coroutine< TResult >::Promise::unhandled_exception()
     {
         m_exception = std::current_exception();
+    }
+
+
+    template < typename TResult >
+    auto operator==( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool
+    {
+        return lhs.m_handle == rhs.m_handle;
     }
 }  // namespace ttb::co

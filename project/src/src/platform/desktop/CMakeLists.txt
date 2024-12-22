@@ -6,3 +6,5 @@ target_sources(
         AdManager.cpp
         SignInManager.cpp
 )
+
+target_compile_options( ${TARGET_NAME} PUBLIC -fcoroutines )
