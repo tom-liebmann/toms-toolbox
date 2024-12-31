@@ -1,15 +1,16 @@
 #pragma once
 
+#include "ttb/utils/co/helper.hpp"
 #include <exception>
 #include <ttb/utils/co/std_namespace.hpp>
 
 #include <fmt/core.h>
 
-#include <cstdint>
-#include <iostream>
 #include <optional>
 #include <type_traits>
 #include <utility>
+
+#include <ttb/utils/co/Promise.hpp>
 
 
 namespace ttb::co
@@ -25,10 +26,9 @@ namespace ttb::co
     {
     public:
         class PromiseBase;
-        class Promise;
 
-        using promise_type = Promise;
-        using Handle = ::co::coroutine_handle< Promise >;
+        using promise_type = Promise< TResult >;
+        using Handle = ::co::coroutine_handle< Promise< TResult > >;
 
         Coroutine();
 
@@ -76,66 +76,6 @@ namespace ttb::co
 
         friend auto operator==
             < TResult >( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool;
-    };
-
-
-    class CoroutinePromiseBase
-    {
-    public:
-        virtual bool resume() = 0;
-    };
-
-
-    template < typename TResult >
-    class Coroutine< TResult >::PromiseBase : public CoroutinePromiseBase
-    {
-    public:
-        std::optional< TResult >& value();
-
-        template < typename TValue >
-        void return_value( TValue&& value );
-
-    private:
-        std::optional< TResult > m_value;
-    };
-
-
-    template <>
-    class Coroutine< void >::PromiseBase : public CoroutinePromiseBase
-    {
-    public:
-        void return_void();
-    };
-
-
-    template < typename TResult >
-    class Coroutine< TResult >::Promise : public PromiseBase
-    {
-    public:
-        Promise();
-
-        ~Promise();
-
-        virtual bool resume() override;
-
-        void subpromise( CoroutinePromiseBase& promise );
-
-        auto initial_suspend();
-
-        auto final_suspend() noexcept;
-
-        Coroutine get_return_object();
-
-        std::exception_ptr getException() const;
-
-        template < typename TException >
-        auto setException( TException&& e ) -> void;
-
-        void unhandled_exception();
-
-    private:
-        CoroutinePromiseBase* m_subpromise{ nullptr };
-        std::exception_ptr m_exception;
     };
 
 
@@ -191,17 +131,6 @@ namespace ttb::co
     template < typename TResult >
     inline bool Coroutine< TResult >::resume()
     {
-        fmt::print( "Resuming\n" );
-        // if( auto exceptionPtr = m_handle.promise().getException() )
-        //{
-        //     if( m_destroy )
-        //     {
-        //         m_handle.destroy();
-        //     }
-        //     m_handle = Handle{};
-        //     std::rethrow_exception( exceptionPtr );
-        // }
-
         return m_handle.promise().resume();
     }
 
@@ -237,23 +166,23 @@ namespace ttb::co
     inline constexpr bool Coroutine< TResult >::await_ready() const
     {
         // If the coroutine is already done, we can skip the suspension.
-        //return m_handle.done();
-        return false;
+        return m_handle.done();
     }
 
     template < typename TResult >
     template < typename TPromise >
     void Coroutine< TResult >::await_suspend( ::co::coroutine_handle< TPromise > handle )
     {
-        fmt::print( "Suspending...\n" );
-        handle.promise().subpromise( m_handle.promise() );
+        if constexpr( helper::IsCoroutinePromise< TPromise >::value )
+        {
+            handle.promise().subpromise( m_handle.promise() );
+        }
     }
 
     template < typename TResult >
     template < typename U, typename >
     U&& Coroutine< TResult >::await_resume()
     {
-        fmt::print( "Resuming...\n" );
         rethrowException();
 
         return std::move( m_handle.promise().value().value() );
@@ -263,7 +192,6 @@ namespace ttb::co
     template < typename U, typename >
     U Coroutine< TResult >::await_resume()
     {
-        fmt::print( "Resuming 2...\n" );
         rethrowException();
     }
 
@@ -273,109 +201,6 @@ namespace ttb::co
         return static_cast< bool >( m_handle );
     }
 
-
-    template < typename TResult >
-    std::optional< TResult >& Coroutine< TResult >::PromiseBase::value()
-    {
-        return m_value;
-    }
-
-    template < typename TResult >
-    template < typename TValue >
-    void Coroutine< TResult >::PromiseBase::return_value( TValue&& value )
-    {
-        m_value = std::forward< TValue >( value );
-    }
-
-
-    inline void Coroutine< void >::PromiseBase::return_void()
-    {
-    }
-
-
-    template < typename TResult >
-    Coroutine< TResult >::Promise::Promise()
-    {
-    }
-
-    template < typename TResult >
-    Coroutine< TResult >::Promise::~Promise()
-    {
-    }
-
-    template < typename TResult >
-    bool Coroutine< TResult >::Promise::resume()
-    {
-        auto handle = Handle::from_promise( *this );
-
-        do
-        {
-            if( m_subpromise )
-            {
-                if( m_subpromise->resume() )
-                {
-                    return true;
-                }
-                else
-                {
-                    m_subpromise = nullptr;
-                }
-            }
-
-            if( handle.done() )
-            {
-                return false;
-            }
-
-            handle.resume();
-
-        } while( m_subpromise );
-
-        return !handle.done();
-    }
-
-    template < typename TResult >
-    inline void Coroutine< TResult >::Promise::subpromise( CoroutinePromiseBase& promise )
-    {
-        m_subpromise = &promise;
-    }
-
-    template < typename TResult >
-    inline auto Coroutine< TResult >::Promise::initial_suspend()
-    {
-        return ::co::suspend_always{};
-    }
-
-    template < typename TResult >
-    inline auto Coroutine< TResult >::Promise::final_suspend() noexcept
-    {
-        return ::co::suspend_always{};
-    }
-
-    template < typename TResult >
-    inline auto Coroutine< TResult >::Promise::get_return_object() -> Coroutine
-    {
-        return Coroutine{ Handle::from_promise( *this ) };
-    }
-
-    template < typename TResult >
-    inline std::exception_ptr Coroutine< TResult >::Promise::getException() const
-    {
-        return m_exception;
-    }
-
-    template < typename TResult >
-    template < typename TException >
-    auto Coroutine< TResult >::Promise::setException( TException&& e ) -> void
-    {
-        m_exception = std::make_exception_ptr( std::forward< TException >( e ) );
-    }
-
-    template < typename TResult >
-    inline void Coroutine< TResult >::Promise::unhandled_exception()
-    {
-        m_exception = std::current_exception();
-    }
 
 
     template < typename TResult >

@@ -67,35 +67,25 @@ TEST_CASE( "Inject exception", "[utils][coroutine]" )
 
     auto const coroutine = [ & ]() -> ttb::co::Coroutine< void >
     {
-        fmt::print( "1\n" );
         co_await std::suspend_always{};
-        fmt::print( "2\n" );
 
         endReached = true;
-        fmt::print( "3\n" );
 
         co_return;
     };
 
-    fmt::print( "a\n" );
     auto handle = coroutine();
 
-    fmt::print( "b\n" );
     REQUIRE( !handle.isFinished() );
 
-    fmt::print( "c\n" );
     handle.resume();
 
-    fmt::print( "d\n" );
     REQUIRE( !handle.isFinished() );
 
-    fmt::print( "e\n" );
     handle.setException( std::runtime_error{ "Exception" } );
 
-    fmt::print( "f\n" );
     handle.resume();
 
-    fmt::print( "g\n" );
     REQUIRE( !endReached );
     REQUIRE( handle.isFinished() );
     REQUIRE_THROWS_WITH( handle.rethrowException(), "Exception" );
