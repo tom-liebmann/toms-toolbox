@@ -16,6 +16,8 @@ namespace ttb::co
     {
     public:
         virtual auto resume() -> bool = 0;
+
+        virtual void setException( std::exception_ptr e ) noexcept = 0;
     };
 
     template < typename TResult >
@@ -105,28 +107,35 @@ namespace ttb::co
 
         auto getException() const noexcept -> std::exception_ptr
         {
-            return m_exception;
+            return m_thrownException;
         }
 
-        template < typename TException >
-        void setException( TException&& e ) noexcept
+        virtual void setException( std::exception_ptr e ) noexcept override
         {
-            m_exception = std::make_exception_ptr( std::forward< TException >( e ) );
+            if( m_subpromise )
+            {
+                m_subpromise->setException( e );
+            }
+            else
+            {
+                m_injectedException = e;
+            }
         }
 
         void unhandled_exception() noexcept
         {
-            m_exception = std::current_exception();
+            m_thrownException = std::current_exception();
         }
 
         template < typename TExpr >
         auto await_transform( TExpr&& expr ) noexcept
         {
-            return ExceptionAwaitable{ std::forward< TExpr >( expr ), m_exception };
+            return ExceptionAwaitable{ std::forward< TExpr >( expr ), m_injectedException };
         }
 
     private:
         PromiseBase* m_subpromise{ nullptr };
-        std::exception_ptr m_exception;
+        std::exception_ptr m_injectedException;
+        std::exception_ptr m_thrownException;
     };
 }

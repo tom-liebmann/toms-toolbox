@@ -25,7 +25,7 @@ namespace ttb::co
         {
             if( m_exceptionPtr )
             {
-                std::rethrow_exception( m_exceptionPtr );
+                std::rethrow_exception( std::exchange( m_exceptionPtr, nullptr ) );
             }
             return m_awaitable.await_suspend( h );
         }
@@ -34,7 +34,7 @@ namespace ttb::co
         {
             if( m_exceptionPtr )
             {
-                std::rethrow_exception( m_exceptionPtr );
+                std::rethrow_exception( std::exchange( m_exceptionPtr, nullptr ) );
             }
             return m_awaitable.await_resume();
         }
