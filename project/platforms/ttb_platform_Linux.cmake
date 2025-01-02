@@ -18,6 +18,7 @@ function( _ttb_project_finish PROJECT_NAME )
     target_link_libraries( ${TARGET_NAME} PRIVATE ttb::core ttb::utils ttb::ui ttb::math )
 
     target_compile_definitions( ${TARGET_NAME} PUBLIC PLATFORM_${BUILD_PLATFORM_UPPER} )
+    target_compile_options( ${TARGET_NAME} PUBLIC -fcoroutines )
 
     add_subdirectory( ${_CMAKE_FILE} _target_${PROJECT_NAME} )
     add_subdirectory( "${TTB_ROOT}/project/src" ttb_project )
