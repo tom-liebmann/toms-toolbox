@@ -18,7 +18,9 @@ namespace ttb
                 onEvent( event );
             } );
 
-        m_runCoro = run( argc, argv );
+        m_renderState = std::make_unique< ttb::State >();
+
+        m_runCoro = run( argc, argv, *m_renderState );
     }
 
     void CoroApp::destroy()
@@ -41,6 +43,17 @@ namespace ttb
         {
             stop();
         }
+    }
+
+    void CoroApp::draw() const
+    {
+        auto& window = ttb::Window::instance();
+
+        m_renderState->with( window,
+                             [ this ]
+                             {
+                                 draw( *m_renderState );
+                             } );
     }
 
     void CoroApp::onEvent( ttb::Event const& event )
