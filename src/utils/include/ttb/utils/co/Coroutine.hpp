@@ -46,7 +46,7 @@ namespace ttb::co
 
         bool resume();
 
-        void rethrowException() const;
+        void rethrowException();
 
         std::exception_ptr getException() const;
 
@@ -131,14 +131,22 @@ namespace ttb::co
     template < typename TResult >
     inline bool Coroutine< TResult >::resume()
     {
-        return m_handle.promise().resume();
+        rethrowException();
+        auto const result = m_handle.promise().resume();
+        rethrowException();
+        return result;
     }
 
     template < typename TResult >
-    inline void Coroutine< TResult >::rethrowException() const
+    inline void Coroutine< TResult >::rethrowException()
     {
         if( auto exceptionPtr = m_handle.promise().getException() )
         {
+            if( m_destroy )
+            {
+                m_handle.destroy();
+            }
+            m_handle = Handle{};
             std::rethrow_exception( exceptionPtr );
         }
     }
@@ -153,7 +161,8 @@ namespace ttb::co
     template < typename TException >
     auto Coroutine< TResult >::setException( TException&& e ) -> void
     {
-        m_handle.promise().setException( std::forward< TException >( e ) );
+        m_handle.promise().setException(
+            std::make_exception_ptr( std::forward< TException >( e ) ) );
     }
 
     template < typename TResult >

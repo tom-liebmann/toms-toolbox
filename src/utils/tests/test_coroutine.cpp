@@ -147,10 +147,8 @@ TEST_CASE( "Exception", "[utils][coroutine]" )
     REQUIRE( !handle.isFinished() );
     REQUIRE( handle.resume() );
     REQUIRE( !handle.isFinished() );
-    REQUIRE( !handle.resume() );
+    REQUIRE_THROWS_WITH( handle.resume(), "Exception" );
     REQUIRE( handle.isFinished() );
-    REQUIRE( handle.getException() );
-    REQUIRE_THROWS_WITH( handle.rethrowException(), "Exception" );
 }
 
 TEST_CASE( "Exception transformation", "[utils][coroutine]" )
@@ -176,8 +174,7 @@ TEST_CASE( "Exception transformation", "[utils][coroutine]" )
 
     auto handle = coroutine2();
     REQUIRE( !handle.isFinished() );
-    REQUIRE( !handle.resume() );
-    REQUIRE_THROWS_WITH( handle.rethrowException(), "Outer Exception" );
+    REQUIRE_THROWS_WITH( handle.resume(), "Outer Exception" );
 }
 
 TEST_CASE( "Run single coroutine without callbacks", "[utils][coroutine]" )

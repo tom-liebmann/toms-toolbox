@@ -84,11 +84,9 @@ TEST_CASE( "Inject exception", "[utils][coroutine]" )
 
     handle.setException( std::runtime_error{ "Exception" } );
 
-    handle.resume();
-
+    REQUIRE_THROWS_WITH( handle.resume(), "Exception" );
     REQUIRE( !endReached );
     REQUIRE( handle.isFinished() );
-    REQUIRE_THROWS_WITH( handle.rethrowException(), "Exception" );
 }
 
 TEST_CASE( "Exception caught", "[utils][coroutine]" )
@@ -127,4 +125,66 @@ TEST_CASE( "Exception caught", "[utils][coroutine]" )
     REQUIRE( endReached );
     REQUIRE( exceptionCaught );
     REQUIRE( handle.isFinished() );
+}
+
+TEST_CASE( "Multiple layers", "[utils][coroutine]" )
+{
+    auto finished1 = false;
+    auto const coroutine1 = [ & ]() -> ttb::co::Coroutine< void >
+    {
+        co_await std::suspend_always{};
+        finished1 = true;
+    };
+
+    auto finished2 = false;
+    auto const coroutine2 = [ & ]() -> ttb::co::Coroutine< void >
+    {
+        co_await coroutine1();
+        finished2 = true;
+    };
+
+    auto handle = coroutine2();
+
+    handle.resume();
+
+    REQUIRE( !handle.isFinished() );
+    REQUIRE( !finished1 );
+    REQUIRE( !finished2 );
+
+    handle.setException( std::runtime_error{ "Exception" } );
+
+    REQUIRE_THROWS_WITH( handle.resume(), "Exception" );
+    REQUIRE( handle.isFinished() );
+    REQUIRE( !finished1 );
+    REQUIRE( !finished2 );
+}
+
+TEST_CASE( "Multiple injection", "[utils][coroutine]" )
+{
+    auto finished = false;
+    auto const coroutine = [ & ]() -> ttb::co::Coroutine< void >
+    {
+        try
+        {
+            co_await std::suspend_always{};
+        }
+        catch( std::exception& e )
+        {
+            // Do nothing
+        }
+
+        co_await std::suspend_always{};
+
+        finished = true;
+    };
+
+    auto handle = coroutine();
+
+    handle.resume();
+    handle.setException( std::runtime_error( "Exception 1" ) );
+    handle.resume();
+    handle.setException( std::runtime_error( "Exception 2" ) );
+    REQUIRE_THROWS_WITH( handle.resume(), "Exception 2" );
+    REQUIRE( handle.isFinished() );
+    REQUIRE( !finished );
 }
