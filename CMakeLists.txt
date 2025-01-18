@@ -86,7 +86,6 @@ add_subdirectory( src/math )
 add_subdirectory( src/core )
 add_subdirectory( src/utils )
 add_subdirectory( src/ui )
-add_subdirectory( src/game )
 
 export(
     TARGETS ${EXPORT_TARGETS}

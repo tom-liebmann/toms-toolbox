@@ -20,5 +20,6 @@ add_subdirectory( shader )
 add_subdirectory( texture )
 add_subdirectory( window )
 add_subdirectory( resources )
+add_subdirectory( entity )
 
 set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )

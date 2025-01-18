@@ -15,7 +15,6 @@ class TomsToolboxConan(ConanFile):
         "activate_math": [True, False],
         "activate_ui": [True, False],
         "activate_utils": [True, False],
-        "activate_game": [True, False],
         "activate_project": [True, False],
         "build_type": ["Release", "Debug"],
         "build_tests": [True, False],
@@ -25,7 +24,6 @@ class TomsToolboxConan(ConanFile):
         "activate_core": True,
         "activate_math": True,
         "activate_ui": True,
-        "activate_game": True,
         "activate_utils": True,
         "activate_project": True,
         "build_type": "Release",
@@ -43,7 +41,6 @@ class TomsToolboxConan(ConanFile):
         toolchain.cache_variables["ACTIVATE_ttbMath"] = str(self.options.activate_math)
         toolchain.cache_variables["ACTIVATE_ttbUi"] = str(self.options.activate_ui)
         toolchain.cache_variables["ACTIVATE_ttbUtils"] = str(self.options.activate_utils)
-        toolchain.cache_variables["ACTIVATE_ttbGame"] = str(self.options.activate_game)
         toolchain.cache_variables["CMAKE_BUILD_TYPE"] = str(self.options.build_type)
         toolchain.generate()
 
@@ -88,10 +85,6 @@ class TomsToolboxConan(ConanFile):
             copy(self, "*", join(self.build_folder, "src/utils/include"), join(self.package_folder, "include"), keep_path=True)
             copy(self, "*.so", join(self.build_folder, "src/utils"), join(self.package_folder, "lib"), keep_path=False)
             copy(self, "*.a", join(self.build_folder, "src/utils"), join(self.package_folder, "lib"), keep_path=False)
-        if self.options.activate_game:
-            copy(self, "*", join(self.build_folder, "src/game/include"), join(self.package_folder, "include"), keep_path=True)
-            copy(self, "*.so", join(self.build_folder, "src/game"), join(self.package_folder, "lib"), keep_path=False)
-            copy(self, "*.a", join(self.build_folder, "src/game"), join(self.package_folder, "lib"), keep_path=False)
         if self.options.activate_project:
             copy(self, "*", join(self.build_folder, "project"), join(self.package_folder, "project"), keep_path=True)
             copy(self, "*", join(self.build_folder, "cmake"), join(self.package_folder, "cmake"), keep_path=True)
@@ -132,12 +125,6 @@ class TomsToolboxConan(ConanFile):
             if self.options.build_tests:
                 comp.requires.extend(["catch2::catch2"])
             comp.libs = ["ttbUtils"]
-
-        if self.options.activate_game:
-            comp = self.cpp_info.components["game"]
-            comp.set_property("cmake_target_name", "ttb::game")
-            comp.requires.extend(["fmt::fmt"])
-            comp.libs = ["ttbGame"]
 
         if self.options.activate_project:
             comp = self.cpp_info.components["project"]
