@@ -21,5 +21,6 @@ add_subdirectory( texture )
 add_subdirectory( window )
 add_subdirectory( resources )
 add_subdirectory( entity )
+add_subdirectory( render_nodes )
 
 set( EXPORT_DEPENDENCIES ${EXPORT_DEPENDENCIES} PARENT_SCOPE )
