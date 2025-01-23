@@ -11,7 +11,7 @@
 namespace ttb
 {
 #if !defined( PLATFORM_ANDROID )
-    std::unique_ptr< Shader > Shader::fromFile( Type type, std::string const& filename )
+    std::unique_ptr< Shader > Shader::fromFile( ShaderType type, std::string const& filename )
     {
         std::ifstream stream( filename, std::ios::in | std::ios::binary );
 
@@ -36,7 +36,7 @@ namespace ttb
         try
         {
             auto shader = std::unique_ptr< Shader >(
-                new Shader( type, std::string( std::begin( buffer ), std::end( buffer ) ) ) );
+                new Shader( type, { std::begin( buffer ), std::end( buffer ) } ) );
 
             return shader;
         }
@@ -47,24 +47,24 @@ namespace ttb
     }
 #endif
 
-    std::unique_ptr< Shader > Shader::fromSource( Type type, std::string const& source )
+    std::unique_ptr< Shader > Shader::fromSource( ShaderType type, std::string_view source )
     {
         return std::unique_ptr< Shader >( new Shader( type, source ) );
     }
 
-    Shader::Shader( Type type, std::string const& source )
+    Shader::Shader( ShaderType type, std::string_view source )
     {
         // create shader object
         {
             switch( type )
             {
-                case Type::VERTEX:
+                case ShaderType::VERTEX:
                     m_shaderObject = glCreateShader( GL_VERTEX_SHADER );
                     break;
-                case Type::FRAGMENT:
+                case ShaderType::FRAGMENT:
                     m_shaderObject = glCreateShader( GL_FRAGMENT_SHADER );
                     break;
-                case Type::GEOMETRY:
+                case ShaderType::GEOMETRY:
                     m_shaderObject = glCreateShader( GL_GEOMETRY_SHADER );
                     break;
             }
@@ -77,8 +77,10 @@ namespace ttb
 
         // load source into shader
         {
-            std::array< GLchar const*, 1 > sources = { { source.c_str() } };
-            glShaderSource( m_shaderObject, 1, sources.data(), nullptr );
+            auto const sources = std::array< GLchar const*, 1 >{ { source.data() } };
+            auto const sourceLengths =
+                std::array< GLint, 1 >{ { static_cast< GLint >( source.size() ) } };
+            glShaderSource( m_shaderObject, 1, sources.data(), sourceLengths.data() );
         }
 
         // compile shader

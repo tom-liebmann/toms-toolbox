@@ -1,8 +1,10 @@
 #pragma once
 
+#include "ShaderType.hpp"
 #include <ttb/core/gl.hpp>
 
 #include <memory>
+#include <string_view>
 
 // declarations
 //=============================================================================
@@ -12,18 +14,11 @@ namespace ttb
     class Shader
     {
     public:
-        enum class Type
-        {
-            VERTEX,
-            FRAGMENT,
-            GEOMETRY
-        };
+        static std::unique_ptr< Shader > fromFile( ShaderType type, std::string const& filename );
 
-        static std::unique_ptr< Shader > fromFile( Type type, std::string const& filename );
+        static std::unique_ptr< Shader > fromSource( ShaderType type, std::string_view source );
 
-        static std::unique_ptr< Shader > fromSource( Type type, std::string const& source );
-
-        Shader( Type type, std::string const& source );
+        Shader( ShaderType type, std::string_view source );
 
         ~Shader();
 

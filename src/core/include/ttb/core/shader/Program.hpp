@@ -3,6 +3,7 @@
 #include <ttb/core/Bindable.hpp>
 #include <ttb/core/gl.hpp>
 
+#include "ShaderType.hpp"
 #include <ttb/math/Matrix.hpp>
 #include <ttb/math/Vector.hpp>
 
@@ -31,10 +32,7 @@ namespace ttb
     class Program : public Bindable< Program >
     {
     public:
-        class Creator;
-
-        template < typename TFunc >
-        static std::unique_ptr< Program > create( TFunc const& func );
+        class Builder;
 
         ~Program();
 
@@ -52,22 +50,19 @@ namespace ttb
 
 
 
-    class Program::Creator
+    class Program::Builder
     {
     public:
-        Creator& attachShader( std::unique_ptr< Shader > shader );
+        auto withShader( std::unique_ptr< Shader > shader ) -> Builder&;
 
-        ~Creator();
+        auto withShaderSource( ShaderType type, std::string_view source ) -> Builder&;
+
+        auto build() -> std::unique_ptr< Program >;
 
     private:
-        Creator();
-
-        std::unique_ptr< Program > finish();
-
         std::vector< std::unique_ptr< Shader > > m_shaders;
-
-        friend class Program;
     };
+
 
 
     template <>
@@ -84,16 +79,4 @@ namespace ttb
 
         friend Bindable;
     };
-}
-
-
-namespace ttb
-{
-    template < typename TFunc >
-    inline std::unique_ptr< Program > Program::create( TFunc const& func )
-    {
-        Creator creator;
-        func( creator );
-        return creator.finish();
-    }
 }

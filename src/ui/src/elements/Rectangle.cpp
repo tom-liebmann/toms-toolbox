@@ -113,13 +113,10 @@ namespace ttb::ui
 
     void Rectangle::initGeometry()
     {
-        m_program = ttb::Program::create(
-            []( auto& c )
-            {
-                c.attachShader(
-                    ttb::Shader::fromSource( ttb::Shader::Type::FRAGMENT, SOURCE_FRAG ) );
-                c.attachShader( ttb::Shader::fromSource( ttb::Shader::Type::VERTEX, SOURCE_VERT ) );
-            } );
+        m_program = Program::Builder{}
+                        .withShaderSource( ShaderType::FRAGMENT, SOURCE_FRAG )
+                        .withShaderSource( ShaderType::VERTEX, SOURCE_VERT )
+                        .build();
 
         auto vertexBuffer = ttb::VertexBuffer::create(
             [ & ]( auto& c )

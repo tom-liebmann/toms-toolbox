@@ -2,6 +2,7 @@
 
 #include <ttb/core/State.hpp>
 #include <ttb/core/geometry.hpp>
+#include <ttb/core/shader.hpp>
 #include <ttb/core/texture.hpp>
 #include <ttb/math.hpp>
 
@@ -30,5 +31,6 @@ namespace ttb
         std::shared_ptr< ttb::VertexBuffer > m_vertexBuffer;
         std::shared_ptr< ttb::IndexBuffer > m_indexBuffer;
         std::unique_ptr< ttb::Geometry > m_geometry;
+        std::unique_ptr< ttb::Program > m_program;
     };
 }

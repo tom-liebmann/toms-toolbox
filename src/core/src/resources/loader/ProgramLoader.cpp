@@ -32,32 +32,32 @@ namespace ttb::resources
 
     std::shared_ptr< ttb::Program > ProgramLoader::load( YAML::Node const& node ) const
     {
-        static std::map< std::string, ttb::Shader::Type > const shaderTypes = {
-            { "fragment", ttb::Shader::Type::FRAGMENT },
-            { "vertex", ttb::Shader::Type::VERTEX },
-            { "geometry", ttb::Shader::Type::GEOMETRY },
+        static std::map< std::string, ShaderType > const shaderTypes = {
+            { "fragment", ShaderType::FRAGMENT },
+            { "vertex", ShaderType::VERTEX },
+            { "geometry", ShaderType::GEOMETRY },
         };
 
-        return ttb::Program::create(
-            [ & ]( auto& creator )
+        auto builder = Program::Builder{};
+
+        for( auto const shaderNode : node )
+        {
+            auto const type = shaderTypes.at( shaderNode[ "type" ].as< std::string >() );
+            auto const file = rootPath() + "/" + shaderNode[ "file" ].as< std::string >();
+
+            auto const source = loadSource( rootPath(), file );
+
+            try
             {
-                for( auto const shaderNode : node )
-                {
-                    auto const type = shaderTypes.at( shaderNode[ "type" ].as< std::string >() );
-                    auto const file = rootPath() + "/" + shaderNode[ "file" ].as< std::string >();
+                builder.withShaderSource( type, source );
+            }
+            catch( std::runtime_error& e )
+            {
+                throw std::runtime_error( file + ":\n" + source + "\n" + e.what() );
+            }
+        }
 
-                    auto const source = loadSource( rootPath(), file );
-
-                    try
-                    {
-                        creator.attachShader( ttb::Shader::fromSource( type, source ) );
-                    }
-                    catch( std::runtime_error& e )
-                    {
-                        throw std::runtime_error( file + ":\n" + source + "\n" + e.what() );
-                    }
-                }
-            } );
+        return builder.build();
     }
 }
 

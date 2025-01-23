@@ -59,19 +59,19 @@ namespace ttb
     }
 
 
-    Program::Creator::Creator()
-    {
-    }
-
-    Program::Creator::~Creator() = default;
-
-    Program::Creator& Program::Creator::attachShader( std::unique_ptr< Shader > shader )
+    auto Program::Builder::withShader( std::unique_ptr< Shader > shader ) -> Builder&
     {
         m_shaders.push_back( std::move( shader ) );
         return *this;
     }
 
-    std::unique_ptr< Program > Program::Creator::finish()
+    auto Program::Builder::withShaderSource( ShaderType type, std::string_view source ) -> Builder&
+    {
+        m_shaders.push_back( Shader::fromSource( type, source ) );
+        return *this;
+    }
+
+    auto Program::Builder::build() -> std::unique_ptr< Program >
     {
         return std::unique_ptr< Program >{ new Program{ std::move( m_shaders ) } };
     }
