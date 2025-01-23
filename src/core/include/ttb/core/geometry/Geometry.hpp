@@ -27,11 +27,9 @@ namespace ttb
 {
     class Geometry
     {
-        class Attribute;
-        class Creator;
-
     public:
-        static Creator create( GLenum mode );
+        class Attribute;
+        class Builder;
 
         ~Geometry();
 
@@ -55,12 +53,32 @@ namespace ttb
     };
 
 
+    class Geometry::Builder
+    {
+    public:
+        Builder( GLenum mode );
+
+        auto addAttribute( std::string const& name,
+                           std::shared_ptr< VertexBuffer > buffer,
+                           std::size_t index = 0 ) -> Builder&;
+
+        auto addIndices( std::shared_ptr< IndexBuffer > indexBuffer ) -> Builder&;
+
+        auto build() -> std::unique_ptr< Geometry >;
+
+    private:
+        GLenum m_mode;
+        std::vector< Attribute > m_attributes;
+        std::shared_ptr< IndexBuffer > m_indexBuffer;
+    };
+
+
 
     class Geometry::Attribute
     {
     public:
         Attribute( std::string const& name,
-                   std::shared_ptr< VertexBuffer > const& vertexBuffer,
+                   std::shared_ptr< VertexBuffer > vertexBuffer,
                    size_t index );
 
         std::string const& name() const;
@@ -75,28 +93,5 @@ namespace ttb
         std::string m_name;
         std::shared_ptr< VertexBuffer > m_buffer;
         size_t m_index;
-    };
-
-
-
-    class Geometry::Creator
-    {
-    public:
-        Creator& attribute( std::string const& name,
-                            std::shared_ptr< VertexBuffer > const& buffer,
-                            size_t index = 0 );
-
-        Creator& indices( std::shared_ptr< IndexBuffer > const& indexBuffer );
-
-        std::unique_ptr< Geometry > finish();
-
-    private:
-        Creator( GLenum mode );
-
-        GLenum m_mode;
-        std::vector< Attribute > m_attributes;
-        std::shared_ptr< IndexBuffer > m_indexBuffer;
-
-        friend class Geometry;
     };
 }

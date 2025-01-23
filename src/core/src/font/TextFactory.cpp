@@ -37,14 +37,13 @@ namespace ttb
                                                               std::string_view text,
                                                               TextLayout const& layout )
     {
-        std::shared_ptr< ttb::VertexBuffer > vertexBuffer = VertexBuffer::create(
-            [ & ]( auto& c )
-            {
-                c.attribute( GL_FLOAT, 2 );  // in_texCoord
-                c.attribute( GL_FLOAT, 2 );  // in_vertex
-            } );
+        auto vertexBuffer =
+            std::shared_ptr< VertexBuffer >{ VertexBuffer::Builder{}           //
+                                                 .addAttribute( GL_FLOAT, 2 )  // in_texCoord
+                                                 .addAttribute( GL_FLOAT, 2 )  // in_vertex
+                                                 .build() };
 
-        auto indexBuffer = IndexBuffer::create();
+        auto indexBuffer = IndexBuffer::Builder{}.build();
 
         auto const scaleFactor = size / font.getEmSize();
 
@@ -109,10 +108,10 @@ namespace ttb
             indexBuffer->flush();
         }
 
-        return Geometry::create( GL_TRIANGLES )
-            .attribute( "in_texCoord", vertexBuffer, 0 )
-            .attribute( "in_vertex", vertexBuffer, 1 )
-            .indices( indexBuffer )
-            .finish();
+        return Geometry::Builder{ GL_TRIANGLES }
+            .addAttribute( "in_texCoord", vertexBuffer, 0 )
+            .addAttribute( "in_vertex", vertexBuffer, 1 )
+            .addIndices( std::move( indexBuffer ) )
+            .build();
     }
 }

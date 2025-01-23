@@ -2,7 +2,6 @@
 
 #include <ttb/core/gl.hpp>
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -24,11 +23,8 @@ namespace ttb
     class VertexBuffer
     {
     public:
-        class Creator;
+        class Builder;
         class VertexHandle;
-
-        template < typename TFunc >
-        static std::unique_ptr< VertexBuffer > create( TFunc const& func );
 
         ~VertexBuffer();
 
@@ -49,8 +45,7 @@ namespace ttb
         VertexHandle operator[]( size_t index );
 
         /**
-         * Flush the changes that are stored in this modified.
-         * This also resets the modifier to the original state.
+         * Flush all changes done to the VertexBuffer.
          */
         void flush();
 
@@ -90,6 +85,18 @@ namespace ttb
     };
 
 
+    class VertexBuffer::Builder
+    {
+    public:
+        auto addAttribute( GLenum type, size_t size ) -> Builder&;
+
+        auto build() -> std::unique_ptr< VertexBuffer >;
+
+    private:
+        std::vector< Attribute > m_attributes;
+    };
+
+
     class VertexBuffer::VertexHandle
     {
     public:
@@ -121,30 +128,6 @@ namespace ttb
 
         friend class VertexBuffer;
     };
-
-
-    class VertexBuffer::Creator
-    {
-    public:
-        Creator( Creator const& ) = delete;
-        Creator( Creator&& ) = delete;
-
-        Creator& operator=( Creator const& ) = delete;
-        Creator& operator=( Creator&& ) = delete;
-
-        void attribute( GLenum type, size_t size );
-
-    private:
-        Creator();
-
-        ~Creator();
-
-        std::unique_ptr< VertexBuffer > finish();
-
-        std::vector< Attribute > m_attributes;
-
-        friend class VertexBuffer;
-    };
 }
 
 
@@ -154,15 +137,6 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename TFunc >
-    inline std::unique_ptr< VertexBuffer > VertexBuffer::create( TFunc const& func )
-    {
-        Creator creator;
-        func( creator );
-        return creator.finish();
-    }
-
-
     inline auto VertexBuffer::VertexHandle::set( VertexHandle const& rhs ) -> VertexHandle&
     {
         std::copy( m_buffer.m_data.data() + rhs.m_index * m_buffer.m_vertexSize,
@@ -186,8 +160,10 @@ namespace ttb
         return *this;
     }
 
-    inline auto VertexBuffer::VertexHandle::set( size_t index, float v0, float v1, float v2 )
-        -> VertexHandle&
+    inline auto VertexBuffer::VertexHandle::set( size_t index,
+                                                 float v0,
+                                                 float v1,
+                                                 float v2 ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
@@ -196,9 +172,8 @@ namespace ttb
         return *this;
     }
 
-    inline auto
-        VertexBuffer::VertexHandle::set( size_t index, float v0, float v1, float v2, float v3 )
-            -> VertexHandle&
+    inline auto VertexBuffer::VertexHandle::set(
+        size_t index, float v0, float v1, float v2, float v3 ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + 0 ] ) = v0;
@@ -208,8 +183,9 @@ namespace ttb
         return *this;
     }
 
-    inline auto VertexBuffer::VertexHandle::setComp( size_t index, size_t component, float value )
-        -> VertexHandle&
+    inline auto VertexBuffer::VertexHandle::setComp( size_t index,
+                                                     size_t component,
+                                                     float value ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         reinterpret_cast< float& >( m_buffer.m_data[ offset + component * 4 ] ) = value;
@@ -223,8 +199,8 @@ namespace ttb
         return *this;
     }
 
-    inline auto VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1 )
-        -> VertexHandle&
+    inline auto
+        VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1 ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );
@@ -232,8 +208,10 @@ namespace ttb
         return *this;
     }
 
-    inline auto VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1, float& v2 )
-        -> VertexHandle&
+    inline auto VertexBuffer::VertexHandle::get( size_t index,
+                                                 float& v0,
+                                                 float& v1,
+                                                 float& v2 ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );
@@ -242,9 +220,8 @@ namespace ttb
         return *this;
     }
 
-    inline auto
-        VertexBuffer::VertexHandle::get( size_t index, float& v0, float& v1, float& v2, float& v3 )
-            -> VertexHandle&
+    inline auto VertexBuffer::VertexHandle::get(
+        size_t index, float& v0, float& v1, float& v2, float& v3 ) -> VertexHandle&
     {
         auto const offset = m_index * m_buffer.m_vertexSize + m_buffer.m_attributes[ index ].offset;
         v0 = reinterpret_cast< float const& >( m_buffer.m_data[ offset + 0 ] );

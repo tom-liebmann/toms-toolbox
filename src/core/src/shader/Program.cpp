@@ -59,13 +59,13 @@ namespace ttb
     }
 
 
-    auto Program::Builder::withShader( std::unique_ptr< Shader > shader ) -> Builder&
+    auto Program::Builder::addShader( std::unique_ptr< Shader > shader ) -> Builder&
     {
         m_shaders.push_back( std::move( shader ) );
         return *this;
     }
 
-    auto Program::Builder::withShaderSource( ShaderType type, std::string_view source ) -> Builder&
+    auto Program::Builder::addShaderSource( ShaderType type, std::string_view source ) -> Builder&
     {
         m_shaders.push_back( Shader::fromSource( type, source ) );
         return *this;

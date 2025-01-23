@@ -5,11 +5,6 @@
 
 namespace ttb
 {
-    std::shared_ptr< IndexBuffer > IndexBuffer::create()
-    {
-        return std::shared_ptr< IndexBuffer >( new IndexBuffer() );
-    }
-
     IndexBuffer::IndexBuffer()
     {
         glGenBuffers( 1, &m_bufferObject );
@@ -104,5 +99,11 @@ namespace ttb
             m_begin = std::min( m_begin, begin );
             m_end = std::max( m_end, end );
         }
+    }
+
+
+    auto IndexBuffer::Builder::build() -> std::unique_ptr< IndexBuffer >
+    {
+        return std::unique_ptr< IndexBuffer >{ new IndexBuffer{} };
     }
 }

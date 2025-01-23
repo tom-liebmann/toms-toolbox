@@ -47,22 +47,20 @@ namespace ttb
     {
         updateTransform();
 
-        m_vertexBuffer = ttb::VertexBuffer::create(
-            []( auto& c )
-            {
-                c.attribute( GL_FLOAT, 2 );
-            } );
+        m_vertexBuffer = VertexBuffer::Builder{}  //
+                             .addAttribute( GL_FLOAT, 2 )
+                             .build();
 
-        m_indexBuffer = ttb::IndexBuffer::create();
+        m_indexBuffer = IndexBuffer::Builder{}.build();
 
-        m_geometry = ttb::Geometry::create( GL_TRIANGLES )
-                         .attribute( "in_vertex", m_vertexBuffer )
-                         .indices( m_indexBuffer )
-                         .finish();
+        m_geometry = Geometry::Builder{ GL_TRIANGLES }  //
+                         .addAttribute( "in_vertex", m_vertexBuffer )
+                         .addIndices( m_indexBuffer )
+                         .build();
 
-        m_program = Program::Builder{}
-                        .withShaderSource( ShaderType::VERTEX, SHADER_SOURCE_VERTEX )
-                        .withShaderSource( ShaderType::FRAGMENT, SHADER_SOURCE_INDEX )
+        m_program = Program::Builder{}  //
+                        .addShaderSource( ShaderType::VERTEX, SHADER_SOURCE_VERTEX )
+                        .addShaderSource( ShaderType::FRAGMENT, SHADER_SOURCE_INDEX )
                         .build();
     }
 

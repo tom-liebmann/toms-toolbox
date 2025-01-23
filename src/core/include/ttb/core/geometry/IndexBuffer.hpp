@@ -14,9 +14,9 @@ namespace ttb
     class IndexBuffer
     {
     public:
-        using Index = GLushort;
+        class Builder;
 
-        static std::shared_ptr< IndexBuffer > create();
+        using Index = GLushort;
 
         ~IndexBuffer();
 
@@ -56,6 +56,13 @@ namespace ttb
         bool m_clear{ false };
 
         friend class Geometry;
+    };
+
+
+    class IndexBuffer::Builder
+    {
+    public:
+        auto build() -> std::unique_ptr< IndexBuffer >;
     };
 }
 

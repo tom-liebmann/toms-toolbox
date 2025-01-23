@@ -19,11 +19,9 @@ namespace ttb::ui
 {
     Image::Image( Root& root ) : Element{ root }
     {
-        auto vertexBuffer = ttb::VertexBuffer::create(
-            [ & ]( auto& c )
-            {
-                c.attribute( GL_FLOAT, 2 );  //
-            } );
+        auto vertexBuffer = VertexBuffer::Builder{}  //
+                                .addAttribute( GL_FLOAT, 2 )
+                                .build();
 
         vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
         vertexBuffer->push_back().set( 0, 1.0f, 0.0f );
@@ -31,9 +29,9 @@ namespace ttb::ui
         vertexBuffer->push_back().set( 0, 1.0f, 1.0f );
         vertexBuffer->flush();
 
-        m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
-                         .attribute( "in_vertex", std::move( vertexBuffer ), 0 )
-                         .finish();
+        m_geometry = Geometry::Builder{ GL_TRIANGLE_STRIP }
+                         .addAttribute( "in_vertex", std::move( vertexBuffer ), 0 )
+                         .build();
 
         m_program = root.getResourceManager().get< ttb::Program >( "ui_image" );
     }

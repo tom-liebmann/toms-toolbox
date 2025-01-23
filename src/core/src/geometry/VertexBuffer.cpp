@@ -120,11 +120,13 @@ namespace ttb
     {
         glGenBuffers( 1, &m_bufferObject );
 
-        m_vertexSize = std::accumulate(
-            std::begin( m_attributes ),
-            std::end( m_attributes ),
-            0,
-            []( size_t size, Attribute const& attr ) { return size + attr.byteSize(); } );
+        m_vertexSize = std::accumulate( std::begin( m_attributes ),
+                                        std::end( m_attributes ),
+                                        0,
+                                        []( size_t size, Attribute const& attr )
+                                        {
+                                            return size + attr.byteSize();
+                                        } );
     }
 
     void VertexBuffer::bind( size_t index, GLint location ) const
@@ -201,19 +203,15 @@ namespace ttb
         }
     }
 
-
-    void VertexBuffer::Creator::attribute( GLenum type, size_t size )
+    auto VertexBuffer::Builder::addAttribute( GLenum type, std::size_t size ) -> Builder&
     {
         m_attributes.push_back( Attribute{ type, size, 0 } );
+        return *this;
     }
 
-    VertexBuffer::Creator::Creator() = default;
-
-    VertexBuffer::Creator::~Creator() = default;
-
-    std::unique_ptr< VertexBuffer > VertexBuffer::Creator::finish()
+    auto VertexBuffer::Builder::build() -> std::unique_ptr< VertexBuffer >
     {
-        size_t offset = 0;
+        auto offset = std::size_t{ 0 };
         for( auto& attribute : m_attributes )
         {
             attribute.offset = offset;

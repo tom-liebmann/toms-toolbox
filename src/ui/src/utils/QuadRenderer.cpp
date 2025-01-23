@@ -11,22 +11,20 @@ namespace ttb::ui
     {
         m_program = resourceManager.get< ttb::Program >( "ui_quad" );
 
-        m_vertexBuffer = ttb::VertexBuffer::create(
-            [ & ]( auto& c )
-            {
-                c.attribute( GL_FLOAT, 3 );
-                c.attribute( GL_FLOAT, 3 );
-                c.attribute( GL_FLOAT, 2 );
-            } );
+        m_vertexBuffer = VertexBuffer::Builder{}
+                             .addAttribute( GL_FLOAT, 3 )
+                             .addAttribute( GL_FLOAT, 3 )
+                             .addAttribute( GL_FLOAT, 2 )
+                             .build();
 
-        m_indexBuffer = ttb::IndexBuffer::create();
+        m_indexBuffer = IndexBuffer::Builder{}.build();
 
-        m_geometry = ttb::Geometry::create( GL_TRIANGLES )
-                         .attribute( "in_vertex", m_vertexBuffer, 0 )
-                         .attribute( "in_color", m_vertexBuffer, 1 )
-                         .attribute( "in_coord", m_vertexBuffer, 2 )
-                         .indices( std::move( m_indexBuffer ) )
-                         .finish();
+        m_geometry = Geometry::Builder{ GL_TRIANGLES }
+                         .addAttribute( "in_vertex", m_vertexBuffer, 0 )
+                         .addAttribute( "in_color", m_vertexBuffer, 1 )
+                         .addAttribute( "in_coord", m_vertexBuffer, 2 )
+                         .addIndices( std::move( m_indexBuffer ) )
+                         .build();
     }
 
     void QuadRenderer::draw( ttb::State& state ) const

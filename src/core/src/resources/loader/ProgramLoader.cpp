@@ -49,7 +49,7 @@ namespace ttb::resources
 
             try
             {
-                builder.withShaderSource( type, source );
+                builder.addShaderSource( type, source );
             }
             catch( std::runtime_error& e )
             {

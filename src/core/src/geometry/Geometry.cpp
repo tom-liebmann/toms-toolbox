@@ -9,11 +9,6 @@
 
 namespace ttb
 {
-    Geometry::Creator Geometry::create( GLenum mode )
-    {
-        return { mode };
-    }
-
     Geometry::~Geometry()
     {
         glDeleteVertexArrays( 1, &m_arrayObject );
@@ -103,38 +98,36 @@ namespace ttb
     }
 
 
-
-    Geometry::Creator::Creator( GLenum mode ) : m_mode( mode )
+    Geometry::Builder::Builder( GLenum mode ) : m_mode{ mode }
     {
     }
 
-    Geometry::Creator& Geometry::Creator::attribute( std::string const& name,
-                                                     std::shared_ptr< VertexBuffer > const& buffer,
-                                                     size_t index )
+    auto Geometry::Builder::addAttribute( std::string const& name,
+                                          std::shared_ptr< VertexBuffer > buffer,
+                                          std::size_t index ) -> Builder&
     {
-        m_attributes.emplace_back( name, buffer, index );
+        m_attributes.emplace_back( name, std::move( buffer ), index );
         return *this;
     }
 
-    Geometry::Creator&
-        Geometry::Creator::indices( std::shared_ptr< IndexBuffer > const& indexBuffer )
+    auto Geometry::Builder::addIndices( std::shared_ptr< IndexBuffer > indexBuffer ) -> Builder&
     {
-        m_indexBuffer = indexBuffer;
+        m_indexBuffer = std::move( indexBuffer );
         return *this;
     }
 
-    std::unique_ptr< Geometry > Geometry::Creator::finish()
+    auto Geometry::Builder::build() -> std::unique_ptr< Geometry >
     {
         return std::unique_ptr< Geometry >(
-            new Geometry( m_mode, std::move( m_attributes ), m_indexBuffer ) );
+            new Geometry{ m_mode, std::move( m_attributes ), std::move( m_indexBuffer ) } );
     }
 
 
 
     Geometry::Attribute::Attribute( std::string const& name,
-                                    std::shared_ptr< VertexBuffer > const& vertexBuffer,
+                                    std::shared_ptr< VertexBuffer > vertexBuffer,
                                     size_t index )
-        : m_name( name ), m_buffer( vertexBuffer ), m_index( index )
+        : m_name( name ), m_buffer{ std::move( vertexBuffer ) }, m_index( index )
     {
     }
 

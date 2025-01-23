@@ -53,9 +53,9 @@ namespace ttb
     class Program::Builder
     {
     public:
-        auto withShader( std::unique_ptr< Shader > shader ) -> Builder&;
+        auto addShader( std::unique_ptr< Shader > shader ) -> Builder&;
 
-        auto withShaderSource( ShaderType type, std::string_view source ) -> Builder&;
+        auto addShaderSource( ShaderType type, std::string_view source ) -> Builder&;
 
         auto build() -> std::unique_ptr< Program >;
 

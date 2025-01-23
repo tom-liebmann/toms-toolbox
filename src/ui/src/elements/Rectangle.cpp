@@ -114,15 +114,13 @@ namespace ttb::ui
     void Rectangle::initGeometry()
     {
         m_program = Program::Builder{}
-                        .withShaderSource( ShaderType::FRAGMENT, SOURCE_FRAG )
-                        .withShaderSource( ShaderType::VERTEX, SOURCE_VERT )
+                        .addShaderSource( ShaderType::FRAGMENT, SOURCE_FRAG )
+                        .addShaderSource( ShaderType::VERTEX, SOURCE_VERT )
                         .build();
 
-        auto vertexBuffer = ttb::VertexBuffer::create(
-            [ & ]( auto& c )
-            {
-                c.attribute( GL_FLOAT, 2 );  //
-            } );
+        auto vertexBuffer = VertexBuffer::Builder{}
+                                .addAttribute( GL_FLOAT, 2 )  //
+                                .build();
 
         vertexBuffer->push_back().set( 0, 0.0f, 0.0f );
         vertexBuffer->push_back().set( 0, 0.0f, 1.0f );
@@ -130,8 +128,8 @@ namespace ttb::ui
         vertexBuffer->push_back().set( 0, 1.0f, 1.0f );
         vertexBuffer->flush();
 
-        m_geometry = ttb::Geometry::create( GL_TRIANGLE_STRIP )
-                         .attribute( "in_vertex", std::move( vertexBuffer ) )
-                         .finish();
+        m_geometry = Geometry::Builder{ GL_TRIANGLE_STRIP }
+                         .addAttribute( "in_vertex", std::move( vertexBuffer ) )
+                         .build();
     }
 }
