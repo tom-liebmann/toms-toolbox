@@ -18,16 +18,16 @@ namespace ttb
     class Sprite
     {
     public:
-        Sprite( Range2F const& range, TextureSlice2D const& texture );
+        Sprite( Range2F const& range, float height, TextureSlice2D const& texture );
 
         void draw( ttb::State& state ) const;
 
     private:
-        void updateTransform();
+        void updateVertices();
 
         Range2F m_range;
+        float m_height;
         TextureSlice2D m_texture;
-        Matrix3F m_transform;
         std::shared_ptr< ttb::VertexBuffer > m_vertexBuffer;
         std::shared_ptr< ttb::IndexBuffer > m_indexBuffer;
         std::unique_ptr< ttb::Geometry > m_geometry;

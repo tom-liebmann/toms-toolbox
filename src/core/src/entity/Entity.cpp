@@ -1,50 +1,32 @@
 #include <ttb/entity/Entity.hpp>
 
-#include <algorithm>
+#include <ttb/entity/Component.hpp>
 
 
 namespace ttb
 {
     Entity::Entity() = default;
 
-    Entity::Entity( Entity& parent )
-    {
-        setParent( &parent );
-    }
-
     Entity::~Entity() = default;
 
-    void Entity::setParent( Entity* newParent )
+    void Entity::init()
     {
-        if( m_parent )
+        for( auto const comp : m_components )
         {
-            m_parent->removeChild( *this );
-        }
-
-        m_parent = newParent;
-
-        if( m_parent )
-        {
-            newParent->addChild( *this );
+            comp->init();
         }
     }
 
-    void Entity::draw( ttb::State& state ) const
+    void Entity::destroy()
     {
-        for( auto const child : m_children )
+        for( auto const comp : m_components )
         {
-            child->draw( state );
+            comp->destroy();
         }
     }
 
-    void Entity::addChild( Entity& entity )
+    void Entity::addComponent( Component& component )
     {
-        m_children.push_back( &entity );
-    }
-
-    void Entity::removeChild( Entity const& entity )
-    {
-        m_children.erase( std::remove( std::begin( m_children ), std::end( m_children ), &entity ),
-                          std::end( m_children ) );
+        m_components.push_back( &component );
     }
 }

@@ -4,6 +4,12 @@
 
 #include <vector>
 
+
+namespace ttb
+{
+    class Component;
+}
+
 namespace ttb
 {
     class Entity
@@ -11,20 +17,36 @@ namespace ttb
     public:
         Entity();
 
-        Entity( Entity& parent );
-
         virtual ~Entity();
 
-        void setParent( Entity* newParent );
+        virtual void init();
 
-        void draw( ttb::State& state ) const;
+        virtual void destroy();
+
+        template < typename TType >
+        auto getComponent() -> TType*;
 
     private:
-        void addChild( Entity& entity );
+        void addComponent( Component& component );
 
-        void removeChild( Entity const& entity );
+        std::vector< Component* > m_components;
 
-        Entity* m_parent{ nullptr };
-        std::vector< Entity* > m_children;
+        friend Component;
     };
+}
+
+namespace ttb
+{
+    template < typename TType >
+    inline auto Entity::getComponent() -> TType*
+    {
+        for( auto const comp : m_components )
+        {
+            if( auto const typedComp = dynamic_cast< TType* >( comp ) )
+            {
+                return typedComp;
+            }
+        }
+        return nullptr;
+    }
 }
