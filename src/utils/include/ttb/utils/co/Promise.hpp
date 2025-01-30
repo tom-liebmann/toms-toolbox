@@ -122,6 +122,16 @@ namespace ttb::co
             }
         }
 
+        void increaseUse()
+        {
+            ++m_useCount;
+        }
+
+        auto decreaseUse() -> bool
+        {
+            return ( --m_useCount ) == 0;
+        }
+
         void unhandled_exception() noexcept
         {
             m_thrownException = std::current_exception();
@@ -134,6 +144,7 @@ namespace ttb::co
         }
 
     private:
+        unsigned int m_useCount{ 0 };
         PromiseBase* m_subpromise{ nullptr };
         std::exception_ptr m_injectedException;
         std::exception_ptr m_thrownException;

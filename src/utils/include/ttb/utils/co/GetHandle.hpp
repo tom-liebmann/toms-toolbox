@@ -25,7 +25,7 @@ namespace ttb
 
         auto await_resume() noexcept -> Coroutine
         {
-            return Coroutine{ m_handle, false };
+            return Coroutine{ m_handle };
         }
 
     private:

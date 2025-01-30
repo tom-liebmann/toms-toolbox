@@ -30,17 +30,35 @@ namespace ttb::co
         using promise_type = Promise< TResult >;
         using Handle = ::co::coroutine_handle< Promise< TResult > >;
 
-        Coroutine();
+        Coroutine() = default;
 
-        explicit Coroutine( Handle handle, bool destroy = true );
+        explicit Coroutine( Handle handle );
 
-        Coroutine( Coroutine const& rhs ) = delete;
+        Coroutine( Coroutine const& rhs ) : m_handle{ rhs.m_handle }
+        {
+            m_handle.promise().increaseUse();
+        }
+
         Coroutine( Coroutine&& rhs );
 
-        Coroutine& operator=( Coroutine const& rhs ) = delete;
-        Coroutine& operator=( Coroutine&& rhs );
-
         ~Coroutine();
+
+        auto operator=( Coroutine const& rhs ) -> Coroutine&
+        {
+            if( m_handle )
+            {
+                if( m_handle.promise().decreaseUse() )
+                {
+                    m_handle.destroy();
+                }
+            }
+
+            m_handle = rhs.m_handle;
+            return *this;
+        }
+
+        auto operator=( Coroutine&& rhs ) -> Coroutine&;
+
 
         auto isFinished() const -> bool;
 
@@ -72,7 +90,6 @@ namespace ttb::co
 
     private:
         Handle m_handle;
-        bool m_destroy{ false };
 
         friend auto operator==
             < TResult >( Coroutine< TResult > const& lhs, Coroutine< TResult > const& rhs ) -> bool;
@@ -87,17 +104,14 @@ namespace ttb::co
 namespace ttb::co
 {
     template < typename TResult >
-    inline Coroutine< TResult >::Coroutine() = default;
-
-    template < typename TResult >
-    inline Coroutine< TResult >::Coroutine( Handle handle, bool destroy )
-        : m_handle{ handle }, m_destroy{ destroy }
+    inline Coroutine< TResult >::Coroutine( Handle handle ) : m_handle{ handle }
     {
+        m_handle.promise().increaseUse();
     }
 
     template < typename TResult >
     inline Coroutine< TResult >::Coroutine( Coroutine&& rhs )
-        : m_handle{ std::exchange( rhs.m_handle, Handle{} ) }, m_destroy{ rhs.m_destroy }
+        : m_handle{ std::exchange( rhs.m_handle, Handle{} ) }
     {
     }
 
@@ -106,7 +120,7 @@ namespace ttb::co
     {
         if( m_handle )
         {
-            if( m_destroy )
+            if( m_handle.promise().decreaseUse() )
             {
                 m_handle.destroy();
             }
@@ -118,7 +132,6 @@ namespace ttb::co
     inline Coroutine< TResult >& Coroutine< TResult >::operator=( Coroutine&& rhs )
     {
         m_handle = std::exchange( rhs.m_handle, Handle{} );
-        m_destroy = rhs.m_destroy;
         return *this;
     }
 
@@ -142,7 +155,7 @@ namespace ttb::co
     {
         if( auto exceptionPtr = m_handle.promise().getException() )
         {
-            if( m_destroy )
+            if( m_handle.promise().decreaseUse() )
             {
                 m_handle.destroy();
             }
