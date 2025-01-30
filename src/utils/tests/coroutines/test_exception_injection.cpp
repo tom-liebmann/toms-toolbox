@@ -1,34 +1,7 @@
 #include <catch2/catch.hpp>
 
 #include <coroutine>
-#include <ttb/utils/co/Coroutine.hpp>
-
-namespace
-{
-    template < typename TResult >
-    struct co_gethandle
-    {
-        using Coroutine = ttb::co::Coroutine< TResult >;
-        using Handle = Coroutine::Handle;
-        Handle m_handle;
-
-        bool await_ready() const noexcept
-        {
-            return false;
-        }
-
-        bool await_suspend( Handle handle ) noexcept
-        {
-            m_handle = handle;
-            return false;
-        }
-
-        Coroutine await_resume() noexcept
-        {
-            return Coroutine{ m_handle, false };
-        }
-    };
-}
+#include <ttb/coroutine.hpp>
 
 
 TEST_CASE( "Get handle inside coroutine", "[utils][coroutine]" )
@@ -37,7 +10,7 @@ TEST_CASE( "Get handle inside coroutine", "[utils][coroutine]" )
 
     auto const coroutine = [ & ]() -> ttb::co::Coroutine< void >
     {
-        handle1 = co_await co_gethandle< void >();
+        handle1 = co_await ttb::GetHandle< void >{};
 
         co_await std::suspend_always{};
 
@@ -187,4 +160,42 @@ TEST_CASE( "Multiple injection", "[utils][coroutine]" )
     REQUIRE_THROWS_WITH( handle.resume(), "Exception 2" );
     REQUIRE( handle.isFinished() );
     REQUIRE( !finished );
+}
+
+TEST_CASE( "Multiple layers inner catch", "[utils][coroutine]" )
+{
+    auto caughtException = false;
+    auto const coroutine1 = [ & ]() -> ttb::co::Coroutine< void >
+    {
+        try
+        {
+            co_await std::suspend_always{};
+        }
+        catch( std::runtime_error& e )
+        {
+            caughtException = true;
+        }
+    };
+
+    auto finished2 = false;
+    auto const coroutine2 = [ & ]() -> ttb::co::Coroutine< void >
+    {
+        co_await coroutine1();
+        finished2 = true;
+    };
+
+    auto handle = coroutine2();
+
+    handle.resume();
+
+    REQUIRE( !handle.isFinished() );
+    REQUIRE( !caughtException );
+    REQUIRE( !finished2 );
+
+    handle.setException( std::runtime_error{ "Exception" } );
+
+    handle.resume();
+    REQUIRE( handle.isFinished() );
+    REQUIRE( caughtException );
+    REQUIRE( finished2 );
 }

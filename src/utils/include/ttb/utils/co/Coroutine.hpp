@@ -42,31 +42,31 @@ namespace ttb::co
 
         ~Coroutine();
 
-        bool isFinished() const;
+        auto isFinished() const -> bool;
 
-        bool resume();
+        auto resume() -> bool;
 
         void rethrowException();
 
-        std::exception_ptr getException() const;
+        auto getException() const -> std::exception_ptr;
 
         template < typename TException >
-        auto setException( TException&& e ) -> void;
+        void setException( TException&& e );
 
-        std::optional< TResult >& getResult();
+        auto getResult() -> std::optional< TResult >&;
 
-        constexpr bool await_ready() const;
+        constexpr auto await_ready() const -> bool;
 
         template < typename TPromise >
         void await_suspend( ::co::coroutine_handle< TPromise > handle );
 
         template < typename U = TResult,
                    typename = typename std::enable_if_t< !std::is_void_v< U > > >
-        U&& await_resume();
+        auto await_resume() -> U&&;
 
         template < typename U = TResult,
                    typename = typename std::enable_if_t< std::is_void_v< U > > >
-        U await_resume();
+        auto await_resume() -> U;
 
         operator bool() const;
 
