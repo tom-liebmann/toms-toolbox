@@ -23,7 +23,7 @@ namespace ttb::ui
                          .addAttribute( "in_vertex", m_vertexBuffer, 0 )
                          .addAttribute( "in_color", m_vertexBuffer, 1 )
                          .addAttribute( "in_coord", m_vertexBuffer, 2 )
-                         .addIndices( std::move( m_indexBuffer ) )
+                         .addIndices( m_indexBuffer )
                          .build();
     }
 
