@@ -39,14 +39,14 @@ namespace ttb::ui
     {
         auto const spaceM = getMargin().shrink( space );
         auto const ratio = spaceM( 0 ) / spaceM( 1 );
-        return ratio > m_ratio ? space( 1 ) * m_ratio : space( 0 );
+        return ratio > m_ratio ? spaceM( 1 ) * m_ratio + getMargin().getRightLeft() : space( 0 );
     }
 
     FitExtent Ratio::fitHeight( Size const& space ) const
     {
         auto const spaceM = getMargin().shrink( space );
         auto const ratio = spaceM( 0 ) / spaceM( 1 );
-        return ratio > m_ratio ? space( 1 ) : space( 0 ) / m_ratio;
+        return ratio > m_ratio ? space( 1 ) : spaceM( 0 ) / m_ratio + getMargin().getTopBottom();
     }
 
     void Ratio::setSize( Size const& value )
