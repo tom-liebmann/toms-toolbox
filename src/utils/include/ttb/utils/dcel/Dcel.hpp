@@ -30,45 +30,45 @@ namespace ttb::dcel
 namespace ttb::dcel
 {
     template < typename TVertexData, typename TEdgeData, typename TFaceData >
-    class DCEL
+    class Dcel
     {
     public:
         using VertexData = TVertexData;
         using EdgeData = TEdgeData;
         using FaceData = TFaceData;
 
-        auto getVertex( VertexId id ) -> VertexHandle< DCEL >
+        auto getVertex( VertexId id ) -> VertexHandle< Dcel >
         {
             return { *this, id };
         }
 
-        auto getVertex( VertexId id ) const -> ConstVertexHandle< DCEL >
+        auto getVertex( VertexId id ) const -> ConstVertexHandle< Dcel >
         {
             return { *this, id };
         }
 
-        auto getEdge( EdgeId id ) -> EdgeHandle< DCEL >
+        auto getEdge( EdgeId id ) -> EdgeHandle< Dcel >
         {
             return { *this, id };
         }
 
-        auto getEdge( EdgeId id ) const -> ConstEdgeHandle< DCEL >
+        auto getEdge( EdgeId id ) const -> ConstEdgeHandle< Dcel >
         {
             return { *this, id };
         }
 
-        auto getFace( FaceId id ) -> FaceHandle< DCEL >
+        auto getFace( FaceId id ) -> FaceHandle< Dcel >
         {
             return { *this, id };
         }
 
-        auto getFace( FaceId id ) const -> ConstFaceHandle< DCEL >
+        auto getFace( FaceId id ) const -> ConstFaceHandle< Dcel >
         {
             return { *this, id };
         }
 
         template < typename... TArgs >
-        auto addVertex( TArgs&&... args ) -> VertexHandle< DCEL >
+        auto addVertex( TArgs&&... args ) -> VertexHandle< Dcel >
         {
             auto const id =
                 m_vertices.add( VertexHolder{ VertexData{ std::forward< TArgs >( args )... } } );
@@ -77,7 +77,7 @@ namespace ttb::dcel
         }
 
         template < typename... TArgs >
-        auto addEdge( TArgs&&... args ) -> EdgeHandle< DCEL >
+        auto addEdge( TArgs&&... args ) -> EdgeHandle< Dcel >
         {
             auto const id =
                 m_edges.add( EdgeHolder{ EdgeData{ std::forward< TArgs >( args )... } } );
@@ -86,7 +86,7 @@ namespace ttb::dcel
         }
 
         template < typename... TArgs >
-        auto addFace( TArgs&&... args ) -> FaceHandle< DCEL >
+        auto addFace( TArgs&&... args ) -> FaceHandle< Dcel >
         {
             auto const id =
                 m_faces.add( FaceHolder{ FaceData{ std::forward< TArgs >( args )... } } );
@@ -136,11 +136,11 @@ namespace ttb::dcel
         LinkedVector< EdgeHolder > m_edges;
         LinkedVector< FaceHolder > m_faces;
 
-        friend class VertexHandle< DCEL >;
-        friend class ConstVertexHandle< DCEL >;
-        friend class EdgeHandle< DCEL >;
-        friend class ConstEdgeHandle< DCEL >;
-        friend class FaceHandle< DCEL >;
-        friend class ConstFaceHandle< DCEL >;
+        friend class VertexHandle< Dcel >;
+        friend class ConstVertexHandle< Dcel >;
+        friend class EdgeHandle< Dcel >;
+        friend class ConstEdgeHandle< Dcel >;
+        friend class FaceHandle< Dcel >;
+        friend class ConstFaceHandle< Dcel >;
     };
 }

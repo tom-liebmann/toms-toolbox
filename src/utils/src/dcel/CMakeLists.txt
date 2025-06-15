@@ -2,7 +2,7 @@ target_sources(
     ${TARGET_NAME}
 
     PRIVATE
-        DCEL.cpp
+        Dcel.cpp
         Vertex.cpp
         Edge.cpp
         Face.cpp

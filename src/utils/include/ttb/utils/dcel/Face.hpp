@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DCEL.hpp"
+#include "Dcel.hpp"
 
 #include <utility>
 

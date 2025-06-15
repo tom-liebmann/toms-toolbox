@@ -9,12 +9,12 @@ struct EmptyData
 
 TEST_CASE( "Empty DCEL", "[utils][dcel]" )
 {
-    auto dcel = ttb::dcel::DCEL< EmptyData, EmptyData, EmptyData >{};
+    auto dcel = ttb::dcel::Dcel< EmptyData, EmptyData, EmptyData >{};
 }
 
 TEST_CASE( "Simple triangle", "[utils][dcel]" )
 {
-    auto dcel = ttb::dcel::DCEL< EmptyData, EmptyData, EmptyData >{};
+    auto dcel = ttb::dcel::Dcel< EmptyData, EmptyData, EmptyData >{};
 
     auto v0 = dcel.addVertex();
     auto v1 = dcel.addVertex();
