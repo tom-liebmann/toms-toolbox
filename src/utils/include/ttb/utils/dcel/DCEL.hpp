@@ -1,54 +1,117 @@
 #pragma once
 
-#include "ids.hpp"
-
-#include <memory>
+#include <ttb/utils/LinkedVector.hpp>
 
 
-namespace ttb::dcel
+namespace ttb
 {
-    class Data;
-    class VertexHandle;
-    class ConstVertexHandle;
-    class EdgeHandle;
-    class ConstEdgeHandle;
-    class FaceHandle;
-    class ConstFaceHandle;
-}
-
-
-namespace ttb::dcel
-{
+    template < typename VertexData, typename EdgeData, typename FaceData >
     class DCEL
     {
     public:
-        DCEL( Data& data );
+        using VertexId = std::size_t;
+        using EdgeId = std::size_t;
+        using FaceId = std::size_t;
 
-        ~DCEL();
+        class VertexHandle;
+        class ConstVertexHandle;
+        class EdgeHandle;
+        class ConstEdgeHandle;
+        class FaceHandle;
+        class ConstFaceHandle;
 
-        VertexHandle vertex( VertexId id );
-        ConstVertexHandle vertex( VertexId id ) const;
+        auto getVertex( VertexId id ) -> VertexHandle
+        {
+            return { *this, id };
+        }
 
-        EdgeHandle edge( EdgeId id );
-        ConstEdgeHandle edge( EdgeId id ) const;
+        auto getVertex( VertexId id ) const -> ConstVertexHandle
+        {
+            return { *this, id };
+        }
 
-        FaceHandle face( FaceId id );
-        ConstFaceHandle face( FaceId id ) const;
+        auto getEdge( EdgeId id ) -> EdgeHandle
+        {
+            return { *this, id };
+        }
 
-        VertexHandle addVertex();
+        auto getEdge( EdgeId id ) const -> ConstEdgeHandle
+        {
+            return { *this, id };
+        }
 
-        EdgeHandle addEdge();
+        auto getFace( FaceId id ) -> FaceHandle
+        {
+            return { *this, id };
+        }
 
-        FaceHandle addFace();
+        auto getFace( FaceId id ) const -> ConstFaceHandle
+        {
+            return { *this, id };
+        }
 
-        template < typename TType >
-        TType& data();
+        auto addVertex( VertexData data ) -> VertexHandle
+        {
+            auto const id = m_vertices.add( VertexHolder{ std::move( data ) } );
+            m_vertices.get( id ).id = id;
+            return { *this, id };
+        }
 
-        template < typename TType >
-        TType const& data() const;
+        auto addEdge( EdgeData data ) -> EdgeHandle
+        {
+            auto const id = m_edges.add( EdgeHolder{ std::move( data ) } );
+            m_edges.get( id ).id = id;
+            return { *this, id };
+        }
+
+        auto addFace( FaceData data ) -> FaceHandle
+        {
+            auto const id = m_faces.add( FaceHolder{ std::move( data ) } );
+            m_faces.get( id ).id = id;
+            return { *this, id };
+        }
 
     private:
-        Data& m_data;
+        struct VertexHolder
+        {
+            VertexId id;
+            EdgeId edge;
+            VertexData data;
+
+            VertexHolder( VertexData dataValue ) : data{ std::move( dataValue ) }
+            {
+            }
+        };
+
+        struct EdgeHolder
+        {
+            EdgeId id;
+            VertexId vertex;
+            FaceId face;
+            EdgeId twin;
+            EdgeId next;
+            EdgeId prev;
+            EdgeData data;
+
+            EdgeHolder( EdgeData dataValue ) : data{ std::move( dataValue ) }
+            {
+            }
+        };
+
+        struct FaceHolder
+        {
+            FaceId id;
+            EdgeId edge;
+            FaceData data;
+
+            FaceHolder( FaceData dataValue ) : data{ std::move( dataValue ) }
+            {
+            }
+        };
+
+        LinkedVector< VertexHolder > m_vertices;
+        LinkedVector< EdgeHolder > m_edges;
+        LinkedVector< FaceHolder > m_faces;
 
         friend class VertexHandle;
         friend class ConstVertexHandle;
@@ -57,20 +120,4 @@ namespace ttb::dcel
         friend class FaceHandle;
         friend class ConstFaceHandle;
     };
-}
-
-
-namespace ttb::dcel
-{
-    template < typename TType >
-    TType& DCEL::data()
-    {
-        return static_cast< TType& >( m_data );
-    }
-
-    template < typename TType >
-    TType const& DCEL::data() const
-    {
-        return static_cast< TType const& >( m_data );
-    }
 }

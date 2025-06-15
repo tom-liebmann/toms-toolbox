@@ -1,189 +1,172 @@
 #pragma once
 
-#include "ids.hpp"
+#include "DCEL.hpp"
 
 #include <utility>
 
 
-namespace ttb::dcel
+namespace ttb
 {
-    class DCEL;
-    class EdgeHandle;
-    class ConstEdgeHandle;
-}
-
-
-namespace ttb::dcel
-{
-    class FaceHandle
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    class DCEL< VertexData, EdgeData, FaceData >::FaceHandle
     {
     public:
-        FaceHandle();
+        FaceHandle() : m_dcel{ nullptr }, m_id{ 0 }
+        {
+        }
 
-        FaceHandle( DCEL& dcel, FaceId const& id );
+        FaceHandle( DCEL& dcel, FaceId id ) : m_dcel{ &dcel }, m_id{ id }
+        {
+        }
 
         FaceHandle( FaceHandle const& rhs ) = default;
 
-        FaceHandle( FaceHandle&& rhs );
+        FaceHandle( FaceHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        FaceHandle& operator=( FaceHandle const& rhs ) = default;
+        auto operator=( FaceHandle const& rhs ) -> FaceHandle& = default;
 
-        FaceHandle& operator=( FaceHandle&& rhs );
+        auto operator=( FaceHandle&& rhs ) -> FaceHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        DCEL& dcel() const;
-        FaceId const& id() const;
+        auto getDCEL() const -> DCEL&
+        {
+            return *m_dcel;
+        }
 
-        void remove() const;
+        auto getId() const -> VertexId
+        {
+            return m_id;
+        }
 
-        EdgeHandle edge() const;
+        auto getData() const -> FaceData&
+        {
+            return getHolder().data;
+        }
 
-        FaceHandle const& edge( EdgeHandle const& edge ) const;
+        auto getEdge() const -> EdgeHandle
+        {
+            return { m_dcel, getHolder().edge };
+        }
+
+        auto setEdge( EdgeHandle const& edge ) const -> FaceHandle const&
+        {
+            getHolder().edge = edge.getId();
+            return *this;
+        }
 
     private:
+        auto getHolder() const -> FaceHolder&
+        {
+            return m_dcel->m_faces.get( m_id );
+        }
+
         DCEL* m_dcel;
-        FaceId m_id;
+        VertexId m_id;
 
         friend class ConstFaceHandle;
     };
 
-
-    bool operator==( FaceHandle const& lhs, FaceHandle const& rhs );
-
-    bool operator!=( FaceHandle const& lhs, FaceHandle const& rhs );
-
-
-    class ConstFaceHandle
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    class DCEL< VertexData, EdgeData, FaceData >::ConstFaceHandle
     {
     public:
-        ConstFaceHandle();
+        ConstFaceHandle() : m_dcel{ nullptr }, m_id{ 0 }
+        {
+        }
 
-        ConstFaceHandle( DCEL const& dcel, FaceId const& id );
+        ConstFaceHandle( DCEL const& dcel, FaceId id ) : m_dcel{ &dcel }, m_id{ id }
+        {
+        }
 
         ConstFaceHandle( ConstFaceHandle const& rhs ) = default;
 
-        ConstFaceHandle( ConstFaceHandle&& rhs );
+        ConstFaceHandle( ConstFaceHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        ConstFaceHandle( FaceHandle const& rhs );
+        ConstFaceHandle( FaceHandle const& rhs ) : m_dcel{ rhs.m_dcel }, m_id{ rhs.m_id }
+        {
+        }
 
-        ConstFaceHandle( FaceHandle&& rhs );
+        ConstFaceHandle( FaceHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        ConstFaceHandle& operator=( ConstFaceHandle const& rhs ) = default;
+        auto operator=( ConstFaceHandle const& rhs ) -> ConstFaceHandle& = default;
 
-        ConstFaceHandle& operator=( ConstFaceHandle&& rhs );
+        auto operator=( ConstFaceHandle&& rhs ) -> ConstFaceHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        ConstFaceHandle& operator=( FaceHandle const& rhs );
+        auto operator=( FaceHandle const& rhs ) -> ConstFaceHandle&
+        {
+            m_dcel = rhs.m_dcel;
+            m_id = rhs.m_id;
+            return *this;
+        }
 
-        ConstFaceHandle& operator=( FaceHandle&& rhs );
+        auto operator=( FaceHandle&& rhs ) -> ConstFaceHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        DCEL const& dcel() const;
-        FaceId const& id() const;
+        auto getDCEL() const -> DCEL&
+        {
+            return *m_dcel;
+        }
 
-        ConstEdgeHandle edge() const;
+        auto getId() const -> VertexId
+        {
+            return m_id;
+        }
+
+        auto getData() const -> FaceData const&
+        {
+            return getHolder().data;
+        }
+
+        auto getEdge() const -> EdgeHandle
+        {
+            return { m_dcel, getHolder().edge };
+        }
 
     private:
+        auto getHolder() const -> FaceHolder const&
+        {
+            return m_dcel->m_faces.get( m_id );
+        }
+
         DCEL const* m_dcel;
-        FaceId m_id;
+        VertexId m_id;
     };
-}
 
-
-namespace ttb::dcel
-{
-    inline FaceHandle::FaceHandle() : m_dcel{ nullptr }, m_id{ 0 }
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    auto
+        operator==( typename DCEL< VertexData, EdgeData, FaceData >::FaceHandle const& lhs,
+                    typename DCEL< VertexData, EdgeData, FaceData >::FaceHandle const& rhs ) -> bool
     {
+        return lhs.getId() == rhs.getId();
     }
 
-    inline FaceHandle::FaceHandle( DCEL& dcel, FaceId const& id ) : m_dcel{ &dcel }, m_id{ id }
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    auto
+        operator!=( typename DCEL< VertexData, EdgeData, FaceData >::FaceHandle const& lhs,
+                    typename DCEL< VertexData, EdgeData, FaceData >::FaceHandle const& rhs ) -> bool
     {
-    }
-
-    inline FaceHandle::FaceHandle( FaceHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline FaceHandle& FaceHandle::operator=( FaceHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline DCEL& FaceHandle::dcel() const
-    {
-        return *m_dcel;
-    }
-
-    inline FaceId const& FaceHandle::id() const
-    {
-        return m_id;
-    }
-
-
-    inline bool operator==( FaceHandle const& lhs, FaceHandle const& rhs )
-    {
-        return lhs.id() == rhs.id();
-    }
-
-    inline bool operator!=( FaceHandle const& lhs, FaceHandle const& rhs )
-    {
-        return lhs.id() != rhs.id();
-    }
-
-
-    inline ConstFaceHandle::ConstFaceHandle() : m_dcel{ nullptr }, m_id{ 0 }
-    {
-    }
-
-    inline ConstFaceHandle::ConstFaceHandle( DCEL const& dcel, FaceId const& id )
-        : m_dcel{ &dcel }, m_id{ id }
-    {
-    }
-
-    inline ConstFaceHandle::ConstFaceHandle( ConstFaceHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline ConstFaceHandle::ConstFaceHandle( FaceHandle const& rhs )
-    {
-        m_dcel = rhs.m_dcel;
-        m_id = rhs.m_id;
-    }
-
-    inline ConstFaceHandle::ConstFaceHandle( FaceHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline ConstFaceHandle& ConstFaceHandle::operator=( ConstFaceHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline ConstFaceHandle& ConstFaceHandle::operator=( FaceHandle const& rhs )
-    {
-        m_dcel = rhs.m_dcel;
-        m_id = rhs.m_id;
-        return *this;
-    }
-
-    inline ConstFaceHandle& ConstFaceHandle::operator=( FaceHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline DCEL const& ConstFaceHandle::dcel() const
-    {
-        return *m_dcel;
-    }
-
-    inline FaceId const& ConstFaceHandle::id() const
-    {
-        return m_id;
+        return lhs.getId() != rhs.getId();
     }
 }

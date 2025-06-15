@@ -12,3 +12,4 @@ ttb_add_test(
 
 add_subdirectory( coroutines )
 add_subdirectory( concepts )
+add_subdirectory( dcel )

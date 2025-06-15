@@ -3,8 +3,7 @@ target_sources(
 
     PRIVATE
         DCEL.cpp
-        Data.cpp
+        Vertex.cpp
         Edge.cpp
         Face.cpp
-        Vertex.cpp
 )

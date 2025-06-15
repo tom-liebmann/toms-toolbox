@@ -1,189 +1,172 @@
 #pragma once
 
-#include "ids.hpp"
+#include "DCEL.hpp"
 
 #include <utility>
 
 
-namespace ttb::dcel
+namespace ttb
 {
-    class DCEL;
-    class EdgeHandle;
-    class ConstEdgeHandle;
-}
-
-
-namespace ttb::dcel
-{
-    class VertexHandle
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    class DCEL< VertexData, EdgeData, FaceData >::VertexHandle
     {
     public:
-        VertexHandle();
+        VertexHandle() : m_dcel{ nullptr }, m_id{ 0 }
+        {
+        }
 
-        VertexHandle( DCEL& dcel, VertexId const& id );
+        VertexHandle( DCEL& dcel, VertexId id ) : m_dcel{ &dcel }, m_id{ id }
+        {
+        }
 
         VertexHandle( VertexHandle const& rhs ) = default;
 
-        VertexHandle( VertexHandle&& rhs );
+        VertexHandle( VertexHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        VertexHandle& operator=( VertexHandle const& rhs ) = default;
+        auto operator=( VertexHandle const& rhs ) -> VertexHandle& = default;
 
-        VertexHandle& operator=( VertexHandle&& rhs );
+        auto operator=( VertexHandle&& rhs ) -> VertexHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        DCEL& dcel() const;
-        VertexId const& id() const;
+        auto getDCEL() const -> DCEL&
+        {
+            return *m_dcel;
+        }
 
-        void remove() const;
+        auto getId() const -> VertexId
+        {
+            return m_id;
+        }
 
-        EdgeHandle edge() const;
+        auto getData() const -> VertexData&
+        {
+            return getHolder().data;
+        }
 
-        VertexHandle const& edge( EdgeHandle const& edge ) const;
+        auto getEdge() const -> EdgeHandle
+        {
+            return { m_dcel, getHolder().edge };
+        }
+
+        auto setEdge( EdgeHandle const& edge ) const -> VertexHandle const&
+        {
+            getHolder().edge = edge.getId();
+            return *this;
+        }
 
     private:
+        auto getHolder() const -> VertexHolder&
+        {
+            return m_dcel->m_vertices.get( m_id );
+        }
+
         DCEL* m_dcel;
         VertexId m_id;
 
         friend class ConstVertexHandle;
     };
 
-
-    bool operator==( VertexHandle const& lhs, VertexHandle const& rhs );
-
-    bool operator!=( VertexHandle const& lhs, VertexHandle const& rhs );
-
-
-    class ConstVertexHandle
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    class DCEL< VertexData, EdgeData, FaceData >::ConstVertexHandle
     {
     public:
-        ConstVertexHandle();
+        ConstVertexHandle() : m_dcel{ nullptr }, m_id{ 0 }
+        {
+        }
 
-        ConstVertexHandle( DCEL const& dcel, VertexId const& id );
+        ConstVertexHandle( DCEL const& dcel, VertexId id ) : m_dcel{ &dcel }, m_id{ id }
+        {
+        }
 
         ConstVertexHandle( ConstVertexHandle const& rhs ) = default;
 
-        ConstVertexHandle( ConstVertexHandle&& rhs );
+        ConstVertexHandle( ConstVertexHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        ConstVertexHandle( VertexHandle const& rhs );
+        ConstVertexHandle( VertexHandle const& rhs ) : m_dcel{ rhs.m_dcel }, m_id{ rhs.m_id }
+        {
+        }
 
-        ConstVertexHandle( VertexHandle&& rhs );
+        ConstVertexHandle( VertexHandle&& rhs )
+            : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
+        {
+        }
 
-        ConstVertexHandle& operator=( ConstVertexHandle const& rhs ) = default;
+        auto operator=( ConstVertexHandle const& rhs ) -> ConstVertexHandle& = default;
 
-        ConstVertexHandle& operator=( ConstVertexHandle&& rhs );
+        auto operator=( ConstVertexHandle&& rhs ) -> ConstVertexHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        ConstVertexHandle& operator=( VertexHandle const& rhs );
+        auto operator=( VertexHandle const& rhs ) -> ConstVertexHandle&
+        {
+            m_dcel = rhs.m_dcel;
+            m_id = rhs.m_id;
+            return *this;
+        }
 
-        ConstVertexHandle& operator=( VertexHandle&& rhs );
+        auto operator=( VertexHandle&& rhs ) -> ConstVertexHandle&
+        {
+            m_dcel = std::exchange( rhs.m_dcel, nullptr );
+            m_id = std::exchange( rhs.m_id, 0 );
+            return *this;
+        }
 
-        DCEL const& dcel() const;
-        VertexId const& id() const;
+        auto getDCEL() const -> DCEL&
+        {
+            return *m_dcel;
+        }
 
-        ConstEdgeHandle edge() const;
+        auto getId() const -> VertexId
+        {
+            return m_id;
+        }
+
+        auto getData() const -> VertexData const&
+        {
+            return getHolder().data;
+        }
+
+        auto getEdge() const -> EdgeHandle
+        {
+            return { m_dcel, getHolder().edge };
+        }
 
     private:
+        auto getHolder() const -> VertexHolder const&
+        {
+            return m_dcel->m_vertices.get( m_id );
+        }
+
         DCEL const* m_dcel;
         VertexId m_id;
     };
-}
 
-
-namespace ttb::dcel
-{
-    inline VertexHandle::VertexHandle() : m_dcel{ nullptr }, m_id{ 0 }
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    auto operator==( typename DCEL< VertexData, EdgeData, FaceData >::VertexHandle const& lhs,
+                     typename DCEL< VertexData, EdgeData, FaceData >::VertexHandle const& rhs )
+        -> bool
     {
+        return lhs.getId() == rhs.getId();
     }
 
-    inline VertexHandle::VertexHandle( DCEL& dcel, VertexId const& id )
-        : m_dcel{ &dcel }, m_id{ id }
+    template < typename VertexData, typename EdgeData, typename FaceData >
+    auto operator!=( typename DCEL< VertexData, EdgeData, FaceData >::VertexHandle const& lhs,
+                     typename DCEL< VertexData, EdgeData, FaceData >::VertexHandle const& rhs )
+        -> bool
     {
-    }
-
-    inline VertexHandle::VertexHandle( VertexHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline VertexHandle& VertexHandle::operator=( VertexHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline DCEL& VertexHandle::dcel() const
-    {
-        return *m_dcel;
-    }
-
-    inline VertexId const& VertexHandle::id() const
-    {
-        return m_id;
-    }
-
-
-    inline bool operator==( VertexHandle const& lhs, VertexHandle const& rhs )
-    {
-        return lhs.id() == rhs.id();
-    }
-
-    inline bool operator!=( VertexHandle const& lhs, VertexHandle const& rhs )
-    {
-        return lhs.id() != rhs.id();
-    }
-
-
-    inline ConstVertexHandle::ConstVertexHandle() : m_dcel{ nullptr }, m_id{ 0 }
-    {
-    }
-
-    inline ConstVertexHandle::ConstVertexHandle( DCEL const& dcel, VertexId const& id )
-        : m_dcel{ &dcel }, m_id{ id }
-    {
-    }
-
-    inline ConstVertexHandle::ConstVertexHandle( ConstVertexHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline ConstVertexHandle::ConstVertexHandle( VertexHandle const& rhs )
-        : m_dcel{ rhs.m_dcel }, m_id{ rhs.m_id }
-    {
-    }
-
-    inline ConstVertexHandle::ConstVertexHandle( VertexHandle&& rhs )
-        : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
-    {
-    }
-
-    inline ConstVertexHandle& ConstVertexHandle::operator=( ConstVertexHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline ConstVertexHandle& ConstVertexHandle::operator=( VertexHandle const& rhs )
-    {
-        m_dcel = rhs.m_dcel;
-        m_id = rhs.m_id;
-        return *this;
-    }
-
-    inline ConstVertexHandle& ConstVertexHandle::operator=( VertexHandle&& rhs )
-    {
-        m_dcel = std::exchange( rhs.m_dcel, nullptr );
-        m_id = std::exchange( rhs.m_id, 0 );
-        return *this;
-    }
-
-    inline DCEL const& ConstVertexHandle::dcel() const
-    {
-        return *m_dcel;
-    }
-
-    inline VertexId const& ConstVertexHandle::id() const
-    {
-        return m_id;
+        return lhs.getId() != rhs.getId();
     }
 }
