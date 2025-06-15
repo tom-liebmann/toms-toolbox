@@ -1,72 +1,95 @@
 #pragma once
 
+#include "ids.hpp"
+
 #include <ttb/utils/LinkedVector.hpp>
 
 
-namespace ttb
+namespace ttb::dcel
 {
-    template < typename VertexData, typename EdgeData, typename FaceData >
+    template < typename DcelType >
+    class VertexHandle;
+
+    template < typename DcelType >
+    class ConstVertexHandle;
+
+    template < typename DcelType >
+    class EdgeHandle;
+
+    template < typename DcelType >
+    class ConstEdgeHandle;
+
+    template < typename DcelType >
+    class FaceHandle;
+
+    template < typename DcelType >
+    class ConstFaceHandle;
+}
+
+
+namespace ttb::dcel
+{
+    template < typename TVertexData, typename TEdgeData, typename TFaceData >
     class DCEL
     {
     public:
-        using VertexId = std::size_t;
-        using EdgeId = std::size_t;
-        using FaceId = std::size_t;
+        using VertexData = TVertexData;
+        using EdgeData = TEdgeData;
+        using FaceData = TFaceData;
 
-        class VertexHandle;
-        class ConstVertexHandle;
-        class EdgeHandle;
-        class ConstEdgeHandle;
-        class FaceHandle;
-        class ConstFaceHandle;
-
-        auto getVertex( VertexId id ) -> VertexHandle
+        auto getVertex( VertexId id ) -> VertexHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto getVertex( VertexId id ) const -> ConstVertexHandle
+        auto getVertex( VertexId id ) const -> ConstVertexHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto getEdge( EdgeId id ) -> EdgeHandle
+        auto getEdge( EdgeId id ) -> EdgeHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto getEdge( EdgeId id ) const -> ConstEdgeHandle
+        auto getEdge( EdgeId id ) const -> ConstEdgeHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto getFace( FaceId id ) -> FaceHandle
+        auto getFace( FaceId id ) -> FaceHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto getFace( FaceId id ) const -> ConstFaceHandle
+        auto getFace( FaceId id ) const -> ConstFaceHandle< DCEL >
         {
             return { *this, id };
         }
 
-        auto addVertex( VertexData data ) -> VertexHandle
+        template < typename... TArgs >
+        auto addVertex( TArgs&&... args ) -> VertexHandle< DCEL >
         {
-            auto const id = m_vertices.add( VertexHolder{ std::move( data ) } );
+            auto const id =
+                m_vertices.add( VertexHolder{ VertexData{ std::forward< TArgs >( args )... } } );
             m_vertices.get( id ).id = id;
             return { *this, id };
         }
 
-        auto addEdge( EdgeData data ) -> EdgeHandle
+        template < typename... TArgs >
+        auto addEdge( TArgs&&... args ) -> EdgeHandle< DCEL >
         {
-            auto const id = m_edges.add( EdgeHolder{ std::move( data ) } );
+            auto const id =
+                m_edges.add( EdgeHolder{ EdgeData{ std::forward< TArgs >( args )... } } );
             m_edges.get( id ).id = id;
             return { *this, id };
         }
 
-        auto addFace( FaceData data ) -> FaceHandle
+        template < typename... TArgs >
+        auto addFace( TArgs&&... args ) -> FaceHandle< DCEL >
         {
-            auto const id = m_faces.add( FaceHolder{ std::move( data ) } );
+            auto const id =
+                m_faces.add( FaceHolder{ FaceData{ std::forward< TArgs >( args )... } } );
             m_faces.get( id ).id = id;
             return { *this, id };
         }
@@ -113,11 +136,11 @@ namespace ttb
         LinkedVector< EdgeHolder > m_edges;
         LinkedVector< FaceHolder > m_faces;
 
-        friend class VertexHandle;
-        friend class ConstVertexHandle;
-        friend class EdgeHandle;
-        friend class ConstEdgeHandle;
-        friend class FaceHandle;
-        friend class ConstFaceHandle;
+        friend class VertexHandle< DCEL >;
+        friend class ConstVertexHandle< DCEL >;
+        friend class EdgeHandle< DCEL >;
+        friend class ConstEdgeHandle< DCEL >;
+        friend class FaceHandle< DCEL >;
+        friend class ConstFaceHandle< DCEL >;
     };
 }

@@ -5,37 +5,37 @@
 #include <utility>
 
 
-namespace ttb
+namespace ttb::dcel
 {
-    template < typename VertexData, typename EdgeData, typename FaceData >
-    class DCEL< VertexData, EdgeData, FaceData >::EdgeHandle
+    template < typename DcelType >
+    class EdgeHandle
     {
     public:
         EdgeHandle() : m_dcel{ nullptr }, m_id{ 0 }
         {
         }
 
-        EdgeHandle( DCEL& dcel, EdgeId id ) : m_dcel{ &dcel }, m_id{ id }
+        EdgeHandle( DcelType& dcel, EdgeId id ) : m_dcel{ &dcel }, m_id{ id }
         {
         }
 
-        EdgeHandle( EdgeHandle const& rhs ) = default;
+        EdgeHandle( EdgeHandle< DcelType > const& rhs ) = default;
 
-        EdgeHandle( EdgeHandle&& rhs )
+        EdgeHandle( EdgeHandle< DcelType >&& rhs )
             : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
         {
         }
 
-        auto operator=( EdgeHandle const& rhs ) -> EdgeHandle& = default;
+        auto operator=( EdgeHandle< DcelType > const& rhs ) -> EdgeHandle< DcelType >& = default;
 
-        auto operator=( EdgeHandle&& rhs ) -> EdgeHandle&
+        auto operator=( EdgeHandle< DcelType >&& rhs ) -> EdgeHandle< DcelType >&
         {
             m_dcel = std::exchange( rhs.m_dcel, nullptr );
             m_id = std::exchange( rhs.m_id, 0 );
             return *this;
         }
 
-        auto getDCEL() const -> DCEL&
+        auto getDCEL() const -> DcelType&
         {
             return *m_dcel;
         }
@@ -45,130 +45,133 @@ namespace ttb
             return m_id;
         }
 
-        auto getData() const -> EdgeData&
+        auto getData() const -> typename DcelType::EdgeData&
         {
             return getHolder().data;
         }
 
-        auto getVertex() const -> VertexHandle
+        auto getVertex() const -> VertexHandle< DcelType >
         {
             return { m_dcel, getHolder().vertex };
         }
 
-        auto getFace() const -> FaceHandle
+        auto getFace() const -> FaceHandle< DcelType >
         {
             return { m_dcel, getHolder().face };
         }
 
-        auto getTwin() const -> EdgeHandle
+        auto getTwin() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().twin };
         }
 
-        auto getNext() const -> EdgeHandle
+        auto getNext() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().next };
         }
 
-        auto getPrev() const -> EdgeHandle
+        auto getPrev() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().prev };
         }
 
-        auto setVertex( VertexHandle const& vertex ) const -> EdgeHandle const&
+        auto setVertex( VertexHandle< DcelType > const& vertex ) const
+            -> EdgeHandle< DcelType > const&
         {
             getHolder().vertex = vertex.getId();
             return *this;
         }
 
-        auto setFace( FaceHandle const& face ) const -> EdgeHandle const&
+        auto setFace( FaceHandle< DcelType > const& face ) const -> EdgeHandle< DcelType > const&
         {
             getHolder().face = face.getId();
             return *this;
         }
 
-        auto setTwin( EdgeHandle const& twin ) const -> EdgeHandle const&
+        auto setTwin( EdgeHandle< DcelType > const& twin ) const -> EdgeHandle< DcelType > const&
         {
             getHolder().twin = twin.getId();
             return *this;
         }
 
-        auto setNext( EdgeHandle const& next ) const -> EdgeHandle const&
+        auto setNext( EdgeHandle< DcelType > const& next ) const -> EdgeHandle< DcelType > const&
         {
             getHolder().next = next.getId();
             return *this;
         }
 
-        auto setPrev( EdgeHandle const& prev ) const -> EdgeHandle const&
+        auto setPrev( EdgeHandle< DcelType > const& prev ) const -> EdgeHandle< DcelType > const&
         {
             getHolder().prev = prev.getId();
             return *this;
         }
 
     private:
-        auto getHolder() const -> EdgeHolder&
+        auto getHolder() const -> typename DcelType::EdgeHolder&
         {
             return m_dcel->m_edges.get( m_id );
         }
 
-        DCEL* m_dcel;
+        DcelType* m_dcel;
         VertexId m_id;
 
-        friend class ConstEdgeHandle;
+        friend class ConstEdgeHandle< DcelType >;
     };
 
-    template < typename VertexData, typename EdgeData, typename FaceData >
-    class DCEL< VertexData, EdgeData, FaceData >::ConstEdgeHandle
+    template < typename DcelType >
+    class ConstEdgeHandle
     {
     public:
         ConstEdgeHandle() : m_dcel{ nullptr }, m_id{ 0 }
         {
         }
 
-        ConstEdgeHandle( DCEL const& dcel, EdgeId id ) : m_dcel{ &dcel }, m_id{ id }
+        ConstEdgeHandle( DcelType const& dcel, EdgeId id ) : m_dcel{ &dcel }, m_id{ id }
         {
         }
 
-        ConstEdgeHandle( ConstEdgeHandle const& rhs ) = default;
+        ConstEdgeHandle( ConstEdgeHandle< DcelType > const& rhs ) = default;
 
-        ConstEdgeHandle( ConstEdgeHandle&& rhs )
+        ConstEdgeHandle( ConstEdgeHandle< DcelType >&& rhs )
             : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
         {
         }
 
-        ConstEdgeHandle( EdgeHandle const& rhs ) : m_dcel{ rhs.m_dcel }, m_id{ rhs.m_id }
+        ConstEdgeHandle( EdgeHandle< DcelType > const& rhs )
+            : m_dcel{ rhs.m_dcel }, m_id{ rhs.m_id }
         {
         }
 
-        ConstEdgeHandle( EdgeHandle&& rhs )
+        ConstEdgeHandle( EdgeHandle< DcelType >&& rhs )
             : m_dcel{ std::exchange( rhs.m_dcel, nullptr ) }, m_id{ std::exchange( rhs.m_id, 0 ) }
         {
         }
 
-        auto operator=( ConstEdgeHandle const& rhs ) -> ConstEdgeHandle& = default;
+        auto operator=( ConstEdgeHandle< DcelType > const& rhs ) -> ConstEdgeHandle< DcelType >& =
+                                                                        default;
 
-        auto operator=( ConstEdgeHandle&& rhs ) -> ConstEdgeHandle&
+        auto operator=( ConstEdgeHandle< DcelType >&& rhs ) -> ConstEdgeHandle< DcelType >&
         {
             m_dcel = std::exchange( rhs.m_dcel, nullptr );
             m_id = std::exchange( rhs.m_id, 0 );
             return *this;
         }
 
-        auto operator=( EdgeHandle const& rhs ) -> ConstEdgeHandle&
+        auto operator=( EdgeHandle< DcelType > const& rhs ) -> ConstEdgeHandle< DcelType >&
         {
             m_dcel = rhs.m_dcel;
             m_id = rhs.m_id;
             return *this;
         }
 
-        auto operator=( EdgeHandle&& rhs ) -> ConstEdgeHandle&
+        auto operator=( EdgeHandle< DcelType >&& rhs ) -> ConstEdgeHandle< DcelType >&
         {
             m_dcel = std::exchange( rhs.m_dcel, nullptr );
             m_id = std::exchange( rhs.m_id, 0 );
             return *this;
         }
 
-        auto getDCEL() const -> DCEL&
+        auto getDCEL() const -> DcelType&
         {
             return *m_dcel;
         }
@@ -178,59 +181,43 @@ namespace ttb
             return m_id;
         }
 
-        auto getData() const -> EdgeData const&
+        auto getData() const -> typename DcelType::EdgeData const&
         {
             return getHolder().data;
         }
 
-        auto getVertex() const -> VertexHandle
+        auto getVertex() const -> VertexHandle< DcelType >
         {
             return { m_dcel, getHolder().vertex };
         }
 
-        auto getFace() const -> FaceHandle
+        auto getFace() const -> FaceHandle< DcelType >
         {
             return { m_dcel, getHolder().face };
         }
 
-        auto getTwin() const -> EdgeHandle
+        auto getTwin() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().twin };
         }
 
-        auto getNext() const -> EdgeHandle
+        auto getNext() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().next };
         }
 
-        auto getPrev() const -> EdgeHandle
+        auto getPrev() const -> EdgeHandle< DcelType >
         {
             return { m_dcel, getHolder().prev };
         }
 
     private:
-        auto getHolder() const -> EdgeHolder const&
+        auto getHolder() const -> typename DcelType::EdgeHolder const&
         {
             return m_dcel->m_edges.get( m_id );
         }
 
-        DCEL const* m_dcel;
+        DcelType const* m_dcel;
         VertexId m_id;
     };
-
-    template < typename VertexData, typename EdgeData, typename FaceData >
-    auto
-        operator==( typename DCEL< VertexData, EdgeData, FaceData >::EdgeHandle const& lhs,
-                    typename DCEL< VertexData, EdgeData, FaceData >::EdgeHandle const& rhs ) -> bool
-    {
-        return lhs.getId() == rhs.getId();
-    }
-
-    template < typename VertexData, typename EdgeData, typename FaceData >
-    auto
-        operator!=( typename DCEL< VertexData, EdgeData, FaceData >::EdgeHandle const& lhs,
-                    typename DCEL< VertexData, EdgeData, FaceData >::EdgeHandle const& rhs ) -> bool
-    {
-        return lhs.getId() != rhs.getId();
-    }
 }

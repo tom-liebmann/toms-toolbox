@@ -2,3 +2,4 @@
 #include "dcel/Edge.hpp"
 #include "dcel/Vertex.hpp"
 #include "dcel/Face.hpp"
+#include "dcel/comparison.hpp"
