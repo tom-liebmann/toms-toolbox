@@ -1,8 +1,11 @@
 #pragma once
 
 #include <ttb/core/State.hpp>
+#include <ttb/utils/concepts.hpp>
 
 #include <vector>
+
+#include <fmt/core.h>
 
 
 namespace ttb
@@ -23,8 +26,11 @@ namespace ttb
 
         virtual void destroy();
 
-        template < typename TType >
-        auto getComponent() -> TType*;
+        template < ttb::Pointer TType >
+        auto getComponent() -> TType;
+
+        template < ttb::Reference TType >
+        auto getComponent() -> TType;
 
     private:
         void addComponent( Component& component );
@@ -37,16 +43,29 @@ namespace ttb
 
 namespace ttb
 {
-    template < typename TType >
-    inline auto Entity::getComponent() -> TType*
+    template < ttb::Pointer TType >
+    inline auto Entity::getComponent() -> TType
     {
         for( auto const comp : m_components )
         {
-            if( auto const typedComp = dynamic_cast< TType* >( comp ) )
+            if( auto const typedComp = dynamic_cast< TType >( comp ) )
             {
                 return typedComp;
             }
         }
         return nullptr;
+    }
+
+    template < ttb::Reference TType >
+    inline auto Entity::getComponent() -> TType
+    {
+        for( auto const comp : m_components )
+        {
+            if( auto const typedComp = dynamic_cast< std::remove_reference_t< TType >* >( comp ) )
+            {
+                return *typedComp;
+            }
+        }
+        throw std::runtime_error( fmt::format( "Missing component: {}", typeid( TType ).name() ) );
     }
 }

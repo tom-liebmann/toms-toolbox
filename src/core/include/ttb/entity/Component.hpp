@@ -20,7 +20,18 @@ namespace ttb
 
         virtual void destroy();
 
+        auto getEntity() -> Entity&;
+
     private:
         Entity& m_entity;
     };
+}
+
+
+namespace ttb
+{
+    inline auto Component::getEntity() -> Entity&
+    {
+        return m_entity;
+    }
 }
