@@ -14,6 +14,8 @@ function( _ttb_project_finish PROJECT_NAME )
     add_executable( ${TARGET_NAME} EXCLUDE_FROM_ALL )
     set_target_properties( ${TARGET_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME} )
 
+    target_compile_features( ${TARGET_NAME} PUBLIC cxx_std_20 )
+
     find_package( ttb REQUIRED )
     target_link_libraries( ${TARGET_NAME} PRIVATE ttb::core ttb::utils ttb::ui ttb::math )
 
