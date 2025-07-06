@@ -1,16 +1,12 @@
 #!/usr/bin/bash
 
+set -ex
+
 PROJECT_DIR="/etc/project"
-
-mkdir -p "$HOME/python"
-
-python3 -m venv $HOME/python/venv
-
-source $HOME/python/venv/bin/activate
-
-python3 -m pip install conan
-
 BUILD_DIR="${PROJECT_DIR}/build"
+
+. $HOME/python/venv/bin/activate
+
 mkdir -p "${BUILD_DIR}"
 
 cd "${BUILD_DIR}"
@@ -32,4 +28,4 @@ cmake .. \
 
 make -j$(nproc)
 
-RUN conan export ..
+conan export ..
