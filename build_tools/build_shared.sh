@@ -27,5 +27,3 @@ cmake .. \
       -DACTIVATE_ttbUtils=ON
 
 make -j$(nproc)
-
-conan export ..

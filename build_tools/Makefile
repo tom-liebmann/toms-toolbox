@@ -14,7 +14,7 @@ build-docker-image:
 	DOCKER_BUILDKIT=0 docker build \
 		-t ${BUILD_IMAGE} \
 		-f ${LOCAL_PROJECT_DIR}/build_tools/Dockerfile \
-		.
+		${LOCAL_PROJECT_DIR}
 
 .PHONY: build
 build:
@@ -23,4 +23,13 @@ build:
 		--mount type=bind,source=${LOCAL_PROJECT_DIR},target=${DOCKER_PROJECT_DIR} \
 		--mount type=bind,source=${LOCAL_CONAN_DIR},target=${DOCKER_CONAN_DIR} \
 		"${BUILD_IMAGE}" \
-		bash "${DOCKER_PROJECT_DIR}/build_tools/build.sh"
+		bash "${DOCKER_PROJECT_DIR}/build_tools/build_shared.sh"
+
+.PHONY: export-recipe
+export-recipe:
+	docker run \
+		--user ${CURRENT_USER_ID}:${CURRENT_GROUP_ID} \
+		--mount type=bind,source=${LOCAL_PROJECT_DIR},target=${DOCKER_PROJECT_DIR} \
+		--mount type=bind,source=${LOCAL_CONAN_DIR},target=${DOCKER_CONAN_DIR} \
+		"${BUILD_IMAGE}" \
+		bash "${DOCKER_PROJECT_DIR}/build_tools/export_recipe.sh"

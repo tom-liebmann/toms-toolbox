@@ -29,8 +29,8 @@ RUN USERNAME=$(getent passwd $UID | cut -d: -f1) && \
     usermod -aG sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN mkdir -p /etc/
-COPY
+RUN mkdir -p /etc/build_tools
+COPY ./conanfile.py ./conan_profile /etc/build_tools/
 
 USER $UID
 
@@ -39,6 +39,13 @@ RUN mkdir -p "$HOME/python" && \
     . $HOME/python/venv/bin/activate && \
     python3.12 -m pip install conan
 
-RUN conan install .. \
+RUN . $HOME/python/venv/bin/activate && \
+    mkdir -p "$HOME/conan_build" && \
+    cd "$HOME/conan_build" && \
+    conan install /etc/build_tools \
+    --profile:build=/etc/build_tools/conan_profile \
+    --profile:host=/etc/build_tools/conan_profile \
+    --build=missing \
+    -of=.
     
 ENV CONAN_HOME=/etc/conan
