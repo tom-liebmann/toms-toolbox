@@ -11,7 +11,7 @@ namespace ttb
         template < typename TSignature, typename... TArgs1 >
         static auto call( TSignature const& function, std::tuple< TArgs1... >& args1 )
         {
-            using ResultType = std::result_of_t< TSignature( TArgs2... ) >;
+            using ResultType = std::invoke_result_t< TSignature, TArgs2... >;
 
             if constexpr( std::is_same_v< void, ResultType > )
             {
