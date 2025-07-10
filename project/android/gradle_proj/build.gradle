@@ -6,7 +6,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.2.2' // Update to the latest version
+        // For latest versions, see https://developer.android.com/reference/tools/gradle-api
+        classpath 'com.android.tools.build:gradle:8.11.0'
     }
 }
 

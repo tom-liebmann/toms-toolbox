@@ -1,14 +1,18 @@
-apply plugin: 'com.android.application'
+plugins {
+    id("com.android.application")
+}
 
 android {
-    compileSdkVersion 33
+    namespace = "@ANDROID_PACKAGE_NAME@"
+
+    compileSdk = 33
 
     defaultConfig {
-        applicationId "@ANDROID_PACKAGE_NAME@"
-        minSdkVersion @ANDROID_SDK_VERSION_MIN@
-        targetSdkVersion @ANDROID_SDK_VERSION_TARGET@
-        versionCode @_PROJECT_VERSION_NR@
-        versionName "@_PROJECT_VERSION_NAME@"
+        applicationId = "@ANDROID_PACKAGE_NAME@"
+        minSdk = @ANDROID_SDK_VERSION_MIN@
+        targetSdk = @ANDROID_SDK_VERSION_TARGET@
+        versionCode = @_PROJECT_VERSION_NR@
+        versionName = "@_PROJECT_VERSION_NAME@"
     }
 
     // Enable the following line to create an App Bundle instead of APKs
@@ -45,5 +49,5 @@ dependencies {
     implementation 'com.google.android.material:material:1.4.0'
     implementation 'com.google.android.gms:play-services-ads:22.2.0'
     implementation "com.google.android.gms:play-services-games-v2:+"
-    implementation 'androidx.activity:activity:1.6.0-alpha04'
+    implementation 'androidx.activity:activity:1.6.1'
 }
