@@ -5,12 +5,12 @@ plugins {
 android {
     namespace = "@ANDROID_PACKAGE_NAME@"
 
-    compileSdk = 33
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "@ANDROID_PACKAGE_NAME@"
-        minSdk = @ANDROID_SDK_VERSION_MIN@
-        targetSdk = @ANDROID_SDK_VERSION_TARGET@
+        minSdk = 21
+        targetSdk = 35
         versionCode = @_PROJECT_VERSION_NR@
         versionName = "@_PROJECT_VERSION_NAME@"
     }

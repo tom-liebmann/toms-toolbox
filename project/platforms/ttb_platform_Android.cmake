@@ -325,7 +325,6 @@ function( _ttb_project_android_build_bundle )
         COMMAND ${ANDROID_APK_SIGNER} sign
             --ks "${_ARGS_KEYSTORE_FILE}"
             --ks-pass file:${_ARGS_KEYSTORE_PWD_FILE}
-            --min-sdk-version ${ANDROID_SDK_VERSION_MIN}
             --out "${_ARGS_OUTPUT_FILE}"
             "${_GRADLE_PROJ_DIR}/app/build/outputs/bundle/release/app-release.aab"
     )
@@ -522,7 +521,6 @@ macro( _ttb_add_project_impl PROJECT_NAME PROJECT_CONAN_FILE PROJECT_CMAKE_FILE 
             sign
             --ks "${TTB_ANDROID_RES_DIR}/debug.keystore"
             --ks-pass pass:android
-            --min-sdk-version ${ANDROID_SDK_VERSION_MIN}
             --out "${CMAKE_CURRENT_BINARY_DIR}/app_signed.apk"
             "${CMAKE_CURRENT_BINARY_DIR}/android/app_unsigned.apk"
     )
