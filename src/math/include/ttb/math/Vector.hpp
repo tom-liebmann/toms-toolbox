@@ -45,6 +45,8 @@ namespace ttb
 
         TType const* data() const;
 
+        TType* data();
+
         template < typename TType2 >
         Vector< TType2, TDim > as() const;
 
@@ -110,6 +112,12 @@ namespace ttb
 
     template < typename TType, size_t TDim >
     TType const* Vector< TType, TDim >::data() const
+    {
+        return m_values.data();
+    }
+
+    template < typename TType, size_t TDim >
+    TType* Vector< TType, TDim >::data()
     {
         return m_values.data();
     }
