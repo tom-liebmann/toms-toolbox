@@ -94,6 +94,9 @@ namespace ttb
         Matrix< TType, 4, 4 > perspective( TType fovx, TType aspect, TType zNear, TType zFar );
 
         template < typename TType >
+        Matrix< TType, 4, 4 > perspectiveRightHanded( TType fovx, TType aspect, TType zNear, TType zFar );
+
+        template < typename TType >
         Matrix< TType, 4, 4 > perspectiveInv( TType fovx, TType aspect, TType zNear, TType zFar );
 
         template < typename TType >
@@ -536,6 +539,23 @@ namespace ttb
         }
 
         template < typename TType >
+        Matrix< TType, 4, 4 > perspectiveRightHanded( TType fovx, TType aspect, TType zNear, TType zFar )
+        {
+            using std::tan;
+            fovx = TType( 1 ) / tan( fovx / TType( 2 ) );
+
+            // clang-format off
+            return {
+                fovx      , TType( 0 )   , TType( 0 )                         , TType( 0 )                                  ,
+                TType( 0 ), fovx * aspect, TType( 0 )                         , TType( 0 )                                  ,
+                TType( 0 ), TType( 0 )   , ( zFar + zNear ) / ( zNear - zFar ), TType( 2 ) * zFar * zNear / ( zNear - zFar ),
+                TType( 0 ), TType( 0 )   , TType( 1 )                         , TType( 0 )
+            };
+            // clang-format on
+        }
+
+
+        template < typename TType >
         Matrix< TType, 4, 4 > perspectiveInv( TType fovx, TType aspect, TType zNear, TType zFar )
         {
             using std::tan;
@@ -561,12 +581,12 @@ namespace ttb
             auto const y = cross( z, x );
 
             // clang-format off
-        return {
-                x( 0 ),     x( 1 ),     x( 2 ), -dot( from, x ),
-                y( 0 ),     y( 1 ),     y( 2 ), -dot( from, y ),
-                z( 0 ),     z( 1 ),     z( 2 ), -dot( from, z ),
-            TType( 0 ), TType( 0 ), TType( 0 ),      TType( 1 )
-        };
+            return {
+                    x( 0 ),     x( 1 ),     x( 2 ), -dot( from, x ),
+                    y( 0 ),     y( 1 ),     y( 2 ), -dot( from, y ),
+                    z( 0 ),     z( 1 ),     z( 2 ), -dot( from, z ),
+                TType( 0 ), TType( 0 ), TType( 0 ),      TType( 1 )
+            };
             // clang-format on
         }
 
